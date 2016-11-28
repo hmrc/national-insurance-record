@@ -16,16 +16,26 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.controllers
 
-import uk.gov.hmrc.play.microservice.controller.BaseController
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
-import play.api.mvc._
-import scala.concurrent.Future
+import play.api.http.Status
+import play.api.test.FakeRequest
+import play.api.http.Status
+import play.api.test.FakeRequest
+import uk.gov.hmrc.play.test.UnitSpec
+import uk.gov.hmrc.play.test.WithFakeApplication
+import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
-object MicroserviceHelloWorld extends MicroserviceHelloWorld
 
-trait MicroserviceHelloWorld extends BaseController {
+class HelloWorldControllerSpec extends UnitSpec with WithFakeApplication{
 
-	def hello() = Action.async { implicit request =>
-		Future.successful(Ok("Hello world"))
-	}
+  val fakeRequest = FakeRequest("GET", "/")
+
+
+  "GET /" should {
+    "return 200" in {
+      val result = HelloWorldController.hello()(fakeRequest)
+      status(result) shouldBe Status.OK
+    }
+  }
+
+
 }
