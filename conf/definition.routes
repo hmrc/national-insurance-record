@@ -1,0 +1,3 @@
+GET        /api/definition                                       uk.gov.hmrc.nationalinsurancerecord.controllers.DocumentationController.definition()
+
+GET        /api/documentation/:version/:endpointName             uk.gov.hmrc.nationalinsurancerecord.controllers.DocumentationController.documentation(version: String, endpointName: String)

@@ -20,14 +20,22 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.play.microservice.controller.BaseController
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import play.api.mvc._
+import uk.gov.hmrc.api.controllers.HeaderValidator
+
 import scala.concurrent.Future
+
+case class HelloWorld(message: String)
+
+object HelloWorld {
+	implicit val format = Json.format[HelloWorld]
+}
 
 object HelloWorldController extends HelloWorldController
 object SandboxHelloWorldController extends HelloWorldController
 
-trait HelloWorldController extends BaseController {
+trait HelloWorldController extends BaseController with HeaderValidator {
 
 	def hello(): Action[AnyContent]= Action.async { implicit request =>
-		Future.successful(Ok(Json.toJson("Hello world")))
+		Future.successful(Ok(Json.toJson(HelloWorld("Hello world"))))
 	}
 }
