@@ -1,0 +1,37 @@
+@import uk.gov.hmrc.nationalinsurancerecord.domain.APIAccess
+@import play.api.libs.json.Json
+
+
+@(access: APIAccess, status: String)
+{
+  "scopes": [
+    {
+      "key": "read:national-insurance-record",
+      "name": "access National Insurance Record",
+      "description": "Access National Insurance Record information"
+    }
+  ],
+  "api": {
+    "name": "National Insurance Record",
+    "description": "Get a National Insurance Record Summary and Tax year details",
+    "context": "national-insurance-record",
+    "versions": [
+      {
+        "version": "1.0",
+        "status": "@status",
+        "access" : @Json.toJson(access),
+        "endpoints": [
+          {
+            "uriPattern": "/hello-world",
+            "endpointName": "Hello World",
+            "method": "GET",
+            "authType": "NONE",
+            "throttlingTier": "UNLIMITED",
+            "scope": "read:national-insurance-record",
+            "queryParameters": []
+          }
+        ]
+      }
+    ]
+  }
+}

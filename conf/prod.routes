@@ -1,5 +1,8 @@
 # Add all the application routes to the app.routes file
-->         /national-insurance-record              app.Routes
-->         /                          health.Routes
 
-GET        /admin/metrics             @com.kenshoo.play.metrics.MetricsController.metrics
+->          /                  app.Routes
+->          /sandbox           sandbox.Routes
+->          /                  health.Routes
+->          /                  definition.Routes
+
+GET        /admin/metrics     @com.kenshoo.play.metrics.MetricsController.metrics
