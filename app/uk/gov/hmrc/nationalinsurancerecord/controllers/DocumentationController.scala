@@ -22,8 +22,8 @@ import uk.gov.hmrc.nationalinsurancerecord.config.{APIAccessConfig, AppContext}
 import uk.gov.hmrc.nationalinsurancerecord.domain.APIAccess
 import uk.gov.hmrc.nationalinsurancerecord.views._
 
-
-class DocumentationController(errorHandler: HttpErrorHandler, appContext: AppContext) extends uk.gov.hmrc.api.controllers.DocumentationController(errorHandler = errorHandler) {
+class DocumentationController (errorHandler: HttpErrorHandler, appContext: AppContext)
+  extends uk.gov.hmrc.api.controllers.DocumentationController(errorHandler = errorHandler) {
 
   override def definition(): Action[AnyContent] = Action {
     Ok(txt.definition(buildAccess(), buildStatus())).withHeaders("Content-Type" -> "application/json")
