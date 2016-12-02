@@ -1,3 +1,4 @@
 # microservice specific routes
 
 GET        /hello-world             uk.gov.hmrc.nationalinsurancerecord.controllers.HelloWorldController.hello
+GET        /ni/:nino                uk.gov.hmrc.nationalinsurancerecord.controllers.live.NationalInsuranceRecordController.get(nino: uk.gov.hmrc.domain.Nino)

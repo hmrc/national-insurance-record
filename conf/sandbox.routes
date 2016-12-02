@@ -1,1 +1,2 @@
 GET        /hello-world             uk.gov.hmrc.nationalinsurancerecord.controllers.SandboxHelloWorldController.hello
+GET        /ni/:nino                uk.gov.hmrc.nationalinsurancerecord.controllers.sandbox.NationalInsuranceRecordController.get(nino: uk.gov.hmrc.domain.Nino)
