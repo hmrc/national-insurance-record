@@ -27,7 +27,6 @@
             "method": "GET",
             "authType": "NONE",
             "throttlingTier": "UNLIMITED",
-            "scope": "read:national-insurance-record",
             "queryParameters": []
           }
         ]
