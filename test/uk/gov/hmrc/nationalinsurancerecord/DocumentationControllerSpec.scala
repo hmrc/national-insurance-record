@@ -92,10 +92,15 @@ class DocumentationControllerSpec extends UnitSpec with WithFakeApplication {
       (contentAsJson(result) \ "api" \ "versions") (0) \ "access" \ "whitelistedApplicationIds" shouldBe JsDefined(JsArray(Seq(JsString("A"), JsString("B"), JsString("C"))))
 
     }
+
+    "return no whitelistApplicationIds json entry if the entry is PUBLIC" in {
+      val result = getDefinitionResultFromConfig(apiConfig = Some(Configuration.from(Map("type" -> "PUBLIC", "whitelist.applicationIds" -> Seq()))))
+      status(result) shouldBe OK
+      (contentAsJson(result) \ "api" \ "versions") (0) \ "access" \ "whitelistedApplicationIds" shouldBe a [JsUndefined]
+    }
   }
 
   "/definition status" should {
-
 
 
     "return PROTOTYPED if there is no application config" in {
