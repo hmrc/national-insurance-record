@@ -1,6 +1,6 @@
 # national-insurance-record
 
-[![Build Status](https://travis-ci.org/hmrc/national-insurance-record.svg)](https://travis-ci.org/hmrc/national-insurance-record) [ ![Download](https://api.bintray.com/packages/hmrc/releases/national-insurance-record/images/download.svg) ](https://bintray.com/hmrc/releases/national-insurance-record/_latestVersion)
+[ ![Download](https://api.bintray.com/packages/hmrc/releases/national-insurance-record/images/download.svg) ](https://bintray.com/hmrc/releases/national-insurance-record/_latestVersion)
 
 This is a placeholder README.md for a new repository
 
