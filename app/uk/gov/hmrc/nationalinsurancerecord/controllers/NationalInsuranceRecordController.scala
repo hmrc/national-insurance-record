@@ -22,7 +22,7 @@ import play.api.mvc._
 import uk.gov.hmrc.api.controllers.HeaderValidator
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nationalinsurancerecord.connectors.CustomAuditConnector
-import uk.gov.hmrc.nationalinsurancerecord.domain.Exclusion
+import uk.gov.hmrc.nationalinsurancerecord.domain.{Exclusion, TaxYearSummary}
 import uk.gov.hmrc.nationalinsurancerecord.events.{NationalInsuranceRecord, NationalInsuranceRecordExclusion}
 import uk.gov.hmrc.nationalinsurancerecord.services.NationalInsuranceRecordService
 import uk.gov.hmrc.play.microservice.controller.BaseController
@@ -32,8 +32,12 @@ trait NationalInsuranceRecordController extends BaseController with HeaderValida
   val nationalInsuranceRecordService: NationalInsuranceRecordService
   val customAuditConnector: CustomAuditConnector
 
-  private def halResourceWithTaxYears(content: JsValue, selfLink: String, years: List[JsValue]): HalResource = {
-    halResourceSelfLink(content, selfLink, Some(Vector("taxYears" -> years.map(halResourceSelfLink(_, "url goes here")).toVector)))
+  private def halResourceWithTaxYears(nino: Nino, content: JsValue, selfLink: String, years: List[TaxYearSummary]): HalResource = {
+    halResourceSelfLink(
+      content,
+      selfLink,
+      Some(Vector("taxYears" -> years.map(taxYear => halResourceSelfLink(Json.toJson(taxYear), nationalInsuranceRecordHref(nino, Some(taxYear.taxYear)))).toVector))
+    )
   }
 
 	def get(nino: Nino): Action[AnyContent] = validateAccept(acceptHeaderValidationRules).async {
@@ -54,13 +58,13 @@ trait NationalInsuranceRecordController extends BaseController with HeaderValida
 
         case Right(nationalInsuranceRecord) =>
           customAuditConnector.sendEvent(NationalInsuranceRecord(nino, nationalInsuranceRecord.qualifyingYears,
-                nationalInsuranceRecord.qualifyingYearsPriorTo1975, nationalInsuranceRecord.nonQualifyingYears,
-                nationalInsuranceRecord.numberOfGaps, nationalInsuranceRecord.numberOfGapsPayable,
-                nationalInsuranceRecord.dateOfEntry, nationalInsuranceRecord.homeResponsibilitiesProtection
+                nationalInsuranceRecord.qualifyingYearsPriorTo1975, nationalInsuranceRecord.numberOfGaps,
+                nationalInsuranceRecord.numberOfGapsPayable, nationalInsuranceRecord.dateOfEntry,
+                nationalInsuranceRecord.homeResponsibilitiesProtection
               )
           )
 
-          Ok(halResourceWithTaxYears(Json.toJson(nationalInsuranceRecord), nationalInsuranceRecordHref(nino), years = List()))
+          Ok(halResourceWithTaxYears(nino, Json.toJson(nationalInsuranceRecord), nationalInsuranceRecordHref(nino), years = nationalInsuranceRecord.taxYears))
       })
   }
 }

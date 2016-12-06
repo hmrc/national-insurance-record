@@ -21,12 +21,11 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 object NationalInsuranceRecord{
-  def apply(nino: Nino, qualifyingYears: Int, qualifyingYearsPriorTo1975: Int, nonQualifyingYears: Int,
+  def apply(nino: Nino, qualifyingYears: Int, qualifyingYearsPriorTo1975: Int,
             numberOfGaps: Int, numberOfGapsPayable: Int, dateOfEntry: LocalDate,
             homeResponsibilitiesProtection: Boolean)(implicit hc: HeaderCarrier): NationalInsuranceRecord =
     new NationalInsuranceRecord(nino: Nino, qualifyingYears: Int,
                                            qualifyingYearsPriorTo1975: Int,
-                                           nonQualifyingYears: Int,
                                            numberOfGaps: Int,
                                            numberOfGapsPayable: Int,
                                            dateOfEntry: LocalDate,
@@ -34,14 +33,13 @@ object NationalInsuranceRecord{
                                           )
 }
 
-class NationalInsuranceRecord(nino: Nino, qualifyingYears: Int, qualifyingYearsPriorTo1975: Int, nonQualifyingYears: Int,
+class NationalInsuranceRecord(nino: Nino, qualifyingYears: Int, qualifyingYearsPriorTo1975: Int,
                               numberOfGaps: Int, numberOfGapsPayable: Int, dateOfEntry: LocalDate,
                               homeResponsibilitiesProtection: Boolean) (implicit hc: HeaderCarrier)
   extends BusinessEvent("StatePension", nino,
     Map(
       "qualifyingYears" -> qualifyingYears.toString,
       "qualifyingYearsPriorTo1975" -> qualifyingYearsPriorTo1975.toString,
-      "nonQualifyingYears" -> nonQualifyingYears.toString,
       "numberOfGaps" -> numberOfGaps.toString,
       "numberOfGapsPayable" -> numberOfGapsPayable.toString,
       "dateOfEntry" -> dateOfEntry.toString,

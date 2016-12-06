@@ -17,18 +17,36 @@
 package uk.gov.hmrc.nationalinsurancerecord.domain
 
 import org.joda.time.LocalDate
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, Writes}
+import play.api.libs.json._
+import play.api.libs.functional.syntax._
 
 case class NationalInsuranceRecord(
                                     qualifyingYears: Int,
                                     qualifyingYearsPriorTo1975: Int,
-                                    nonQualifyingYears: Int,
                                     numberOfGaps: Int,
                                     numberOfGapsPayable: Int,
                                     dateOfEntry: LocalDate,
-                                    homeResponsibilitiesProtection: Boolean
+                                    homeResponsibilitiesProtection: Boolean,
+                                    taxYears: List[TaxYearSummary]
                                   )
 
 object NationalInsuranceRecord {
-  implicit val formats = Json.format[NationalInsuranceRecord]
+  implicit val reads = Json.reads[NationalInsuranceRecord]
+  implicit val writes: Writes[NationalInsuranceRecord] = (
+    (JsPath \ "qualifyingYears").write[Int] and
+    (JsPath \ "qualifyingYearsPriorTo1975").write[Int] and
+    (JsPath \ "numberOfGaps").write[Int] and
+    (JsPath \ "numberOfGapsPayable").write[Int] and
+    (JsPath \ "dateOfEntry").write[LocalDate] and
+    (JsPath \ "homeResponsibilitiesProtection").write[Boolean]
+    )((ni: NationalInsuranceRecord) => (
+      ni.qualifyingYears,
+      ni.qualifyingYearsPriorTo1975, ni.numberOfGaps,
+      ni.numberOfGapsPayable,
+      ni.dateOfEntry,
+      ni.homeResponsibilitiesProtection
+    ))
+  implicit val formats: Format[NationalInsuranceRecord] = Format(reads, writes)
+
 }
