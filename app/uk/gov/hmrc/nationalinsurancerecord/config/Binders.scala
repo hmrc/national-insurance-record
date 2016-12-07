@@ -34,4 +34,20 @@ object Binders {
 
     override def unbind(key: String, value: Nino): String = value.value
   }
+
+  val regex = """\d{4}\-\d{2}""".r
+
+  implicit  val taxYearBinder: PathBindable[String] = new PathBindable[String] {
+
+    override def bind(key: String, value: String): Either[String, String] = {
+      if(regex.pattern.matcher(value).matches()) {
+          Right(value)
+      } else {
+          Left(ErrorResponses.CODE_INVALID_TAXYEAR)
+      }
+    }
+
+    override def unbind(key: String, value: String): String = value
+
+  }
 }

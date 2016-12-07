@@ -17,19 +17,25 @@
 package uk.gov.hmrc.nationalinsurancerecord.services
 
 import org.joda.time.LocalDate
+import play.api.Logger
+import play.api.libs.json.Json
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.nationalinsurancerecord.domain.{NationalInsuranceRecord, NationalInsuranceRecordExclusion, TaxYearSummary}
+import uk.gov.hmrc.nationalinsurancerecord.domain.{NationalInsuranceRecord, NationalInsuranceRecordExclusion, TaxYear, TaxYearSummary}
 import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+import play.api.Play.current
 
 import scala.concurrent.Future
 
 trait NationalInsuranceRecordService {
   def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[NationalInsuranceRecordExclusion, NationalInsuranceRecord]]
+  def getTaxYear(nino: Nino, taxYear: String)(implicit hc: HeaderCarrier): Future[TaxYear]
 }
 
 object SandboxNationalInsuranceService extends NationalInsuranceRecordService {
+  // scalastyle:off magic.number
+
   private val dummyRecord: NationalInsuranceRecord = NationalInsuranceRecord(
-    // scalastyle:off magic.number
     qualifyingYears = 36,
     qualifyingYearsPriorTo1975 = 5,
     numberOfGaps = 10,
@@ -82,6 +88,22 @@ object SandboxNationalInsuranceService extends NationalInsuranceRecordService {
     )
   )
 
+  private val defaultResponsePath = "conf/resources/sandbox/EZ/"
+  private val resourcePath = "conf/resources/sandbox/"
+
+  private def getFileFromPrefix(nino: Nino, taxYear: String): TaxYear = {
+    val prefix = nino.toString.substring(0, 2)
+    val taxYearPrefix = taxYear.substring(0,4)
+
+    play.api.Play.getExistingFile(resourcePath + prefix + "/" + taxYearPrefix + ".json") match {
+      case Some(file) => Json.parse(scala.io.Source.fromFile(file).mkString).as[TaxYear]
+      case None => Logger.info(s"Sandbox: Resource not found for $prefix, using default");
+        Json.parse(scala.io.Source.fromFile( defaultResponsePath + taxYearPrefix + ".json").mkString).as[TaxYear]
+    }
+  }
+
   override def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier):
     Future[Either[NationalInsuranceRecordExclusion, NationalInsuranceRecord]] = Future.successful(Right(dummyRecord))
+
+  override def getTaxYear(nino: Nino, taxYear: String)(implicit hc: HeaderCarrier): Future[TaxYear] = Future.successful(getFileFromPrefix(nino, taxYear))
 }
