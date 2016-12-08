@@ -1,9 +1,9 @@
 {
 "classThreePayableByPenalty":  "2023-04-05",
-"qualifying": 0,
+"qualifying": false,
 "underInvestigation":  false,
-"payable": 1,
-"taxYear":  "2010-2011",
+"payable": false,
+"taxYear":  "2010-11",
 "classThreePayable":  578.4,
 "classOneContributions":  0,
 "otherCredits":  4,

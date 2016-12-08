@@ -1,11 +1,11 @@
 {
   "classThreePayableByPenalty":  null,
-  "qualifying": 0,
+  "qualifying": false,
   "underInvestigation":  false,
   "payable": false,
   "taxYear":  "1986-87",
   "classThreePayable": 0,
-  "classOneContributions":  "36.0400",
+  "classOneContributions":  36.0400,
   "otherCredits":  3,
   "classTwoCredits":  0,
   "classThreePayableBy":  null,

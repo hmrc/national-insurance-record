@@ -1,6 +1,6 @@
 {
   "classThreePayableByPenalty":  null,
-  "qualifying": 1,
+  "qualifying": true,
   "underInvestigation":  false,
   "payable": false,
   "taxYear":  "1988-89",

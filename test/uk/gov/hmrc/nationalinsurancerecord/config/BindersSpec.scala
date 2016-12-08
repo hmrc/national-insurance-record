@@ -18,7 +18,6 @@ package uk.gov.hmrc.nationalinsurancerecord.config
 
 import play.api.mvc.PathBindable
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
-import uk.gov.hmrc.play.test.UnitSpec
 
 class BindersSpec extends NationalInsuranceRecordUnitSpec {
 

@@ -1,9 +1,9 @@
 {
   "classThreePayableByPenalty":  null,
-  "qualifying": 1,
+  "qualifying": true,
   "underInvestigation":  false,
   "payable": false,
-  "taxYear":  "2002-2003",
+  "taxYear":  "2002-03",
   "classThreePayable": 0,
   "classOneContributions":  0,
   "otherCredits":  52,

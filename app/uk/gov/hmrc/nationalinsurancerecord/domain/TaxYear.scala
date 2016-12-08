@@ -27,8 +27,8 @@ case class TaxYear(
                     classThreeCredits: Int,
                     otherCredits: Int,
                     classThreePayable: BigDecimal,
-                    classThreePayableBy: LocalDate,
-                    classThreePayableByPenalty: LocalDate,
+                    classThreePayableBy: Option[LocalDate],
+                    classThreePayableByPenalty: Option[LocalDate],
                     payable: Boolean,
                     underInvestigation: Boolean
                   ){

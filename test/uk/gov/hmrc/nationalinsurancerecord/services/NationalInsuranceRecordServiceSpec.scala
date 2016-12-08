@@ -19,13 +19,12 @@ package uk.gov.hmrc.nationalinsurancerecord.services
 import org.joda.time.LocalDate
 import org.scalatest.concurrent.ScalaFutures
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
-import org.scalatestplus.play.{OneAppPerSuite, OneAppPerTest}
+import org.scalatestplus.play.OneAppPerSuite
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nationalinsurancerecord.domain._
 import uk.gov.hmrc.play.http.HeaderCarrier
-import uk.gov.hmrc.play.test.UnitSpec
 
-class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec with OneAppPerTest with ScalaFutures {
+class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec with OneAppPerSuite with ScalaFutures {
 
   private val dummyRecord: NationalInsuranceRecord = NationalInsuranceRecord(
     // scalastyle:off magic.number
@@ -77,35 +76,59 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
       TaxYearSummary("1977-78", true),
       TaxYearSummary("1976-77", true),
       TaxYearSummary("1975-76", true)
-
     )
   )
+  
+  private val dummyTaxYearDefault: TaxYear = TaxYear(
+    taxYear =  "1989-90",
+    qualifying = true,
+    classOneContributions =  1149.98,
+    classTwoCredits =  0,
+    classThreeCredits =  0,
+    otherCredits =  0,
+    classThreePayable = 0,
+    classThreePayableBy = None,
+    classThreePayableByPenalty = None,
+    payable = false,
+    underInvestigation =  false
+  )
 
-  "Sandbox" should {
-    "return dummy data for non-existent prefix" in {
+  private val dummyTaxYear1: TaxYear = TaxYear(
+    taxYear =  "1989-90",
+    qualifying = true,
+    classOneContributions =  1149.98,
+    classTwoCredits =  0,
+    classThreeCredits =  0,
+    otherCredits =  0,
+    classThreePayable = 0,
+    classThreePayableBy = Some(new LocalDate(2017,4,5)),
+    classThreePayableByPenalty = None,
+    payable = false,
+    underInvestigation =  false
+  )
+
+  "sandbox" should {
+
+    "return ni record summary dummy data for non-existent prefix" in {
       val nino: Nino = generateNinoWithPrefix("ZX")
-        whenReady(SandboxNationalInsuranceService.getNationalInsuranceRecord(nino)(HeaderCarrier())) { result =>
+      whenReady(SandboxNationalInsuranceService.getNationalInsuranceRecord(nino)(HeaderCarrier())) { result =>
         result shouldBe Right(dummyRecord)
-    }
-
-    "EZ prefix should return Dead exclusion" in {
-      whenReady(SandboxNationalInsuranceService.getNationalInsuranceRecord(generateNinoWithPrefix("EZ"))(HeaderCarrier())) { result =>
-        result shouldBe Left(NationalInsuranceRecordExclusion(
-          exclusionReasons = List(Exclusion.Dead),
-          pensionAge = 66
-        ))
       }
     }
 
-    "PG prefix should return MCI exclusion" in {
-      whenReady(SandboxNationalInsuranceService.getNationalInsuranceRecord(generateNinoWithPrefix("PG"))(HeaderCarrier())) { result =>
-        result shouldBe Left(NationalInsuranceRecordExclusion(
-          exclusionReasons = List(Exclusion.ManualCorrespondenceIndicator),
-          pensionAge = 66
-        ))
+    "return tax year dummy data for non-existent prefix ZX" in {
+      val nino: Nino = generateNinoWithPrefix("ZX")
+      whenReady(SandboxNationalInsuranceService.getTaxYear(nino,"1989-90")(HeaderCarrier())) { result =>
+        result shouldBe dummyTaxYearDefault
+      }
+    }
+
+    "return tax year dummy data for existent prefix EY" in {
+      val nino: Nino = generateNinoWithPrefix("EY")
+      whenReady(SandboxNationalInsuranceService.getTaxYear(nino,"1989-90")(HeaderCarrier())) { result =>
+        result shouldBe dummyTaxYear1
       }
     }
 
   }
-
 }
