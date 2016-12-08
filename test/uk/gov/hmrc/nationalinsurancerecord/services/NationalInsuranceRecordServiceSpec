@@ -19,12 +19,13 @@ package uk.gov.hmrc.nationalinsurancerecord.services
 import org.joda.time.LocalDate
 import org.scalatest.concurrent.ScalaFutures
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
-import org.scalatestplus.play.OneAppPerSuite
+import org.scalatestplus.play.{OneAppPerSuite, OneAppPerTest}
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.nationalinsurancerecord.domain.{Exclusion, NationalInsuranceRecord, NationalInsuranceRecordExclusion, TaxYearSummary}
+import uk.gov.hmrc.nationalinsurancerecord.domain._
 import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.play.test.UnitSpec
 
-class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec with OneAppPerSuite with ScalaFutures {
+class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec with OneAppPerTest with ScalaFutures {
 
   private val dummyRecord: NationalInsuranceRecord = NationalInsuranceRecord(
     // scalastyle:off magic.number
@@ -32,7 +33,7 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
     qualifyingYearsPriorTo1975 = 5,
     numberOfGaps = 10,
     numberOfGapsPayable = 4,
-    dateOfEntry =  new LocalDate(1969, 8, 1),
+    dateOfEntry = new LocalDate(1969, 8, 1),
     homeResponsibilitiesProtection = false,
     List(
       TaxYearSummary("2015-16", true),
@@ -83,28 +84,28 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
   "Sandbox" should {
     "return dummy data for non-existent prefix" in {
       val nino: Nino = generateNinoWithPrefix("ZX")
-      whenReady(SandboxNationalInsuranceService.getNationalInsuranceRecord(nino)(HeaderCarrier())) { result =>
+        whenReady(SandboxNationalInsuranceService.getNationalInsuranceRecord(nino)(HeaderCarrier())) { result =>
         result shouldBe Right(dummyRecord)
+    }
+
+    "EZ prefix should return Dead exclusion" in {
+      whenReady(SandboxNationalInsuranceService.getNationalInsuranceRecord(generateNinoWithPrefix("EZ"))(HeaderCarrier())) { result =>
+        result shouldBe Left(NationalInsuranceRecordExclusion(
+          exclusionReasons = List(Exclusion.Dead),
+          pensionAge = 66
+        ))
       }
     }
-  }
 
-  "EZ prefix should return Dead exclusion" in {
-    whenReady(SandboxNationalInsuranceService.getNationalInsuranceRecord(generateNinoWithPrefix("EZ"))(HeaderCarrier())) { result =>
-      result shouldBe Left(NationalInsuranceRecordExclusion(
-        exclusionReasons = List(Exclusion.Dead),
-        pensionAge = 66
-      ))
+    "PG prefix should return MCI exclusion" in {
+      whenReady(SandboxNationalInsuranceService.getNationalInsuranceRecord(generateNinoWithPrefix("PG"))(HeaderCarrier())) { result =>
+        result shouldBe Left(NationalInsuranceRecordExclusion(
+          exclusionReasons = List(Exclusion.ManualCorrespondenceIndicator),
+          pensionAge = 66
+        ))
+      }
     }
-  }
 
-  "PG prefix should return MCI exclusion" in {
-    whenReady(SandboxNationalInsuranceService.getNationalInsuranceRecord(generateNinoWithPrefix("PG"))(HeaderCarrier())) { result =>
-      result shouldBe Left(NationalInsuranceRecordExclusion(
-        exclusionReasons = List(Exclusion.ManualCorrespondenceIndicator),
-        pensionAge = 66
-      ))
-    }
   }
 
 }
