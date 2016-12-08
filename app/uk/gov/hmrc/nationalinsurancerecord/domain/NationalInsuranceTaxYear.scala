@@ -19,7 +19,7 @@ package uk.gov.hmrc.nationalinsurancerecord.domain
 import org.joda.time.LocalDate
 import play.api.libs.json.Json
 
-case class TaxYear(
+case class NationalInsuranceTaxYear(
                     taxYear: String,
                     qualifying: Boolean,
                     classOneContributions: BigDecimal,
@@ -34,6 +34,6 @@ case class TaxYear(
                   ){
 }
 
-object TaxYear {
-  implicit val formats = Json.format[TaxYear]
+object NationalInsuranceTaxYear {
+  implicit val formats = Json.format[NationalInsuranceTaxYear]
 }

@@ -36,7 +36,7 @@ object NationalInsuranceRecord{
 class NationalInsuranceRecord(nino: Nino, qualifyingYears: Int, qualifyingYearsPriorTo1975: Int,
                               numberOfGaps: Int, numberOfGapsPayable: Int, dateOfEntry: LocalDate,
                               homeResponsibilitiesProtection: Boolean) (implicit hc: HeaderCarrier)
-  extends BusinessEvent("StatePension", nino,
+  extends BusinessEvent("NationalInsuranceRecordSummary", nino,
     Map(
       "qualifyingYears" -> qualifyingYears.toString,
       "qualifyingYearsPriorTo1975" -> qualifyingYearsPriorTo1975.toString,

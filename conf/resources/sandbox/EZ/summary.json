@@ -1,0 +1,174 @@
+{
+  "qualifyingYears": 36,
+  "qualifyingYearsPriorTo1975": 5,
+  "numberOfGaps": 10,
+  "numberOfGapsPayable": 4,
+  "dateOfEntry": "1969-08-01",
+  "homeResponsibilitiesProtection": false,
+    "taxYears": [
+      {
+        "taxYear": "2015-16",
+        "qualifying": true
+      },
+      {
+        "taxYear": "2014-15",
+        "qualifying": true
+      },
+      {
+        "taxYear": "2013-14",
+        "qualifying": true
+      },
+      {
+        "taxYear": "2012-13",
+        "qualifying": false
+      },
+      {
+        "taxYear": "2011-12",
+        "qualifying": false
+      },
+      {
+        "taxYear": "2010-11",
+        "qualifying": false
+      },
+      {
+        "taxYear": "2009-10",
+        "qualifying": true
+      },
+      {
+        "taxYear": "2008-09",
+        "qualifying": false
+      },
+      {
+        "taxYear": "2007-08",
+        "qualifying": true
+      },
+      {
+        "taxYear": "2006-07",
+        "qualifying": true
+      },
+      {
+        "taxYear": "2005-06",
+        "qualifying": true
+      },
+      {
+        "taxYear": "2004-05",
+        "qualifying": true
+      },
+      {
+        "taxYear": "2003-04",
+        "qualifying": true
+      },
+      {
+        "taxYear": "2002-03",
+        "qualifying": true
+      },
+      {
+        "taxYear": "2001-02",
+        "qualifying": false
+      },
+      {
+        "taxYear": "2000-01",
+        "qualifying": true
+      },
+      {
+        "taxYear": "1999-00",
+        "qualifying": true
+      },
+      {
+        "taxYear": "1998-99",
+        "qualifying": true
+      },
+      {
+        "taxYear": "1997-98",
+        "qualifying": true
+      },
+      {
+        "taxYear": "1996-97",
+        "qualifying": false
+      },
+      {
+        "taxYear": "1995-96",
+        "qualifying": false
+      },
+      {
+        "taxYear": "1994-95",
+        "qualifying": true
+      },
+      {
+        "taxYear": "1993-94",
+        "qualifying": true
+      },
+      {
+        "taxYear": "1992-93",
+        "qualifying": true
+      },
+      {
+        "taxYear": "1991-92",
+        "qualifying": true
+      },
+      {
+        "taxYear": "1990-91",
+        "qualifying": true
+      },
+      {
+        "taxYear": "1989-90",
+        "qualifying": true
+      },
+      {
+        "taxYear": "1988-89",
+        "qualifying": true
+      },
+      {
+        "taxYear": "1987-88",
+        "qualifying": true
+      },
+      {
+        "taxYear": "1986-87",
+        "qualifying": false
+      },
+      {
+        "taxYear": "1985-86",
+        "qualifying": false
+      },
+      {
+        "taxYear": "1984-85",
+        "qualifying": true
+      },
+      {
+        "taxYear": "1983-84",
+        "qualifying": false
+      },
+      {
+        "taxYear": "1982-83",
+        "qualifying": true
+      },
+      {
+        "taxYear": "1981-82",
+        "qualifying": true
+      },
+      {
+        "taxYear": "1980-81",
+        "qualifying": true
+      },
+      {
+        "taxYear": "1979-80",
+        "qualifying": true
+      },
+      {
+        "taxYear": "1978-79",
+        "qualifying": true
+      },
+      {
+        "taxYear": "1977-78",
+        "qualifying": true
+      },
+      {
+        "taxYear": "1976-77",
+        "qualifying": true
+      },
+      {
+        "taxYear": "1975-76",
+        "qualifying": true
+      }
+    ]
+}

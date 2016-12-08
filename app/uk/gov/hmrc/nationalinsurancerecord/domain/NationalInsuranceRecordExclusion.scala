@@ -16,18 +16,14 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.domain
 
-import org.joda.time.LocalDate
 import play.api.libs.json._
 
 
 object Exclusion extends Enumeration {
   type Exclusion = Value
-  val Abroad = Value
   val IsleOfMan = Value
   val MarriedWomenReducedRateElection = Value
   val Dead = Value
-  val AmountDissonance = Value
-  val PostStatePensionAge = Value
   val ManualCorrespondenceIndicator = Value
 
   implicit val formats = new Format[Exclusion] {
@@ -37,7 +33,7 @@ object Exclusion extends Enumeration {
 }
 
 
-case class NationalInsuranceRecordExclusion(exclusionReasons: List[Exclusion.Exclusion], pensionAge: Int)
+case class NationalInsuranceRecordExclusion(exclusionReasons: List[Exclusion.Exclusion])
 
 object NationalInsuranceRecordExclusion {
   implicit val formats = Json.format[NationalInsuranceRecordExclusion]
