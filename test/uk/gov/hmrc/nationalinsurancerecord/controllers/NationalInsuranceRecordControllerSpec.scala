@@ -14,17 +14,46 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nationalinsurancerecord.services
+package uk.gov.hmrc.nationalinsurancerecord.controllers
 
 import org.joda.time.LocalDate
-import org.scalatest.concurrent.ScalaFutures
+import play.api.libs.json._
+import play.api.test.FakeRequest
+import play.api.test.Helpers._
+import uk.gov.hmrc.domain.{Generator, Nino}
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
-import org.scalatestplus.play.OneAppPerSuite
-import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.nationalinsurancerecord.domain._
+import uk.gov.hmrc.nationalinsurancerecord.connectors.CustomAuditConnector
+import uk.gov.hmrc.nationalinsurancerecord.domain.{NationalInsuranceRecord, NationalInsuranceRecordExclusion, NationalInsuranceTaxYear, TaxYearSummary}
+import uk.gov.hmrc.nationalinsurancerecord.services.{NationalInsuranceRecordService, SandboxNationalInsuranceService}
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+import uk.gov.hmrc.play.audit.model.AuditEvent
 import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.play.test.WithFakeApplication
 
-class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec with OneAppPerSuite with ScalaFutures {
+import scala.concurrent.Future
+import scala.util.Random
+import play.api.test.Helpers._
+import uk.gov.hmrc.nationalinsurancerecord.util.EitherReads
+
+class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitSpec with WithFakeApplication {
+
+  val nino: Nino = new Generator(new Random()).nextNino
+
+  val emptyRequest = FakeRequest()
+  val emptyRequestWithHeader = FakeRequest().withHeaders("Accept" -> "application/vnd.hmrc.1.0+json")
+
+  val mockAuditConnector = new CustomAuditConnector {
+    override lazy val auditConnector: AuditConnector = ???
+    override def sendEvent(event: AuditEvent)(implicit hc: HeaderCarrier): Unit = {}
+  }
+
+  def testNationalInsuranceRecordController(niRecordService: NationalInsuranceRecordService): NationalInsuranceRecordController
+  = new NationalInsuranceRecordController {
+    override val nationalInsuranceRecordService: NationalInsuranceRecordService = niRecordService
+    override val app: String = "Test National Insurance Record"
+    override val context: String = "test"
+    override val customAuditConnector: CustomAuditConnector = mockAuditConnector
+  }
 
   private val dummyRecord: NationalInsuranceRecord = NationalInsuranceRecord(
     // scalastyle:off magic.number
@@ -78,24 +107,24 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
       TaxYearSummary("1975-76", true)
     )
   )
-  
+
   private val dummyTaxYearDefault: NationalInsuranceTaxYear = NationalInsuranceTaxYear(
     taxYear =  "2010-11",
-    qualifying = false,
+    qualifying = true,
     classOneContributions =  1149.98,
     classTwoCredits =  0,
     classThreeCredits =  0,
     otherCredits =  0,
     classThreePayable = 0,
     classThreePayableBy = None,
-    classThreePayableByPenalty = Some(new LocalDate(2023,4,5)),
+    classThreePayableByPenalty = None,
     payable = false,
     underInvestigation =  false
   )
 
   private val dummyTaxYearForEY: NationalInsuranceTaxYear = NationalInsuranceTaxYear(
     taxYear =  "2010-11",
-    qualifying = false,
+    qualifying = true,
     classOneContributions =  1149.98,
     classTwoCredits =  0,
     classThreeCredits =  0,
@@ -107,28 +136,32 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
     underInvestigation =  false
   )
 
-  "sandbox" should {
+  "get" should {
+      val testNIRecordController = testNationalInsuranceRecordController(SandboxNationalInsuranceService)
 
-    "return ni record summary dummy data for non-existent prefix" in {
-      val nino: Nino = generateNinoWithPrefix("ZX")
-      whenReady(SandboxNationalInsuranceService.getNationalInsuranceRecord(nino)(HeaderCarrier())) { result =>
-        result shouldBe Right(dummyRecord)
-      }
+    "return status code 406 when the headers are invalid" in {
+      val response = testNIRecordController.getTaxYear(nino,"2010-11")(emptyRequest)
+      status(response) shouldBe 406
+      contentAsJson(response) shouldBe Json.parse("""{"code":"ACCEPT_HEADER_INVALID","message":"The accept header is missing or invalid"}""")
     }
 
-    "return tax year dummy data for non-existent prefix ZX" in {
-      val nino: Nino = generateNinoWithPrefix("ZX")
-      whenReady(SandboxNationalInsuranceService.getTaxYear(nino,"2010-11")(HeaderCarrier())) { result =>
-        result shouldBe Right(dummyTaxYearDefault)
-      }
-    }
-
-    "return tax year dummy data for existent prefix EY" in {
-      val nino: Nino = generateNinoWithPrefix("EY")
-      whenReady(SandboxNationalInsuranceService.getTaxYear(nino,"2010-11")(HeaderCarrier())) { result =>
-        result shouldBe Right(dummyTaxYearForEY)
-      }
+    "return 200 with a Response" in {
+      val response = testNIRecordController.getTaxYear(nino, "2010-11")(emptyRequestWithHeader)
+      status(response) shouldBe 200
+      val json = contentAsJson(response)
+      (json \ "classThreePayableByPenalty").as[LocalDate] shouldBe new LocalDate(2023,4,5)
+      (json \ "qualifying").as[Boolean] shouldBe false
+      (json \ "underInvestigation").as[Boolean] shouldBe false
+      (json \ "payable").as[Boolean] shouldBe false
+      (json \ "taxYear").as[String] shouldBe "2010-11"
+      (json \ "classThreePayable").as[BigDecimal] shouldBe 0
+      (json \ "classOneContributions").as[BigDecimal] shouldBe 1149.98
+      (json \ "otherCredits").as[Int] shouldBe 0
+      (json \ "classTwoCredits").as[Int] shouldBe 0
+      (json \ "classThreePayableBy") shouldBe JsDefined(JsNull)
+      (json \ "classThreeCredits").as[Int] shouldBe 0
     }
 
   }
+
 }

@@ -38,7 +38,7 @@ trait NationalInsuranceRecordController extends BaseController with HeaderValida
       content,
       selfLink,
       Some(Vector("taxYears" -> years.map(taxYear => halResourceSelfLink(Json.toJson(taxYear),
-        nationalInsuranceRecordHref(nino, Some(taxYear.taxYear)))).toVector))
+        nationalInsuranceTaxYearHref(nino, taxYear.taxYear))).toVector))
     )
   }
 

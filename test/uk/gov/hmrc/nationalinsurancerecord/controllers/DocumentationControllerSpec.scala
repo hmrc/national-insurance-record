@@ -26,7 +26,6 @@ import uk.gov.hmrc.nationalinsurancerecord.config.AppContext
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 
-
 class DocumentationControllerSpec extends UnitSpec with WithFakeApplication {
   "respond to GET /api/definition" in {
     val result = route(FakeRequest(GET, "/api/definition"))

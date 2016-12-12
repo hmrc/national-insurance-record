@@ -26,12 +26,10 @@ trait HalSupport {
 
     val halState = Hal.state(jsValue)
 
-    if (embedded.isEmpty) {
-      links.foldLeft(halState)((res, link) => res ++ link)
-    } else {
-      Hal.hal(halState, links.toVector, embedded.get)
+    embedded match {
+      case Some(embed) => Hal.hal(halState, links.toVector, embed)
+      case None => links.foldLeft(halState)((res, link) => res ++ link)
     }
-
   }
 
   def halResourceSelfLink(value: JsValue, self: String, embedded: Option[Vector[(String, Vector[HalResource])]] = None): HalResource = {
@@ -44,6 +42,6 @@ trait HalSupport {
 
   // scalastyle:off method.name
   def Ok(hal: HalResource): Result =
-    play.api.mvc.Results.Ok(Json.toJson(hal)).withHeaders("Content-Type" -> "application/hal+json")
+    play.api.mvc.Results.Ok(Json.toJson(hal)).as("application/hal+json")
 
 }

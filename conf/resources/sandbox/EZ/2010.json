@@ -1,6 +1,6 @@
 {
-  "classThreePayableByPenalty":  null,
-  "qualifying": true,
+  "classThreePayableByPenalty":  "2023-04-05",
+  "qualifying": false,
   "underInvestigation":  false,
   "payable": false,
   "taxYear":  "2010-11",
