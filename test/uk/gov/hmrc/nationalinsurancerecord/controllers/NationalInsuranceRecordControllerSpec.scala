@@ -19,8 +19,7 @@ package uk.gov.hmrc.nationalinsurancerecord.controllers
 import org.joda.time.LocalDate
 import play.api.libs.json._
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
-import uk.gov.hmrc.domain.{Generator, Nino}
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.connectors.CustomAuditConnector
 import uk.gov.hmrc.nationalinsurancerecord.domain.{NationalInsuranceRecord, NationalInsuranceRecordExclusion, NationalInsuranceTaxYear, TaxYearSummary}
@@ -29,15 +28,13 @@ import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.AuditEvent
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.WithFakeApplication
-
-import scala.concurrent.Future
-import scala.util.Random
 import play.api.test.Helpers._
-import uk.gov.hmrc.nationalinsurancerecord.util.EitherReads
+
+import scala.util.parsing.json.JSONObject
 
 class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitSpec with WithFakeApplication {
 
-  val nino: Nino = new Generator(new Random()).nextNino
+  val nino: Nino = generateNinoWithPrefix("EZ")
 
   val emptyRequest = FakeRequest()
   val emptyRequestWithHeader = FakeRequest().withHeaders("Accept" -> "application/vnd.hmrc.1.0+json")
@@ -137,15 +134,16 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
   )
 
   "get" should {
-      val testNIRecordController = testNationalInsuranceRecordController(SandboxNationalInsuranceService)
 
-    "return status code 406 when the headers are invalid" in {
+    val testNIRecordController = testNationalInsuranceRecordController(SandboxNationalInsuranceService)
+
+    "return NI Tax Year status code 406 when the headers are invalid" in {
       val response = testNIRecordController.getTaxYear(nino,"2010-11")(emptyRequest)
       status(response) shouldBe 406
       contentAsJson(response) shouldBe Json.parse("""{"code":"ACCEPT_HEADER_INVALID","message":"The accept header is missing or invalid"}""")
     }
 
-    "return 200 with a Response" in {
+    "return NI Tax Year status code 200 with a Response" in {
       val response = testNIRecordController.getTaxYear(nino, "2010-11")(emptyRequestWithHeader)
       status(response) shouldBe 200
       val json = contentAsJson(response)
@@ -160,6 +158,31 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
       (json \ "classTwoCredits").as[Int] shouldBe 0
       (json \ "classThreePayableBy") shouldBe JsDefined(JsNull)
       (json \ "classThreeCredits").as[Int] shouldBe 0
+      (json \ "_links" \ "self" \ "href").as[String] shouldBe s"/test/ni/$nino/taxyear/2010-11"
+    }
+
+    "return code NISummary status code 406 when the headers are invalid" in {
+      val response = testNIRecordController.getSummary(nino)(emptyRequest)
+      status(response) shouldBe 406
+      contentAsJson(response) shouldBe Json.parse("""{"code":"ACCEPT_HEADER_INVALID","message":"The accept header is missing or invalid"}""")
+    }
+
+    "return 200 with a Response" in {
+      val responseSummary = testNIRecordController.getSummary(nino)(emptyRequestWithHeader)
+      status(responseSummary) shouldBe 200
+      val json = contentAsJson(responseSummary)
+
+      (json \ "qualifyingYears").as[Int] shouldBe 36
+      (json \ "qualifyingYearsPriorTo1975").as[Int] shouldBe 5
+      (json \ "numberOfGaps").as[Int] shouldBe 10
+      (json \ "numberOfGapsPayable").as[Int] shouldBe 4
+      (json \ "dateOfEntry").as[LocalDate] shouldBe new LocalDate(1969,8,1)
+      (json \ "homeResponsibilitiesProtection").as[Boolean] shouldBe false
+      (json \ "_links" \ "self" \ "href").as[String] shouldBe s"/test/ni/$nino"
+      ((json \ "_embedded" \ "taxYears") (0) \ "_links" \ "self" \ "href").as[String] shouldBe s"/test/ni/$nino/taxyear/2015-16"
+      ((json \ "_embedded" \ "taxYears") (0) \ "taxYear").as[String] shouldBe s"2015-16"
+      ((json \ "_embedded" \ "taxYears") (0) \ "qualifying").as[Boolean] shouldBe true
+
     }
 
   }
