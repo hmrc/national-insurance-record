@@ -66,7 +66,8 @@ trait NationalInsuranceRecordController extends BaseController with HeaderValida
               )
           )
 
-          Ok(halResourceWithTaxYears(nino, Json.toJson(nationalInsuranceRecord), nationalInsuranceRecordHref(nino), years = nationalInsuranceRecord.taxYears))
+          Ok(halResourceWithTaxYears(nino, Json.toJson(nationalInsuranceRecord), nationalInsuranceRecordHref(nino),
+            years = nationalInsuranceRecord.taxYears))
       })
   }
 

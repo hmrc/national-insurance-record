@@ -20,8 +20,6 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nationalinsurancerecord.domain.Exclusion
 import uk.gov.hmrc.play.http.HeaderCarrier
 
-import scala.language.postfixOps
-
 object NationalInsuranceRecordExclusion{
   def apply(nino: Nino, exclusionReasons: List[Exclusion.Exclusion])(implicit hc: HeaderCarrier): NationalInsuranceRecordExclusion =
     new NationalInsuranceRecordExclusion(nino, exclusionReasons)

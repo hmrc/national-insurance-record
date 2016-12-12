@@ -18,10 +18,7 @@ package uk.gov.hmrc.nationalinsurancerecord.domain
 
 import play.api.libs.json.Json
 
-case class TaxYearSummary(
-                         taxYear: String,
-                         qualifying: Boolean
-                          ){
+case class TaxYearSummary(taxYear: String, qualifying: Boolean ){
 }
 
 object TaxYearSummary {

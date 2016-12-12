@@ -80,7 +80,7 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
   )
   
   private val dummyTaxYearDefault: NationalInsuranceTaxYear = NationalInsuranceTaxYear(
-    taxYear =  "1989-90",
+    taxYear =  "2010-11",
     qualifying = true,
     classOneContributions =  1149.98,
     classTwoCredits =  0,
@@ -93,8 +93,8 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
     underInvestigation =  false
   )
 
-  private val dummyTaxYear1: NationalInsuranceTaxYear = NationalInsuranceTaxYear(
-    taxYear =  "1989-90",
+  private val dummyTaxYearForEY: NationalInsuranceTaxYear = NationalInsuranceTaxYear(
+    taxYear =  "2010-11",
     qualifying = true,
     classOneContributions =  1149.98,
     classTwoCredits =  0,
@@ -118,15 +118,15 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
 
     "return tax year dummy data for non-existent prefix ZX" in {
       val nino: Nino = generateNinoWithPrefix("ZX")
-      whenReady(SandboxNationalInsuranceService.getTaxYear(nino,"1989-90")(HeaderCarrier())) { result =>
+      whenReady(SandboxNationalInsuranceService.getTaxYear(nino,"2010-11")(HeaderCarrier())) { result =>
         result shouldBe Right(dummyTaxYearDefault)
       }
     }
 
     "return tax year dummy data for existent prefix EY" in {
       val nino: Nino = generateNinoWithPrefix("EY")
-      whenReady(SandboxNationalInsuranceService.getTaxYear(nino,"1989-90")(HeaderCarrier())) { result =>
-        result shouldBe Right(dummyTaxYear1)
+      whenReady(SandboxNationalInsuranceService.getTaxYear(nino,"2010-11")(HeaderCarrier())) { result =>
+        result shouldBe Right(dummyTaxYearForEY)
       }
     }
 

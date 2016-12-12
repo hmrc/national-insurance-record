@@ -27,7 +27,7 @@ trait Links {
 
   def nationalInsuranceRecordHref(nino: Nino, taxYear: Option[String] = None): String =
     taxYear match {
-      case Some(year) => createLink(s"${uk.gov.hmrc.nationalinsurancerecord.controllers.live.routes.NationalInsuranceRecordController.getSummary(nino).url}/taxYear/$year")
+      case Some(year) => createLink(nationalInsuranceTaxYearHref(nino, year))
       case None => createLink(uk.gov.hmrc.nationalinsurancerecord.controllers.live.routes.NationalInsuranceRecordController.getSummary(nino).url)
     }
 
