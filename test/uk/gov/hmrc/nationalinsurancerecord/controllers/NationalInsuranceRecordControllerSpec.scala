@@ -30,8 +30,6 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.WithFakeApplication
 import play.api.test.Helpers._
 
-import scala.util.parsing.json.JSONObject
-
 class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitSpec with WithFakeApplication {
 
   val nino: Nino = generateNinoWithPrefix("EZ")
@@ -167,7 +165,7 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
       contentAsJson(response) shouldBe Json.parse("""{"code":"ACCEPT_HEADER_INVALID","message":"The accept header is missing or invalid"}""")
     }
 
-    "return 200 with a Response" in {
+    "return code 200 with a valid NationalInsuranceRecord" in {
       val responseSummary = testNIRecordController.getSummary(nino)(emptyRequestWithHeader)
       status(responseSummary) shouldBe 200
       val json = contentAsJson(responseSummary)
@@ -182,6 +180,7 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
       ((json \ "_embedded" \ "taxYears") (0) \ "_links" \ "self" \ "href").as[String] shouldBe s"/test/ni/$nino/taxyear/2015-16"
       ((json \ "_embedded" \ "taxYears") (0) \ "taxYear").as[String] shouldBe s"2015-16"
       ((json \ "_embedded" \ "taxYears") (0) \ "qualifying").as[Boolean] shouldBe true
+      (json \ "_embedded" \ "taxYears").as[JsArray].value.length shouldBe 41
 
     }
 
