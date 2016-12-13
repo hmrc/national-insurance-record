@@ -47,22 +47,22 @@ trait NationalInsuranceRecordController extends BaseController with HeaderValida
       errorWrapper(nationalInsuranceRecordService.getNationalInsuranceRecord(nino).map {
 
         case Left(exclusion) => {
-            if(exclusion.exclusionReasons.contains(Exclusion.Dead)) {
-              customAuditConnector.sendEvent(NationalInsuranceRecordExclusion(nino, List(Exclusion.Dead)))
-              Forbidden(Json.toJson(ErrorResponses.ExclusionDead))
-            } else if (exclusion.exclusionReasons.contains(Exclusion.ManualCorrespondenceIndicator)) {
-                      customAuditConnector.sendEvent(NationalInsuranceRecordExclusion(nino, List(Exclusion.ManualCorrespondenceIndicator)))
-                      Forbidden(Json.toJson(ErrorResponses.ExclusionManualCorrespondence))
-                    } else if (exclusion.exclusionReasons.contains(Exclusion.MarriedWomenReducedRateElection)) {
-                        customAuditConnector.sendEvent(NationalInsuranceRecordExclusion(nino, List(Exclusion.MarriedWomenReducedRateElection)))
-                        Forbidden(Json.toJson(ErrorResponses.ExclusionMarriedWomenReducedRate))
-                      } else if (exclusion.exclusionReasons.contains(Exclusion.IsleOfMan)) {
-                            customAuditConnector.sendEvent(NationalInsuranceRecordExclusion(nino, List(Exclusion.IsleOfMan)))
-                            Forbidden(Json.toJson(ErrorResponses.ExclusionIsleOfMan))
-                          } else {
-                            customAuditConnector.sendEvent(NationalInsuranceRecordExclusion(nino, exclusion.exclusionReasons))
-                            Ok(halResourceSelfLink(Json.toJson(exclusion), nationalInsuranceRecordHref(nino)))
-                          }
+          if (exclusion.exclusionReasons.contains(Exclusion.Dead)) {
+            customAuditConnector.sendEvent(NationalInsuranceRecordExclusion(nino, List(Exclusion.Dead)))
+            Forbidden(Json.toJson(ErrorResponses.ExclusionDead))
+          } else if (exclusion.exclusionReasons.contains(Exclusion.ManualCorrespondenceIndicator)) {
+            customAuditConnector.sendEvent(NationalInsuranceRecordExclusion(nino, List(Exclusion.ManualCorrespondenceIndicator)))
+            Forbidden(Json.toJson(ErrorResponses.ExclusionManualCorrespondence))
+          } else if (exclusion.exclusionReasons.contains(Exclusion.MarriedWomenReducedRateElection)) {
+            customAuditConnector.sendEvent(NationalInsuranceRecordExclusion(nino, List(Exclusion.MarriedWomenReducedRateElection)))
+            Forbidden(Json.toJson(ErrorResponses.ExclusionMarriedWomenReducedRate))
+          } else if (exclusion.exclusionReasons.contains(Exclusion.IsleOfMan)) {
+            customAuditConnector.sendEvent(NationalInsuranceRecordExclusion(nino, List(Exclusion.IsleOfMan)))
+            Forbidden(Json.toJson(ErrorResponses.ExclusionIsleOfMan))
+          } else {
+            customAuditConnector.sendEvent(NationalInsuranceRecordExclusion(nino, exclusion.exclusionReasons))
+            Ok(halResourceSelfLink(Json.toJson(exclusion), nationalInsuranceRecordHref(nino)))
+          }
         }
 
         case Right(nationalInsuranceRecord) =>
