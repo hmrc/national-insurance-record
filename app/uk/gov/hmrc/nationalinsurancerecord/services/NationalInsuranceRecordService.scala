@@ -57,9 +57,14 @@ object SandboxNationalInsuranceService extends NationalInsuranceRecordService {
     play.api.Play.getExistingFile(resourcePath + prefix + "/summary.json") match {
       case Some(file) => Json.parse(scala.io.Source.fromFile(file).mkString).
         as[Either[NationalInsuranceRecordExclusion,NationalInsuranceRecord]]
-      case None => Logger.info(s"Sandbox: Resource not found for $prefix, using default");
-        Json.parse(scala.io.Source.fromFile( defaultResponsePath + "/summary.json").
+
+      case None => {
+        Logger.info(s"Sandbox: Resource not found for " + resourcePath + prefix + "/summary.json Using default -"
+          + defaultResponsePath + "/summary.json")
+
+        Json.parse(scala.io.Source.fromFile( defaultResponsePath + "summary.json").
           mkString).as[Either[NationalInsuranceRecordExclusion,NationalInsuranceRecord]]
+      }
     }
   }
 
