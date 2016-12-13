@@ -26,9 +26,11 @@ import uk.gov.hmrc.nationalinsurancerecord.domain.{NationalInsuranceRecord, Nati
 import uk.gov.hmrc.nationalinsurancerecord.services.{NationalInsuranceRecordService, SandboxNationalInsuranceService}
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.AuditEvent
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.play.http.{BadRequestException, HeaderCarrier}
 import uk.gov.hmrc.play.test.WithFakeApplication
 import play.api.test.Helpers._
+
+import scala.concurrent.Future
 
 class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitSpec with WithFakeApplication {
 
@@ -182,6 +184,38 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
       ((json \ "_embedded" \ "taxYears") (0) \ "qualifying").as[Boolean] shouldBe true
       (json \ "_embedded" \ "taxYears").as[JsArray].value.length shouldBe 41
 
+    }
+
+    "return 403 with an error message for an MCI exclusion" in {
+      val responseExclusionMCI = testNIRecordController.getSummary(generateNinoWithPrefix("MC"))(emptyRequestWithHeader)
+      status(responseExclusionMCI) shouldBe 403
+      contentAsJson(responseExclusionMCI) shouldBe Json.parse(
+        """{"code":"EXCLUSION_MANUAL_CORRESPONDENCE","message":
+          |"The customer cannot access the service, they should contact HMRC"}""".stripMargin)
+    }
+
+    "return 403 with an error message for Dead exclusion" in {
+      val responseExclusionDead = testNIRecordController.getSummary(generateNinoWithPrefix("YN"))(emptyRequestWithHeader)
+      status(responseExclusionDead) shouldBe 403
+      contentAsJson(responseExclusionDead) shouldBe Json.parse(
+        """{"code":"EXCLUSION_DEAD","message":
+          |"The customer needs to contact the National Insurance helpline"}""".stripMargin)
+    }
+
+    "return 403 with an error message for Married Women Reduced Rate exclusion" in {
+      val responseExclusionMWRRE = testNIRecordController.getSummary(generateNinoWithPrefix("MW"))(emptyRequestWithHeader)
+      status(responseExclusionMWRRE) shouldBe 403
+      contentAsJson(responseExclusionMWRRE) shouldBe Json.parse(
+        """{"code":"EXCLUSION_MARRIED_WOMENS_REDUCED_RATE","message":
+          |"The customer needs to contact the National Insurance helpline"}""".stripMargin)
+    }
+
+    "return 403 with an error message for Isle of Man exclusion" in {
+      val responseExclusionIOM = testNIRecordController.getSummary(generateNinoWithPrefix("MA"))(emptyRequestWithHeader)
+      status(responseExclusionIOM) shouldBe 403
+      contentAsJson(responseExclusionIOM) shouldBe Json.parse(
+        """{"code":"EXCLUSION_ISLE_OF_MAN","message":
+          |"The customer needs to contact the National Insurance helpline"}""".stripMargin)
     }
 
   }
