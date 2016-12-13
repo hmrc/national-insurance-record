@@ -14,19 +14,16 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nationalinsurancerecord
+package uk.gov.hmrc.nationalinsurancerecord.controllers
 
 import play.api.Configuration
 import play.api.http.LazyHttpErrorHandler
-import play.api.libs.json
 import play.api.libs.json.{JsArray, JsDefined, JsString, JsUndefined}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import uk.gov.hmrc.nationalinsurancerecord.config.AppContext
-import uk.gov.hmrc.nationalinsurancerecord.controllers.DocumentationController
-
+import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 
 class DocumentationControllerSpec extends UnitSpec with WithFakeApplication {
