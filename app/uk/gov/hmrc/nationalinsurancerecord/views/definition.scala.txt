@@ -22,8 +22,16 @@
         "access" : @Json.toJson(access),
         "endpoints": [
           {
-            "uriPattern": "/hello-world",
-            "endpointName": "Hello World",
+            "uriPattern": "/ni/{nino}",
+            "endpointName": "National Insurance Record",
+            "method": "GET",
+            "authType": "NONE",
+            "throttlingTier": "UNLIMITED",
+            "queryParameters": []
+          },
+          {
+            "uriPattern": "/ni/{nino}/taxyear/{taxYear}",
+            "endpointName": "National Insurance Tax Year",
             "method": "GET",
             "authType": "NONE",
             "throttlingTier": "UNLIMITED",
