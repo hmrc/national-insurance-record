@@ -25,7 +25,7 @@
             "uriPattern": "/ni/{nino}",
             "endpointName": "National Insurance Record",
             "method": "GET",
-            "authType": "NONE",
+            "authType": "USER",
             "throttlingTier": "UNLIMITED",
             "queryParameters": []
           },
@@ -33,7 +33,7 @@
             "uriPattern": "/ni/{nino}/taxyear/{taxYear}",
             "endpointName": "National Insurance Tax Year",
             "method": "GET",
-            "authType": "NONE",
+            "authType": "USER",
             "throttlingTier": "UNLIMITED",
             "queryParameters": []
           }
