@@ -118,14 +118,14 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
 
     "return tax year dummy data for non-existent prefix ZX" in {
       val nino: Nino = generateNinoWithPrefix("ZX")
-      whenReady(SandboxNationalInsuranceService.getTaxYear(nino,"2010-11")(HeaderCarrier())) { result =>
+      whenReady(SandboxNationalInsuranceService.getTaxYear(nino,TaxYear("2010-11"))(HeaderCarrier())) { result =>
         result shouldBe Right(dummyTaxYearDefault)
       }
     }
 
     "return tax year dummy data for existent prefix EY" in {
       val nino: Nino = generateNinoWithPrefix("EY")
-      whenReady(SandboxNationalInsuranceService.getTaxYear(nino,"2010-11")(HeaderCarrier())) { result =>
+      whenReady(SandboxNationalInsuranceService.getTaxYear(nino,TaxYear("2010-11"))(HeaderCarrier())) { result =>
         result shouldBe Right(dummyTaxYearForEY)
       }
     }

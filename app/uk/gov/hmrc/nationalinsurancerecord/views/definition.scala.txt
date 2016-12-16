@@ -32,7 +32,7 @@
           },
           {
             "uriPattern": "/ni/{nino}/taxyear/{taxYear}",
-            "endpointName": "National Insurance Tax Year",
+            "endpointName": "National Insurance TaxYear",
             "method": "GET",
             "authType": "USER",
             "throttlingTier": "UNLIMITED",

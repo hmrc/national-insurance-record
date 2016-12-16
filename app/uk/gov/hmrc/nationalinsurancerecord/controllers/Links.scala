@@ -17,7 +17,7 @@
 package uk.gov.hmrc.nationalinsurancerecord.controllers
 
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.nationalinsurancerecord.domain.NationalInsuranceTaxYear$
+import uk.gov.hmrc.nationalinsurancerecord.domain.TaxYear
 
 trait Links {
 
@@ -28,6 +28,6 @@ trait Links {
   def nationalInsuranceRecordHref(nino: Nino): String =
       createLink(uk.gov.hmrc.nationalinsurancerecord.controllers.live.routes.NationalInsuranceRecordController.getSummary(nino).url)
 
-  def nationalInsuranceTaxYearHref(nino: Nino, taxYear: String): String =
+  def nationalInsuranceTaxYearHref(nino: Nino, taxYear: TaxYear): String =
     createLink(uk.gov.hmrc.nationalinsurancerecord.controllers.live.routes.NationalInsuranceRecordController.getTaxYear(nino,taxYear).url)
 }

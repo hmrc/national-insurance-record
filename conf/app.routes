@@ -2,4 +2,4 @@
 
 GET  /hello-world             uk.gov.hmrc.nationalinsurancerecord.controllers.HelloWorldController.hello
 GET  /ni/:nino                uk.gov.hmrc.nationalinsurancerecord.controllers.live.NationalInsuranceRecordController.getSummary(nino: uk.gov.hmrc.domain.Nino)
-GET  /ni/:nino/taxyear/:taxYear  uk.gov.hmrc.nationalinsurancerecord.controllers.live.NationalInsuranceRecordController.getTaxYear(nino: uk.gov.hmrc.domain.Nino, taxYear: String)
+GET  /ni/:nino/taxyear/:taxYear  uk.gov.hmrc.nationalinsurancerecord.controllers.live.NationalInsuranceRecordController.getTaxYear(nino: uk.gov.hmrc.domain.Nino, taxYear: uk.gov.hmrc.nationalinsurancerecord.domain.TaxYear)

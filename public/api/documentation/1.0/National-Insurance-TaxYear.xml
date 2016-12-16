@@ -1,5 +1,5 @@
 <endpoint>
-    <name>National Insurance Tax Year</name>
+    <name>National Insurance TaxYear</name>
     <description>Returns a National Insurance Tax Year statement</description>
     <section id="resource">
         <title>Resource</title>
