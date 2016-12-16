@@ -35,19 +35,22 @@ object Binders {
     override def unbind(key: String, value: Nino): String = value.value
   }
 
-  val taxYearformat = """\d{4}\-\d{2}""".r
+  /* Temporary comments to check API documentation on QA
 
-  implicit  val taxYearBinder: PathBindable[String] = new PathBindable[String] {
+    val taxYearformat = """\d{4}\-\d{2}""".r
 
-    override def bind(key: String, value: String): Either[String, String] = {
-      if(taxYearformat.pattern.matcher(value).matches()) {
-          Right(value)
-      } else {
-          Left(ErrorResponses.CODE_INVALID_TAXYEAR)
+    implicit  val taxYearBinder: PathBindable[String] = new PathBindable[String] {
+
+      override def bind(key: String, value: String): Either[String, String] = {
+        if(taxYearformat.pattern.matcher(value).matches()) {
+            Right(value)
+        } else {
+            Left(ErrorResponses.CODE_INVALID_TAXYEAR)
+        }
       }
+
+      override def unbind(key: String, value: String): String = value
+
     }
-
-    override def unbind(key: String, value: String): String = value
-
-  }
+    */
 }

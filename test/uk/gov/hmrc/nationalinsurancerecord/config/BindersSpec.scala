@@ -39,6 +39,7 @@ class BindersSpec extends NationalInsuranceRecordUnitSpec {
       result shouldEqual Left("ERROR_NINO_INVALID")
     }
   }
+/* Temporary comments to check API documentation on QA
 
   "taxYear.bind" should {
 
@@ -59,5 +60,7 @@ class BindersSpec extends NationalInsuranceRecordUnitSpec {
     }
 
   }
+  */
+
 }
 
