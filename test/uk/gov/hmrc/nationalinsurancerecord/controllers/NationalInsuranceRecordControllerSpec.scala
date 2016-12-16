@@ -143,6 +143,38 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
       contentAsJson(response) shouldBe Json.parse("""{"code":"ACCEPT_HEADER_INVALID","message":"The accept header is missing or invalid"}""")
     }
 
+    "return 403 for tax Year 2010-11 with an error message for an MCI exclusion" in {
+      val responseTaxYearExclusionMCI = testNIRecordController.getTaxYear(generateNinoWithPrefix("MC"),"2010-11")(emptyRequestWithHeader)
+      status(responseTaxYearExclusionMCI) shouldBe 403
+      contentAsJson(responseTaxYearExclusionMCI) shouldBe Json.parse(
+        """{"code":"EXCLUSION_MANUAL_CORRESPONDENCE","message":
+          |"The customer cannot access the service, they should contact HMRC"}""".stripMargin)
+    }
+
+    "return 403 for tax Year 2010-11 with an error message for Dead exclusion" in {
+      val responseTaxYearExclusionDead = testNIRecordController.getTaxYear(generateNinoWithPrefix("YN"),"2010-11")(emptyRequestWithHeader)
+      status(responseTaxYearExclusionDead) shouldBe 403
+      contentAsJson(responseTaxYearExclusionDead) shouldBe Json.parse(
+        """{"code":"EXCLUSION_DEAD","message":
+          |"The customer needs to contact the National Insurance helpline"}""".stripMargin)
+    }
+
+    "return 403 for tax Year 2010-11 with an error message for Married Women Reduced Rate exclusion" in {
+      val responseTaxYearExclusionMWRRE = testNIRecordController.getTaxYear(generateNinoWithPrefix("MW"),"2010-11")(emptyRequestWithHeader)
+      status(responseTaxYearExclusionMWRRE) shouldBe 403
+      contentAsJson(responseTaxYearExclusionMWRRE) shouldBe Json.parse(
+        """{"code":"EXCLUSION_MARRIED_WOMENS_REDUCED_RATE","message":
+          |"The customer needs to contact the National Insurance helpline"}""".stripMargin)
+    }
+
+    "return 403 for tax Year 2010-11 with an error message for Isle of Man exclusion" in {
+      val responseTaxYearExclusionIOM = testNIRecordController.getTaxYear(generateNinoWithPrefix("MA"),"2010-11")(emptyRequestWithHeader)
+      status(responseTaxYearExclusionIOM) shouldBe 403
+      contentAsJson(responseTaxYearExclusionIOM) shouldBe Json.parse(
+        """{"code":"EXCLUSION_ISLE_OF_MAN","message":
+          |"The customer needs to contact the National Insurance helpline"}""".stripMargin)
+    }
+
     "return NI Tax Year status code 200 with a Response" in {
       val response = testNIRecordController.getTaxYear(nino, "2010-11")(emptyRequestWithHeader)
       status(response) shouldBe 200
