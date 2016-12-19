@@ -1,6 +1,6 @@
 {
   "classThreePayableByPenalty":  "2008-04-05",
-  "qualifying": 0,
+  "qualifying": false,
   "underInvestigation": true,
   "payable": true,
   "taxYear":  "2001-02",

@@ -22,7 +22,7 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.connectors.CustomAuditConnector
-import uk.gov.hmrc.nationalinsurancerecord.domain.{NationalInsuranceRecord, NationalInsuranceRecordExclusion, NationalInsuranceTaxYear, TaxYearSummary}
+import uk.gov.hmrc.nationalinsurancerecord.domain._
 import uk.gov.hmrc.nationalinsurancerecord.services.{NationalInsuranceRecordService, SandboxNationalInsuranceService}
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.AuditEvent
@@ -138,13 +138,13 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
     val testNIRecordController = testNationalInsuranceRecordController(SandboxNationalInsuranceService)
 
     "return NI Tax Year status code 406 when the headers are invalid" in {
-      val response = testNIRecordController.getTaxYear(nino,"2010-11")(emptyRequest)
+      val response = testNIRecordController.getTaxYear(nino,TaxYear("2010-11"))(emptyRequest)
       status(response) shouldBe 406
       contentAsJson(response) shouldBe Json.parse("""{"code":"ACCEPT_HEADER_INVALID","message":"The accept header is missing or invalid"}""")
     }
 
     "return 403 for tax Year 2010-11 with an error message for an MCI exclusion" in {
-      val responseTaxYearExclusionMCI = testNIRecordController.getTaxYear(generateNinoWithPrefix("MC"),"2010-11")(emptyRequestWithHeader)
+      val responseTaxYearExclusionMCI = testNIRecordController.getTaxYear(generateNinoWithPrefix("MC"),TaxYear("2010-11"))(emptyRequestWithHeader)
       status(responseTaxYearExclusionMCI) shouldBe 403
       contentAsJson(responseTaxYearExclusionMCI) shouldBe Json.parse(
         """{"code":"EXCLUSION_MANUAL_CORRESPONDENCE","message":
@@ -152,7 +152,7 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
     }
 
     "return 403 for tax Year 2010-11 with an error message for Dead exclusion" in {
-      val responseTaxYearExclusionDead = testNIRecordController.getTaxYear(generateNinoWithPrefix("YN"),"2010-11")(emptyRequestWithHeader)
+      val responseTaxYearExclusionDead = testNIRecordController.getTaxYear(generateNinoWithPrefix("YN"),TaxYear("2010-11"))(emptyRequestWithHeader)
       status(responseTaxYearExclusionDead) shouldBe 403
       contentAsJson(responseTaxYearExclusionDead) shouldBe Json.parse(
         """{"code":"EXCLUSION_DEAD","message":
@@ -160,7 +160,7 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
     }
 
     "return 403 for tax Year 2010-11 with an error message for Married Women Reduced Rate exclusion" in {
-      val responseTaxYearExclusionMWRRE = testNIRecordController.getTaxYear(generateNinoWithPrefix("MW"),"2010-11")(emptyRequestWithHeader)
+      val responseTaxYearExclusionMWRRE = testNIRecordController.getTaxYear(generateNinoWithPrefix("MW"),TaxYear("2010-11"))(emptyRequestWithHeader)
       status(responseTaxYearExclusionMWRRE) shouldBe 403
       contentAsJson(responseTaxYearExclusionMWRRE) shouldBe Json.parse(
         """{"code":"EXCLUSION_MARRIED_WOMENS_REDUCED_RATE","message":
@@ -168,7 +168,7 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
     }
 
     "return 403 for tax Year 2010-11 with an error message for Isle of Man exclusion" in {
-      val responseTaxYearExclusionIOM = testNIRecordController.getTaxYear(generateNinoWithPrefix("MA"),"2010-11")(emptyRequestWithHeader)
+      val responseTaxYearExclusionIOM = testNIRecordController.getTaxYear(generateNinoWithPrefix("MA"),TaxYear("2010-11"))(emptyRequestWithHeader)
       status(responseTaxYearExclusionIOM) shouldBe 403
       contentAsJson(responseTaxYearExclusionIOM) shouldBe Json.parse(
         """{"code":"EXCLUSION_ISLE_OF_MAN","message":
@@ -176,7 +176,7 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
     }
 
     "return NI Tax Year status code 200 with a Response" in {
-      val response = testNIRecordController.getTaxYear(nino, "2010-11")(emptyRequestWithHeader)
+      val response = testNIRecordController.getTaxYear(nino, TaxYear("2010-11"))(emptyRequestWithHeader)
       status(response) shouldBe 200
       val json = contentAsJson(response)
       (json \ "classThreePayableByPenalty").as[LocalDate] shouldBe new LocalDate(2023,4,5)

@@ -19,6 +19,7 @@ package uk.gov.hmrc.nationalinsurancerecord.config
 import play.api.mvc.PathBindable
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nationalinsurancerecord.controllers.ErrorResponses
+import uk.gov.hmrc.nationalinsurancerecord.domain.TaxYear
 
 import scala.util.{Failure, Success, Try}
 
@@ -35,22 +36,16 @@ object Binders {
     override def unbind(key: String, value: Nino): String = value.value
   }
 
-  /* Temporary comments to check API documentation on QA
+  implicit  val taxYearBinder: PathBindable[TaxYear] = new PathBindable[TaxYear] {
 
-    val taxYearformat = """\d{4}\-\d{2}""".r
-
-    implicit  val taxYearBinder: PathBindable[String] = new PathBindable[String] {
-
-      override def bind(key: String, value: String): Either[String, String] = {
-        if(taxYearformat.pattern.matcher(value).matches()) {
-            Right(value)
-        } else {
-            Left(ErrorResponses.CODE_INVALID_TAXYEAR)
-        }
+    override def bind(key: String, value: String): Either[String, TaxYear] = {
+      Try[TaxYear](TaxYear.apply(value)) match {
+        case Success(taxYear) => Right(taxYear)
+        case Failure(e) => Left(ErrorResponses.CODE_INVALID_TAXYEAR)
       }
-
-      override def unbind(key: String, value: String): String = value
-
     }
-    */
+
+    override def unbind(key: String, value: TaxYear): String = value.value
+  }
+
 }

@@ -23,7 +23,7 @@ import uk.gov.hmrc.NationalInsuranceTaxYear.events.NationalInsuranceTaxYear
 import uk.gov.hmrc.api.controllers.HeaderValidator
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nationalinsurancerecord.connectors.CustomAuditConnector
-import uk.gov.hmrc.nationalinsurancerecord.domain.{Exclusion, TaxYearSummary}
+import uk.gov.hmrc.nationalinsurancerecord.domain.{Exclusion, TaxYear, TaxYearSummary}
 import uk.gov.hmrc.nationalinsurancerecord.events.{NationalInsuranceRecord, NationalInsuranceRecordExclusion}
 import uk.gov.hmrc.nationalinsurancerecord.services.NationalInsuranceRecordService
 import uk.gov.hmrc.play.microservice.controller.BaseController
@@ -38,7 +38,7 @@ trait NationalInsuranceRecordController extends BaseController with HeaderValida
       content,
       selfLink,
       Some(Vector("taxYears" -> years.map(taxYear => halResourceSelfLink(Json.toJson(taxYear),
-        nationalInsuranceTaxYearHref(nino, taxYear.taxYear))).toVector))
+        nationalInsuranceTaxYearHref(nino, TaxYear(taxYear.taxYear)))).toVector))
     )
   }
 
@@ -78,7 +78,7 @@ trait NationalInsuranceRecordController extends BaseController with HeaderValida
       })
   }
 
-  def getTaxYear(nino: Nino, taxYear: String): Action[AnyContent] = validateAccept(acceptHeaderValidationRules).async {
+  def getTaxYear(nino: Nino, taxYear: TaxYear): Action[AnyContent] = validateAccept(acceptHeaderValidationRules).async {
     implicit request =>
       errorWrapper(nationalInsuranceRecordService.getTaxYear(nino, taxYear).map {
 
@@ -115,5 +115,6 @@ trait NationalInsuranceRecordController extends BaseController with HeaderValida
       )
 
   }
+
 }
 

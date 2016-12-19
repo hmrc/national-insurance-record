@@ -32,7 +32,7 @@ import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 trait NationalInsuranceRecordService {
   def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[NationalInsuranceRecordExclusion, NationalInsuranceRecord]]
 
-  def getTaxYear(nino: Nino, taxYear: String)(implicit hc: HeaderCarrier): Future[Either[NationalInsuranceRecordExclusion, NationalInsuranceTaxYear]]
+  def getTaxYear(nino: Nino, taxYear: TaxYear)(implicit hc: HeaderCarrier): Future[Either[NationalInsuranceRecordExclusion, NationalInsuranceTaxYear]]
 }
 
 object SandboxNationalInsuranceService extends NationalInsuranceRecordService {
@@ -41,9 +41,9 @@ object SandboxNationalInsuranceService extends NationalInsuranceRecordService {
   private val defaultResponsePath = "conf/resources/sandbox/EZ/"
   private val resourcePath = "conf/resources/sandbox/"
 
-  private def getTaxYearFileFromPrefix(nino: Nino, taxYear: String): Either[NationalInsuranceRecordExclusion, NationalInsuranceTaxYear] = {
+  private def getTaxYearFileFromPrefix(nino: Nino, taxYear: TaxYear): Either[NationalInsuranceRecordExclusion, NationalInsuranceTaxYear] = {
     val prefix = nino.toString.substring(0, 2)
-    val taxYearPrefix = taxYear.substring(0, 4)
+    val taxYearPrefix = taxYear.startYear
 
     play.api.Play.getExistingFile(resourcePath + prefix + "/" + taxYearPrefix + ".json") match {
       case Some(file) => Json.parse(scala.io.Source.fromFile(file).mkString).as[Either[NationalInsuranceRecordExclusion, NationalInsuranceTaxYear]]
@@ -80,7 +80,8 @@ object SandboxNationalInsuranceService extends NationalInsuranceRecordService {
   override def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier):
   Future[Either[NationalInsuranceRecordExclusion, NationalInsuranceRecord]] = Future(getSummaryFileFromPrefix(nino))
 
-  override def getTaxYear(nino: Nino, taxYear: String)(implicit hc: HeaderCarrier): Future[Either[NationalInsuranceRecordExclusion, NationalInsuranceTaxYear]] =
+  override def getTaxYear(nino: Nino, taxYear: TaxYear)(implicit hc: HeaderCarrier):
+    Future[Either[NationalInsuranceRecordExclusion, NationalInsuranceTaxYear]] =
     Future(getTaxYearFileFromPrefix(nino, taxYear))
 
 }
