@@ -33,8 +33,8 @@ object Exclusion extends Enumeration {
 }
 
 
-case class NationalInsuranceRecordExclusion(exclusionReasons: List[Exclusion.Exclusion])
+case class ExclusionResponse(exclusionReasons: List[Exclusion.Exclusion])
 
-object NationalInsuranceRecordExclusion {
-  implicit val formats = Json.format[NationalInsuranceRecordExclusion]
+object ExclusionResponse {
+  implicit val formats: OFormat[ExclusionResponse] = Json.format[ExclusionResponse]
 }
