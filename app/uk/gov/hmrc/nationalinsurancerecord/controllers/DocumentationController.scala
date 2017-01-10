@@ -26,7 +26,7 @@ class DocumentationController (errorHandler: HttpErrorHandler, appContext: AppCo
   extends uk.gov.hmrc.api.controllers.DocumentationController(errorHandler = errorHandler) {
 
   override def definition(): Action[AnyContent] = Action {
-    Ok(txt.definition(buildAccess(), buildStatus())).withHeaders("Content-Type" -> "application/json")
+    Ok(txt.definition(buildAccess(), buildStatus())).as("application/json")
   }
 
   private def buildAccess(): APIAccess = {
