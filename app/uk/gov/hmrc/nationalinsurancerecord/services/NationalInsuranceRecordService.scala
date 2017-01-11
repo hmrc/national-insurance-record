@@ -22,6 +22,7 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nationalinsurancerecord.domain._
 import uk.gov.hmrc.play.http.HeaderCarrier
 import play.api.Play.current
+import uk.gov.hmrc.nationalinsurancerecord.connectors.NispConnector
 import uk.gov.hmrc.nationalinsurancerecord.util.EitherReads._
 
 import scala.concurrent.Future
@@ -93,4 +94,11 @@ object SandboxNationalInsuranceService extends NationalInsuranceRecordService {
       case Some(exclusionResponse) => Future.successful(Left(exclusionResponse))
       case None => Future(getTaxYearFileFromPrefix(nino, taxYear))
     }
+}
+
+object NationalInsuranceRecordService extends NationalInsuranceRecordService {
+  val nisp: NispConnector = NispConnector
+  override def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceRecord]] =
+    nisp.getSummary(nino)
+  override def getTaxYear(nino: Nino, taxYear: TaxYear)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceTaxYear]] = ???
 }

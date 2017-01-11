@@ -23,7 +23,7 @@ import uk.gov.hmrc.nationalinsurancerecord.services.NationalInsuranceRecordServi
 
 
 object NationalInsuranceRecordController extends NationalInsuranceRecordController {
-  override val nationalInsuranceRecordService: NationalInsuranceRecordService = ???
+  override val nationalInsuranceRecordService: NationalInsuranceRecordService = NationalInsuranceRecordService
   override val app: String = "National-Insurance-Record"
   override val context: String = AppContext.apiGatewayContext
   override val customAuditConnector: CustomAuditConnector = CustomAuditConnector

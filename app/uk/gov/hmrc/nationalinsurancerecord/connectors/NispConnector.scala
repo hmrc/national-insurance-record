@@ -39,7 +39,7 @@ trait NispConnector {
   }
 
   def getSummary(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceRecord]] = {
-    val response = http.GET[HttpResponse](s"$nispBaseUrl/paye/$nino")(rds = HttpReads.readRaw, hc)
+    val response = http.GET[HttpResponse](s"$nispBaseUrl/ni/$nino")(rds = HttpReads.readRaw, hc)
     response.flatMap { httpResponse =>
       httpResponse.json.validate[Either[ExclusionResponse, NationalInsuranceRecord]].fold(
         invalid => Future.failed(new JsonValidationException(formatJsonErrors(invalid))),
