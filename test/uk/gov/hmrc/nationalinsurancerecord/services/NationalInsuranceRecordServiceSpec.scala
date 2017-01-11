@@ -34,6 +34,7 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
     numberOfGapsPayable = 4,
     dateOfEntry = new LocalDate(1969, 8, 1),
     homeResponsibilitiesProtection = false,
+    earningsIncludedUpTo = new LocalDate(2016, 4, 5),
     List(
       TaxYearSummary("2015-16", true),
       TaxYearSummary("2014-15", true),

@@ -60,6 +60,7 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
     numberOfGapsPayable = 4,
     dateOfEntry = new LocalDate(1969, 8, 1),
     homeResponsibilitiesProtection = false,
+    earningsIncludedUpTo = new LocalDate(2016, 4, 5),
     List(
       TaxYearSummary("2015-16", true),
       TaxYearSummary("2014-15", true),
@@ -317,6 +318,9 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
 
       "have the first tax year be qualifying" in {
         ((json \ "_embedded" \ "taxYears") \ 0 \ "qualifying").as[Boolean] shouldBe true
+      }
+      "have a LocalDate called earningsIncludedUpTo which is 5/4/2016" in {
+        (json \ "earningsIncludedUpTo").as[LocalDate] shouldBe new LocalDate(2016, 4, 5)
       }
 
       "have the last tax year be 1975-76" in {

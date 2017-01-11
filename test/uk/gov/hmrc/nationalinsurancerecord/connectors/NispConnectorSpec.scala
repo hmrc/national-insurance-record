@@ -74,6 +74,7 @@ class NispConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSuga
            |  "numberOfGapsPayable": 4,
            |  "dateOfEntry": "1969-08-01",
            |  "homeResponsibilitiesProtection": false,
+           |  "earningsIncludedUpTo": "2015-04-05",
            |  "taxYears": [
            |    {
            |      "taxYear": "1975-76",
@@ -251,6 +252,7 @@ class NispConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSuga
           numberOfGapsPayable = 4,
           dateOfEntry = new LocalDate(1969, 8, 1),
           homeResponsibilitiesProtection = false,
+          earningsIncludedUpTo = new LocalDate(2015, 4, 5),
           taxYears = List(
             generateTaxYear("1975-76", true),
             generateTaxYear("1976-77", true),
