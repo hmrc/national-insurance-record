@@ -82,7 +82,7 @@ trait NationalInsuranceRecordController extends BaseController with HeaderValida
     implicit request =>
       errorWrapper(nationalInsuranceRecordService.getTaxYear(nino, taxYear).map {
 
-        case Left(exclusion) => {
+        case Left(exclusion) =>
           if (exclusion.exclusionReasons.contains(Exclusion.Dead)) {
             customAuditConnector.sendEvent(NationalInsuranceRecordExclusion(nino, List(Exclusion.Dead)))
             Forbidden(Json.toJson(ErrorResponses.ExclusionDead))
@@ -99,20 +99,17 @@ trait NationalInsuranceRecordController extends BaseController with HeaderValida
             customAuditConnector.sendEvent(NationalInsuranceRecordExclusion(nino, exclusion.exclusionReasons))
             Ok(halResourceSelfLink(Json.toJson(exclusion), nationalInsuranceTaxYearHref(nino,taxYear)))
           }
-        }
 
         case Right(nationalInsuranceTaxYear) =>
-            customAuditConnector.sendEvent(NationalInsuranceTaxYear(nino, nationalInsuranceTaxYear.taxYear,
+          customAuditConnector.sendEvent(NationalInsuranceTaxYear(nino, nationalInsuranceTaxYear.taxYear,
               nationalInsuranceTaxYear.qualifying, nationalInsuranceTaxYear.classOneContributions,
               nationalInsuranceTaxYear.classTwoCredits, nationalInsuranceTaxYear.classThreeCredits,
               nationalInsuranceTaxYear.otherCredits, nationalInsuranceTaxYear.classThreePayable,
               nationalInsuranceTaxYear.classThreePayableBy, nationalInsuranceTaxYear.classThreePayableByPenalty,
               nationalInsuranceTaxYear.payable, nationalInsuranceTaxYear.underInvestigation))
 
-      Ok(halResourceSelfLink(Json.toJson(nationalInsuranceTaxYear), nationalInsuranceTaxYearHref(nino,taxYear)))
-
-      }
-      )
+          Ok(halResourceSelfLink(Json.toJson(nationalInsuranceTaxYear), nationalInsuranceTaxYearHref(nino,taxYear)))
+      })
 
   }
 

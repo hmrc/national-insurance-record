@@ -34,6 +34,7 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
     numberOfGapsPayable = 4,
     dateOfEntry = new LocalDate(1969, 8, 1),
     homeResponsibilitiesProtection = false,
+    earningsIncludedUpTo = new LocalDate(2016, 4, 5),
     List(
       TaxYearSummary("2015-16", true),
       TaxYearSummary("2014-15", true),
@@ -107,28 +108,101 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
     underInvestigation =  false
   )
 
-  "sandbox" should {
+  "Sandbox getNationalInsuranceRecord" when {
 
-    "return ni record summary dummy data for non-existent prefix" in {
-      val nino: Nino = generateNinoWithPrefix("ZX")
-      whenReady(SandboxNationalInsuranceService.getNationalInsuranceRecord(nino)(HeaderCarrier())) { result =>
-        result shouldBe Right(dummyRecord)
+    "nino input is a non-existent prefix" should {
+
+      "return the default dummy data" in {
+        val nino: Nino = generateNinoWithPrefix("ZX")
+        whenReady(SandboxNationalInsuranceService.getNationalInsuranceRecord(nino)(HeaderCarrier())) { result =>
+          result shouldBe Right(dummyRecord)
+        }
       }
     }
 
-    "return tax year dummy data for non-existent prefix ZX" in {
-      val nino: Nino = generateNinoWithPrefix("ZX")
-      whenReady(SandboxNationalInsuranceService.getTaxYear(nino,TaxYear("2010-11"))(HeaderCarrier())) { result =>
-        result shouldBe Right(dummyTaxYearDefault)
+    "nino input is MA" should {
+      "return the Isle of Man exclusion" in {
+        val nino: Nino = generateNinoWithPrefix("MA")
+        whenReady(SandboxNationalInsuranceService.getNationalInsuranceRecord(nino)(HeaderCarrier())) { result =>
+          result shouldBe Left(ExclusionResponse(List(Exclusion.IsleOfMan)))
+        }
       }
     }
 
-    "return tax year dummy data for existent prefix EY" in {
-      val nino: Nino = generateNinoWithPrefix("EY")
-      whenReady(SandboxNationalInsuranceService.getTaxYear(nino,TaxYear("2010-11"))(HeaderCarrier())) { result =>
-        result shouldBe Right(dummyTaxYearForEY)
+    "nino input is MW" should {
+      "return the Married Women exclusion" in {
+        val nino: Nino = generateNinoWithPrefix("MW")
+        whenReady(SandboxNationalInsuranceService.getNationalInsuranceRecord(nino)(HeaderCarrier())) { result =>
+          result shouldBe Left(ExclusionResponse(List(Exclusion.MarriedWomenReducedRateElection)))
+        }
       }
     }
 
+    "nino input is YN" should {
+      "return the dead user exclusion" in {
+        val nino: Nino = generateNinoWithPrefix("YN")
+        whenReady(SandboxNationalInsuranceService.getNationalInsuranceRecord(nino)(HeaderCarrier())) { result =>
+          result shouldBe Left(ExclusionResponse(List(Exclusion.Dead)))
+        }
+      }
+    }
+
+    "nino input is MC" should {
+      "return the manual correspondence exclusion" in {
+        val nino: Nino = generateNinoWithPrefix("MC")
+        whenReady(SandboxNationalInsuranceService.getNationalInsuranceRecord(nino)(HeaderCarrier())) { result =>
+          result shouldBe Left(ExclusionResponse(List(Exclusion.ManualCorrespondenceIndicator)))
+        }
+      }
+    }
+  }
+
+  "Sandbox getTaxYear" when {
+
+    "nino input is a non-existent prefix" should {
+
+      "return the default dummy data" in {
+        val nino: Nino = generateNinoWithPrefix("ZX")
+        whenReady(SandboxNationalInsuranceService.getTaxYear(nino, TaxYear("2010-11"))(HeaderCarrier())) { result =>
+          result shouldBe Right(dummyTaxYearDefault)
+        }
+      }
+    }
+
+    "nino input is MA" should {
+      "return the Isle of Man exclusion" in {
+        val nino: Nino = generateNinoWithPrefix("MA")
+        whenReady(SandboxNationalInsuranceService.getTaxYear(nino, TaxYear("1900-01"))(HeaderCarrier())) { result =>
+          result shouldBe Left(ExclusionResponse(List(Exclusion.IsleOfMan)))
+        }
+      }
+    }
+
+    "nino input is MW" should {
+      "return the Married Women exclusion" in {
+        val nino: Nino = generateNinoWithPrefix("MW")
+        whenReady(SandboxNationalInsuranceService.getTaxYear(nino, TaxYear("1900-01"))(HeaderCarrier())) { result =>
+          result shouldBe Left(ExclusionResponse(List(Exclusion.MarriedWomenReducedRateElection)))
+        }
+      }
+    }
+
+    "nino input is YN" should {
+      "return the dead user exclusion" in {
+        val nino: Nino = generateNinoWithPrefix("YN")
+        whenReady(SandboxNationalInsuranceService.getTaxYear(nino, TaxYear("1900-01"))(HeaderCarrier())) { result =>
+          result shouldBe Left(ExclusionResponse(List(Exclusion.Dead)))
+        }
+      }
+    }
+
+    "nino input is MC" should {
+      "return the manual correspondence exclusion" in {
+        val nino: Nino = generateNinoWithPrefix("MC")
+        whenReady(SandboxNationalInsuranceService.getTaxYear(nino, TaxYear("1900-01"))(HeaderCarrier())) { result =>
+          result shouldBe Left(ExclusionResponse(List(Exclusion.ManualCorrespondenceIndicator)))
+        }
+      }
+    }
   }
 }
