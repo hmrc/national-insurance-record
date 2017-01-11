@@ -55,6 +55,7 @@
                   "numberOfGapsPayable": 4,
                   "dateOfEntry": "1969-08-01",
                   "homeResponsibilitiesProtection": false,
+                  "earningsIncludedUpTo": "2016-04-05",
                   "_embedded": {
                     "taxYears": [
                       {
@@ -150,7 +151,12 @@
                       {
                         "_links": {
                           "self": {
-                            "href": "/national-insurance-record/ni/QQ123456A/taxyear/2005-06"
+                            "href": "/national-insurance-record/ni/QQ123456A/taxyear/2005-06"                <row>
+                    <cell><code>earningsIncludedUpTo</code></cell>
+                    <cell><code>Date</code></cell>
+                    <cell><code>"2016-04-05"</code></cell>
+                    <cell>This is always the end date of the last posted tax year</cell>
+                </row>
                           }
                         },
                         "taxYear": "2005-06",
@@ -473,6 +479,12 @@
                     <cell><code>Boolean</code></cell>
                     <cell><code>false</code></cell>
                     <cell>The flag for Home Responsibilities Protection (HRP)</cell>
+                </row>
+                <row>
+                    <cell><code>earningsIncludedUpTo</code></cell>
+                    <cell><code>Date</code></cell>
+                    <cell><code>"2016-04-05"</code></cell>
+                    <cell>This is always the end date of the last posted tax year</cell>
                 </row>
                 <row>
                     <cell><code>_embedded.taxYears.taxYear</code></cell>
