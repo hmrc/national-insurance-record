@@ -100,5 +100,6 @@ object NationalInsuranceRecordService extends NationalInsuranceRecordService {
   val nisp: NispConnector = NispConnector
   override def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceRecord]] =
     nisp.getSummary(nino)
-  override def getTaxYear(nino: Nino, taxYear: TaxYear)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceTaxYear]] = ???
+  override def getTaxYear(nino: Nino, taxYear: TaxYear)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceTaxYear]] =
+    nisp.getTaxYear(nino, taxYear)
 }

@@ -24,7 +24,7 @@ import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
 import play.api.libs.json.Json
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
-import uk.gov.hmrc.nationalinsurancerecord.domain.{Exclusion, ExclusionResponse, NationalInsuranceRecord, TaxYearSummary}
+import uk.gov.hmrc.nationalinsurancerecord.domain._
 import uk.gov.hmrc.play.http.{BadRequestException, HeaderCarrier, HttpGet, HttpResponse}
 import uk.gov.hmrc.nationalinsurancerecord.connectors.NispConnector.JsonValidationException
 
@@ -34,14 +34,15 @@ class NispConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSuga
 
   val testNispConnector = new NispConnector {
     override def nispBaseUrl: String = ""
+
     override val http: HttpGet = mock[HttpGet]
   }
 
   implicit val dummyHeaderCarrier = HeaderCarrier()
 
-  "NispConnector" should {
-    "getSummary" should {
-      "return Left(Exclusion) when there is Exclusion JSON" in {
+  "getSummary" when {
+    "there is exclusion JSON" should {
+      "return Left(Exclusion)" in {
         when(testNispConnector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.successful(HttpResponse(
           200,
           Some(Json.parse(
@@ -61,8 +62,12 @@ class NispConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSuga
           )
         ))
       }
+    }
 
-      "return Right(StatePension) when there is StatePensionJson" in {
+
+    "when there is valid json" should {
+
+      "return Right(NationalInsuranceRecord)" in {
         when(testNispConnector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.successful(HttpResponse(
           200,
           Some(Json.parse(
@@ -298,7 +303,11 @@ class NispConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSuga
         ))
       }
 
-      "return a failed future when it cannot parse to Either an exclusion or statement and report validation errors" in {
+    }
+
+    "when it cannot parse to Either an exclusion or ni record" should {
+
+      "fail and report validation errors" in {
         when(testNispConnector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.successful(HttpResponse(
           200,
           Some(Json.parse(
@@ -319,8 +328,10 @@ class NispConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSuga
           ex.getMessage.contains("JSON Validation Error:") shouldBe true
         }
       }
+    }
 
-      "return a failed future when there is an http error and pass on the exception" in {
+    "when there is an http error" should {
+      "return the failed future and pass the http exception" in {
         when(testNispConnector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.failed(new BadRequestException("You want me to do what?")))
         ScalaFutures.whenReady(testNispConnector.getSummary(generateNino()).failed) { ex =>
           ex shouldBe a[BadRequestException]
@@ -328,5 +339,106 @@ class NispConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSuga
       }
     }
   }
+
+  "getTaxYear" when {
+    "there is exclusion JSON" should {
+      "return Left(Exclusion)" in {
+        when(testNispConnector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.successful(HttpResponse(
+          200,
+          Some(Json.parse(
+            """
+              |{
+              |  "exclusionReasons": [
+              |    "Dead"
+              |  ]
+              |}
+            """.stripMargin
+          ))
+        )))
+
+        await(testNispConnector.getTaxYear(generateNino(), TaxYear("1999-00"))) shouldBe Left(ExclusionResponse(
+          List(
+            Exclusion.Dead
+          )
+        ))
+      }
+    }
+
+
+    "there is valid json" should {
+
+      "return Right(NationalInsuranceRecordTaxYear)" in {
+        when(testNispConnector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.successful(HttpResponse(
+          200,
+          Some(Json.parse(
+            """
+            {
+ |            "taxYear": "2010-11",
+ |            "qualifying": false,
+ |            "classOneContributions": 1149.98,
+ |            "classTwoCredits": 0,
+ |            "classThreeCredits": 0,
+ |            "otherCredits": 0,
+ |            "classThreePayable": 0,
+ |            "classThreePayableBy": null,
+ |            "classThreePayableByPenalty": "2023-04-05",
+ |            "payable": false,
+ |            "underInvestigation": false
+            }
+            """.stripMargin
+          ))
+        )))
+
+        val responseF = testNispConnector.getSummary(generateNino())
+        await(testNispConnector.getTaxYear(generateNino(), TaxYear("1999-00"))) shouldBe Right(NationalInsuranceTaxYear(
+          taxYear = "2010-11",
+          qualifying = false,
+          classOneContributions = 1149.98,
+          classTwoCredits = 0,
+          classThreeCredits = 0,
+          otherCredits = 0,
+          classThreePayable = 0,
+          classThreePayableBy = None,
+          classThreePayableByPenalty = Some(new LocalDate(2023, 4, 5)),
+          payable = false,
+          underInvestigation = false
+        ))
+      }
+
+    }
+
+    "it cannot parse to Either an exclusion or ni record" should {
+
+      "fail and report validation errors" in {
+        when(testNispConnector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.successful(HttpResponse(
+          200,
+          Some(Json.parse(
+            """
+              |{
+              | "taxYear": "2010-11",
+              | "qualifying": false,
+              | "classOneContributionsYO": 1149.98
+              |}
+            """.stripMargin
+          ))
+        )))
+
+        ScalaFutures.whenReady(testNispConnector.getTaxYear(generateNino(), TaxYear("1999-00")).failed) { ex =>
+          ex shouldBe a[JsonValidationException]
+          ex.getMessage.contains("JSON Validation Error:") shouldBe true
+        }
+      }
+    }
+
+    "when there is an http error" should {
+      "return the failed future and pass the http exception" in {
+        when(testNispConnector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.failed(new BadRequestException("You want me to do what?")))
+        ScalaFutures.whenReady(testNispConnector.getTaxYear(generateNino(), TaxYear("1999-00")).failed) { ex =>
+          ex shouldBe a[BadRequestException]
+        }
+      }
+    }
+  }
+
 }
 
