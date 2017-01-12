@@ -49,7 +49,7 @@ trait NispConnector {
   }
 
   def getTaxYear(nino: Nino, taxYear: TaxYear)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceTaxYear]] = {
-    val response = http.GET[HttpResponse](s"$nispBaseUrl/ni/$nino/taxyear/$taxYear")(rds = HttpReads.readRaw, hc)
+    val response = http.GET[HttpResponse](s"$nispBaseUrl/ni/$nino/taxyear/${taxYear.taxYear}")(rds = HttpReads.readRaw, hc)
     response.flatMap { httpResponse =>
       httpResponse.json.validate[Either[ExclusionResponse, NationalInsuranceTaxYear]].fold(
         invalid => Future.failed(new JsonValidationException(formatJsonErrors(invalid))),
