@@ -138,18 +138,18 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
       }
     }
 
-    "nino input is YN" should {
+    "nino input is EZ" should {
       "return the dead user exclusion" in {
-        val nino: Nino = generateNinoWithPrefix("YN")
+        val nino: Nino = generateNinoWithPrefix("EZ")
         whenReady(SandboxNationalInsuranceService.getNationalInsuranceRecord(nino)(HeaderCarrier())) { result =>
           result shouldBe Left(ExclusionResponse(List(Exclusion.Dead)))
         }
       }
     }
 
-    "nino input is MC" should {
+    "nino input is PG" should {
       "return the manual correspondence exclusion" in {
-        val nino: Nino = generateNinoWithPrefix("MC")
+        val nino: Nino = generateNinoWithPrefix("PG")
         whenReady(SandboxNationalInsuranceService.getNationalInsuranceRecord(nino)(HeaderCarrier())) { result =>
           result shouldBe Left(ExclusionResponse(List(Exclusion.ManualCorrespondenceIndicator)))
         }
@@ -187,18 +187,18 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
       }
     }
 
-    "nino input is YN" should {
+    "nino input is EZ" should {
       "return the dead user exclusion" in {
-        val nino: Nino = generateNinoWithPrefix("YN")
+        val nino: Nino = generateNinoWithPrefix("EZ")
         whenReady(SandboxNationalInsuranceService.getTaxYear(nino, TaxYear("1900-01"))(HeaderCarrier())) { result =>
           result shouldBe Left(ExclusionResponse(List(Exclusion.Dead)))
         }
       }
     }
 
-    "nino input is MC" should {
+    "nino input is PG" should {
       "return the manual correspondence exclusion" in {
-        val nino: Nino = generateNinoWithPrefix("MC")
+        val nino: Nino = generateNinoWithPrefix("PG")
         whenReady(SandboxNationalInsuranceService.getTaxYear(nino, TaxYear("1900-01"))(HeaderCarrier())) { result =>
           result shouldBe Left(ExclusionResponse(List(Exclusion.ManualCorrespondenceIndicator)))
         }

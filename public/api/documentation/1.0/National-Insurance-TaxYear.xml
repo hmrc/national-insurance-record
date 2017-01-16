@@ -228,11 +228,11 @@
                     <cell>A user with the MarriedWomenReducedRateElection exclusion</cell>
                 </row>
                 <row>
-                    <cell><code>YN</code></cell>
+                    <cell><code>EZ</code></cell>
                     <cell>A user who is dead</cell>
                 </row>
                 <row>
-                    <cell><code>MC</code></cell>
+                    <cell><code>PG</code></cell>
                     <cell>A user who has manual correspondence only and cannot use the service</cell>
                 </row>
             </rows>

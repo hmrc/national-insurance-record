@@ -76,8 +76,8 @@ object SandboxNationalInsuranceService extends NationalInsuranceRecordService {
     prefix match {
       case "MA" => Some(ExclusionResponse(List(Exclusion.IsleOfMan)))
       case "MW" => Some(ExclusionResponse(List(Exclusion.MarriedWomenReducedRateElection)))
-      case "YN" => Some(ExclusionResponse(List(Exclusion.Dead)))
-      case "MC" => Some(ExclusionResponse(List(Exclusion.ManualCorrespondenceIndicator)))
+      case "EZ" => Some(ExclusionResponse(List(Exclusion.Dead)))
+      case "PG" => Some(ExclusionResponse(List(Exclusion.ManualCorrespondenceIndicator)))
       case _ => None
     }
   }
