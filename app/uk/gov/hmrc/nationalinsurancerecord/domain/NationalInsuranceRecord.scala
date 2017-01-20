@@ -29,7 +29,7 @@ case class NationalInsuranceRecord(
                                     dateOfEntry: LocalDate,
                                     homeResponsibilitiesProtection: Boolean,
                                     earningsIncludedUpTo: LocalDate,
-                                    taxYears: List[TaxYearSummary]
+                                    taxYears: List[NationalInsuranceTaxYear]
                                   )
 
 object NationalInsuranceRecord {

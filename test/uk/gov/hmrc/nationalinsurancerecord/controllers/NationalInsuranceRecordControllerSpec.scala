@@ -52,59 +52,6 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
     override val customAuditConnector: CustomAuditConnector = mockAuditConnector
   }
 
-  private val dummyRecord: NationalInsuranceRecord = NationalInsuranceRecord(
-    // scalastyle:off magic.number
-    qualifyingYears = 36,
-    qualifyingYearsPriorTo1975 = 5,
-    numberOfGaps = 10,
-    numberOfGapsPayable = 4,
-    dateOfEntry = new LocalDate(1969, 8, 1),
-    homeResponsibilitiesProtection = false,
-    earningsIncludedUpTo = new LocalDate(2016, 4, 5),
-    List(
-      TaxYearSummary("2015-16", true),
-      TaxYearSummary("2014-15", true),
-      TaxYearSummary("2013-14", true),
-      TaxYearSummary("2012-13", false),
-      TaxYearSummary("2011-12", false),
-      TaxYearSummary("2010-11", false),
-      TaxYearSummary("2009-10", true),
-      TaxYearSummary("2008-09", false),
-      TaxYearSummary("2007-08", true),
-      TaxYearSummary("2006-07", true),
-      TaxYearSummary("2005-06", true),
-      TaxYearSummary("2004-05", true),
-      TaxYearSummary("2003-04", true),
-      TaxYearSummary("2002-03", true),
-      TaxYearSummary("2001-02", false),
-      TaxYearSummary("2000-01", true),
-      TaxYearSummary("1999-00", true),
-      TaxYearSummary("1998-99", true),
-      TaxYearSummary("1997-98", true),
-      TaxYearSummary("1996-97", false),
-      TaxYearSummary("1995-96", false),
-      TaxYearSummary("1994-95", true),
-      TaxYearSummary("1993-94", true),
-      TaxYearSummary("1992-93", true),
-      TaxYearSummary("1991-92", true),
-      TaxYearSummary("1990-91", true),
-      TaxYearSummary("1989-90", true),
-      TaxYearSummary("1988-89", true),
-      TaxYearSummary("1987-88", true),
-      TaxYearSummary("1986-87", false),
-      TaxYearSummary("1985-86", false),
-      TaxYearSummary("1984-85", true),
-      TaxYearSummary("1983-84", false),
-      TaxYearSummary("1982-83", true),
-      TaxYearSummary("1981-82", true),
-      TaxYearSummary("1980-81", true),
-      TaxYearSummary("1979-80", true),
-      TaxYearSummary("1978-79", true),
-      TaxYearSummary("1977-78", true),
-      TaxYearSummary("1976-77", true),
-      TaxYearSummary("1975-76", true)
-    )
-  )
 
   private val dummyTaxYearQualifying: NationalInsuranceTaxYear = NationalInsuranceTaxYear(
     taxYear = "2010-11",
@@ -133,6 +80,71 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
     payable = true,
     underInvestigation = false
   )
+
+
+  private def generateTaxYear(taxYear: String, qualifying: Boolean): NationalInsuranceTaxYear = {
+    if(qualifying) {
+      dummyTaxYearQualifying.copy(taxYear = taxYear)
+    } else {
+      dummyTaxYearNonQualifying.copy(taxYear = taxYear)
+    }
+  }
+
+  private val dummyRecord: NationalInsuranceRecord = NationalInsuranceRecord(
+    // scalastyle:off magic.number
+    qualifyingYears = 36,
+    qualifyingYearsPriorTo1975 = 5,
+    numberOfGaps = 10,
+    numberOfGapsPayable = 4,
+    dateOfEntry = new LocalDate(1969, 8, 1),
+    homeResponsibilitiesProtection = false,
+    earningsIncludedUpTo = new LocalDate(2016, 4, 5),
+    List(
+      generateTaxYear("2015-16", true),
+      generateTaxYear("2014-15", true),
+      generateTaxYear("2013-14", true),
+      generateTaxYear("2012-13", false),
+      generateTaxYear("2011-12", false),
+      generateTaxYear("2010-11", false),
+      generateTaxYear("2009-10", true),
+      generateTaxYear("2008-09", false),
+      generateTaxYear("2007-08", true),
+      generateTaxYear("2006-07", true),
+      generateTaxYear("2005-06", true),
+      generateTaxYear("2004-05", true),
+      generateTaxYear("2003-04", true),
+      generateTaxYear("2002-03", true),
+      generateTaxYear("2001-02", false),
+      generateTaxYear("2000-01", true),
+      generateTaxYear("1999-00", true),
+      generateTaxYear("1998-99", true),
+      generateTaxYear("1997-98", true),
+      generateTaxYear("1996-97", false),
+      generateTaxYear("1995-96", false),
+      generateTaxYear("1994-95", true),
+      generateTaxYear("1993-94", true),
+      generateTaxYear("1992-93", true),
+      generateTaxYear("1991-92", true),
+      generateTaxYear("1990-91", true),
+      generateTaxYear("1989-90", true),
+      generateTaxYear("1988-89", true),
+      generateTaxYear("1987-88", true),
+      generateTaxYear("1986-87", false),
+      generateTaxYear("1985-86", false),
+      generateTaxYear("1984-85", true),
+      generateTaxYear("1983-84", false),
+      generateTaxYear("1982-83", true),
+      generateTaxYear("1981-82", true),
+      generateTaxYear("1980-81", true),
+      generateTaxYear("1979-80", true),
+      generateTaxYear("1978-79", true),
+      generateTaxYear("1977-78", true),
+      generateTaxYear("1976-77", true),
+      generateTaxYear("1975-76", true)
+    )
+  )
+
+
 
   "getSummary" when {
 
@@ -308,31 +320,163 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
         (json \ "homeResponsibilitiesProtection").as[Boolean] shouldBe  false
       }
 
-      "have a list of 41 tax years" in {
-        (json \ "_embedded" \ "taxYears").as[JsArray].value.length shouldBe 41
-      }
-
-      "have the first tax year be 2015-16" in {
-        ((json \ "_embedded" \ "taxYears") \ 0 \ "taxYear").as[String] shouldBe "2015-16"
-      }
-
-      "have the first tax year be qualifying" in {
-        ((json \ "_embedded" \ "taxYears") \ 0 \ "qualifying").as[Boolean] shouldBe true
-      }
       "have a LocalDate called earningsIncludedUpTo which is 5/4/2016" in {
         (json \ "earningsIncludedUpTo").as[LocalDate] shouldBe new LocalDate(2016, 4, 5)
       }
 
-      "have the last tax year be 1975-76" in {
-        ((json \ "_embedded" \ "taxYears") \ 40 \ "taxYear").as[String] shouldBe "1975-76"
+      "have a list of 41 tax years" in {
+        (json \ "_embedded" \ "taxYears").as[JsArray].value.length shouldBe 41
       }
 
-      "have the last tax year be qualifying" in {
-        ((json \ "_embedded" \ "taxYears") \ 40 \ "qualifying").as[Boolean] shouldBe true
+      "the first tax year" should {
+
+        "have a string called taxYear which is 2015-16" in {
+          ((json \ "_embedded" \ "taxYears") \ 0 \ "taxYear").as[String] shouldBe "2015-16"
+        }
+
+        "have a Boolean called qualifying which is true" in {
+          ((json \ "_embedded" \ "taxYears") \ 0 \ "qualifying").as[Boolean] shouldBe true
+        }
+
+        "have a big decimal called classOneContributions that is 1149.98" in {
+           ((json \ "_embedded" \ "taxYears") \ 0 \ "classOneContributions").as[BigDecimal] shouldBe 1149.98
+        }
+
+        "have an Int called classTwoCredits that is 0" in {
+           ((json \ "_embedded" \ "taxYears") \ 0 \ "classTwoCredits").as[Int] shouldBe 0
+        }
+
+        "have an Int called classThreeCredits that is 0" in {
+           ((json \ "_embedded" \ "taxYears") \ 0 \ "classThreeCredits").as[Int] shouldBe 0
+        }
+
+        "have an Int called otherCredits that is 0" in {
+           ((json \ "_embedded" \ "taxYears") \ 0 \ "otherCredits").as[Int] shouldBe 0
+        }
+
+        "have an Int called classThreePayable that is 0" in {
+           ((json \ "_embedded" \ "taxYears") \ 0 \ "classThreePayable").as[BigDecimal] shouldBe 0
+        }
+
+        "have a nullable local date called classThreePayableBy that is null" in {
+           ((json \ "_embedded" \ "taxYears") \ 0 \ "classThreePayableBy") shouldBe JsDefined(JsNull)
+        }
+
+        "have a nullable local date called classThreePayableByPenalty that is null" in {
+           ((json \ "_embedded" \ "taxYears") \ 0 \ "classThreePayableByPenalty") shouldBe JsDefined(JsNull)
+        }
+
+        "have a Boolean called payable that is false" in {
+           ((json \ "_embedded" \ "taxYears") \ 0 \ "payable").as[Boolean] shouldBe false
+        }
+
+        "have a Boolean called underInvestigation that is false" in {
+           ((json \ "_embedded" \ "taxYears") \ 0 \ "underInvestigation").as[Boolean] shouldBe false
+        }
+
+        "have a link to it's resource" in {
+          ((json \ "_embedded" \ "taxYears") \ 0 \ "_links" \ "self" \ "href").as[String] shouldBe s"/test/ni/$testNino/taxyear/2015-16"
+        }
+      }
+      
+      "the last tax year" should {
+        "have a string called taxYear which is 1975-76" in {
+          ((json \ "_embedded" \ "taxYears") \ 40 \ "taxYear").as[String] shouldBe "1975-76"
+        }
+
+        "have a Boolean called qualifying which is true" in {
+          ((json \ "_embedded" \ "taxYears") \ 40 \ "qualifying").as[Boolean] shouldBe true
+        }
+
+        "have a big decimal called classOneContributions that is 1149.98" in {
+          ((json \ "_embedded" \ "taxYears") \ 40 \ "classOneContributions").as[BigDecimal] shouldBe 1149.98
+        }
+
+        "have an Int called classTwoCredits that is 0" in {
+          ((json \ "_embedded" \ "taxYears") \ 40 \ "classTwoCredits").as[Int] shouldBe 0
+        }
+
+        "have an Int called classThreeCredits that is 0" in {
+          ((json \ "_embedded" \ "taxYears") \ 40 \ "classThreeCredits").as[Int] shouldBe 0
+        }
+
+        "have an Int called otherCredits that is 0" in {
+          ((json \ "_embedded" \ "taxYears") \ 40 \ "otherCredits").as[Int] shouldBe 0
+        }
+
+        "have an Int called classThreePayable that is 0" in {
+          ((json \ "_embedded" \ "taxYears") \ 40 \ "classThreePayable").as[BigDecimal] shouldBe 0
+        }
+
+        "have a nullable local date called classThreePayableBy that is null" in {
+          ((json \ "_embedded" \ "taxYears") \ 40 \ "classThreePayableBy") shouldBe JsDefined(JsNull)
+        }
+
+        "have a nullable local date called classThreePayableByPenalty that is null" in {
+          ((json \ "_embedded" \ "taxYears") \ 40 \ "classThreePayableByPenalty") shouldBe JsDefined(JsNull)
+        }
+
+        "have a Boolean called payable that is false" in {
+          ((json \ "_embedded" \ "taxYears") \ 40 \ "payable").as[Boolean] shouldBe false
+        }
+
+        "have a Boolean called underInvestigation that is false" in {
+          ((json \ "_embedded" \ "taxYears") \ 40 \ "underInvestigation").as[Boolean] shouldBe false
+        }
+
+        "have a link to it's resource" in {
+          ((json \ "_embedded" \ "taxYears") \ 40 \ "_links" \ "self" \ "href").as[String] shouldBe s"/test/ni/$testNino/taxyear/1975-76"
+        }
       }
 
-      "have tax years we a link to their resource" in {
-        ((json \ "_embedded" \ "taxYears") \ 0 \ "_links" \ "self" \ "href").as[String] shouldBe s"/test/ni/$testNino/taxyear/2015-16"
+      "a non qualifying year like 2012" should {
+        "have a string called taxYear which is 2012-13" in {
+          ((json \ "_embedded" \ "taxYears") \ 3 \ "taxYear").as[String] shouldBe "2012-13"
+        }
+
+        "have a Boolean called qualifying which is true" in {
+          ((json \ "_embedded" \ "taxYears") \ 3 \ "qualifying").as[Boolean] shouldBe false
+        }
+
+        "have a big decimal called classOneContributions that is 1149.98" in {
+          ((json \ "_embedded" \ "taxYears") \ 3 \ "classOneContributions").as[BigDecimal] shouldBe 0
+        }
+
+        "have an Int called classTwoCredits that is 0" in {
+          ((json \ "_embedded" \ "taxYears") \ 3 \ "classTwoCredits").as[Int] shouldBe 12
+        }
+
+        "have an Int called classThreeCredits that is 0" in {
+          ((json \ "_embedded" \ "taxYears") \ 3 \ "classThreeCredits").as[Int] shouldBe 0
+        }
+
+        "have an Int called otherCredits that is 0" in {
+          ((json \ "_embedded" \ "taxYears") \ 3 \ "otherCredits").as[Int] shouldBe 10
+        }
+
+        "have a decimal called classThreePayable that is 0" in {
+          ((json \ "_embedded" \ "taxYears") \ 3 \ "classThreePayable").as[BigDecimal] shouldBe 325.14
+        }
+
+        "have a nullable local date called classThreePayableBy that is null" in {
+          ((json \ "_embedded" \ "taxYears") \ 3 \ "classThreePayableBy") shouldBe JsDefined(JsString("2019-04-05"))
+        }
+
+        "have a nullable local date called classThreePayableByPenalty that is null" in {
+          ((json \ "_embedded" \ "taxYears") \ 3 \ "classThreePayableByPenalty") shouldBe JsDefined(JsString("2023-04-05"))
+        }
+
+        "have a Boolean called payable that is false" in {
+          ((json \ "_embedded" \ "taxYears") \ 3 \ "payable").as[Boolean] shouldBe true
+        }
+
+        "have a Boolean called underInvestigation that is false" in {
+          ((json \ "_embedded" \ "taxYears") \ 3 \ "underInvestigation").as[Boolean] shouldBe false
+        }
+
+        "have a link to it's resource" in {
+          ((json \ "_embedded" \ "taxYears") \ 3 \ "_links" \ "self" \ "href").as[String] shouldBe s"/test/ni/$testNino/taxyear/2012-13"
+        }
       }
 
       "have a link to itself" in {
