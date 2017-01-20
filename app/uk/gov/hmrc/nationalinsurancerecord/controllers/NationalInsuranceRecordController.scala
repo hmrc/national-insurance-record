@@ -19,7 +19,6 @@ package uk.gov.hmrc.nationalinsurancerecord.controllers
 import play.api.hal.HalResource
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
-import uk.gov.hmrc.NationalInsuranceTaxYear.events.NationalInsuranceTaxYear
 import uk.gov.hmrc.api.controllers.HeaderValidator
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nationalinsurancerecord.connectors.CustomAuditConnector
@@ -27,13 +26,14 @@ import uk.gov.hmrc.nationalinsurancerecord.domain.{Exclusion, TaxYear, TaxYearSu
 import uk.gov.hmrc.nationalinsurancerecord.events.{NationalInsuranceRecord, NationalInsuranceRecordExclusion}
 import uk.gov.hmrc.nationalinsurancerecord.services.NationalInsuranceRecordService
 import uk.gov.hmrc.play.microservice.controller.BaseController
+import uk.gov.hmrc.nationalinsurancerecord.domain.NationalInsuranceTaxYear
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 trait NationalInsuranceRecordController extends BaseController with HeaderValidator with ErrorHandling with HalSupport with Links {
   val nationalInsuranceRecordService: NationalInsuranceRecordService
   val customAuditConnector: CustomAuditConnector
 
-  private def halResourceWithTaxYears(nino: Nino, content: JsValue, selfLink: String, years: List[TaxYearSummary]): HalResource = {
+  private def halResourceWithTaxYears(nino: Nino, content: JsValue, selfLink: String, years: List[NationalInsuranceTaxYear]): HalResource = {
     halResourceSelfLink(
       content,
       selfLink,
@@ -101,6 +101,7 @@ trait NationalInsuranceRecordController extends BaseController with HeaderValida
           }
 
         case Right(nationalInsuranceTaxYear) =>
+          import uk.gov.hmrc.nationalinsurancerecord.events.NationalInsuranceTaxYear
           customAuditConnector.sendEvent(NationalInsuranceTaxYear(nino, nationalInsuranceTaxYear.taxYear,
               nationalInsuranceTaxYear.qualifying, nationalInsuranceTaxYear.classOneContributions,
               nationalInsuranceTaxYear.classTwoCredits, nationalInsuranceTaxYear.classThreeCredits,

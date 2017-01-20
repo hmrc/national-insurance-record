@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.NationalInsuranceTaxYear.events
+package uk.gov.hmrc.nationalinsurancerecord.events
 
 import org.joda.time.LocalDate
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.nationalinsurancerecord.events.BusinessEvent
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 object NationalInsuranceTaxYear{

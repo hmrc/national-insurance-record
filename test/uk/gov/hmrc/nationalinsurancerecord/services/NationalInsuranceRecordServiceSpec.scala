@@ -26,7 +26,9 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 
 class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec with OneAppPerSuite with ScalaFutures {
 
-  private val dummyRecord: NationalInsuranceRecord = NationalInsuranceRecord(
+
+
+  private val regularData: NationalInsuranceRecord = NationalInsuranceRecord(
     // scalastyle:off magic.number
     qualifyingYears = 36,
     qualifyingYearsPriorTo1975 = 5,
@@ -36,47 +38,47 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
     homeResponsibilitiesProtection = false,
     earningsIncludedUpTo = new LocalDate(2016, 4, 5),
     List(
-      TaxYearSummary("2015-16", true),
-      TaxYearSummary("2014-15", true),
-      TaxYearSummary("2013-14", true),
-      TaxYearSummary("2012-13", false),
-      TaxYearSummary("2011-12", false),
-      TaxYearSummary("2010-11", false),
-      TaxYearSummary("2009-10", true),
-      TaxYearSummary("2008-09", false),
-      TaxYearSummary("2007-08", true),
-      TaxYearSummary("2006-07", true),
-      TaxYearSummary("2005-06", true),
-      TaxYearSummary("2004-05", true),
-      TaxYearSummary("2003-04", true),
-      TaxYearSummary("2002-03", true),
-      TaxYearSummary("2001-02", false),
-      TaxYearSummary("2000-01", true),
-      TaxYearSummary("1999-00", true),
-      TaxYearSummary("1998-99", true),
-      TaxYearSummary("1997-98", true),
-      TaxYearSummary("1996-97", false),
-      TaxYearSummary("1995-96", false),
-      TaxYearSummary("1994-95", true),
-      TaxYearSummary("1993-94", true),
-      TaxYearSummary("1992-93", true),
-      TaxYearSummary("1991-92", true),
-      TaxYearSummary("1990-91", true),
-      TaxYearSummary("1989-90", true),
-      TaxYearSummary("1988-89", true),
-      TaxYearSummary("1987-88", true),
-      TaxYearSummary("1986-87", false),
-      TaxYearSummary("1985-86", false),
-      TaxYearSummary("1984-85", true),
-      TaxYearSummary("1983-84", false),
-      TaxYearSummary("1982-83", true),
-      TaxYearSummary("1981-82", true),
-      TaxYearSummary("1980-81", true),
-      TaxYearSummary("1979-80", true),
-      TaxYearSummary("1978-79", true),
-      TaxYearSummary("1977-78", true),
-      TaxYearSummary("1976-77", true),
-      TaxYearSummary("1975-76", true)
+      NationalInsuranceTaxYear("2015-16", true, 2430.24, 0, 0, 0, 0, None, None, false, false),
+      NationalInsuranceTaxYear("2014-15", true, 2430.24, 0, 0, 0, 0, None, None, false, false),
+      NationalInsuranceTaxYear("2013-14", true, 2430.24, 0, 0, 0, 0, None, None, false, false),
+      NationalInsuranceTaxYear("2012-13", false, 0, 0, 0, 12, 530, Some(new LocalDate(2019, 4, 5)), Some(new LocalDate(2023, 4, 5)), true, false),
+      NationalInsuranceTaxYear("2011-12", false, 0, 0, 0, 0, 655.2, Some(new LocalDate(2019, 4, 5)), Some(new LocalDate(2023, 4, 5)), true, false),
+      NationalInsuranceTaxYear("2010-11", false, 1149.98, 0, 0, 0, 0, None, Some(new LocalDate(2023, 4, 5)), false, false),
+      NationalInsuranceTaxYear("2009-10", true, 0, 0, 0, 52, 0, None, None, false, false),
+      NationalInsuranceTaxYear("2008-09", false, 0, 0, 0, 1, 675.75, Some(new LocalDate(2019, 4, 5)), Some(new LocalDate(2023, 4, 5)), true, false),
+      NationalInsuranceTaxYear("2007-08", true, 0, 0, 0, 52, 0, None, None, false, false),
+      NationalInsuranceTaxYear("2006-07", true, 0, 0, 0, 52, 0, None, None, false, false),
+      NationalInsuranceTaxYear("2005-06", true, 0, 0, 0, 52, 0, None, None, false, false),
+      NationalInsuranceTaxYear("2004-05", true, 2779.48, 0, 0, 0, 0, None, None, false, false),
+      NationalInsuranceTaxYear("2003-04", true, 0, 0, 0, 53, 0, None, None, false, false),
+      NationalInsuranceTaxYear("2002-03", true, 0, 0, 0, 52, 0, None, None, false, false),
+      NationalInsuranceTaxYear("2001-02", false, 14.3, 0, 0, 7, 0.0, None, Some(new LocalDate(2008, 4, 5)), true, true),
+      NationalInsuranceTaxYear("2000-01", true, 1111.95, 0, 0, 2, 0, None, None, false, false),
+      NationalInsuranceTaxYear("1999-00", true, 860.99, 0, 0, 1, 0, None, None, false, false),
+      NationalInsuranceTaxYear("1998-99", true, 311.44, 0, 0, 0, 0, None, None, false, false),
+      NationalInsuranceTaxYear("1997-98", true, 2094.04, 0, 0, 0, 0, None, None, false, false),
+      NationalInsuranceTaxYear("1996-97", false, 0, 0, 0, 0, 0, None, None, false, false),
+      NationalInsuranceTaxYear("1995-96", false, 0, 0, 0, 0, 0, None, None, false, false),
+      NationalInsuranceTaxYear("1994-95", true, 2094.04, 0, 0, 0, 0, None, None, false, false),
+      NationalInsuranceTaxYear("1993-94", true, 996.32, 0, 0, 0, 0, None, None, false, false),
+      NationalInsuranceTaxYear("1992-93", true, 1555.84, 0, 0, 0, 0, None, None, false, false),
+      NationalInsuranceTaxYear("1991-92", true, 1085.76, 0, 0, 0, 0, None, None, false, false),
+      NationalInsuranceTaxYear("1990-91", true, 840.84, 0, 0, 0, 0, None, None, false, false),
+      NationalInsuranceTaxYear("1989-90", true, 1149.98, 0, 0, 0, 0, None, None, false, false),
+      NationalInsuranceTaxYear("1988-89", true, 0, 0, 0, 52, 0, None, None, false, false),
+      NationalInsuranceTaxYear("1987-88", true, 0, 0, 0, 52, 0, None, None, false, false),
+      NationalInsuranceTaxYear("1986-87", false, 36.04, 0, 0, 3, 0, None, None, false, false),
+      NationalInsuranceTaxYear("1985-86", false, 0, 0, 0, 34, 0, None, None, false, false),
+      NationalInsuranceTaxYear("1984-85", true, 239.21, 0, 0, 19, 0, None, None, false, false),
+      NationalInsuranceTaxYear("1983-84", false, 17.76, 0, 0, 44, 0, None, None, false, false),
+      NationalInsuranceTaxYear("1982-83", true, 0, 0, 0, 52, 0, None, None, false, false),
+      NationalInsuranceTaxYear("1981-82", true, 0, 0, 0, 52, 0, None, None, false, false),
+      NationalInsuranceTaxYear("1980-81", true, 114.19, 0, 0, 35, 0, None, None, false, false),
+      NationalInsuranceTaxYear("1979-80", true, 24.9, 0, 0, 42, 0, None, None, false, false),
+      NationalInsuranceTaxYear("1978-79", true, 69.35, 0, 0, 41, 0, None, None, false, false),
+      NationalInsuranceTaxYear("1977-78", true, 82.13, 0, 0, 28, 0, None, None, false, false),
+      NationalInsuranceTaxYear("1976-77", true, 53.5, 0, 0, 34, 0, None, None, false, false),
+      NationalInsuranceTaxYear("1975-76", true, 70.67, 0, 0, 6, 0, None, None, false, false)
     )
   )
   
@@ -94,20 +96,6 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
     underInvestigation =  false
   )
 
-  private val dummyTaxYearForEY: NationalInsuranceTaxYear = NationalInsuranceTaxYear(
-    taxYear =  "2010-11",
-    qualifying = false,
-    classOneContributions =  1149.98,
-    classTwoCredits =  0,
-    classThreeCredits =  0,
-    otherCredits =  0,
-    classThreePayable = 0,
-    classThreePayableBy = Some(new LocalDate(2017,4,5)),
-    classThreePayableByPenalty = None,
-    payable = false,
-    underInvestigation =  false
-  )
-
   "Sandbox getNationalInsuranceRecord" when {
 
     "nino input is a non-existent prefix" should {
@@ -115,7 +103,7 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
       "return the default dummy data" in {
         val nino: Nino = generateNinoWithPrefix("ZX")
         whenReady(SandboxNationalInsuranceService.getNationalInsuranceRecord(nino)(HeaderCarrier())) { result =>
-          result shouldBe Right(dummyRecord)
+          result shouldBe Right(regularData)
         }
       }
     }
