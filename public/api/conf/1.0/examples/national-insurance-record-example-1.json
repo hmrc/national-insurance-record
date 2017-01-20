@@ -1,0 +1,387 @@
+{
+  "_links": {
+    "self": {
+      "href": "/national-insurance-record/ni/QQ123456A"
+    }
+  },
+  "qualifyingYears": 36,
+  "qualifyingYearsPriorTo1975": 5,
+  "numberOfGaps": 10,
+  "numberOfGapsPayable": 4,
+  "dateOfEntry": "1969-08-01",
+  "homeResponsibilitiesProtection": false,
+  "earningsIncludedUpTo": "2016-04-05",
+  "_embedded": {
+    "taxYears": [
+      {
+        "_links": {
+          "self": {
+            "href": "/national-insurance-record/ni/QQ123456A/taxyear/2015-16"
+          }
+        },
+        "taxYear": "2015-16",
+        "qualifying": true
+      },
+      {
+        "_links": {
+          "self": {
+            "href": "/national-insurance-record/ni/QQ123456A/taxyear/2014-15"
+          }
+        },
+        "taxYear": "2014-15",
+        "qualifying": true
+      },
+      {
+        "_links": {
+          "self": {
+            "href": "/national-insurance-record/ni/QQ123456A/taxyear/2013-14"
+          }
+        },
+        "taxYear": "2013-14",
+        "qualifying": true
+      },
+      {
+        "_links": {
+          "self": {
+            "href": "/national-insurance-record/ni/QQ123456A/taxyear/2012-13"
+          }
+        },
+        "taxYear": "2012-13",
+        "qualifying": false
+      },
+      {
+        "_links": {
+          "self": {
+            "href": "/national-insurance-record/ni/QQ123456A/taxyear/2011-12"
+          }
+        },
+        "taxYear": "2011-12",
+        "qualifying": false
+      },
+      {
+        "_links": {
+          "self": {
+            "href": "/national-insurance-record/ni/QQ123456A/taxyear/2010-11"
+          }
+        },
+        "taxYear": "2010-11",
+        "qualifying": false
+      },
+      {
+        "_links": {
+          "self": {
+            "href": "/national-insurance-record/ni/QQ123456A/taxyear/2009-10"
+          }
+        },
+        "taxYear": "2009-10",
+        "qualifying": true
+      },
+      {
+        "_links": {
+          "self": {
+            "href": "/national-insurance-record/ni/QQ123456A/taxyear/2008-09"
+          }
+        },
+        "taxYear": "2008-09",
+        "qualifying": false
+      },
+      {
+        "_links": {
+          "self": {
+            "href": "/national-insurance-record/ni/QQ123456A/taxyear/2007-08"
+          }
+        },
+        "taxYear": "2007-08",
+        "qualifying": true
+      },
+      {
+        "_links": {
+          "self": {
+            "href": "/national-insurance-record/ni/QQ123456A/taxyear/2006-07"
+          }
+        },
+        "taxYear": "2006-07",
+        "qualifying": true
+      },
+      {
+        "_links": {
+          "self": {
+            "href": "/national-insurance-record/ni/QQ123456A/taxyear/2005-06"
+          }
+        },
+        "taxYear": "2005-06",
+        "qualifying": true
+      },
+      {
+        "_links": {
+          "self": {
+            "href": "/national-insurance-record/ni/QQ123456A/taxyear/2004-05"
+          }
+        },
+        "taxYear": "2004-05",
+        "qualifying": true
+      },
+      {
+        "_links": {
+          "self": {
+            "href": "/national-insurance-record/ni/QQ123456A/taxyear/2003-04"
+          }
+        },
+        "taxYear": "2003-04",
+        "qualifying": true
+      },
+      {
+        "_links": {
+          "self": {
+            "href": "/national-insurance-record/ni/QQ123456A/taxyear/2002-03"
+          }
+        },
+        "taxYear": "2002-03",
+        "qualifying": true
+      },
+      {
+        "_links": {
+          "self": {
+            "href": "/national-insurance-record/ni/QQ123456A/taxyear/2001-02"
+          }
+        },
+        "taxYear": "2001-02",
+        "qualifying": false
+      },
+      {
+        "_links": {
+          "self": {
+            "href": "/national-insurance-record/ni/QQ123456A/taxyear/2000-01"
+          }
+        },
+        "taxYear": "2000-01",
+        "qualifying": true
+      },
+      {
+        "_links": {
+          "self": {
+            "href": "/national-insurance-record/ni/QQ123456A/taxyear/1999-00"
+          }
+        },
+        "taxYear": "1999-00",
+        "qualifying": true
+      },
+      {
+        "_links": {
+          "self": {
+            "href": "/national-insurance-record/ni/QQ123456A/taxyear/1998-99"
+          }
+        },
+        "taxYear": "1998-99",
+        "qualifying": true
+      },
+      {
+        "_links": {
+          "self": {
+            "href": "/national-insurance-record/ni/QQ123456A/taxyear/1997-98"
+          }
+        },
+        "taxYear": "1997-98",
+        "qualifying": true
+      },
+      {
+        "_links": {
+          "self": {
+            "href": "/national-insurance-record/ni/QQ123456A/taxyear/1996-97"
+          }
+        },
+        "taxYear": "1996-97",
+        "qualifying": false
+      },
+      {
+        "_links": {
+          "self": {
+            "href": "/national-insurance-record/ni/QQ123456A/taxyear/1995-96"
+          }
+        },
+        "taxYear": "1995-96",
+        "qualifying": false
+      },
+      {
+        "_links": {
+          "self": {
+            "href": "/national-insurance-record/ni/QQ123456A/taxyear/1994-95"
+          }
+        },
+        "taxYear": "1994-95",
+        "qualifying": true
+      },
+      {
+        "_links": {
+          "self": {
+            "href": "/national-insurance-record/ni/QQ123456A/taxyear/1993-94"
+          }
+        },
+        "taxYear": "1993-94",
+        "qualifying": true
+      },
+      {
+        "_links": {
+          "self": {
+            "href": "/national-insurance-record/ni/QQ123456A/taxyear/1992-93"
+          }
+        },
+        "taxYear": "1992-93",
+        "qualifying": true
+      },
+      {
+        "_links": {
+          "self": {
+            "href": "/national-insurance-record/ni/QQ123456A/taxyear/1991-92"
+          }
+        },
+        "taxYear": "1991-92",
+        "qualifying": true
+      },
+      {
+        "_links": {
+          "self": {
+            "href": "/national-insurance-record/ni/QQ123456A/taxyear/1990-91"
+          }
+        },
+        "taxYear": "1990-91",
+        "qualifying": true
+      },
+      {
+        "_links": {
+          "self": {
+            "href": "/national-insurance-record/ni/QQ123456A/taxyear/1989-90"
+          }
+        },
+        "taxYear": "1989-90",
+        "qualifying": true
+      },
+      {
+        "_links": {
+          "self": {
+            "href": "/national-insurance-record/ni/QQ123456A/taxyear/1988-89"
+          }
+        },
+        "taxYear": "1988-89",
+        "qualifying": true
+      },
+      {
+        "_links": {
+          "self": {
+            "href": "/national-insurance-record/ni/QQ123456A/taxyear/1987-88"
+          }
+        },
+        "taxYear": "1987-88",
+        "qualifying": true
+      },
+      {
+        "_links": {
+          "self": {
+            "href": "/national-insurance-record/ni/QQ123456A/taxyear/1986-87"
+          }
+        },
+        "taxYear": "1986-87",
+        "qualifying": false
+      },
+      {
+        "_links": {
+          "self": {
+            "href": "/national-insurance-record/ni/QQ123456A/taxyear/1985-86"
+          }
+        },
+        "taxYear": "1985-86",
+        "qualifying": false
+      },
+      {
+        "_links": {
+          "self": {
+            "href": "/national-insurance-record/ni/QQ123456A/taxyear/1984-85"
+          }
+        },
+        "taxYear": "1984-85",
+        "qualifying": true
+      },
+      {
+        "_links": {
+          "self": {
+            "href": "/national-insurance-record/ni/QQ123456A/taxyear/1983-84"
+          }
+        },
+        "taxYear": "1983-84",
+        "qualifying": false
+      },
+      {
+        "_links": {
+          "self": {
+            "href": "/national-insurance-record/ni/QQ123456A/taxyear/1982-83"
+          }
+        },
+        "taxYear": "1982-83",
+        "qualifying": true
+      },
+      {
+        "_links": {
+          "self": {
+            "href": "/national-insurance-record/ni/QQ123456A/taxyear/1981-82"
+          }
+        },
+        "taxYear": "1981-82",
+        "qualifying": true
+      },
+      {
+        "_links": {
+          "self": {
+            "href": "/national-insurance-record/ni/QQ123456A/taxyear/1980-81"
+          }
+        },
+        "taxYear": "1980-81",
+        "qualifying": true
+      },
+      {
+        "_links": {
+          "self": {
+            "href": "/national-insurance-record/ni/QQ123456A/taxyear/1979-80"
+          }
+        },
+        "taxYear": "1979-80",
+        "qualifying": true
+      },
+      {
+        "_links": {
+          "self": {
+            "href": "/national-insurance-record/ni/QQ123456A/taxyear/1978-79"
+          }
+        },
+        "taxYear": "1978-79",
+        "qualifying": true
+      },
+      {
+        "_links": {
+          "self": {
+            "href": "/national-insurance-record/ni/QQ123456A/taxyear/1977-78"
+          }
+        },
+        "taxYear": "1977-78",
+        "qualifying": true
+      },
+      {
+        "_links": {
+          "self": {
+            "href": "/national-insurance-record/ni/QQ123456A/taxyear/1976-77"
+          }
+        },
+        "taxYear": "1976-77",
+        "qualifying": true
+      },
+      {
+        "_links": {
+          "self": {
+            "href": "/national-insurance-record/ni/QQ123456A/taxyear/1975-76"
+          }
+        },
+        "taxYear": "1975-76",
+        "qualifying": true
+      }
+    ]
+  }
+}

@@ -19,27 +19,7 @@
       {
         "version": "1.0",
         "status": "@status",
-        "access" : @Json.toJson(access),
-        "endpoints": [
-          {
-            "uriPattern": "/ni/{nino}",
-            "endpointName": "National Insurance Record",
-            "method": "GET",
-            "authType": "USER",
-            "throttlingTier": "UNLIMITED",
-            "scope": "read:national-insurance-record",
-            "queryParameters": []
-          },
-          {
-            "uriPattern": "/ni/{nino}/taxyear/{taxYear}",
-            "endpointName": "National Insurance TaxYear",
-            "method": "GET",
-            "authType": "USER",
-            "throttlingTier": "UNLIMITED",
-            "scope": "read:national-insurance-record",
-            "queryParameters": []
-          }
-        ]
+        "access" : @Json.toJson(access)
       }
     ]
   }

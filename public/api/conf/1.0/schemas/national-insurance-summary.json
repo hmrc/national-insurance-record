@@ -1,0 +1,68 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "National Insurance summary",
+  "type": "object",
+  "properties": {
+    "_links": {
+      "$ref": "common.json#/definitions/halLinks"
+    },
+    "qualifyingYears": {
+      "description": "The number of qualifying years of National Insurance",
+      "type": "number"
+    },
+    "qualifyingYearsPriorTo1975": {
+      "description": "The number of qualifying years of National Insurance before year 1975",
+      "type": "number"
+    },
+    "numberOfGaps": {
+      "description": "The number of National Insurance gap years",
+      "type": "number"
+    },
+    "numberOfGapsPayable": {
+      "description": "The number of National Insurance gaps that can be paid to the maximum pension amount",
+      "type": "number"
+    },
+    "dateOfEntry": {
+      "description": "The date of entry into the National Insurance system",
+      "$ref": "common.json#/definitions/iso8601Date"
+    },
+    "homeResponsibilitiesProtection": {
+      "description": "The flag for Home Responsibilities Protection (HRP)",
+      "type": "boolean"
+    },
+    "earningsIncludedUpTo": {
+      "description": "This is always the end date of the last posted tax year",
+      "$ref": "common.json#/definitions/iso8601Date"
+    },
+    "_embedded": {
+      "type": "object",
+      "properties": {
+        "taxYears": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "_links": {
+                "$ref": "common.json#/definitions/halLinks"
+              },
+              "taxYear": {
+                "$ref": "common.json#/definitions/taxYear"
+              },
+              "qualifying": {
+                "description": "The flag for tax year qualifying status",
+                "type": "boolean"
+              }
+            },
+            "required": ["_links", "taxYear", "qualifying"]
+          }
+        }
+      },
+      "required": ["taxYears"]
+    }
+  },
+  "required": [
+    "_links", "qualifyingYears", "qualifyingYearsPriorTo1975",
+    "numberOfGaps", "numberOfGapsPayable", "dateOfEntry",
+    "homeResponsibilitiesProtection", "earningsIncludedUpTo", "_embedded"
+  ]
+}

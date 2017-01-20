@@ -1,0 +1,17 @@
+{
+  "_links": {
+    "self": {
+      "href": "/national-insurance-record/ni/YN123456D/taxyear/2010-11"
+    }
+  },
+  "taxYear": "2010-11",
+  "qualifying": false,
+  "classOneContributions": 1149.98,
+  "classTwoCredits": 0,
+  "classThreeCredits": 0,
+  "otherCredits": 0,
+  "classThreePayable": 0,
+  "classThreePayableByPenalty": "2023-04-05",
+  "payable": false,
+  "underInvestigation": false
+}
