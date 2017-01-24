@@ -57,7 +57,7 @@ class NationalInsuranceTaxYear(nino: Nino, taxYear: String,
                                classThreePayableByPenalty: Option[LocalDate],
                                payable: Boolean,
                                underInvestigation: Boolean) (implicit hc: HeaderCarrier)
-  extends BusinessEvent("NationalInsuranceRecordTaxYear", nino,
+  extends BusinessEvent("NationalInsuranceTaxYear", nino,
     Map(
       "taxYear" -> taxYear.toString,
       "qualifying" -> qualifying.toString,
@@ -66,8 +66,8 @@ class NationalInsuranceTaxYear(nino: Nino, taxYear: String,
       "classThreeCredits" -> classThreeCredits.toString,
       "otherCredits" -> otherCredits.toString,
       "classThreePayable" -> classThreePayable.toString,
-      "classThreePayableBy" -> classThreePayableBy.toString,
-      "classThreePayableByPenalty" -> classThreePayableByPenalty.toString,
+      "classThreePayableBy" -> classThreePayableBy.map(_.toString).getOrElse(""),
+      "classThreePayableByPenalty" -> classThreePayableByPenalty.map(_.toString).getOrElse(""),
       "payable" -> payable.toString,
       "underInvestigation" -> underInvestigation.toString
     )

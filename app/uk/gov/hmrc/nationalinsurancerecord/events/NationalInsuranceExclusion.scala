@@ -20,13 +20,13 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nationalinsurancerecord.domain.Exclusion
 import uk.gov.hmrc.play.http.HeaderCarrier
 
-object NationalInsuranceRecordExclusion{
-  def apply(nino: Nino, exclusionReasons: List[Exclusion.Exclusion])(implicit hc: HeaderCarrier): NationalInsuranceRecordExclusion =
-    new NationalInsuranceRecordExclusion(nino, exclusionReasons)
+object NationalInsuranceExclusion{
+  def apply(nino: Nino, exclusionReasons: List[Exclusion.Exclusion])(implicit hc: HeaderCarrier): NationalInsuranceExclusion =
+    new NationalInsuranceExclusion(nino, exclusionReasons)
 }
 
-class NationalInsuranceRecordExclusion(nino: Nino, exclusionReasons: List[Exclusion.Exclusion]) (implicit hc: HeaderCarrier)
-  extends BusinessEvent("NationalInsuranceRecordExclusion", nino,
+class NationalInsuranceExclusion(nino: Nino, exclusionReasons: List[Exclusion.Exclusion]) (implicit hc: HeaderCarrier)
+  extends BusinessEvent("NationalInsuranceExclusion", nino,
     Map(
       "reasons" -> exclusionReasons.map(_.toString).mkString(",")
     )

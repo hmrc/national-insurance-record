@@ -20,30 +20,34 @@ import org.joda.time.LocalDate
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.play.http.HeaderCarrier
 
-object NationalInsuranceRecord{
+object NationalInsuranceRecord {
   def apply(nino: Nino, qualifyingYears: Int, qualifyingYearsPriorTo1975: Int,
             numberOfGaps: Int, numberOfGapsPayable: Int, dateOfEntry: LocalDate,
-            homeResponsibilitiesProtection: Boolean)(implicit hc: HeaderCarrier): NationalInsuranceRecord =
+            homeResponsibilitiesProtection: Boolean, earningsIncludedUpTo: LocalDate, numberOfTaxYears: Int)(implicit hc: HeaderCarrier): NationalInsuranceRecord =
     new NationalInsuranceRecord(nino: Nino, qualifyingYears: Int,
-                                           qualifyingYearsPriorTo1975: Int,
-                                           numberOfGaps: Int,
-                                           numberOfGapsPayable: Int,
-                                           dateOfEntry: LocalDate,
-                                           homeResponsibilitiesProtection: Boolean
-                                          )
+      qualifyingYearsPriorTo1975: Int,
+      numberOfGaps: Int,
+      numberOfGapsPayable: Int,
+      dateOfEntry: LocalDate,
+      homeResponsibilitiesProtection: Boolean,
+      earningsIncludedUpTo: LocalDate,
+      numberOfTaxYears: Int
+    )
 }
 
 class NationalInsuranceRecord(nino: Nino, qualifyingYears: Int, qualifyingYearsPriorTo1975: Int,
                               numberOfGaps: Int, numberOfGapsPayable: Int, dateOfEntry: LocalDate,
-                              homeResponsibilitiesProtection: Boolean) (implicit hc: HeaderCarrier)
-  extends BusinessEvent("NationalInsuranceRecordSummary", nino,
+                              homeResponsibilitiesProtection: Boolean, earningsIncludedUpTo: LocalDate, numberOfTaxYears: Int)(implicit hc: HeaderCarrier)
+  extends BusinessEvent("NationalInsuranceRecord", nino,
     Map(
       "qualifyingYears" -> qualifyingYears.toString,
       "qualifyingYearsPriorTo1975" -> qualifyingYearsPriorTo1975.toString,
       "numberOfGaps" -> numberOfGaps.toString,
       "numberOfGapsPayable" -> numberOfGapsPayable.toString,
       "dateOfEntry" -> dateOfEntry.toString,
-      "homeResponsibilitiesProtection" -> homeResponsibilitiesProtection.toString
+      "homeResponsibilitiesProtection" -> homeResponsibilitiesProtection.toString,
+      "earningsIncludedUpTo" -> earningsIncludedUpTo.toString,
+      "numberOfTaxYears" -> numberOfTaxYears.toString
     )
 
   )
