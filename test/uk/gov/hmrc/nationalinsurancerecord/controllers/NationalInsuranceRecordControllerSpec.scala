@@ -280,9 +280,9 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
         status(response) shouldBe 403
       }
 
-      "return the mwrre message" in {
+      "return the IOM message" in {
         contentAsJson(response) shouldBe Json.parse(
-          """{"code":"EXCLUSION_MARRIED_WOMENS_REDUCED_RATE","message": "The customer needs to contact the National Insurance helpline"}"""
+          """{"code":"EXCLUSION_ISLE_OF_MAN","message": "The customer needs to contact the National Insurance helpline"}"""
         )
       }
 
@@ -620,9 +620,9 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
         status(response) shouldBe 403
       }
 
-      "return the mwrre message" in {
+      "return the IOM message" in {
         contentAsJson(response) shouldBe Json.parse(
-          """{"code":"EXCLUSION_MARRIED_WOMENS_REDUCED_RATE","message": "The customer needs to contact the National Insurance helpline"}"""
+          """{"code":"EXCLUSION_ISLE_OF_MAN","message": "The customer needs to contact the National Insurance helpline"}"""
         )
       }
 
