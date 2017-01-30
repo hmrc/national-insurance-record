@@ -53,12 +53,12 @@ trait NationalInsuranceRecordController extends BaseController with HeaderValida
           } else if (exclusion.exclusionReasons.contains(Exclusion.ManualCorrespondenceIndicator)) {
             customAuditConnector.sendEvent(NationalInsuranceExclusion(nino, List(Exclusion.ManualCorrespondenceIndicator)))
             Forbidden(Json.toJson(ErrorResponses.ExclusionManualCorrespondence))
-          } else if (exclusion.exclusionReasons.contains(Exclusion.MarriedWomenReducedRateElection)) {
-            customAuditConnector.sendEvent(NationalInsuranceExclusion(nino, List(Exclusion.MarriedWomenReducedRateElection)))
-            Forbidden(Json.toJson(ErrorResponses.ExclusionMarriedWomenReducedRate))
           } else if (exclusion.exclusionReasons.contains(Exclusion.IsleOfMan)) {
             customAuditConnector.sendEvent(NationalInsuranceExclusion(nino, List(Exclusion.IsleOfMan)))
             Forbidden(Json.toJson(ErrorResponses.ExclusionIsleOfMan))
+          } else if (exclusion.exclusionReasons.contains(Exclusion.MarriedWomenReducedRateElection)) {
+            customAuditConnector.sendEvent(NationalInsuranceExclusion(nino, List(Exclusion.MarriedWomenReducedRateElection)))
+            Forbidden(Json.toJson(ErrorResponses.ExclusionMarriedWomenReducedRate))
           } else {
             customAuditConnector.sendEvent(NationalInsuranceExclusion(nino, exclusion.exclusionReasons))
             Ok(halResourceSelfLink(Json.toJson(exclusion), nationalInsuranceRecordHref(nino)))
@@ -89,12 +89,12 @@ trait NationalInsuranceRecordController extends BaseController with HeaderValida
           } else if (exclusion.exclusionReasons.contains(Exclusion.ManualCorrespondenceIndicator)) {
             customAuditConnector.sendEvent(NationalInsuranceExclusion(nino, List(Exclusion.ManualCorrespondenceIndicator)))
             Forbidden(Json.toJson(ErrorResponses.ExclusionManualCorrespondence))
-          } else if (exclusion.exclusionReasons.contains(Exclusion.MarriedWomenReducedRateElection)) {
-            customAuditConnector.sendEvent(NationalInsuranceExclusion(nino, List(Exclusion.MarriedWomenReducedRateElection)))
-            Forbidden(Json.toJson(ErrorResponses.ExclusionMarriedWomenReducedRate))
           } else if (exclusion.exclusionReasons.contains(Exclusion.IsleOfMan)) {
             customAuditConnector.sendEvent(NationalInsuranceExclusion(nino, List(Exclusion.IsleOfMan)))
             Forbidden(Json.toJson(ErrorResponses.ExclusionIsleOfMan))
+          } else if (exclusion.exclusionReasons.contains(Exclusion.MarriedWomenReducedRateElection)) {
+            customAuditConnector.sendEvent(NationalInsuranceExclusion(nino, List(Exclusion.MarriedWomenReducedRateElection)))
+            Forbidden(Json.toJson(ErrorResponses.ExclusionMarriedWomenReducedRate))
           } else {
             customAuditConnector.sendEvent(NationalInsuranceExclusion(nino, exclusion.exclusionReasons))
             Ok(halResourceSelfLink(Json.toJson(exclusion), nationalInsuranceTaxYearHref(nino, taxYear)))
