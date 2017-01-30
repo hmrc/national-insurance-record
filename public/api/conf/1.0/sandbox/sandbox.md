@@ -1,32 +1,36 @@
 <table>
-  <col width="25%">
-  <col width="75%">
   <thead>
     <tr>
+      <th>Scenario</th>
       <th>NINO prefix</th>
       <th>Response</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td>Not listed</td>
-      <td>The regular response at the top of this document</td>
+      <td>Regular taxpayer</td>
+      <td>(Any not prefixed as below)</td>
+      <td>200 (OK) Payload as regular example above</td>
     </tr>
     <tr>
-      <td>MA</td>
-      <td>A user with the IsleOfMan exclusion</td>
+      <td>Taxpayer with the Isle of Man exclusion</td>
+      <td><code class="code--slim">MA</code></td>
+      <td>403 (Forbidden) {"code": "EXCLUSION_ISLE_OF_MAN"}</td>
     </tr>
     <tr>
-      <td>MW</td>
-      <td>A user with the MarriedWomenReducedRateElection exclusion</td>
+      <td>Taxpayer with the married women's reduced rate election exclusion</td>
+      <td><code class="code--slim">MW</code></td>
+      <td>403 (Forbidden) {"code": "EXCLUSION_MARRIED_WOMENS_REDUCED_RATE"}</td>
     </tr>
     <tr>
-      <td>EZ</td>
-      <td>A user who is dead</td>
+      <td>Taxpayer who is dead</td>
+      <td><code class="code--slim">EZ</code></td>
+      <td>403 (Forbidden) {"code": "EXCLUSION_DEAD"}</td>
     </tr>
     <tr>
-      <td>PG</td>
       <td>A user who has manual correspondence only and cannot use the service</td>
+      <td><code class="code--slim">PG</code></td>
+      <td>403 (Forbidden) {"code": "EXCLUSION_MANUAL_CORRESPONDENCE"}</td>
     </tr>
   </tbody>
 </table>
