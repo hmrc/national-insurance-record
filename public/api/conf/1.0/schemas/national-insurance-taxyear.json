@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "National Insurance tax year record",
+  "type": "object",
+  "properties": {
+    "_links": {
+      "$ref": "common.json#/definitions/halLinks"
+    },
+    "taxYear": {
+      "$ref": "common.json#/definitions/taxYear"
+    },
+    "qualifying": {
+      "description": "The flag for tax year qualifying status",
+      "type": "boolean"
+    },
+    "classOneContributions": {
+      "description": "The class one national insurance contributions",
+      "type": "number"
+    },
+    "classTwoCredits": {
+      "description": "The class two national insurance credits",
+      "type": "number"
+    },
+    "classThreeCredits": {
+      "description": "The class three national insurance credits",
+      "type": "number"
+    },
+    "otherCredits": {
+      "description": "The other national insurance credits",
+      "type": "number"
+    },
+    "classThreePayable": {
+      "description": "The class three national insurance contributions to fill the gap year",
+      "type": "number"
+    },
+    "classThreePayableBy": {
+      "description": "The date by which class three national insurance contributions is payable",
+      "$ref": "common.json#/definitions/iso8601Date"
+    },
+    "classThreePayableByPenalty": {
+      "description": "The date by which class three national insurance contributions is payable by Penalty",
+      "$ref": "common.json#/definitions/iso8601Date"
+    },
+    "payable": {
+      "description": "The gap year is payable",
+      "type": "boolean"
+    },
+    "underInvestigation": {
+      "description": "The tax year is under investigation",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "_links", "taxYear", "qualifying", "classOneContributions",
+    "classTwoCredits", "classThreeCredits", "otherCredits", "classThreePayable",
+    "payable", "underInvestigation"
+  ]
+}
