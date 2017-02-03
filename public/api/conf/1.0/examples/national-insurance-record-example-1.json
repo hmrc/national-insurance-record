@@ -116,7 +116,7 @@
         "classThreeCredits": 0,
         "otherCredits": 0,
         "classThreePayable": 0,
-        "classThreePayableBy": null,
+        "classThreePayableBy": "2019-04-05",
         "classThreePayableByPenalty": "2023-04-05",
         "payable": false,
         "underInvestigation": false
@@ -134,7 +134,7 @@
         "classThreeCredits": 0,
         "otherCredits": 52,
         "classThreePayable": 0,
-        "classThreePayableBy": null,
+        "classThreePayableBy": "2019-04-05",
         "classThreePayableByPenalty": null,
         "payable": false,
         "underInvestigation": false
@@ -170,7 +170,7 @@
         "classThreeCredits": 0,
         "otherCredits": 52,
         "classThreePayable": 0,
-        "classThreePayableBy": null,
+        "classThreePayableBy": "2019-04-05",
         "classThreePayableByPenalty": null,
         "payable": false,
         "underInvestigation": false
@@ -188,7 +188,7 @@
         "classThreeCredits": 0,
         "otherCredits": 52,
         "classThreePayable": 0,
-        "classThreePayableBy": null,
+        "classThreePayableBy": "2019-04-05",
         "classThreePayableByPenalty": null,
         "payable": false,
         "underInvestigation": false
@@ -206,7 +206,7 @@
         "classThreeCredits": 0,
         "otherCredits": 52,
         "classThreePayable": 0,
-        "classThreePayableBy": null,
+        "classThreePayableBy": "2019-04-05",
         "classThreePayableByPenalty": null,
         "payable": false,
         "underInvestigation": false
@@ -224,7 +224,7 @@
         "classThreeCredits": 0,
         "otherCredits": 0,
         "classThreePayable": 0,
-        "classThreePayableBy": null,
+        "classThreePayableBy": "2019-04-05",
         "classThreePayableByPenalty": null,
         "payable": false,
         "underInvestigation": false
@@ -242,7 +242,7 @@
         "classThreeCredits": 0,
         "otherCredits": 53,
         "classThreePayable": 0,
-        "classThreePayableBy": null,
+        "classThreePayableBy": "2019-04-05",
         "classThreePayableByPenalty": null,
         "payable": false,
         "underInvestigation": false
@@ -260,7 +260,7 @@
         "classThreeCredits": 0,
         "otherCredits": 52,
         "classThreePayable": 0,
-        "classThreePayableBy": null,
+        "classThreePayableBy": "2019-04-05",
         "classThreePayableByPenalty": null,
         "payable": false,
         "underInvestigation": false
@@ -278,7 +278,7 @@
         "classThreeCredits": 0,
         "otherCredits": 7,
         "classThreePayable": 0,
-        "classThreePayableBy": null,
+        "classThreePayableBy": "2019-04-05",
         "classThreePayableByPenalty": "2008-04-05",
         "payable": true,
         "underInvestigation": true
@@ -296,7 +296,7 @@
         "classThreeCredits": 0,
         "otherCredits": 2,
         "classThreePayable": 0,
-        "classThreePayableBy": null,
+        "classThreePayableBy": "2019-04-05",
         "classThreePayableByPenalty": null,
         "payable": false,
         "underInvestigation": false
@@ -314,7 +314,7 @@
         "classThreeCredits": 0,
         "otherCredits": 1,
         "classThreePayable": 0,
-        "classThreePayableBy": null,
+        "classThreePayableBy": "2019-04-05",
         "classThreePayableByPenalty": null,
         "payable": false,
         "underInvestigation": false
@@ -332,7 +332,7 @@
         "classThreeCredits": 0,
         "otherCredits": 0,
         "classThreePayable": 0,
-        "classThreePayableBy": null,
+        "classThreePayableBy": "2019-04-05",
         "classThreePayableByPenalty": null,
         "payable": false,
         "underInvestigation": false
@@ -350,7 +350,7 @@
         "classThreeCredits": 0,
         "otherCredits": 0,
         "classThreePayable": 0,
-        "classThreePayableBy": null,
+        "classThreePayableBy": "2019-04-05",
         "classThreePayableByPenalty": null,
         "payable": false,
         "underInvestigation": false
@@ -368,7 +368,7 @@
         "classThreeCredits": 0,
         "otherCredits": 0,
         "classThreePayable": 0,
-        "classThreePayableBy": null,
+        "classThreePayableBy": "2019-04-05",
         "classThreePayableByPenalty": null,
         "payable": false,
         "underInvestigation": false
@@ -386,7 +386,7 @@
         "classThreeCredits": 0,
         "otherCredits": 0,
         "classThreePayable": 0,
-        "classThreePayableBy": null,
+        "classThreePayableBy": "2019-04-05",
         "classThreePayableByPenalty": null,
         "payable": false,
         "underInvestigation": false
@@ -404,7 +404,7 @@
         "classThreeCredits": 0,
         "otherCredits": 0,
         "classThreePayable": 0,
-        "classThreePayableBy": null,
+        "classThreePayableBy": "2019-04-05",
         "classThreePayableByPenalty": null,
         "payable": false,
         "underInvestigation": false
@@ -422,7 +422,7 @@
         "classThreeCredits": 0,
         "otherCredits": 0,
         "classThreePayable": 0,
-        "classThreePayableBy": null,
+        "classThreePayableBy": "2019-04-05",
         "classThreePayableByPenalty": null,
         "payable": false,
         "underInvestigation": false
@@ -440,7 +440,7 @@
         "classThreeCredits": 0,
         "otherCredits": 0,
         "classThreePayable": 0,
-        "classThreePayableBy": null,
+        "classThreePayableBy": "2019-04-05",
         "classThreePayableByPenalty": null,
         "payable": false,
         "underInvestigation": false
@@ -458,7 +458,7 @@
         "classThreeCredits": 0,
         "otherCredits": 0,
         "classThreePayable": 0,
-        "classThreePayableBy": null,
+        "classThreePayableBy": "2019-04-05",
         "classThreePayableByPenalty": null,
         "payable": false,
         "underInvestigation": false
@@ -476,7 +476,7 @@
         "classThreeCredits": 0,
         "otherCredits": 0,
         "classThreePayable": 0,
-        "classThreePayableBy": null,
+        "classThreePayableBy": "2019-04-05",
         "classThreePayableByPenalty": null,
         "payable": false,
         "underInvestigation": false
@@ -494,7 +494,7 @@
         "classThreeCredits": 0,
         "otherCredits": 0,
         "classThreePayable": 0,
-        "classThreePayableBy": null,
+        "classThreePayableBy": "2019-04-05",
         "classThreePayableByPenalty": null,
         "payable": false,
         "underInvestigation": false
@@ -512,7 +512,7 @@
         "classThreeCredits": 0,
         "otherCredits": 52,
         "classThreePayable": 0,
-        "classThreePayableBy": null,
+        "classThreePayableBy": "2019-04-05",
         "classThreePayableByPenalty": null,
         "payable": false,
         "underInvestigation": false
@@ -530,7 +530,7 @@
         "classThreeCredits": 0,
         "otherCredits": 52,
         "classThreePayable": 0,
-        "classThreePayableBy": null,
+        "classThreePayableBy": "2019-04-05",
         "classThreePayableByPenalty": null,
         "payable": false,
         "underInvestigation": false
@@ -548,7 +548,7 @@
         "classThreeCredits": 0,
         "otherCredits": 3,
         "classThreePayable": 0,
-        "classThreePayableBy": null,
+        "classThreePayableBy": "2019-04-05",
         "classThreePayableByPenalty": null,
         "payable": false,
         "underInvestigation": false
@@ -566,7 +566,7 @@
         "classThreeCredits": 0,
         "otherCredits": 34,
         "classThreePayable": 0,
-        "classThreePayableBy": null,
+        "classThreePayableBy": "2019-04-05",
         "classThreePayableByPenalty": null,
         "payable": false,
         "underInvestigation": false
@@ -584,7 +584,7 @@
         "classThreeCredits": 0,
         "otherCredits": 19,
         "classThreePayable": 0,
-        "classThreePayableBy": null,
+        "classThreePayableBy": "2019-04-05",
         "classThreePayableByPenalty": null,
         "payable": false,
         "underInvestigation": false
@@ -602,7 +602,7 @@
         "classThreeCredits": 0,
         "otherCredits": 44,
         "classThreePayable": 0,
-        "classThreePayableBy": null,
+        "classThreePayableBy": "2019-04-05",
         "classThreePayableByPenalty": null,
         "payable": false,
         "underInvestigation": false
@@ -620,7 +620,7 @@
         "classThreeCredits": 0,
         "otherCredits": 52,
         "classThreePayable": 0,
-        "classThreePayableBy": null,
+        "classThreePayableBy": "2019-04-05",
         "classThreePayableByPenalty": null,
         "payable": false,
         "underInvestigation": false
@@ -638,7 +638,7 @@
         "classThreeCredits": 0,
         "otherCredits": 52,
         "classThreePayable": 0,
-        "classThreePayableBy": null,
+        "classThreePayableBy": "2019-04-05",
         "classThreePayableByPenalty": null,
         "payable": false,
         "underInvestigation": false
@@ -656,7 +656,7 @@
         "classThreeCredits": 0,
         "otherCredits": 35,
         "classThreePayable": 0,
-        "classThreePayableBy": null,
+        "classThreePayableBy": "2019-04-05",
         "classThreePayableByPenalty": null,
         "payable": false,
         "underInvestigation": false
@@ -674,7 +674,7 @@
         "classThreeCredits": 0,
         "otherCredits": 42,
         "classThreePayable": 0,
-        "classThreePayableBy": null,
+        "classThreePayableBy": "2019-04-05",
         "classThreePayableByPenalty": null,
         "payable": false,
         "underInvestigation": false
@@ -692,7 +692,7 @@
         "classThreeCredits": 0,
         "otherCredits": 41,
         "classThreePayable": 0,
-        "classThreePayableBy": null,
+        "classThreePayableBy": "2019-04-05",
         "classThreePayableByPenalty": null,
         "payable": false,
         "underInvestigation": false
@@ -710,7 +710,7 @@
         "classThreeCredits": 0,
         "otherCredits": 28,
         "classThreePayable": 0,
-        "classThreePayableBy": null,
+        "classThreePayableBy": "2019-04-05",
         "classThreePayableByPenalty": null,
         "payable": false,
         "underInvestigation": false
@@ -728,7 +728,7 @@
         "classThreeCredits": 0,
         "otherCredits": 34,
         "classThreePayable": 0,
-        "classThreePayableBy": null,
+        "classThreePayableBy": "2019-04-05",
         "classThreePayableByPenalty": null,
         "payable": false,
         "underInvestigation": false
@@ -746,7 +746,7 @@
         "classThreeCredits": 0,
         "otherCredits": 6,
         "classThreePayable": 0,
-        "classThreePayableBy": null,
+        "classThreePayableBy": "2019-04-05",
         "classThreePayableByPenalty": null,
         "payable": false,
         "underInvestigation": false

@@ -11,6 +11,7 @@
   "classThreeCredits": 0,
   "otherCredits": 0,
   "classThreePayable": 0,
+  "classThreePayableBy": "2019-04-05",
   "classThreePayableByPenalty": "2023-04-05",
   "payable": false,
   "underInvestigation": false

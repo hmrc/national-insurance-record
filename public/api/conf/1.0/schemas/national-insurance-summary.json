@@ -90,9 +90,8 @@
               }
             },
             "required": [
-              "_links", "taxYear", "qualifying", "classOneContributions",
-              "classTwoCredits", "classThreeCredits", "otherCredits", "classThreePayable",
-              "payable", "underInvestigation"
+              "_links", "taxYear", "qualifying", "classOneContributions", "classTwoCredits",
+              "classThreeCredits", "otherCredits", "classThreePayable", "payable", "underInvestigation"
             ]
           }
         }
