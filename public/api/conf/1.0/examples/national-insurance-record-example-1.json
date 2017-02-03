@@ -26,8 +26,6 @@
         "classThreeCredits": 0,
         "otherCredits": 0,
         "classThreePayable": 0,
-        "classThreePayableBy": null,
-        "classThreePayableByPenalty": "2023-04-05",
         "payable": false,
         "underInvestigation": false
       },
@@ -44,8 +42,6 @@
         "classThreeCredits": 0,
         "otherCredits": 0,
         "classThreePayable": 0,
-        "classThreePayableBy": null,
-        "classThreePayableByPenalty": "2023-04-05",
         "payable": false,
         "underInvestigation": false
       },
@@ -62,8 +58,6 @@
         "classThreeCredits": 0,
         "otherCredits": 0,
         "classThreePayable": 0,
-        "classThreePayableBy": null,
-        "classThreePayableByPenalty": "2023-04-05",
         "payable": false,
         "underInvestigation": false
       },
@@ -135,7 +129,6 @@
         "otherCredits": 52,
         "classThreePayable": 0,
         "classThreePayableBy": "2019-04-05",
-        "classThreePayableByPenalty": "2023-04-05",
         "payable": false,
         "underInvestigation": false
       },
@@ -171,7 +164,6 @@
         "otherCredits": 52,
         "classThreePayable": 0,
         "classThreePayableBy": "2019-04-05",
-        "classThreePayableByPenalty": "2023-04-05",
         "payable": false,
         "underInvestigation": false
       },
@@ -189,7 +181,6 @@
         "otherCredits": 52,
         "classThreePayable": 0,
         "classThreePayableBy": "2019-04-05",
-        "classThreePayableByPenalty": "2023-04-05",
         "payable": false,
         "underInvestigation": false
       },
@@ -207,7 +198,6 @@
         "otherCredits": 52,
         "classThreePayable": 0,
         "classThreePayableBy": "2019-04-05",
-        "classThreePayableByPenalty": "2023-04-05",
         "payable": false,
         "underInvestigation": false
       },
@@ -225,7 +215,6 @@
         "otherCredits": 0,
         "classThreePayable": 0,
         "classThreePayableBy": "2019-04-05",
-        "classThreePayableByPenalty": "2023-04-05",
         "payable": false,
         "underInvestigation": false
       },
@@ -243,7 +232,6 @@
         "otherCredits": 53,
         "classThreePayable": 0,
         "classThreePayableBy": "2019-04-05",
-        "classThreePayableByPenalty": "2023-04-05",
         "payable": false,
         "underInvestigation": false
       },
@@ -261,7 +249,6 @@
         "otherCredits": 52,
         "classThreePayable": 0,
         "classThreePayableBy": "2019-04-05",
-        "classThreePayableByPenalty": "2023-04-05",
         "payable": false,
         "underInvestigation": false
       },
@@ -297,7 +284,6 @@
         "otherCredits": 2,
         "classThreePayable": 0,
         "classThreePayableBy": "2019-04-05",
-        "classThreePayableByPenalty": "2023-04-05",
         "payable": false,
         "underInvestigation": false
       },
@@ -315,7 +301,6 @@
         "otherCredits": 1,
         "classThreePayable": 0,
         "classThreePayableBy": "2019-04-05",
-        "classThreePayableByPenalty": "2023-04-05",
         "payable": false,
         "underInvestigation": false
       },
@@ -333,7 +318,6 @@
         "otherCredits": 0,
         "classThreePayable": 0,
         "classThreePayableBy": "2019-04-05",
-        "classThreePayableByPenalty": "2023-04-05",
         "payable": false,
         "underInvestigation": false
       },
@@ -351,7 +335,6 @@
         "otherCredits": 0,
         "classThreePayable": 0,
         "classThreePayableBy": "2019-04-05",
-        "classThreePayableByPenalty": "2023-04-05",
         "payable": false,
         "underInvestigation": false
       },
@@ -369,7 +352,6 @@
         "otherCredits": 0,
         "classThreePayable": 0,
         "classThreePayableBy": "2019-04-05",
-        "classThreePayableByPenalty": "2023-04-05",
         "payable": false,
         "underInvestigation": false
       },
@@ -387,7 +369,6 @@
         "otherCredits": 0,
         "classThreePayable": 0,
         "classThreePayableBy": "2019-04-05",
-        "classThreePayableByPenalty": "2023-04-05",
         "payable": false,
         "underInvestigation": false
       },
@@ -405,7 +386,6 @@
         "otherCredits": 0,
         "classThreePayable": 0,
         "classThreePayableBy": "2019-04-05",
-        "classThreePayableByPenalty": "2023-04-05",
         "payable": false,
         "underInvestigation": false
       },
@@ -423,7 +403,6 @@
         "otherCredits": 0,
         "classThreePayable": 0,
         "classThreePayableBy": "2019-04-05",
-        "classThreePayableByPenalty": "2023-04-05",
         "payable": false,
         "underInvestigation": false
       },
@@ -441,7 +420,6 @@
         "otherCredits": 0,
         "classThreePayable": 0,
         "classThreePayableBy": "2019-04-05",
-        "classThreePayableByPenalty": "2023-04-05",
         "payable": false,
         "underInvestigation": false
       },
@@ -459,7 +437,6 @@
         "otherCredits": 0,
         "classThreePayable": 0,
         "classThreePayableBy": "2019-04-05",
-        "classThreePayableByPenalty": "2023-04-05",
         "payable": false,
         "underInvestigation": false
       },
@@ -477,7 +454,6 @@
         "otherCredits": 0,
         "classThreePayable": 0,
         "classThreePayableBy": "2019-04-05",
-        "classThreePayableByPenalty": "2023-04-05",
         "payable": false,
         "underInvestigation": false
       },
@@ -495,7 +471,6 @@
         "otherCredits": 0,
         "classThreePayable": 0,
         "classThreePayableBy": "2019-04-05",
-        "classThreePayableByPenalty": "2023-04-05",
         "payable": false,
         "underInvestigation": false
       },
@@ -513,7 +488,6 @@
         "otherCredits": 52,
         "classThreePayable": 0,
         "classThreePayableBy": "2019-04-05",
-        "classThreePayableByPenalty": "2023-04-05",
         "payable": false,
         "underInvestigation": false
       },
@@ -531,7 +505,6 @@
         "otherCredits": 52,
         "classThreePayable": 0,
         "classThreePayableBy": "2019-04-05",
-        "classThreePayableByPenalty": "2023-04-05",
         "payable": false,
         "underInvestigation": false
       },
@@ -549,7 +522,6 @@
         "otherCredits": 3,
         "classThreePayable": 0,
         "classThreePayableBy": "2019-04-05",
-        "classThreePayableByPenalty": "2023-04-05",
         "payable": false,
         "underInvestigation": false
       },
@@ -567,7 +539,6 @@
         "otherCredits": 34,
         "classThreePayable": 0,
         "classThreePayableBy": "2019-04-05",
-        "classThreePayableByPenalty": "2023-04-05",
         "payable": false,
         "underInvestigation": false
       },
@@ -585,7 +556,6 @@
         "otherCredits": 19,
         "classThreePayable": 0,
         "classThreePayableBy": "2019-04-05",
-        "classThreePayableByPenalty": "2023-04-05",
         "payable": false,
         "underInvestigation": false
       },
@@ -603,7 +573,6 @@
         "otherCredits": 44,
         "classThreePayable": 0,
         "classThreePayableBy": "2019-04-05",
-        "classThreePayableByPenalty": "2023-04-05",
         "payable": false,
         "underInvestigation": false
       },
@@ -621,7 +590,6 @@
         "otherCredits": 52,
         "classThreePayable": 0,
         "classThreePayableBy": "2019-04-05",
-        "classThreePayableByPenalty": "2023-04-05",
         "payable": false,
         "underInvestigation": false
       },
@@ -639,7 +607,6 @@
         "otherCredits": 52,
         "classThreePayable": 0,
         "classThreePayableBy": "2019-04-05",
-        "classThreePayableByPenalty": "2023-04-05",
         "payable": false,
         "underInvestigation": false
       },
@@ -657,7 +624,6 @@
         "otherCredits": 35,
         "classThreePayable": 0,
         "classThreePayableBy": "2019-04-05",
-        "classThreePayableByPenalty": "2023-04-05",
         "payable": false,
         "underInvestigation": false
       },
@@ -675,7 +641,6 @@
         "otherCredits": 42,
         "classThreePayable": 0,
         "classThreePayableBy": "2019-04-05",
-        "classThreePayableByPenalty": "2023-04-05",
         "payable": false,
         "underInvestigation": false
       },
@@ -693,7 +658,6 @@
         "otherCredits": 41,
         "classThreePayable": 0,
         "classThreePayableBy": "2019-04-05",
-        "classThreePayableByPenalty": "2023-04-05",
         "payable": false,
         "underInvestigation": false
       },
@@ -711,7 +675,6 @@
         "otherCredits": 28,
         "classThreePayable": 0,
         "classThreePayableBy": "2019-04-05",
-        "classThreePayableByPenalty": "2023-04-05",
         "payable": false,
         "underInvestigation": false
       },
@@ -729,7 +692,6 @@
         "otherCredits": 34,
         "classThreePayable": 0,
         "classThreePayableBy": "2019-04-05",
-        "classThreePayableByPenalty": "2023-04-05",
         "payable": false,
         "underInvestigation": false
       },
@@ -747,7 +709,6 @@
         "otherCredits": 6,
         "classThreePayable": 0,
         "classThreePayableBy": "2019-04-05",
-        "classThreePayableByPenalty": "2023-04-05",
         "payable": false,
         "underInvestigation": false
       }
