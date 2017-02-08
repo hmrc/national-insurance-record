@@ -18,7 +18,7 @@
       <td>403 (Forbidden) {"code": "EXCLUSION_ISLE_OF_MAN"}</td>
     </tr>
     <tr>
-      <td>Taxpayer with the married women's reduced rate election exclusion</td>
+      <td>Taxpayer with the married women’s reduced rate election exclusion</td>
       <td><code class="code--slim">MW</code></td>
       <td>403 (Forbidden) {"code": "EXCLUSION_MARRIED_WOMENS_REDUCED_RATE"}</td>
     </tr>

@@ -53,31 +53,31 @@
                 "type": "boolean"
               },
               "classOneContributions": {
-                "description": "The class one national insurance contributions",
+                "description": "The class one National Insurance contributions",
                 "type": "number"
               },
               "classTwoCredits": {
-                "description": "The class two national insurance credits",
+                "description": "The class two National Insurance credits",
                 "type": "number"
               },
               "classThreeCredits": {
-                "description": "The class three national insurance credits",
+                "description": "The class three National Insurance credits",
                 "type": "number"
               },
               "otherCredits": {
-                "description": "The other national insurance credits",
+                "description": "The other National Insurance credits",
                 "type": "number"
               },
               "classThreePayable": {
-                "description": "The class three national insurance contributions to fill the gap year",
+                "description": "The class three National Insurance contributions to fill the gap year",
                 "type": "number"
               },
               "classThreePayableBy": {
-                "description": "The date by which class three national insurance contributions is payable",
+                "description": "The date by which class three National Insurance contributions is payable",
                 "$ref": "common.json#/definitions/iso8601Date"
               },
               "classThreePayableByPenalty": {
-                "description": "The date by which class three national insurance contributions is payable by Penalty",
+                "description": "The date by which class three National Insurance contributions is payable by penalty",
                 "$ref": "common.json#/definitions/iso8601Date"
               },
               "payable": {
