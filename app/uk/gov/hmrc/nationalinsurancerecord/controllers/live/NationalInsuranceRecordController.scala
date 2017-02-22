@@ -19,11 +19,12 @@ package uk.gov.hmrc.nationalinsurancerecord.controllers.live
 import uk.gov.hmrc.nationalinsurancerecord.config.AppContext
 import uk.gov.hmrc.nationalinsurancerecord.connectors.CustomAuditConnector
 import uk.gov.hmrc.nationalinsurancerecord.controllers.NationalInsuranceRecordController
-import uk.gov.hmrc.nationalinsurancerecord.services.NationalInsuranceRecordService
+import uk.gov.hmrc.nationalinsurancerecord.services.{NationalInsuranceRecordService, NationalInsuranceRecordServiceViaNisp}
 
 
 object NationalInsuranceRecordController extends NationalInsuranceRecordController {
-  override val nationalInsuranceRecordService: NationalInsuranceRecordService = NationalInsuranceRecordService
+  override val nationalInsuranceRecordService: NationalInsuranceRecordService = if(AppContext.connectToHOD)
+    NationalInsuranceRecordService else NationalInsuranceRecordServiceViaNisp
   override val app: String = "National-Insurance-Record"
   override val context: String = AppContext.apiGatewayContext
   override val customAuditConnector: CustomAuditConnector = CustomAuditConnector

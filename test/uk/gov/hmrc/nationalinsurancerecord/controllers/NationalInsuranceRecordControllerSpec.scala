@@ -18,16 +18,15 @@ package uk.gov.hmrc.nationalinsurancerecord.controllers
 
 import org.joda.time.LocalDate
 import play.api.libs.json._
-import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.connectors.CustomAuditConnector
 import uk.gov.hmrc.nationalinsurancerecord.domain._
-import uk.gov.hmrc.nationalinsurancerecord.services.{NationalInsuranceRecordService, SandboxNationalInsuranceService}
+import uk.gov.hmrc.nationalinsurancerecord.services.NationalInsuranceRecordService
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.AuditEvent
-import uk.gov.hmrc.play.http.{BadRequestException, HeaderCarrier}
+import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.WithFakeApplication
 import play.api.test.Helpers.{contentAsJson, _}
 

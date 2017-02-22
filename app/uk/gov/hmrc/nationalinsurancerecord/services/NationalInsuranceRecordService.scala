@@ -30,7 +30,6 @@ import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 trait NationalInsuranceRecordService {
   def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceRecord]]
-
   def getTaxYear(nino: Nino, taxYear: TaxYear)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceTaxYear]]
 }
 
@@ -96,10 +95,19 @@ object SandboxNationalInsuranceService extends NationalInsuranceRecordService {
     }
 }
 
-object NationalInsuranceRecordService extends NationalInsuranceRecordService {
+trait NispConnection extends NationalInsuranceRecordService {
   val nisp: NispConnector = NispConnector
   override def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceRecord]] =
     nisp.getSummary(nino)
   override def getTaxYear(nino: Nino, taxYear: TaxYear)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceTaxYear]] =
     nisp.getTaxYear(nino, taxYear)
 }
+
+trait NpsConnection extends NationalInsuranceRecordService {
+  val nisp: NispConnector = NispConnector
+  override def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceRecord]] = ???
+  override def getTaxYear(nino: Nino, taxYear: TaxYear)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceTaxYear]] = ???
+}
+
+object NationalInsuranceRecordServiceViaNisp extends NationalInsuranceRecordService with NispConnection
+object NationalInsuranceRecordService extends NationalInsuranceRecordService with NpsConnection
