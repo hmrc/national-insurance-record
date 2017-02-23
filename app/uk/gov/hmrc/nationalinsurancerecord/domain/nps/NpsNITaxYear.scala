@@ -30,7 +30,7 @@ case class NpsNITaxYear(
                          classThreePayableByPenalty: Option[LocalDate] = None,
                          classOneContribution: BigDecimal = 0,
                          classTwoCredits: Int = 0,
-                         classThreeCredits: Int,
+                         classThreeCredits: Int = 0,
                          otherCredits: List[NpsOtherCredits] = List()
                        )
 
