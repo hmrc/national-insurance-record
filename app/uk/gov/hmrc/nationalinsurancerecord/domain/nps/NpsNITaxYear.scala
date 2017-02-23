@@ -21,7 +21,7 @@ import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
 case class NpsNITaxYear(
-                         taxYear:Int = 0,
+                         taxYear: Int = 0,
                          qualifying: Boolean = false,
                          underInvestigation: Boolean = false,
                          payable: Boolean = false,

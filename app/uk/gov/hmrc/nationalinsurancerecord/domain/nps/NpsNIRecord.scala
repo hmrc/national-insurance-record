@@ -21,7 +21,7 @@ import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
 case class NpsNIRecord(
-                       numberOfQualifyingYears:Int = 0,
+                       numberOfQualifyingYears: Int = 0,
                        nonQualifyingYears: Int = 0,
                        nonQualifyingYearsPayable: Int = 0,
                        pre75ContributionCount: Int = 0,
