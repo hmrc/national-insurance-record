@@ -26,6 +26,7 @@ trait AppContext {
   def apiGatewayContext: String
   def access: Option[Configuration]
   def status: Option[String]
+  def connectToHOD: Boolean
 }
 
 object AppContext extends AppContext with ServicesConfig {
@@ -35,4 +36,5 @@ object AppContext extends AppContext with ServicesConfig {
     .getOrElse(throw new RuntimeException("api.gateway.context is not configured"))
   lazy val access = current.configuration.getConfig("api.access")
   lazy val status = current.configuration.getString("api.status")
+  lazy val connectToHOD = current.configuration.getBoolean("feature.connectToHOD").getOrElse(false)
 }
