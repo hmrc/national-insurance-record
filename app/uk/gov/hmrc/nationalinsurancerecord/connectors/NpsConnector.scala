@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nationalinsurancerecord
+package uk.gov.hmrc.nationalinsurancerecord.connectors
 
-import uk.gov.hmrc.domain.{Generator, Nino}
-import scala.util.Random
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.nationalinsurancerecord.domain.{NationalInsuranceRecord, NationalInsuranceTaxYear}
 
-trait NationalInsuranceRecordUnitSpec extends uk.gov.hmrc.play.test.UnitSpec {
-  private val ninoGenerator = new Generator(new Random())
-  def generateNino(): Nino = ninoGenerator.nextNino
-  def generateNinoWithPrefix(prefix: String): Nino = {
-    require(prefix.length == 2)
-    Nino(ninoGenerator.nextNino.toString().replaceFirst("[A-Z]{2}", prefix))
-  }
-  implicit val headerCarrier: HeaderCarrier = HeaderCarrier()
+import scala.concurrent.Future
+
+trait NpsConnector {
+
+  def getNationalInsuranceRecord: Future[NationalInsuranceRecord]
+  def getTaxYear: Future[NationalInsuranceTaxYear]
+
 }

@@ -23,7 +23,7 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nationalinsurancerecord.domain._
 import uk.gov.hmrc.play.http.HeaderCarrier
 import play.api.Play.current
-import uk.gov.hmrc.nationalinsurancerecord.connectors.NispConnector
+import uk.gov.hmrc.nationalinsurancerecord.connectors.{NispConnector, NpsConnector}
 import uk.gov.hmrc.nationalinsurancerecord.util.EitherReads._
 
 import scala.concurrent.Future
@@ -105,10 +105,45 @@ trait NispConnection extends NationalInsuranceRecordService {
 }
 
 trait NpsConnection extends NationalInsuranceRecordService {
-  val nisp: NispConnector = NispConnector
-  override def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceRecord]] = ???
-  override def getTaxYear(nino: Nino, taxYear: TaxYear)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceTaxYear]] = ???
+
+  def nps: NpsConnector
+
+  override def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceRecord]] = {
+    nps.getNationalInsuranceRecord map { niRecord =>
+      Right(NationalInsuranceRecord(
+        niRecord.qualifyingYears,
+        niRecord.qualifyingYearsPriorTo1975,
+        niRecord.numberOfGaps,
+        niRecord.numberOfGapsPayable,
+        niRecord.dateOfEntry,
+        niRecord.homeResponsibilitiesProtection,
+        niRecord.earningsIncludedUpTo,
+        niRecord.taxYears
+      ))
+    }
+  }
+
+  override def getTaxYear(nino: Nino, taxYear: TaxYear)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceTaxYear]] = {
+    nps.getTaxYear map { taxYear =>
+      Right(NationalInsuranceTaxYear(
+        taxYear.taxYear,
+        taxYear.qualifying,
+        taxYear.classOneContributions,
+        taxYear.classTwoCredits,
+        taxYear.classThreeCredits,
+        taxYear.otherCredits,
+        taxYear.classThreePayable,
+        taxYear.classThreePayableBy,
+        taxYear.classThreePayableByPenalty,
+        taxYear.payable,
+        taxYear.underInvestigation
+      ))
+    }
+
+  }
 }
 
 object NationalInsuranceRecordServiceViaNisp extends NationalInsuranceRecordService with NispConnection
-object NationalInsuranceRecordService extends NationalInsuranceRecordService with NpsConnection
+object NationalInsuranceRecordService extends NationalInsuranceRecordService with NpsConnection {
+  override lazy val nps: NpsConnector = ???
+}

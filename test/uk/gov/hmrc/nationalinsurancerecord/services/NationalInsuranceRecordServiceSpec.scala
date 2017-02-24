@@ -21,12 +21,16 @@ import org.scalatest.concurrent.ScalaFutures
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import org.scalatestplus.play.OneAppPerSuite
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.nationalinsurancerecord.domain._
+import uk.gov.hmrc.nationalinsurancerecord.domain.{NationalInsuranceTaxYear, _}
 import uk.gov.hmrc.play.http.HeaderCarrier
+import org.mockito.Mockito._
+import org.scalatest.mock.MockitoSugar
+import org.mockito.Matchers
+import uk.gov.hmrc.nationalinsurancerecord.connectors.NpsConnector
 
-class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec with OneAppPerSuite with ScalaFutures {
+import scala.concurrent.Future
 
-
+class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec with OneAppPerSuite with ScalaFutures with MockitoSugar {
 
   private val regularData: NationalInsuranceRecord = NationalInsuranceRecord(
     // scalastyle:off magic.number
@@ -191,6 +195,163 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
           result shouldBe Left(ExclusionResponse(List(Exclusion.ManualCorrespondenceIndicator)))
         }
       }
+    }
+  }
+
+  "NationalInsuranceRecordService with a HOD Connection" when {
+
+    val service = new NpsConnection {
+      override lazy val nps: NpsConnector = mock[NpsConnector]
+    }
+
+    "regular ni record" should {
+
+      val niRecord = NationalInsuranceRecord(
+        qualifyingYears = 36,
+        qualifyingYearsPriorTo1975 = 5,
+        numberOfGaps = 10,
+        numberOfGapsPayable = 4,
+        dateOfEntry = new LocalDate(1969,8,1),
+        homeResponsibilitiesProtection = false,
+        earningsIncludedUpTo = new LocalDate(2016,4,5),
+        List(
+          NationalInsuranceTaxYear(
+            taxYear = "2015-16",
+            qualifying = true,
+            classOneContributions = 2430.24,
+            classTwoCredits = 0,
+            classThreeCredits = 0,
+            otherCredits = 0,
+            classThreePayable = 0,
+            classThreePayableBy = None,
+            classThreePayableByPenalty = None,
+            payable = false,
+            underInvestigation = false
+          ),
+          NationalInsuranceTaxYear(
+            taxYear = "2014-15",
+            qualifying = false,
+            classOneContributions = 430.4,
+            classTwoCredits = 0,
+            classThreeCredits = 0,
+            otherCredits = 0,
+            classThreePayable = 9,
+            classThreePayableBy = Some(new LocalDate(2019,4,5)),
+            classThreePayableByPenalty = None,
+            payable = true,
+            underInvestigation = false
+          ),
+          NationalInsuranceTaxYear(
+            taxYear = "2013-14",
+            qualifying = true,
+            classOneContributions = 0,
+            classTwoCredits = 10,
+            classThreeCredits = 3,
+            otherCredits = 7,
+            classThreePayable = 720,
+            classThreePayableBy = Some(new LocalDate(2019, 4, 5)),
+            classThreePayableByPenalty = Some(new LocalDate(2023, 4, 5)),
+            payable = true,
+            underInvestigation = false
+          )
+        )
+      )
+
+      when(service.nps.getNationalInsuranceRecord).thenReturn(Future.successful(niRecord))
+
+      lazy val niRecordF: Future[NationalInsuranceRecord] = service.getNationalInsuranceRecord(generateNino()).right.get
+
+      "return qualifying years to be 36" in {
+        whenReady(niRecordF) { ni =>
+          ni.qualifyingYears shouldBe 36
+        }
+      }
+      "return qualifyingyears pre 1975 to be 5"  in {
+        whenReady(niRecordF) { ni =>
+          ni.qualifyingYearsPriorTo1975 shouldBe 5
+        }
+      }
+      "return number of gaps to be 10"  in {
+        whenReady(niRecordF) { ni =>
+          ni.numberOfGaps shouldBe 10
+        }
+      }
+      "return number of gaps payable to be 4"  in {
+        whenReady(niRecordF) { ni =>
+          ni.numberOfGapsPayable shouldBe 4
+        }
+      }
+      "return date of entry to be 1969/8/1"  in {
+        whenReady(niRecordF) { ni =>
+          ni.dateOfEntry shouldBe new LocalDate(1969,8,1)
+        }
+      }
+      "return homeResponsibilities to be false"  in {
+        whenReady(niRecordF) { ni =>
+          ni.homeResponsibilitiesProtection shouldBe false
+        }
+      }
+      "return earnings included upto to be 2016/8/1"  in {
+        whenReady(niRecordF) { ni =>
+          ni.earningsIncludedUpTo shouldBe new LocalDate(2016,4,5)
+        }
+      }
+      "return taxYear to be 2015-16"  in {
+        whenReady(niRecordF) { ni =>
+          ni.taxYears.head.taxYear shouldBe "2015-16"
+        }
+      }
+      "return qualifying status true for taxyear 2015-16 to be"  in {
+        whenReady(niRecordF) { ni =>
+          ni.taxYears.head.qualifying shouldBe true
+        }
+      }
+      "return classOneContributions to be 2430.24 for taxyear 2015-16"  in {
+        whenReady(niRecordF) { ni =>
+          ni.taxYears.head.classOneContributions shouldBe 2430.24
+        }
+      }
+      "return classTwoCredits to be 0 for taxyear 2015-16"  in {
+        whenReady(niRecordF) { ni =>
+          ni.taxYears.head.classTwoCredits shouldBe 0
+        }
+      }
+      "return classThreeCredits to be 0 for taxyear 2015-16"  in {
+        whenReady(niRecordF) { ni =>
+          ni.taxYears.head.classThreeCredits shouldBe 0
+        }
+      }
+      "return otherCredits to be 0 for taxyear 2015-16"  in {
+        whenReady(niRecordF) { ni =>
+          ni.taxYears.head.otherCredits shouldBe 0
+        }
+      }
+      "return classThreePayable to be 0 for taxyear 2015-16"  in {
+        whenReady(niRecordF) { ni =>
+          ni.taxYears.head.classThreePayable shouldBe 0
+          ni.taxYears(2).classThreePayable shouldBe 720
+        }
+      }
+      "return classThreePayableBy to be None for taxyear 2015-16"  in {
+        whenReady(niRecordF) { ni =>
+          ni.taxYears.head.classThreePayableBy shouldBe None
+          ni.taxYears(2).classThreePayableBy shouldBe Some(new LocalDate(2019,4,5))
+        }
+      }
+      "return classThreePayableByPenalty to be None for taxyear 2015-16"  in {
+        whenReady(niRecordF) { ni =>
+          ni.taxYears.head.classThreePayableByPenalty shouldBe None
+          ni.taxYears(2).classThreePayableByPenalty shouldBe Some(new LocalDate(2023,4,5))
+        }
+      }
+
+      "return payable and underinvestigateion flag to be false for taxyear 2015-16"  in {
+        whenReady(niRecordF) { ni =>
+          ni.taxYears.head.payable shouldBe false
+          ni.taxYears.head.underInvestigation shouldBe false
+        }
+      }
+
     }
   }
 }

@@ -22,7 +22,7 @@ import uk.gov.hmrc.play.test.UnitSpec
 
 class TaxYearSpec extends UnitSpec with Matchers {
   // scalastyle:off magic.number
-  
+
   val validTaxYears = Seq("2014-15", "2013-14", "2016-17", "2019-20", "2099-00")
 
   val invalidTaxYears = Seq("2014", "201314", "2016-1X", "A2014-15", "2015-17", "2013-18")
