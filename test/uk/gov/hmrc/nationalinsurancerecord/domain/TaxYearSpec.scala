@@ -40,6 +40,14 @@ class TaxYearSpec extends UnitSpec with Matchers {
     }
   }
 
+  "TaxYear from starTaxYear" should {
+    "return TaxYear(2014-15) for 2014" in {
+      TaxYear.getTaxYear(2014) shouldBe "2014-2015"
+    }
+    "return TaxYear(2018-19) for 2014" in {
+      TaxYear.getTaxYear(2018) shouldBe "2018-2019"
+    }
+  }
 
   "TaxYear constructor" should {
     validTaxYears.foreach {

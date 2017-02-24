@@ -19,9 +19,10 @@ package uk.gov.hmrc.nationalinsurancerecord.domain.nps
 import org.joda.time.LocalDate
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
+import uk.gov.hmrc.nationalinsurancerecord.domain.TaxYear
 
 case class NpsNITaxYear(
-                         taxYear: Int = 0,
+                         startTaxYear: Int = 0,
                          qualifying: Boolean = false,
                          underInvestigation: Boolean = false,
                          payable: Boolean = false,
@@ -32,7 +33,9 @@ case class NpsNITaxYear(
                          classTwoCredits: Int = 0,
                          classThreeCredits: Int = 0,
                          otherCredits: List[NpsOtherCredits] = List()
-                       )
+                       ) {
+  lazy val taxYear: String = TaxYear.getTaxYear(startTaxYear)
+}
 
 object NpsNITaxYear {
 

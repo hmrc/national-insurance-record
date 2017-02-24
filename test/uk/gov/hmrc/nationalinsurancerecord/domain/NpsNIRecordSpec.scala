@@ -171,7 +171,7 @@ class NpsNIRecordSpec extends UnitSpec{
         taxYear(2016, false, true)
       ))
 
-      val purged = niRecord.purge(fry = 2014)
+      val purged = niRecord.purge(finalRelevantStartYear = 2014)
 
       purged.numberOfQualifyingYears shouldBe 5
       purged.nonQualifyingYears shouldBe 0
@@ -199,7 +199,7 @@ class NpsNIRecordSpec extends UnitSpec{
       taxYear(2016, false, true)
     ))
 
-    val purged = niRecord.purge(fry = 2015)
+    val purged = niRecord.purge(finalRelevantStartYear = 2015)
 
     purged.numberOfQualifyingYears shouldBe 3
     purged.nonQualifyingYears shouldBe 3

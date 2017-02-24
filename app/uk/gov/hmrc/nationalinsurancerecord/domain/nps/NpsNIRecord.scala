@@ -30,13 +30,13 @@ case class NpsNIRecord(
                        niTaxYears: List[NpsNITaxYear]
                       ) {
 
-  def purge(fry: Int): NpsNIRecord = {
-    val taxYears = niTaxYears.filter(_.taxYear <= fry)
-    val purgedYears = niTaxYears.filter(_.taxYear > fry)
-    if(purgedYears.nonEmpty) Logger.info(s"Purged years (FRY $fry): ${purgedYears.map(_.taxYear).mkString(",")}")
+  def purge(finalRelevantStartYear: Int): NpsNIRecord = {
+    val taxYears = niTaxYears.filter(_.startTaxYear <= finalRelevantStartYear)
+    val purgedYears = niTaxYears.filter(_.startTaxYear > finalRelevantStartYear)
+    if(purgedYears.nonEmpty) Logger.info(s"Purged years (FRY $finalRelevantStartYear): ${purgedYears.map(_.startTaxYear).mkString(",")}")
 
-    this.copy(nonQualifyingYears =
-      taxYears.count(!_.qualifying),
+    this.copy(
+      nonQualifyingYears = taxYears.count(!_.qualifying),
       nonQualifyingYearsPayable = taxYears.count(year => !year.qualifying && year.payable && !year.underInvestigation),
       niTaxYears = taxYears
     )

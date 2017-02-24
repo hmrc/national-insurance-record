@@ -44,4 +44,6 @@ object TaxYear {
     r => (r.group("first").toInt + 1) % 100 == r.group("second").toInt
   }
 
+  def getTaxYear(startYear: Int): String = startYear.toString.concat("-").concat((startYear.toInt + 1).toString)
+
 }
