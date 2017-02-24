@@ -21,7 +21,8 @@ import org.scalatest.Matchers
 import uk.gov.hmrc.play.test.UnitSpec
 
 class TaxYearSpec extends UnitSpec with Matchers {
-
+  // scalastyle:off magic.number
+  
   val validTaxYears = Seq("2014-15", "2013-14", "2016-17", "2019-20", "2099-00")
 
   val invalidTaxYears = Seq("2014", "201314", "2016-1X", "A2014-15", "2015-17", "2013-18")
@@ -42,10 +43,13 @@ class TaxYearSpec extends UnitSpec with Matchers {
 
   "TaxYear from starTaxYear" should {
     "return TaxYear(2014-15) for 2014" in {
-      TaxYear.getTaxYear(2014) shouldBe "2014-2015"
+      TaxYear.getTaxYear(2014) shouldBe "2014-15"
     }
-    "return TaxYear(2018-19) for 2014" in {
-      TaxYear.getTaxYear(2018) shouldBe "2018-2019"
+    "return TaxYear(2018-19) for 2018" in {
+      TaxYear.getTaxYear(2018) shouldBe "2018-19"
+    }
+    "return TaxYear(1999-00) for 1999" in {
+      TaxYear.getTaxYear(1999) shouldBe "1999-00"
     }
   }
 
