@@ -14,14 +14,10 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nationalinsurancerecord.connectors
-
-import uk.gov.hmrc.nationalinsurancerecord.domain.nps.{NpsLiability, NpsNIRecord, NpsSummary}
+package uk.gov.hmrc.nationalinsurancerecord.services
 
 import scala.concurrent.Future
 
-trait NpsConnector {
-  def getNationalInsuranceRecord: Future[NpsNIRecord]
-  def getLiabilities: Future[List[NpsLiability]]
-  def getSummary: Future[NpsSummary]
+trait CitizenDetailsService {
+  def checkManualCorrespondenceIndicator: Future[Boolean]
 }

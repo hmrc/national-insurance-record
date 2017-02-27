@@ -16,19 +16,15 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.domain.nps
 
-import org.joda.time.LocalDate
-import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
-case class NpsLiability(
-                         liabilityType: Int,
-                         startYear: Option[LocalDate],
-                         endYear: Option[LocalDate])
+case class NpsLiability(liabilityType: Int)
 
 object NpsLiability {
-  implicit val reads: Reads[NpsLiability] = (
-      (__ \ "liability_type").read[Int] and
-      (__ \ "liability_type_start_date").readNullable[LocalDate] and
-      (__ \ "liability_type_end_date").readNullable[LocalDate]
-    )(NpsLiability.apply _)
+  implicit val reads: Reads[NpsLiability] = (__ \ "liability_type").read[Int].map(NpsLiability.apply)
+}
+
+
+object LiabilityType {
+  final val ISLE_OF_MAN = 15
 }

@@ -16,6 +16,10 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.util
 
-class NIRecordConstants {
+object NIRecordConstants {
+  // scalastyle:off magic.number
 
+  val niRecordMinAge = 16
+  val niRecordStart = 1975
+  val homeResponsibilitiesProtectionTypes = List(14, 15, 16, 38, 48, 80)
 }

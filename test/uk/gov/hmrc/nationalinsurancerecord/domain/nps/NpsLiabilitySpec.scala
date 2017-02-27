@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.domain.nps
 
-import org.joda.time.LocalDate
 import uk.gov.hmrc.play.test.UnitSpec
 
 class NpsLiabilitySpec extends UnitSpec{
@@ -25,9 +24,7 @@ class NpsLiabilitySpec extends UnitSpec{
   "NPS Liability" should {
 
     "return liability type and dates correctly" in {
-      NpsLiability(13, Some(new LocalDate(2015,3,8)), Some(new LocalDate(2015,4,4))).liabilityType shouldBe 13
-      NpsLiability(13, Some(new LocalDate(2015,3,8)), Some(new LocalDate(2015,4,4))).startYear shouldBe Some(new LocalDate(2015,3,8))
-      NpsLiability(13, Some(new LocalDate(2015,3,8)), Some(new LocalDate(2015,4,4))).endYear shouldBe Some(new LocalDate(2015,4,4))
+      NpsLiability(13).liabilityType shouldBe 13
     }
   }
 }

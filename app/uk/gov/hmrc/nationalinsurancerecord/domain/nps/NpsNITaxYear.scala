@@ -34,7 +34,7 @@ case class NpsNITaxYear(
                          classThreeCredits: Int = 0,
                          otherCredits: List[NpsOtherCredits] = List()
                        ) {
-  lazy val taxYear: String = TaxYear.getTaxYear(startTaxYear)
+  lazy val taxYear: String = TaxYear.getTaxYear(startTaxYear).taxYear
 }
 
 object NpsNITaxYear {

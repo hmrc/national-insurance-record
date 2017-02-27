@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.domain.nps
 
+import org.joda.time.LocalDate
 import uk.gov.hmrc.play.test.UnitSpec
 import play.api.libs.json.Json
 
@@ -88,6 +89,15 @@ class NpsSummarySpec extends UnitSpec {
       }
       "parse date of death correctly" in {
         niSummary.dateOfDeath shouldBe None
+      }
+      "parse date of birth correctly" in {
+        niSummary.dateOfBirth shouldBe new LocalDate(1952, 11, 21)
+      }
+      "parse earnings Included upto correctly" in {
+        niSummary.earningsIncludedUpTo shouldBe new LocalDate(2014, 4, 5)
+      }
+      "parse final relevant year correctly" in {
+      niSummary.finalRelevantYear shouldBe 2016
       }
     }
 }

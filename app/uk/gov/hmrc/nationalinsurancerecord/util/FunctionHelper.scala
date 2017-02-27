@@ -14,14 +14,8 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nationalinsurancerecord.connectors
+package uk.gov.hmrc.nationalinsurancerecord.util
 
-import uk.gov.hmrc.nationalinsurancerecord.domain.nps.{NpsLiability, NpsNIRecord, NpsSummary}
-
-import scala.concurrent.Future
-
-trait NpsConnector {
-  def getNationalInsuranceRecord: Future[NpsNIRecord]
-  def getLiabilities: Future[List[NpsLiability]]
-  def getSummary: Future[NpsSummary]
+object FunctionHelper {
+  def composeAll[A](functionList: Seq[A => A]): A => A = functionList.foldLeft(identity[A] _)(_ compose _)
 }

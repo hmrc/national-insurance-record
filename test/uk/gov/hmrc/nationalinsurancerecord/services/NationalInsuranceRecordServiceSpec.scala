@@ -24,9 +24,10 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nationalinsurancerecord.domain.{NationalInsuranceTaxYear, _}
 import uk.gov.hmrc.play.http.HeaderCarrier
 import org.mockito.Mockito._
-import org.scalatest.mock.MockitoSugar
 import org.mockito.Matchers
+import org.scalatest.mock.MockitoSugar
 import uk.gov.hmrc.nationalinsurancerecord.connectors.NpsConnector
+import uk.gov.hmrc.nationalinsurancerecord.domain.nps.{NpsNIRecord, NpsNITaxYear, NpsOtherCredits, NpsSummary}
 
 import scala.concurrent.Future
 
@@ -202,64 +203,72 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
 
     val service = new NpsConnection {
       override lazy val nps: NpsConnector = mock[NpsConnector]
+      override lazy val citizenDetailsService: CitizenDetailsService = {
+        mock[CitizenDetailsService]
+      }
+      override lazy val now: LocalDate = {
+        new LocalDate(2017, 1, 16)
+      }
     }
 
     "regular ni record" should {
 
-      val niRecord = NationalInsuranceRecord(
-        qualifyingYears = 36,
-        qualifyingYearsPriorTo1975 = 5,
-        numberOfGaps = 10,
-        numberOfGapsPayable = 4,
+      val niRecord = NpsNIRecord(
+        numberOfQualifyingYears = 36,
+        nonQualifyingYears = 10,
+        nonQualifyingYearsPayable = 4,
         dateOfEntry = new LocalDate(1969,8,1),
-        homeResponsibilitiesProtection = false,
-        earningsIncludedUpTo = new LocalDate(2016,4,5),
-        List(
-          NationalInsuranceTaxYear(
-            taxYear = "2015-16",
+        pre75ContributionCount = 250,
+        niTaxYears = List(
+          NpsNITaxYear(
+            startTaxYear = 2015,
             qualifying = true,
-            classOneContributions = 2430.24,
-            classTwoCredits = 0,
-            classThreeCredits = 0,
-            otherCredits = 0,
+            underInvestigation = false,
+            payable = false,
             classThreePayable = 0,
             classThreePayableBy = None,
             classThreePayableByPenalty = None,
-            payable = false,
-            underInvestigation = false
-          ),
-          NationalInsuranceTaxYear(
-            taxYear = "2014-15",
-            qualifying = false,
-            classOneContributions = 430.4,
+            classOneContribution = 2430.24,
             classTwoCredits = 0,
             classThreeCredits = 0,
-            otherCredits = 0,
-            classThreePayable = 9,
-            classThreePayableBy = Some(new LocalDate(2019,4,5)),
-            classThreePayableByPenalty = None,
-            payable = true,
-            underInvestigation = false
+            otherCredits = List()
           ),
-          NationalInsuranceTaxYear(
-            taxYear = "2013-14",
+          NpsNITaxYear(
+            startTaxYear = 2014,
+            qualifying = false,
+            underInvestigation = false,
+            payable = true,
+            classThreePayable = 9,
+            classThreePayableBy = Some(new LocalDate(2019, 4, 5)),
+            classThreePayableByPenalty = None,
+            classOneContribution = 430.4,
+            classTwoCredits = 0,
+            classThreeCredits = 0,
+            otherCredits = List()
+          ),
+          NpsNITaxYear(
+            startTaxYear = 2013,
             qualifying = true,
-            classOneContributions = 0,
-            classTwoCredits = 10,
-            classThreeCredits = 3,
-            otherCredits = 7,
+            underInvestigation = false,
+            payable = true,
             classThreePayable = 720,
             classThreePayableBy = Some(new LocalDate(2019, 4, 5)),
             classThreePayableByPenalty = Some(new LocalDate(2023, 4, 5)),
-            payable = true,
-            underInvestigation = false
+            classOneContribution = 0,
+            classTwoCredits = 10,
+            classThreeCredits = 3,
+            otherCredits = List(NpsOtherCredits(1,2,7))
           )
         )
       )
 
+      when(service.citizenDetailsService.checkManualCorrespondenceIndicator).thenReturn(Future.successful(false))
       when(service.nps.getNationalInsuranceRecord).thenReturn(Future.successful(niRecord))
+      when(service.nps.getLiabilities).thenReturn(Future.successful(List()))
+      when(service.nps.getSummary).thenReturn(Future.successful(NpsSummary(false, None, new LocalDate(2016, 4, 5), new LocalDate(1951, 4 , 5), 2017)))
 
       lazy val niRecordF: Future[NationalInsuranceRecord] = service.getNationalInsuranceRecord(generateNino()).right.get
+      lazy val niTaxYearF: Future[NationalInsuranceTaxYear] = service.getTaxYear(generateNino(),TaxYear("2014-15")).right.get
 
       "return qualifying years to be 36" in {
         whenReady(niRecordF) { ni =>
@@ -271,14 +280,14 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
           ni.qualifyingYearsPriorTo1975 shouldBe 5
         }
       }
-      "return number of gaps to be 10"  in {
+      "return number of gaps to be 1"  in {
         whenReady(niRecordF) { ni =>
-          ni.numberOfGaps shouldBe 10
+          ni.numberOfGaps shouldBe 1
         }
       }
-      "return number of gaps payable to be 4"  in {
+      "return number of gaps payable to be 1"  in {
         whenReady(niRecordF) { ni =>
-          ni.numberOfGapsPayable shouldBe 4
+          ni.numberOfGapsPayable shouldBe 1
         }
       }
       "return date of entry to be 1969/8/1"  in {
@@ -345,13 +354,28 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
         }
       }
 
-      "return payable and underinvestigateion flag to be false for taxyear 2015-16"  in {
+      "return payable and underinvestigation flag to be false for taxyear 2015-16"  in {
         whenReady(niRecordF) { ni =>
           ni.taxYears.head.payable shouldBe false
           ni.taxYears.head.underInvestigation shouldBe false
         }
       }
-
+      "return tax Year details correctly" in {
+        whenReady(niTaxYearF) {
+          niTaxYear =>
+            niTaxYear.taxYear shouldBe "2014-15"
+            niTaxYear.underInvestigation shouldBe false
+            niTaxYear.qualifying shouldBe false
+            niTaxYear.payable shouldBe true
+            niTaxYear.classThreePayable shouldBe 9
+            niTaxYear.classThreePayableBy shouldBe Some(new LocalDate(2019,4,5))
+            niTaxYear.classThreePayableByPenalty shouldBe None
+            niTaxYear.classOneContributions shouldBe 430.4
+            niTaxYear.classTwoCredits shouldBe 0
+            niTaxYear.classThreeCredits shouldBe 0
+            niTaxYear.otherCredits shouldBe 0
+        }
+      }
     }
   }
 }
