@@ -35,8 +35,8 @@ object NpsSummary {
   implicit val reads: Reads[NpsSummary] = (
       readBooleanFromInt(__ \ "rre_to_consider") and
       (__ \ "date_of_death").readNullable[LocalDate] and
-      (__ \ "earnings_included_upto").format[LocalDate] and
-      (JsPath \ "date_of_birth").read[LocalDate] and
+      (__ \ "earnings_included_upto").read[LocalDate] and
+      (__ \ "date_of_birth").read[LocalDate] and
         (__ \ "final_relevant_year").format[Int]
     )(NpsSummary.apply _)
 }

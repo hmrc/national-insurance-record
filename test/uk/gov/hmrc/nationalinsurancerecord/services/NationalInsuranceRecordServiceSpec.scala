@@ -27,7 +27,7 @@ import org.mockito.Mockito._
 import org.mockito.Matchers
 import org.scalatest.mock.MockitoSugar
 import uk.gov.hmrc.nationalinsurancerecord.connectors.NpsConnector
-import uk.gov.hmrc.nationalinsurancerecord.domain.nps.{NpsNIRecord, NpsNITaxYear, NpsOtherCredits, NpsSummary, NpsLiability}
+import uk.gov.hmrc.nationalinsurancerecord.domain.nps.{NpsLiability, NpsNIRecord, NpsNITaxYear, NpsOtherCredits, NpsSummary}
 
 import scala.concurrent.Future
 
@@ -379,6 +379,30 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
             niTaxYear.classThreeCredits shouldBe 0
             niTaxYear.otherCredits shouldBe 0
         }
+      }
+    }
+
+    "calc pre75 years" should {
+      "return 3 when the number of conts in 157 and the date of entry is 04/10/1972 and their date of birth is 04/10/1956" in {
+        NationalInsuranceRecordService.calcPre75QualifyingYears(157, new LocalDate(1972, 10, 4), new LocalDate(1956, 10, 4)) shouldBe Some(3)
+      }
+      "return 8 when the number of conts in 408 and the date of entry is 08/01/1968 and their date of birth is 08/01/1952" in {
+        NationalInsuranceRecordService.calcPre75QualifyingYears(408, new LocalDate(1968, 1, 8), new LocalDate(1952, 1, 8)) shouldBe Some(8)
+      }
+      "return 2 when the number of conts in 157 and the date of entry is 06/04/1973 and their date of birth is 04/10/1956" in {
+        NationalInsuranceRecordService.calcPre75QualifyingYears(157, new LocalDate(1973, 4, 6), new LocalDate(1956, 10, 4)) shouldBe Some(2)
+      }
+      "return 1 when the number of conts in 157 and the date of entry is 06/04/1973 and their date of birth is 06/04/1958" in {
+        NationalInsuranceRecordService.calcPre75QualifyingYears(157, new LocalDate(1973, 4, 6), new LocalDate(1958, 4, 6)) shouldBe Some(1)
+      }
+      "return 3 when the number of conts in 157 and the date of entry is 06/04/1973 and their date of birth is 24/05/1996" in {
+        NationalInsuranceRecordService.calcPre75QualifyingYears(157, new LocalDate(1973, 4, 6), new LocalDate(1996, 5, 24)) shouldBe None
+      }
+      "return 3 when the number of conts in 157 and the date of entry is 06/04/1976 and their date of birth is 06/04/1960" in {
+        NationalInsuranceRecordService.calcPre75QualifyingYears(157, new LocalDate(1976, 4, 6), new LocalDate(1960, 4, 6)) shouldBe None
+      }
+      "return 3 when the number of conts in 157 and the date of entry is 06/04/2005 and their date of birth is 06/04/1958" in {
+        NationalInsuranceRecordService.calcPre75QualifyingYears(157, new LocalDate(2005, 4, 6), new LocalDate(1958, 4, 6)) shouldBe None
       }
     }
   }
