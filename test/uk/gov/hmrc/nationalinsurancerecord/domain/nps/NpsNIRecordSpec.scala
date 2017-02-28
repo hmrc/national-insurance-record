@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nationalinsurancerecord.domain
+package uk.gov.hmrc.nationalinsurancerecord.domain.nps
 
 import org.joda.time.LocalDate
 import play.api.libs.json.Json
-import uk.gov.hmrc.nationalinsurancerecord.domain.nps.NpsNIRecord
 import uk.gov.hmrc.play.test.UnitSpec
 
 class NpsNIRecordSpec extends UnitSpec{
@@ -157,4 +156,62 @@ class NpsNIRecordSpec extends UnitSpec{
 
     }
 
+  def taxYear(year: Int, qualifying: Boolean, payable: Boolean): NpsNITaxYear = NpsNITaxYear(year, qualifying, false, payable, 0,None,None,0,0,0,List())
+
+  "purge" should {
+    "return an nirecord with no tax years after 2014 when the FRY 2014" in {
+      val niRecord = NpsNIRecord(5, 2, 2, pre75ContributionCount = 0, new LocalDate(2010, 4, 6), List(
+        taxYear(2010, true, false),
+        taxYear(2011, true, false),
+        taxYear(2012, true, false),
+        taxYear(2013, true, false),
+        taxYear(2014, true, false),
+        taxYear(2015, false, true),
+        taxYear(2016, false, true)
+      ))
+
+      val purged = niRecord.purge(finalRelevantStartYear = 2014)
+
+      purged.numberOfQualifyingYears shouldBe 5
+      purged.nonQualifyingYears shouldBe 0
+      purged.nonQualifyingYearsPayable shouldBe 0
+      purged.pre75ContributionCount shouldBe 0
+      purged.dateOfEntry shouldBe new LocalDate(2010, 4, 6)
+      purged.niTaxYears shouldBe List(
+        taxYear(2010, true, false),
+        taxYear(2011, true, false),
+        taxYear(2012, true, false),
+        taxYear(2013, true, false),
+        taxYear(2014, true, false)
+      )
+    }
+  }
+
+  "return an nirecord with no tax years after 2015 when the FRY 2015" in {
+    val niRecord = NpsNIRecord(3, 4, 3, pre75ContributionCount = 0, new LocalDate(2010, 4, 6), List(
+      taxYear(2010, true, false),
+      taxYear(2011, false, false),
+      taxYear(2012, false, true),
+      taxYear(2013, true, false),
+      taxYear(2014, true, false),
+      taxYear(2015, false, true),
+      taxYear(2016, false, true)
+    ))
+
+    val purged = niRecord.purge(finalRelevantStartYear = 2015)
+
+    purged.numberOfQualifyingYears shouldBe 3
+    purged.nonQualifyingYears shouldBe 3
+    purged.nonQualifyingYearsPayable shouldBe 2
+    purged.pre75ContributionCount shouldBe 0
+    purged.dateOfEntry shouldBe new LocalDate(2010, 4, 6)
+    purged.niTaxYears shouldBe List(
+      taxYear(2010, true, false),
+      taxYear(2011, false, false),
+      taxYear(2012, false, true),
+      taxYear(2013, true, false),
+      taxYear(2014, true, false),
+      taxYear(2015, false, true)
+    )
+  }
 }

@@ -16,17 +16,24 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.services
 
+import java.util.TimeZone
+
+import org.joda.time.{DateTimeZone, LocalDate}
 import play.api.Logger
 import play.api.libs.json.{Json, Reads}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nationalinsurancerecord.domain._
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.play.http.{HeaderCarrier, NotFoundException}
 import play.api.Play.current
-import uk.gov.hmrc.nationalinsurancerecord.connectors.NispConnector
+import uk.gov.hmrc.nationalinsurancerecord.connectors.{NispConnector, NpsConnector}
+import uk.gov.hmrc.nationalinsurancerecord.domain.Exclusion.Exclusion
+import uk.gov.hmrc.nationalinsurancerecord.domain.nps.{NpsLiability, NpsNITaxYear}
 import uk.gov.hmrc.nationalinsurancerecord.util.EitherReads._
+import uk.gov.hmrc.nationalinsurancerecord.util.NIRecordConstants
 
 import scala.concurrent.Future
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+import uk.gov.hmrc.time.TaxYearResolver
 
 trait NationalInsuranceRecordService {
   def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceRecord]]
@@ -104,10 +111,122 @@ trait NispConnection extends NationalInsuranceRecordService {
 }
 
 trait NpsConnection extends NationalInsuranceRecordService {
-  val nisp: NispConnector = NispConnector
-  override def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceRecord]] = ???
-  override def getTaxYear(nino: Nino, taxYear: TaxYear)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceTaxYear]] = ???
+
+  def nps: NpsConnector
+  def citizenDetailsService: CitizenDetailsService
+  def now: LocalDate
+
+  override def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceRecord]] = {
+
+    val npsNIRecordF = nps.getNationalInsuranceRecord
+    val npsLiabilitiesF = nps.getLiabilities
+    val npsSummaryF = nps.getSummary
+    val manualCorrespondenceF = citizenDetailsService.checkManualCorrespondenceIndicator
+
+    for(
+      npsNIRecord <- npsNIRecordF;
+      npsLiabilities <- npsLiabilitiesF;
+      npsSummary <- npsSummaryF;
+      manualCorrespondence <- manualCorrespondenceF
+    ) yield {
+
+      val purgedNIRecord = npsNIRecord.purge(npsSummary.finalRelevantYear)
+
+        val exclusions: List[Exclusion] = new ExclusionService(
+          dateOfDeath = npsSummary.dateOfDeath,
+          reducedRateElection = npsSummary.rreToConsider,
+          npsLiabilities,
+          manualCorrespondence
+        ).getExclusions
+
+        if(exclusions.nonEmpty) {
+          Left(ExclusionResponse(exclusions))
+        } else {
+          Right(NationalInsuranceRecord(
+            purgedNIRecord.numberOfQualifyingYears,
+            calcPre75QualifyingYears(purgedNIRecord.pre75ContributionCount, purgedNIRecord.dateOfEntry, npsSummary.dateOfBirth).getOrElse(0),
+            purgedNIRecord.nonQualifyingYears,
+            purgedNIRecord.nonQualifyingYearsPayable,
+            purgedNIRecord.dateOfEntry,
+            homeResponsibilitiesProtection(npsLiabilities),
+            npsSummary.earningsIncludedUpTo,
+            purgedNIRecord.niTaxYears.map(npsTaxYearToNIRecordTaxYear).sortBy(_.taxYear)(Ordering[String].reverse)
+          ))
+        }
+      }
+  }
+
+  override def getTaxYear(nino: Nino, taxYear: TaxYear)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceTaxYear]] = {
+    val npsNIRecordF = nps.getNationalInsuranceRecord
+    val npsSummaryF = nps.getSummary
+    val npsLiabilitiesF = nps.getLiabilities
+    val manualCorrespondenceIndicatorF = citizenDetailsService.checkManualCorrespondenceIndicator
+
+    for (
+      npsNIRecord <- npsNIRecordF;
+      npsSummary <- npsSummaryF;
+      npsLiabilities <- npsLiabilitiesF;
+      manualCorrespondenceIndicator <- manualCorrespondenceIndicatorF
+    ) yield {
+
+      val purgedNIRecord = npsNIRecord.purge(npsSummary.finalRelevantYear)
+
+      val exclusions = new ExclusionService(
+        npsSummary.dateOfDeath,
+        npsSummary.rreToConsider,
+        npsLiabilities,
+        manualCorrespondenceIndicator
+      ).getExclusions
+
+      if (exclusions.nonEmpty) {
+        Left(ExclusionResponse(exclusions))
+      } else {
+        purgedNIRecord.niTaxYears.map(npsTaxYearToNIRecordTaxYear).find(x => x.taxYear == taxYear.taxYear) match {
+          case Some(nationalInsuranceRecordTaxYear) => Right(nationalInsuranceRecordTaxYear)
+          case _ => throw new NotFoundException(s"taxYear ${taxYear.taxYear} Not Found for $nino")
+        }
+      }
+    }
+  }
+
+  def homeResponsibilitiesProtection(liabilities: List[NpsLiability]): Boolean =
+    liabilities.exists(liability => NIRecordConstants.homeResponsibilitiesProtectionTypes.contains(liability.liabilityType))
+
+  def calcPre75QualifyingYears(pre75Contributions: Int, dateOfEntry: LocalDate, dateOfBirth: LocalDate): Option[Int] = {
+    val yearCalc: BigDecimal = BigDecimal(pre75Contributions)/50
+    val sixteenthBirthday: LocalDate = new LocalDate(dateOfBirth.plusYears(NIRecordConstants.niRecordMinAge))
+    val yearsPre75 = (NIRecordConstants.niRecordStart - TaxYearResolver.taxYearFor(dateOfEntry))
+      .min(NIRecordConstants.niRecordStart - TaxYearResolver.taxYearFor(sixteenthBirthday))
+    if (yearsPre75 > 0) {
+      Some(yearCalc.setScale(0, BigDecimal.RoundingMode.CEILING).min(yearsPre75).toInt)
+    } else {
+      None
+    }
+  }
+
+  def npsTaxYearToNIRecordTaxYear(npsNITaxYear: NpsNITaxYear): NationalInsuranceTaxYear = {
+    NationalInsuranceTaxYear(
+      npsNITaxYear.taxYear,
+      npsNITaxYear.qualifying,
+      npsNITaxYear.classOneContribution,
+      npsNITaxYear.classTwoCredits,
+      npsNITaxYear.classThreeCredits,
+      npsNITaxYear.otherCredits.foldRight(0)(_.numberOfCredits + _),
+      npsNITaxYear.classThreePayable,
+      npsNITaxYear.classThreePayableBy,
+      npsNITaxYear.classThreePayableByPenalty,
+      npsNITaxYear.payable,
+      npsNITaxYear.underInvestigation
+    )
+  }
+
 }
 
+
+
 object NationalInsuranceRecordServiceViaNisp extends NationalInsuranceRecordService with NispConnection
-object NationalInsuranceRecordService extends NationalInsuranceRecordService with NpsConnection
+object NationalInsuranceRecordService extends NationalInsuranceRecordService with NpsConnection {
+  override lazy val nps: NpsConnector = ???
+  override def citizenDetailsService: CitizenDetailsService = ???
+  override def now: LocalDate = LocalDate.now(DateTimeZone.forTimeZone(TimeZone.getTimeZone("Europe/London")))
+}
