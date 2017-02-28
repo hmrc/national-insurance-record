@@ -33,7 +33,56 @@ import scala.concurrent.Future
 
 class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec with OneAppPerSuite with ScalaFutures with MockitoSugar {
 
-  private val regularData: NationalInsuranceRecord = NationalInsuranceRecord(
+  private val niRecordHOD = NpsNIRecord(
+    numberOfQualifyingYears = 36,
+    nonQualifyingYears = 10,
+    nonQualifyingYearsPayable = 4,
+    dateOfEntry = new LocalDate(1969,8,1),
+    pre75ContributionCount = 250,
+    niTaxYears = List(
+      NpsNITaxYear(
+        startTaxYear = 2015,
+        qualifying = true,
+        underInvestigation = false,
+        payable = false,
+        classThreePayable = 0,
+        classThreePayableBy = None,
+        classThreePayableByPenalty = None,
+        classOneContribution = 2430.24,
+        classTwoCredits = 0,
+        classThreeCredits = 0,
+        otherCredits = List()
+      ),
+      NpsNITaxYear(
+        startTaxYear = 2014,
+        qualifying = false,
+        underInvestigation = false,
+        payable = true,
+        classThreePayable = 9,
+        classThreePayableBy = Some(new LocalDate(2019, 4, 5)),
+        classThreePayableByPenalty = None,
+        classOneContribution = 430.4,
+        classTwoCredits = 0,
+        classThreeCredits = 0,
+        otherCredits = List()
+      ),
+      NpsNITaxYear(
+        startTaxYear = 2013,
+        qualifying = true,
+        underInvestigation = false,
+        payable = true,
+        classThreePayable = 720,
+        classThreePayableBy = Some(new LocalDate(2019, 4, 5)),
+        classThreePayableByPenalty = Some(new LocalDate(2023, 4, 5)),
+        classOneContribution = 0,
+        classTwoCredits = 10,
+        classThreeCredits = 3,
+        otherCredits = List(NpsOtherCredits(1,2,7))
+      )
+    )
+  )
+
+  private val regularDataSandbox: NationalInsuranceRecord = NationalInsuranceRecord(
     // scalastyle:off magic.number
     qualifyingYears = 36,
     qualifyingYearsPriorTo1975 = 5,
@@ -108,7 +157,7 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
       "return the default dummy data" in {
         val nino: Nino = generateNinoWithPrefix("ZX")
         whenReady(SandboxNationalInsuranceService.getNationalInsuranceRecord(nino)(HeaderCarrier())) { result =>
-          result shouldBe Right(regularData)
+          result shouldBe Right(regularDataSandbox)
         }
       }
     }
@@ -215,59 +264,10 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
 
     "regular ni record" should {
 
-      val niRecord = NpsNIRecord(
-        numberOfQualifyingYears = 36,
-        nonQualifyingYears = 10,
-        nonQualifyingYearsPayable = 4,
-        dateOfEntry = new LocalDate(1969,8,1),
-        pre75ContributionCount = 250,
-        niTaxYears = List(
-          NpsNITaxYear(
-            startTaxYear = 2015,
-            qualifying = true,
-            underInvestigation = false,
-            payable = false,
-            classThreePayable = 0,
-            classThreePayableBy = None,
-            classThreePayableByPenalty = None,
-            classOneContribution = 2430.24,
-            classTwoCredits = 0,
-            classThreeCredits = 0,
-            otherCredits = List()
-          ),
-          NpsNITaxYear(
-            startTaxYear = 2014,
-            qualifying = false,
-            underInvestigation = false,
-            payable = true,
-            classThreePayable = 9,
-            classThreePayableBy = Some(new LocalDate(2019, 4, 5)),
-            classThreePayableByPenalty = None,
-            classOneContribution = 430.4,
-            classTwoCredits = 0,
-            classThreeCredits = 0,
-            otherCredits = List()
-          ),
-          NpsNITaxYear(
-            startTaxYear = 2013,
-            qualifying = true,
-            underInvestigation = false,
-            payable = true,
-            classThreePayable = 720,
-            classThreePayableBy = Some(new LocalDate(2019, 4, 5)),
-            classThreePayableByPenalty = Some(new LocalDate(2023, 4, 5)),
-            classOneContribution = 0,
-            classTwoCredits = 10,
-            classThreeCredits = 3,
-            otherCredits = List(NpsOtherCredits(1,2,7))
-          )
-        )
-      )
-
       val liabilities = List(NpsLiability(14))
 
       when(service.citizenDetailsService.checkManualCorrespondenceIndicator).thenReturn(Future.successful(false))
-      when(service.nps.getNationalInsuranceRecord).thenReturn(Future.successful(niRecord))
+      when(service.nps.getNationalInsuranceRecord).thenReturn(Future.successful(niRecordHOD))
       when(service.nps.getLiabilities).thenReturn(Future.successful(liabilities))
       when(service.nps.getSummary).thenReturn(Future.successful(NpsSummary(false, None, new LocalDate(2016, 4, 5), new LocalDate(1951, 4 , 5), 2017)))
 
@@ -406,4 +406,42 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
       }
     }
   }
+
+  "NationalInsuranceRecordService exclusion with HOD connection" should {
+    val service = new NpsConnection {
+      override lazy val nps: NpsConnector = mock[NpsConnector]
+      override lazy val citizenDetailsService: CitizenDetailsService = {
+        mock[CitizenDetailsService]
+      }
+      override lazy val now: LocalDate = {
+        new LocalDate(2017, 1, 16)
+      }
+    }
+
+    "NI Summary with exclusions" should {
+
+      val summary = NpsSummary(
+        rreToConsider = true,
+        dateOfDeath = None,
+        earningsIncludedUpTo = new LocalDate(1954, 4, 5),
+        dateOfBirth = new LocalDate(1954, 7, 7),
+        finalRelevantYear = 2049
+      )
+      val liabilities = List(NpsLiability(14), NpsLiability(15))
+
+      when(service.citizenDetailsService.checkManualCorrespondenceIndicator).thenReturn(Future.successful(false))
+      when(service.nps.getNationalInsuranceRecord).thenReturn(Future.successful(niRecordHOD))
+      when(service.nps.getLiabilities).thenReturn(Future.successful(liabilities))
+      when(service.nps.getSummary).thenReturn(Future.successful(summary))
+
+      lazy val niRecordF: Future[ExclusionResponse] = service.getNationalInsuranceRecord(generateNino()).left.get
+
+      "return Isle of Man and married women reduced rate election exclusion" in {
+        whenReady(niRecordF) { niExclusion =>
+          niExclusion.exclusionReasons shouldBe List(Exclusion.IsleOfMan, Exclusion.MarriedWomenReducedRateElection)
+        }
+      }
+    }
+  }
+
 }
