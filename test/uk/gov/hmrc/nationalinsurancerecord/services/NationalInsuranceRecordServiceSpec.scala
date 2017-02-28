@@ -27,7 +27,7 @@ import org.mockito.Mockito._
 import org.mockito.Matchers
 import org.scalatest.mock.MockitoSugar
 import uk.gov.hmrc.nationalinsurancerecord.connectors.NpsConnector
-import uk.gov.hmrc.nationalinsurancerecord.domain.nps.{NpsNIRecord, NpsNITaxYear, NpsOtherCredits, NpsSummary}
+import uk.gov.hmrc.nationalinsurancerecord.domain.nps.{NpsNIRecord, NpsNITaxYear, NpsOtherCredits, NpsSummary, NpsLiability}
 
 import scala.concurrent.Future
 
@@ -199,6 +199,7 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
     }
   }
 
+
   "NationalInsuranceRecordService with a HOD Connection" when {
 
     val service = new NpsConnection {
@@ -210,6 +211,7 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
         new LocalDate(2017, 1, 16)
       }
     }
+
 
     "regular ni record" should {
 
@@ -262,9 +264,11 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
         )
       )
 
+      val liabilities = List(NpsLiability(14))
+
       when(service.citizenDetailsService.checkManualCorrespondenceIndicator).thenReturn(Future.successful(false))
       when(service.nps.getNationalInsuranceRecord).thenReturn(Future.successful(niRecord))
-      when(service.nps.getLiabilities).thenReturn(Future.successful(List()))
+      when(service.nps.getLiabilities).thenReturn(Future.successful(liabilities))
       when(service.nps.getSummary).thenReturn(Future.successful(NpsSummary(false, None, new LocalDate(2016, 4, 5), new LocalDate(1951, 4 , 5), 2017)))
 
       lazy val niRecordF: Future[NationalInsuranceRecord] = service.getNationalInsuranceRecord(generateNino()).right.get
@@ -297,7 +301,7 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
       }
       "return homeResponsibilities to be false"  in {
         whenReady(niRecordF) { ni =>
-          ni.homeResponsibilitiesProtection shouldBe false
+          ni.homeResponsibilitiesProtection shouldBe true
         }
       }
       "return earnings included upto to be 2016/8/1"  in {
