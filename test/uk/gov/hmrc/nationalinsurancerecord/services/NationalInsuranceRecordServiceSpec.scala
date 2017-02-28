@@ -24,7 +24,6 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nationalinsurancerecord.domain.{NationalInsuranceTaxYear, _}
 import uk.gov.hmrc.play.http.HeaderCarrier
 import org.mockito.Mockito._
-import org.mockito.Matchers
 import org.scalatest.mock.MockitoSugar
 import uk.gov.hmrc.nationalinsurancerecord.connectors.NpsConnector
 import uk.gov.hmrc.nationalinsurancerecord.domain.nps.{NpsLiability, NpsNIRecord, NpsNITaxYear, NpsOtherCredits, NpsSummary}
@@ -299,7 +298,7 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
           ni.dateOfEntry shouldBe new LocalDate(1969,8,1)
         }
       }
-      "return homeResponsibilities to be false"  in {
+      "return homeResponsibilities to be true"  in {
         whenReady(niRecordF) { ni =>
           ni.homeResponsibilitiesProtection shouldBe true
         }
