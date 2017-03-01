@@ -37,6 +37,6 @@ object NpsSummary {
       (__ \ "date_of_death").readNullable[LocalDate] and
       (__ \ "earnings_included_upto").read[LocalDate] and
       (__ \ "date_of_birth").read[LocalDate] and
-        (__ \ "final_relevant_year").format[Int]
+      (__ \ "final_relevant_year").read[Int]
     )(NpsSummary.apply _)
 }

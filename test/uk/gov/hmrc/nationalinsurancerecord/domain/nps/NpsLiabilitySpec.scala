@@ -37,7 +37,6 @@ class NpsLiabilitySpec extends UnitSpec{
            |    "liability_type_start_date": "1984-02-20",
            |    "liability_type_end_date_reason": "END DATE HELD",
            |    "liability_type": 16,
-           |    "nino": "QQ123456A",
            |    "award_amount": null
            |}
          """.stripMargin).as[NpsLiability].liabilityType shouldBe 16

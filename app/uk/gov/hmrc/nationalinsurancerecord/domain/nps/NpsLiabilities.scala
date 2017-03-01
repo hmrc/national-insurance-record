@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nationalinsurancerecord.util
+package uk.gov.hmrc.nationalinsurancerecord.domain.nps
 
-object NIRecordConstants {
-  // scalastyle:off magic.number
+import play.api.libs.json._
 
-  val niRecordMinAge = 16
-  val niRecordStart = 1975
-  val homeResponsibilitiesProtectionTypes = List(14, 15, 16, 38, 48, 80)
-  val ninoLengthWithoutSuffix = 8
+case class NpsLiabilities(liabilities: List[NpsLiability])
+
+object NpsLiabilities {
+  implicit val reads: Reads[NpsLiabilities] = {
+    (__ \ "npsLcdo004d").read[List[NpsLiability]].map(NpsLiabilities.apply)
+  }
 }
