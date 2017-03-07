@@ -263,7 +263,7 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
       val liabilities = NpsLiabilities(List(NpsLiability(14)))
       val nino = generateNino()
 
-      when(service.citizenDetailsService.checkManualCorrespondenceIndicator).thenReturn(Future.successful(false))
+      when(service.citizenDetailsService.checkManualCorrespondenceIndicator(nino)).thenReturn(Future.successful(false))
       when(service.nps.getNationalInsuranceRecord(nino)).thenReturn(Future.successful(niRecordHOD))
       when(service.nps.getLiabilities(nino)).thenReturn(Future.successful(liabilities))
       when(service.nps.getSummary(nino)).thenReturn(Future.successful(NpsSummary(false, None, new LocalDate(2016, 4, 5), new LocalDate(1951, 4 , 5), 2017)))
@@ -427,7 +427,7 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
       val liabilities = NpsLiabilities(List(NpsLiability(14), NpsLiability(15)))
       val nino = generateNino()
 
-      when(service.citizenDetailsService.checkManualCorrespondenceIndicator).thenReturn(Future.successful(false))
+      when(service.citizenDetailsService.checkManualCorrespondenceIndicator(nino)).thenReturn(Future.successful(false))
       when(service.nps.getNationalInsuranceRecord(nino)).thenReturn(Future.successful(niRecordHOD))
       when(service.nps.getLiabilities(nino)).thenReturn(Future.successful(liabilities))
       when(service.nps.getSummary(nino)).thenReturn(Future.successful(summary))

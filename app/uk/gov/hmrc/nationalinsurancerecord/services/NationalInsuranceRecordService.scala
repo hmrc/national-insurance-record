@@ -121,7 +121,7 @@ trait NpsConnection extends NationalInsuranceRecordService {
     val npsNIRecordF = nps.getNationalInsuranceRecord(nino)
     val npsLiabilitiesF = nps.getLiabilities(nino)
     val npsSummaryF = nps.getSummary(nino)
-    val manualCorrespondenceF = citizenDetailsService.checkManualCorrespondenceIndicator
+    val manualCorrespondenceF = citizenDetailsService.checkManualCorrespondenceIndicator(nino)
 
     for(
       npsNIRecord <- npsNIRecordF;
@@ -160,7 +160,7 @@ trait NpsConnection extends NationalInsuranceRecordService {
     val npsNIRecordF = nps.getNationalInsuranceRecord(nino)
     val npsSummaryF = nps.getSummary(nino)
     val npsLiabilitiesF = nps.getLiabilities(nino)
-    val manualCorrespondenceIndicatorF = citizenDetailsService.checkManualCorrespondenceIndicator
+    val manualCorrespondenceIndicatorF = citizenDetailsService.checkManualCorrespondenceIndicator(nino)
 
     for (
       npsNIRecord <- npsNIRecordF;
@@ -226,7 +226,7 @@ trait NpsConnection extends NationalInsuranceRecordService {
 
 object NationalInsuranceRecordServiceViaNisp extends NationalInsuranceRecordService with NispConnection
 object NationalInsuranceRecordService extends NationalInsuranceRecordService with NpsConnection {
-  override lazy val nps: NpsConnector = ???
-  override def citizenDetailsService: CitizenDetailsService = ???
+  override lazy val nps: NpsConnector = NpsConnector
+  override def citizenDetailsService: CitizenDetailsService = CitizenDetailsService
   override def now: LocalDate = LocalDate.now(DateTimeZone.forTimeZone(TimeZone.getTimeZone("Europe/London")))
 }

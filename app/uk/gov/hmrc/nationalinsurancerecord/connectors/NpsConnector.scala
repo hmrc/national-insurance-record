@@ -19,7 +19,7 @@ package uk.gov.hmrc.nationalinsurancerecord.connectors
 import play.api.data.validation.ValidationError
 import play.api.libs.json.{JsPath, Reads}
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.nationalinsurancerecord.domain.nps.{NpsLiabilities, NpsLiability, NpsNIRecord, NpsSummary}
+import uk.gov.hmrc.nationalinsurancerecord.domain.nps.{NpsLiabilities, NpsNIRecord, NpsSummary}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet, HttpReads, HttpResponse}
 import uk.gov.hmrc.nationalinsurancerecord.WSHttp
@@ -53,7 +53,7 @@ trait NpsConnector {
 
   def getLiabilities(nino: Nino)(implicit hc: HeaderCarrier): Future[NpsLiabilities] = {
     val urlToRead = url(s"/nps-rest-service/services/nps/pensions/${ninoWithoutSuffix(nino)}/liabilities")
-    connectToNps[NpsLiabilities](urlToRead, APITypes.NIRecord, requestHeaderCarrier) map {
+    connectToNps[NpsLiabilities](urlToRead, APITypes.Liabilities, requestHeaderCarrier) map {
       response =>
         response
     }
@@ -61,7 +61,7 @@ trait NpsConnector {
 
 
   def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[NpsNIRecord] = {
-    val urlToRead = url(s"/nps-rest-service/services/nps/pensions/${ninoWithoutSuffix(nino)}/liabilities")
+    val urlToRead = url(s"/nps-rest-service/services/nps/pensions/${ninoWithoutSuffix(nino)}/ni_record")
     connectToNps[NpsNIRecord](urlToRead, APITypes.NIRecord, requestHeaderCarrier) map {
       response =>
         response
@@ -69,7 +69,7 @@ trait NpsConnector {
   }
 
   def getSummary(nino: Nino)(implicit hc: HeaderCarrier): Future[NpsSummary] = {
-    val urlToRead = url(s"/nps-rest-service/services/nps/pensions/${ninoWithoutSuffix(nino)}/liabilities")
+    val urlToRead = url(s"/nps-rest-service/services/nps/pensions/${ninoWithoutSuffix(nino)}/sp_summary")
     connectToNps[NpsSummary](urlToRead, APITypes.Summary, requestHeaderCarrier) map {
       response =>
         response
