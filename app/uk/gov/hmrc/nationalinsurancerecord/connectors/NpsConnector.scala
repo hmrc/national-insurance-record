@@ -61,7 +61,6 @@ trait NpsConnector {
     connectToNps[NpsLiabilities](urlToRead, APITypes.Liabilities, requestHeaderCarrier)
   }
 
-
   def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[NpsNIRecord] = {
     val urlToRead = url(s"/nps-rest-service/services/nps/pensions/${ninoWithoutSuffix(nino)}/ni_record")
     connectToNps[NpsNIRecord](urlToRead, APITypes.NIRecord, requestHeaderCarrier)
