@@ -16,8 +16,24 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.services
 
+import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.nationalinsurancerecord.connectors.CitizenDetailsConnector
+import uk.gov.hmrc.play.http.HeaderCarrier
+import play.api.http.Status.LOCKED
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
+object CitizenDetailsService extends CitizenDetailsService {
+  override val citizenDetailsConnector: CitizenDetailsConnector = CitizenDetailsConnector
+}
+
+
 trait CitizenDetailsService {
-  def checkManualCorrespondenceIndicator: Future[Boolean]
+
+  val citizenDetailsConnector: CitizenDetailsConnector
+
+  def checkManualCorrespondenceIndicator(nino: Nino)(implicit hc: HeaderCarrier): Future[Boolean] = {
+    citizenDetailsConnector.retrieveMCIStatus(nino).map(status => status == LOCKED)
+  }
+
 }

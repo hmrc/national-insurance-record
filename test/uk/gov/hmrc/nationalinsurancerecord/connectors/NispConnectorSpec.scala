@@ -25,9 +25,8 @@ import org.scalatestplus.play.OneAppPerSuite
 import play.api.libs.json.Json
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.domain._
-import uk.gov.hmrc.play.http.{BadRequestException, HeaderCarrier, HttpGet, HttpResponse}
+import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.nationalinsurancerecord.connectors.NispConnector.JsonValidationException
-
 import scala.concurrent.Future
 
 class NispConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar with OneAppPerSuite {
@@ -77,7 +76,7 @@ class NispConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSuga
     }
   }
 
-  "getSummary" when {
+  "NispConnector - getSummary" when {
     "there is exclusion JSON" should {
       "return Left(Exclusion)" in {
         when(testNispConnector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.successful(HttpResponse(
@@ -735,7 +734,7 @@ class NispConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSuga
     }
   }
 
-  "getTaxYear" when {
+  "NispConnector - getTaxYear" when {
     "there is exclusion JSON" should {
       "return Left(Exclusion)" in {
         when(testNispConnector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.successful(HttpResponse(
@@ -834,6 +833,5 @@ class NispConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSuga
       }
     }
   }
-
 }
 

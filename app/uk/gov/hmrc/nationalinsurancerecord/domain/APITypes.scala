@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nationalinsurancerecord.util
+package uk.gov.hmrc.nationalinsurancerecord.domain
 
-object NIRecordConstants {
-  // scalastyle:off magic.number
+object APITypes extends Enumeration {
+  type APITypes = Value
 
-  val niRecordMinAge = 16
-  val niRecordStart = 1975
-  val homeResponsibilitiesProtectionTypes = List(14, 15, 16, 38, 48, 80)
-  val ninoLengthWithoutSuffix = 8
+  val Summary = Value
+  val NIRecord = Value
+  val Liabilities = Value
 }

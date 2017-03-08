@@ -118,10 +118,10 @@ trait NpsConnection extends NationalInsuranceRecordService {
 
   override def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceRecord]] = {
 
-    val npsNIRecordF = nps.getNationalInsuranceRecord
-    val npsLiabilitiesF = nps.getLiabilities
-    val npsSummaryF = nps.getSummary
-    val manualCorrespondenceF = citizenDetailsService.checkManualCorrespondenceIndicator
+    val npsNIRecordF = nps.getNationalInsuranceRecord(nino)
+    val npsLiabilitiesF = nps.getLiabilities(nino)
+    val npsSummaryF = nps.getSummary(nino)
+    val manualCorrespondenceF = citizenDetailsService.checkManualCorrespondenceIndicator(nino)
 
     for(
       npsNIRecord <- npsNIRecordF;
@@ -135,7 +135,7 @@ trait NpsConnection extends NationalInsuranceRecordService {
         val exclusions: List[Exclusion] = new ExclusionService(
           dateOfDeath = npsSummary.dateOfDeath,
           reducedRateElection = npsSummary.rreToConsider,
-          npsLiabilities,
+          npsLiabilities.liabilities,
           manualCorrespondence
         ).getExclusions
 
@@ -148,7 +148,7 @@ trait NpsConnection extends NationalInsuranceRecordService {
             purgedNIRecord.nonQualifyingYears,
             purgedNIRecord.nonQualifyingYearsPayable,
             purgedNIRecord.dateOfEntry,
-            homeResponsibilitiesProtection(npsLiabilities),
+            homeResponsibilitiesProtection(npsLiabilities.liabilities),
             npsSummary.earningsIncludedUpTo,
             purgedNIRecord.niTaxYears.map(npsTaxYearToNIRecordTaxYear).sortBy(_.taxYear)(Ordering[String].reverse)
           ))
@@ -157,10 +157,10 @@ trait NpsConnection extends NationalInsuranceRecordService {
   }
 
   override def getTaxYear(nino: Nino, taxYear: TaxYear)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceTaxYear]] = {
-    val npsNIRecordF = nps.getNationalInsuranceRecord
-    val npsSummaryF = nps.getSummary
-    val npsLiabilitiesF = nps.getLiabilities
-    val manualCorrespondenceIndicatorF = citizenDetailsService.checkManualCorrespondenceIndicator
+    val npsNIRecordF = nps.getNationalInsuranceRecord(nino)
+    val npsSummaryF = nps.getSummary(nino)
+    val npsLiabilitiesF = nps.getLiabilities(nino)
+    val manualCorrespondenceIndicatorF = citizenDetailsService.checkManualCorrespondenceIndicator(nino)
 
     for (
       npsNIRecord <- npsNIRecordF;
@@ -174,7 +174,7 @@ trait NpsConnection extends NationalInsuranceRecordService {
       val exclusions = new ExclusionService(
         npsSummary.dateOfDeath,
         npsSummary.rreToConsider,
-        npsLiabilities,
+        npsLiabilities.liabilities,
         manualCorrespondenceIndicator
       ).getExclusions
 
@@ -226,7 +226,7 @@ trait NpsConnection extends NationalInsuranceRecordService {
 
 object NationalInsuranceRecordServiceViaNisp extends NationalInsuranceRecordService with NispConnection
 object NationalInsuranceRecordService extends NationalInsuranceRecordService with NpsConnection {
-  override lazy val nps: NpsConnector = ???
-  override def citizenDetailsService: CitizenDetailsService = ???
+  override lazy val nps: NpsConnector = NpsConnector
+  override def citizenDetailsService: CitizenDetailsService = CitizenDetailsService
   override def now: LocalDate = LocalDate.now(DateTimeZone.forTimeZone(TimeZone.getTimeZone("Europe/London")))
 }

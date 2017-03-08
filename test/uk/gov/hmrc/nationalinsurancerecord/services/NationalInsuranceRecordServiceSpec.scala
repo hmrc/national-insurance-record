@@ -26,11 +26,12 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import uk.gov.hmrc.nationalinsurancerecord.connectors.NpsConnector
-import uk.gov.hmrc.nationalinsurancerecord.domain.nps.{NpsLiability, NpsNIRecord, NpsNITaxYear, NpsOtherCredits, NpsSummary}
+import uk.gov.hmrc.nationalinsurancerecord.domain.nps._
 
 import scala.concurrent.Future
 
 class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec with OneAppPerSuite with ScalaFutures with MockitoSugar {
+  // scalastyle:off magic.number
 
   private val niRecordHOD = NpsNIRecord(
     numberOfQualifyingYears = 36,
@@ -252,26 +253,23 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
 
     val service = new NpsConnection {
       override lazy val nps: NpsConnector = mock[NpsConnector]
-      override lazy val citizenDetailsService: CitizenDetailsService = {
-        mock[CitizenDetailsService]
-      }
-      override lazy val now: LocalDate = {
-        new LocalDate(2017, 1, 16)
-      }
+      override lazy val citizenDetailsService: CitizenDetailsService = mock[CitizenDetailsService]
+      override lazy val now: LocalDate = new LocalDate(2017, 1, 16)
     }
 
 
     "regular ni record" should {
 
-      val liabilities = List(NpsLiability(14))
+      val liabilities = NpsLiabilities(List(NpsLiability(14)))
+      val nino = generateNino()
 
-      when(service.citizenDetailsService.checkManualCorrespondenceIndicator).thenReturn(Future.successful(false))
-      when(service.nps.getNationalInsuranceRecord).thenReturn(Future.successful(niRecordHOD))
-      when(service.nps.getLiabilities).thenReturn(Future.successful(liabilities))
-      when(service.nps.getSummary).thenReturn(Future.successful(NpsSummary(false, None, new LocalDate(2016, 4, 5), new LocalDate(1951, 4 , 5), 2017)))
+      when(service.citizenDetailsService.checkManualCorrespondenceIndicator(nino)).thenReturn(Future.successful(false))
+      when(service.nps.getNationalInsuranceRecord(nino)).thenReturn(Future.successful(niRecordHOD))
+      when(service.nps.getLiabilities(nino)).thenReturn(Future.successful(liabilities))
+      when(service.nps.getSummary(nino)).thenReturn(Future.successful(NpsSummary(false, None, new LocalDate(2016, 4, 5), new LocalDate(1951, 4 , 5), 2017)))
 
-      lazy val niRecordF: Future[NationalInsuranceRecord] = service.getNationalInsuranceRecord(generateNino()).right.get
-      lazy val niTaxYearF: Future[NationalInsuranceTaxYear] = service.getTaxYear(generateNino(),TaxYear("2014-15")).right.get
+      lazy val niRecordF: Future[NationalInsuranceRecord] = service.getNationalInsuranceRecord(nino).right.get
+      lazy val niTaxYearF: Future[NationalInsuranceTaxYear] = service.getTaxYear(nino,TaxYear("2014-15")).right.get
 
       "return qualifying years to be 36" in {
         whenReady(niRecordF) { ni =>
@@ -426,14 +424,15 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
         dateOfBirth = new LocalDate(1954, 7, 7),
         finalRelevantYear = 2049
       )
-      val liabilities = List(NpsLiability(14), NpsLiability(15))
+      val liabilities = NpsLiabilities(List(NpsLiability(14), NpsLiability(15)))
+      val nino = generateNino()
 
-      when(service.citizenDetailsService.checkManualCorrespondenceIndicator).thenReturn(Future.successful(false))
-      when(service.nps.getNationalInsuranceRecord).thenReturn(Future.successful(niRecordHOD))
-      when(service.nps.getLiabilities).thenReturn(Future.successful(liabilities))
-      when(service.nps.getSummary).thenReturn(Future.successful(summary))
+      when(service.citizenDetailsService.checkManualCorrespondenceIndicator(nino)).thenReturn(Future.successful(false))
+      when(service.nps.getNationalInsuranceRecord(nino)).thenReturn(Future.successful(niRecordHOD))
+      when(service.nps.getLiabilities(nino)).thenReturn(Future.successful(liabilities))
+      when(service.nps.getSummary(nino)).thenReturn(Future.successful(summary))
 
-      lazy val niRecordF: Future[ExclusionResponse] = service.getNationalInsuranceRecord(generateNino()).left.get
+      lazy val niRecordF: Future[ExclusionResponse] = service.getNationalInsuranceRecord(nino).left.get
 
       "return Isle of Man and married women reduced rate election exclusion" in {
         whenReady(niRecordF) { niExclusion =>
