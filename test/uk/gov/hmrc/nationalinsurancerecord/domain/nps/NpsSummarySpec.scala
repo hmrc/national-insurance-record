@@ -100,4 +100,5 @@ class NpsSummarySpec extends UnitSpec {
       niSummary.finalRelevantYear shouldBe 2016
     }
   }
+
 }

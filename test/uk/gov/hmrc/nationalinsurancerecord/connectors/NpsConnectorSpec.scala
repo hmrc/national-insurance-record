@@ -25,12 +25,18 @@ import org.scalatestplus.play.OneAppPerSuite
 import play.api.libs.json.Json
 import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
+import uk.gov.hmrc.nationalinsurancerecord.cache.SummaryCache
 import uk.gov.hmrc.nationalinsurancerecord.connectors.NpsConnector.JsonValidationException
+import uk.gov.hmrc.nationalinsurancerecord.domain.nps.NpsSummary
+import uk.gov.hmrc.nationalinsurancerecord.services.CachingService
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet}
+
 import scala.concurrent.Future
 
 class NpsConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar with OneAppPerSuite with ScalaFutures {
   // scalastyle:off magic.number
+
+  val mockSummaryRepo = mock[CachingService[SummaryCache, NpsSummary]]
 
   "NpsConnector" should {
     val connector = new NpsConnector {
@@ -38,70 +44,27 @@ class NpsConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
         override val serviceOriginatorIdKey: String = "id"
         override val serviceOriginatorId: String = "key"
         override val http: HttpGet = mock[HttpGet]
-      }
-
-    val nino = generateNino()
-
-    "return valid Summary response" in {
-
-      when(connector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any()))
-        .thenReturn(
-          Future.successful(
-            HttpResponse(
-              200,
-              Some(Json.parse(
-                """
-                  |{
-                  | "final_relevant_year": 2016,
-                  | "date_of_death": null,
-                  | "date_of_birth": "1952-11-21",
-                  | "rre_to_consider": 0,
-                  | "earnings_included_upto": "2014-04-05"
-                  |}
-                """.stripMargin
-              ))))
-        )
-
-        val npsSummaryF = await(connector.getSummary(nino)(HeaderCarrier()))
-        npsSummaryF.rreToConsider shouldBe false
-        npsSummaryF.finalRelevantYear shouldBe 2016
-        npsSummaryF.dateOfBirth shouldBe new LocalDate(1952,11,21)
-        npsSummaryF.dateOfDeath shouldBe None
-        npsSummaryF.earningsIncludedUpTo shouldBe new LocalDate(2014,4,5)
+        override val summaryRepository: CachingService[SummaryCache, NpsSummary] = mockSummaryRepo
     }
 
-    "return a failed Summary when it cannot parse JSON and report validation errors" in {
-      when(connector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any()))
-        .thenReturn(
-          Future.successful(
-            HttpResponse(
-              200,
-              Some(Json.parse(
-                """
-                  |{
-                  | "final_relevant_year": 2016,
-                  | "date_of_death": null,
-                  | "date_of_birth": "1952-11-21",
-                  | "rre_to_consider": 0,
-                  | "earnings_included": "2014-04-05"
-                  |}
-                """.stripMargin
-              ))
-            )
-          )
-        )
-      ScalaFutures.whenReady(connector.getSummary(generateNino()).failed) { ex =>
-        ex shouldBe a[JsonValidationException]
-        ex.getMessage.contains("JSON Validation Error:") shouldBe true
-      }
+    val nino = generateNino()
+    val testSummaryModel = NpsSummary(rreToConsider = false, dateOfDeath = None, earningsIncludedUpTo = new LocalDate(2014, 4, 5),
+      dateOfBirth = new LocalDate(1952, 11, 21), finalRelevantYear = 2016)
+
+    "return valid Summary response" in {
+      when(mockSummaryRepo.findByNino(Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.successful(Some(testSummaryModel)))
+      val npsSummaryF = connector.getSummary(generateNino())(HeaderCarrier())
+      npsSummaryF.rreToConsider shouldBe false
+      npsSummaryF.finalRelevantYear shouldBe 2016
+      npsSummaryF.dateOfBirth shouldBe new LocalDate(1952,11,21)
+      npsSummaryF.dateOfDeath shouldBe None
+      npsSummaryF.earningsIncludedUpTo shouldBe new LocalDate(2014,4,5)
     }
 
     "return a failed Summary when there is an http error and pass on the exception" in {
-      when(connector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any()))
-        .thenReturn(Future.failed(new BadRequestException("Bad Request exception")))
-      ScalaFutures.whenReady(connector.getSummary(generateNino()).failed) { ex =>
-        ex shouldBe a[BadRequestException]
-      }
+      val npsSummaryF = connector.getSummary(generateNino())(HeaderCarrier())
+      await(npsSummaryF) shouldBe testSummaryModel
+      verify(connector.http, never()).GET(Matchers.any())(Matchers.any(), Matchers.any())
     }
 
     "return valid NIRecord response" in {

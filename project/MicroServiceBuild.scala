@@ -38,7 +38,9 @@ private object AppDependencies {
     "uk.gov.hmrc" %% "logback-json-logger" % logbackJsonLoggerVersion,
     "uk.gov.hmrc" %% "domain" % domainVersion,
     "uk.gov.hmrc" %% "play-hmrc-api" % playHmrcApiVersion,
-    "uk.gov.hmrc" %% "play-hal" % playHalVersion
+    "uk.gov.hmrc" %% "play-hal" % playHalVersion,
+    "uk.gov.hmrc" %% "play-reactivemongo" % "5.2.0",
+    "uk.gov.hmrc" %% "simple-reactivemongo" % "5.2.0"
   )
 
   trait TestDependencies {
@@ -53,7 +55,8 @@ private object AppDependencies {
         "org.pegdown" % "pegdown" % pegdownVersion % scope,
         "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
         "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % scope,
-        "org.mockito" % "mockito-all" % "1.9.5" % scope
+        "org.mockito" % "mockito-all" % "1.9.5" % scope,
+        "uk.gov.hmrc" %% "reactivemongo-test" % "1.6.0" % scope
       )
     }.test
   }
