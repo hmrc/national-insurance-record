@@ -53,27 +53,17 @@ trait NpsConnector {
 
   def getLiabilities(nino: Nino)(implicit hc: HeaderCarrier): Future[NpsLiabilities] = {
     val urlToRead = url(s"/nps-rest-service/services/nps/pensions/${ninoWithoutSuffix(nino)}/liabilities")
-    connectToNps[NpsLiabilities](urlToRead, APITypes.Liabilities, requestHeaderCarrier) map {
-      response =>
-        response
-    }
+    connectToNps[NpsLiabilities](urlToRead, APITypes.Liabilities, requestHeaderCarrier)
   }
-
 
   def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[NpsNIRecord] = {
     val urlToRead = url(s"/nps-rest-service/services/nps/pensions/${ninoWithoutSuffix(nino)}/ni_record")
-    connectToNps[NpsNIRecord](urlToRead, APITypes.NIRecord, requestHeaderCarrier) map {
-      response =>
-        response
-    }
+    connectToNps[NpsNIRecord](urlToRead, APITypes.NIRecord, requestHeaderCarrier)
   }
 
   def getSummary(nino: Nino)(implicit hc: HeaderCarrier): Future[NpsSummary] = {
     val urlToRead = url(s"/nps-rest-service/services/nps/pensions/${ninoWithoutSuffix(nino)}/sp_summary")
-    connectToNps[NpsSummary](urlToRead, APITypes.Summary, requestHeaderCarrier) map {
-      response =>
-        response
-    }
+    connectToNps[NpsSummary](urlToRead, APITypes.Summary, requestHeaderCarrier)
   }
 
   private def connectToNps[A](url: String, api: APITypes, requestHc: HeaderCarrier)(implicit hc: HeaderCarrier, reads: Reads[A]): Future[A] = {
