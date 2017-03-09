@@ -14,20 +14,10 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nationalinsurancerecord.domain.nps
+package uk.gov.hmrc.nationalinsurancerecord.cache
 
-import play.api.libs.json._
-import play.api.libs.functional.syntax._
+import uk.gov.hmrc.nationalinsurancerecord.config.ApplicationConfig
 
-case class NpsLiability(liabilityType: Int)
-
-object NpsLiability {
-  val reads: Reads[NpsLiability] = (__ \ "liability_type").read[Int].map(NpsLiability.apply)
-  val writes: Writes[NpsLiability] = (__ \ "liability_type").write[Int].contramap(_.liabilityType)
-  implicit val formats: Format[NpsLiability] = Format(reads, writes)
-}
-
-
-object LiabilityType {
-  final val ISLE_OF_MAN = 15
+object StubApplicationConfig extends ApplicationConfig {
+  override val responseCacheTTL: Int = 60
 }
