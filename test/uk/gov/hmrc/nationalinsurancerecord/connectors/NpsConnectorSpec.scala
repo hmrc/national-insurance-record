@@ -26,7 +26,6 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.cache.SummaryCache
-import uk.gov.hmrc.nationalinsurancerecord.connectors.NpsConnector.JsonValidationException
 import uk.gov.hmrc.nationalinsurancerecord.domain.nps.NpsSummary
 import uk.gov.hmrc.nationalinsurancerecord.services.CachingService
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet}
@@ -38,7 +37,7 @@ class NpsConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
 
   val mockSummaryRepo = mock[CachingService[SummaryCache, NpsSummary]]
 
-  "NpsConnector" should {
+  "NpsConnector - No Caching" should {
     val connector = new NpsConnector {
         override val serviceUrl: String = ""
         override val serviceOriginatorIdKey: String = "id"
@@ -48,23 +47,32 @@ class NpsConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
     }
 
     val nino = generateNino()
-    val testSummaryModel = NpsSummary(rreToConsider = false, dateOfDeath = None, earningsIncludedUpTo = new LocalDate(2014, 4, 5),
-      dateOfBirth = new LocalDate(1952, 11, 21), finalRelevantYear = 2016)
 
-    "return valid Summary response" in {
-      when(mockSummaryRepo.findByNino(Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.successful(Some(testSummaryModel)))
-      val npsSummaryF = connector.getSummary(generateNino())(HeaderCarrier())
+    "return valid Summary in HTTP response" in {
+      when(mockSummaryRepo.findByNino(Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.successful(None))
+      when(connector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any()))
+        .thenReturn(
+          Future.successful(
+            HttpResponse(
+              200,
+              Some(Json.parse(
+                """
+                  |{
+                  | "final_relevant_year": 2016,
+                  | "date_of_death": null,
+                  | "date_of_birth": "1952-11-21",
+                  | "rre_to_consider": 0,
+                  | "earnings_included_upto": "2014-04-05"
+                  |}
+                """.stripMargin
+              ))))
+        )
+      val npsSummaryF = await(connector.getSummary(nino)(HeaderCarrier()))
       npsSummaryF.rreToConsider shouldBe false
       npsSummaryF.finalRelevantYear shouldBe 2016
       npsSummaryF.dateOfBirth shouldBe new LocalDate(1952,11,21)
       npsSummaryF.dateOfDeath shouldBe None
       npsSummaryF.earningsIncludedUpTo shouldBe new LocalDate(2014,4,5)
-    }
-
-    "return a failed Summary when there is an http error and pass on the exception" in {
-      val npsSummaryF = connector.getSummary(generateNino())(HeaderCarrier())
-      await(npsSummaryF) shouldBe testSummaryModel
-      verify(connector.http, never()).GET(Matchers.any())(Matchers.any(), Matchers.any())
     }
 
     "return valid NIRecord response" in {
@@ -271,5 +279,35 @@ class NpsConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
       }
     }
 
+  }
+
+  "NpsConnector - Caching" should {
+    val connector = new NpsConnector {
+      override val serviceUrl: String = ""
+      override val serviceOriginatorIdKey: String = "id"
+      override val serviceOriginatorId: String = "key"
+      override val http: HttpGet = mock[HttpGet]
+      override val summaryRepository: CachingService[SummaryCache, NpsSummary] = mockSummaryRepo
+    }
+
+    val nino = generateNino()
+    val testSummaryModel = NpsSummary(rreToConsider = false, dateOfDeath = None, earningsIncludedUpTo = new LocalDate(2014, 4, 5),
+      dateOfBirth = new LocalDate(1952, 11, 21), finalRelevantYear = 2016)
+
+    "return valid Summary response" in {
+      when(mockSummaryRepo.findByNino(Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.successful(Some(testSummaryModel)))
+      val npsSummaryF = connector.getSummary(generateNino())(HeaderCarrier())
+      npsSummaryF.rreToConsider shouldBe false
+      npsSummaryF.finalRelevantYear shouldBe 2016
+      npsSummaryF.dateOfBirth shouldBe new LocalDate(1952, 11, 21)
+      npsSummaryF.dateOfDeath shouldBe None
+      npsSummaryF.earningsIncludedUpTo shouldBe new LocalDate(2014, 4, 5)
+    }
+
+    "return valid Summary from cache" in {
+      val npsSummaryF = connector.getSummary(generateNino())(HeaderCarrier())
+      await(npsSummaryF) shouldBe testSummaryModel
+      verify(connector.http, never()).GET(Matchers.any())(Matchers.any(), Matchers.any())
+    }
   }
 }
