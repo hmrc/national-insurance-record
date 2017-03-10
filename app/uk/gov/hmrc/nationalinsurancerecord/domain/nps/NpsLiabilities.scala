@@ -17,11 +17,16 @@
 package uk.gov.hmrc.nationalinsurancerecord.domain.nps
 
 import play.api.libs.json._
+import play.api.libs.functional.syntax._
 
 case class NpsLiabilities(liabilities: List[NpsLiability])
 
 object NpsLiabilities {
-  implicit val reads: Reads[NpsLiabilities] = {
+  val reads: Reads[NpsLiabilities] = {
     (__ \ "npsLcdo004d").read[List[NpsLiability]].map(NpsLiabilities.apply)
   }
+  val writes: Writes[NpsLiabilities] = {
+    (__ \ "npsLcdo004d").write[List[NpsLiability]].contramap(_.liabilities)
+  }
+  implicit val formats: Format[NpsLiabilities] = Format(reads, writes)
 }

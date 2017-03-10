@@ -14,24 +14,15 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nationalinsurancerecord.controllers
+package uk.gov.hmrc.nationalinsurancerecord.config
 
-import play.api.http.Status
-import play.api.test.FakeRequest
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import play.api.Play._
+import uk.gov.hmrc.play.config.ServicesConfig
 
+trait ApplicationConfig {
+  val responseCacheTTL: Int
+}
 
-class HelloWorldControllerSpec extends UnitSpec with WithFakeApplication{
-
-  val fakeRequest = FakeRequest("GET", "/")
-
-
-  "GET /" should {
-    "return 200" in {
-      val result = HelloWorldController.hello()(fakeRequest)
-      status(result) shouldBe Status.OK
-    }
-  }
-
-
+object ApplicationConfig extends ApplicationConfig with ServicesConfig {
+  override val responseCacheTTL = configuration.getInt("mongodb.responseTTL").getOrElse(throw new RuntimeException("MongoDB TTL is not configured"))
 }

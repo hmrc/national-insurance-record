@@ -18,12 +18,12 @@ package uk.gov.hmrc.nationalinsurancerecord.domain.nps
 
 import org.joda.time.LocalDate
 import uk.gov.hmrc.play.test.UnitSpec
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
 
 class NpsSummarySpec extends UnitSpec {
   // scalastyle:off magic.number
 
-  val summary = Json.parse(
+  val summary: JsValue = Json.parse(
     """
       |{
       | "contracted_out_flag": 1,
@@ -82,7 +82,7 @@ class NpsSummarySpec extends UnitSpec {
       |}
     """.stripMargin)
 
-  val niSummary = summary.as[NpsSummary]
+  val niSummary: NpsSummary = summary.as[NpsSummary]
   "NISummary" should {
     "parse rre to consider correctly" in {
       niSummary.rreToConsider shouldBe false
@@ -100,4 +100,31 @@ class NpsSummarySpec extends UnitSpec {
       niSummary.finalRelevantYear shouldBe 2016
     }
   }
+
+  "NpsSummary" should {
+    val expected = new NpsSummary(
+      rreToConsider = true,
+      dateOfDeath = Some(new LocalDate(2017, 1, 1)),
+      earningsIncludedUpTo = new LocalDate(2016, 12, 31),
+      dateOfBirth = new LocalDate(1968, 2, 24),
+      finalRelevantYear = 2016
+    )
+
+    val json = Json.toJson[NpsSummary](expected)
+    val actual = Json.fromJson[NpsSummary](json)
+
+    "convert to JSON" in {
+      val rreToConsider = (json \ "rre_to_consider").asOpt[Int]
+      rreToConsider.isDefined shouldBe true
+      rreToConsider.get shouldBe 1
+    }
+    "convert from JSON" in {
+      actual.isSuccess shouldBe true
+    }
+    "convert the same value to and from JSON" in {
+      actual.get shouldBe expected
+      actual.get.rreToConsider shouldBe true
+    }
+  }
+
 }

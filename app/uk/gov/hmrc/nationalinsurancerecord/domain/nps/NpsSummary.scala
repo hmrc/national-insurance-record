@@ -31,12 +31,26 @@ case class NpsSummary(
 
 object NpsSummary {
   val readBooleanFromInt: JsPath => Reads[Boolean] = jsPath => jsPath.read[Int].map(_.equals(1))
+  val writeIntFromBoolean: JsPath => OWrites[Boolean] = jsPath => jsPath.write[Int].contramap[Boolean] {
+    case true => 1
+    case _ => 0
+  }
 
-  implicit val reads: Reads[NpsSummary] = (
+  val writes: Writes[NpsSummary] = (
+    writeIntFromBoolean(__ \ "rre_to_consider") and
+    (__ \ "date_of_death").write[Option[LocalDate]] and
+    (__ \ "earnings_included_upto").write[LocalDate] and
+    (__ \ "date_of_birth").write[LocalDate] and
+    (__ \ "final_relevant_year").write[Int]
+    )(unlift(NpsSummary.unapply))
+
+  val reads: Reads[NpsSummary] = (
       readBooleanFromInt(__ \ "rre_to_consider") and
       (__ \ "date_of_death").readNullable[LocalDate] and
       (__ \ "earnings_included_upto").read[LocalDate] and
       (__ \ "date_of_birth").read[LocalDate] and
       (__ \ "final_relevant_year").read[Int]
     )(NpsSummary.apply _)
+
+  implicit val formats: Format[NpsSummary] = Format(reads, writes)
 }
