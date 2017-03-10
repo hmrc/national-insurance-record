@@ -22,11 +22,11 @@ import org.mockito.Matchers
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
-import uk.gov.hmrc.nationalinsurancerecord.cache.SummaryCache
-import uk.gov.hmrc.nationalinsurancerecord.domain.nps.NpsSummary
+import uk.gov.hmrc.nationalinsurancerecord.cache.{LiabilitiesCache, NIRecordCache, SummaryCache}
+import uk.gov.hmrc.nationalinsurancerecord.domain.nps.{NpsLiabilities, NpsNIRecord, NpsSummary}
 import uk.gov.hmrc.nationalinsurancerecord.services.CachingService
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet}
 
@@ -36,14 +36,161 @@ class NpsConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
   // scalastyle:off magic.number
 
   val mockSummaryRepo = mock[CachingService[SummaryCache, NpsSummary]]
+  val mockLiabilitiesRepo = mock[CachingService[LiabilitiesCache, NpsLiabilities]]
+  val mockNIRecordRepo = mock[CachingService[NIRecordCache, NpsNIRecord]]
+  val testNIRecordJson = Json.parse(
+    """
+      | {
+      | "years_to_fry": 1,
+      | "non_qualifying_years": 13,
+      | "date_of_entry": "1973-10-01",
+      | "npsLniemply": [],
+      | "pre_75_cc_count": 51,
+      | "number_of_qualifying_years": 27,
+      | "npsErrlist": {
+      |   "count": 0,
+      | "mgt_check": 0,
+      | "commit_status": 2,
+      | "npsErritem": [],
+      | "bfm_return_code": 0,
+      | "data_not_found": 0
+      |},
+      |"non_qualifying_years_payable": 0,
+      |  "npsLnitaxyr": [
+      | {
+      | "class_three_payable_by_penalty": null,
+      | "class_two_outstanding_weeks": null,
+      | "class_two_payable": null,
+      | "qualifying": 1,
+      | "under_investigation_flag": 0,
+      | "class_two_payable_by": null,
+      | "co_class_one_paid": null,
+      | "class_two_payable_by_penalty": null,
+      | "co_primary_paid_earnings": null,
+      | "payable": 0,
+      | "rattd_tax_year": 2012,
+      | "ni_earnings": null,
+      | "amount_needed": null,
+      | "primary_paid_earnings": "21750.0000",
+      | "class_three_payable": null,
+      | "ni_earnings_employed": "1698.9600",
+      | "npsLothcred": [
+      |   {
+      |      "credit_source_type": 2,
+      |      "cc_type": 23,
+      |      "no_of_credits_and_conts": 4
+      |   }
+      | ],
+      | "ni_earnings_self_employed": null,
+      | "class_three_payable_by": null,
+      | "ni_earnings_voluntary": null
+      |},
+      |{
+      | "class_three_payable_by_penalty": "2023-04-05",
+      | "class_two_outstanding_weeks": null,
+      | "class_two_payable": null,
+      | "qualifying": 0,
+      | "under_investigation_flag": 1,
+      | "class_two_payable_by": null,
+      | "co_class_one_paid": null,
+      | "class_two_payable_by_penalty": null,
+      | "co_primary_paid_earnings": null,
+      | "payable": 1,
+      | "rattd_tax_year": 2013,
+      | "ni_earnings": null,
+      | "amount_needed": null,
+      | "primary_paid_earnings": null,
+      | "class_three_payable": 722.80,
+      | "ni_earnings_employed": null,
+      | "npsLothcred": [],
+      | "ni_earnings_self_employed": "52",
+      | "class_three_payable_by": "2019-04-05",
+      | "ni_earnings_voluntary": null
+      |}
+      |],
+      | "nino": "<NINO>"
+      |}
+    """.stripMargin
+  )
 
-  "NpsConnector - No Caching" should {
+  val niRecord = testNIRecordJson.as[NpsNIRecord]
+
+  val testLiabilitiesJson = Json.parse(
+    """
+      |{
+      |  "npsErrlist": {
+      |    "count": 0,
+      |    "mgt_check": 0,
+      |    "commit_status": 2,
+      |    "npsErritem": [],
+      |    "bfm_return_code": 0,
+      |    "data_not_found": 0
+      |  },
+      |  "npsLcdo004d": [
+      |    {
+      |      "liability_type_end_date": "2012-06-23",
+      |      "liability_occurrence_no": 1,
+      |      "liability_type_start_date": "2011-08-21",
+      |      "liability_type_end_date_reason": "END DATE HELD",
+      |      "liability_type": 13
+      |    },
+      |    {
+      |      "liability_type_end_date": "1998-05-03",
+      |      "liability_occurrence_no": 1,
+      |      "liability_type_start_date": "1989-08-28",
+      |      "liability_type_end_date_reason": "END DATE HELD",
+      |      "liability_type": 16
+      |    },
+      |    {
+      |      "liability_type_end_date": "2005-08-23",
+      |      "liability_occurrence_no": 2,
+      |      "liability_type_start_date": "1998-05-04",
+      |      "liability_type_end_date_reason": "END DATE HELD",
+      |      "liability_type": 16
+      |    },
+      |    {
+      |      "liability_type_end_date": "1995-02-11",
+      |      "liability_occurrence_no": 1,
+      |      "liability_type_start_date": "1995-02-06",
+      |      "liability_type_end_date_reason": "END DATE HELD",
+      |      "liability_type": 34
+      |    },
+      |    {
+      |      "liability_type_end_date": "1998-06-13",
+      |      "liability_occurrence_no": 2,
+      |      "liability_type_start_date": "1997-04-06",
+      |      "liability_type_end_date_reason": "END DATE HELD",
+      |      "liability_type": 34
+      |    },
+      |    {
+      |      "liability_type_end_date": "2000-09-25",
+      |      "liability_occurrence_no": 1,
+      |      "liability_type_start_date": "2000-03-28",
+      |      "liability_type_end_date_reason": "END DATE HELD",
+      |      "liability_type": 71
+      |    },
+      |    {
+      |      "liability_type_end_date": "2004-04-05",
+      |      "liability_occurrence_no": 1,
+      |      "liability_type_start_date": "2003-09-12",
+      |      "liability_type_end_date_reason": "END DATE HELD",
+      |      "liability_type": 83
+      |    }
+      |  ]
+      |}
+    """.stripMargin
+  )
+  val liabilities = testLiabilitiesJson.as[NpsLiabilities]
+
+    "NpsConnector - No Caching" should {
     val connector = new NpsConnector {
-        override val serviceUrl: String = ""
-        override val serviceOriginatorIdKey: String = "id"
-        override val serviceOriginatorId: String = "key"
-        override val http: HttpGet = mock[HttpGet]
-        override val summaryRepository: CachingService[SummaryCache, NpsSummary] = mockSummaryRepo
+      override val serviceUrl: String = ""
+      override val serviceOriginatorIdKey: String = "id"
+      override val serviceOriginatorId: String = "key"
+      override val http: HttpGet = mock[HttpGet]
+      override val summaryRepository: CachingService[SummaryCache, NpsSummary] = mockSummaryRepo
+      override val liabilitiesRepository: CachingService[LiabilitiesCache, NpsLiabilities] = mockLiabilitiesRepo
+      override val nirecordRepository: CachingService[NIRecordCache, NpsNIRecord] = mockNIRecordRepo
     }
 
     val nino = generateNino()
@@ -76,85 +223,14 @@ class NpsConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
     }
 
     "return valid NIRecord response" in {
+      when(mockNIRecordRepo.findByNino(Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.successful(None))
       when(connector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(
           Future.successful(
             HttpResponse(
               200,
-              Some(Json.parse(
-                """
-                  | {
-                  | "years_to_fry": 1,
-                  | "non_qualifying_years": 13,
-                  | "date_of_entry": "1973-10-01",
-                  | "npsLniemply": [],
-                  | "pre_75_cc_count": 51,
-                  | "number_of_qualifying_years": 27,
-                  | "npsErrlist": {
-                  |   "count": 0,
-                  | "mgt_check": 0,
-                  | "commit_status": 2,
-                  | "npsErritem": [],
-                  | "bfm_return_code": 0,
-                  | "data_not_found": 0
-                  |},
-                  |"non_qualifying_years_payable": 0,
-                  |  "npsLnitaxyr": [
-                  | {
-                  | "class_three_payable_by_penalty": null,
-                  | "class_two_outstanding_weeks": null,
-                  | "class_two_payable": null,
-                  | "qualifying": 1,
-                  | "under_investigation_flag": 0,
-                  | "class_two_payable_by": null,
-                  | "co_class_one_paid": null,
-                  | "class_two_payable_by_penalty": null,
-                  | "co_primary_paid_earnings": null,
-                  | "payable": 0,
-                  | "rattd_tax_year": 2012,
-                  | "ni_earnings": null,
-                  | "amount_needed": null,
-                  | "primary_paid_earnings": "21750.0000",
-                  | "class_three_payable": null,
-                  | "ni_earnings_employed": "1698.9600",
-                  | "npsLothcred": [
-                  |   {
-                  |      "credit_source_type": 2,
-                  |      "cc_type": 23,
-                  |      "no_of_credits_and_conts": 4
-                  |   }
-                  | ],
-                  | "ni_earnings_self_employed": null,
-                  | "class_three_payable_by": null,
-                  | "ni_earnings_voluntary": null
-                  |},
-                  |{
-                  | "class_three_payable_by_penalty": "2023-04-05",
-                  | "class_two_outstanding_weeks": null,
-                  | "class_two_payable": null,
-                  | "qualifying": 0,
-                  | "under_investigation_flag": 1,
-                  | "class_two_payable_by": null,
-                  | "co_class_one_paid": null,
-                  | "class_two_payable_by_penalty": null,
-                  | "co_primary_paid_earnings": null,
-                  | "payable": 1,
-                  | "rattd_tax_year": 2013,
-                  | "ni_earnings": null,
-                  | "amount_needed": null,
-                  | "primary_paid_earnings": null,
-                  | "class_three_payable": 722.80,
-                  | "ni_earnings_employed": null,
-                  | "npsLothcred": [],
-                  | "ni_earnings_self_employed": "52",
-                  | "class_three_payable_by": "2019-04-05",
-                  | "ni_earnings_voluntary": null
-                  |}
-                  |],
-                  | "nino": "<NINO>"
-                  |}
-                """.stripMargin
-              ))))
+              Some(testNIRecordJson)
+            ))
         )
       val npsNIRecordF = await(connector.getNationalInsuranceRecord(nino)(HeaderCarrier()))
       npsNIRecordF.nonQualifyingYearsPayable shouldBe 0
@@ -193,77 +269,13 @@ class NpsConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
     }
 
     "return valid Liabilities response" in {
-
+      when(mockLiabilitiesRepo.findByNino(Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.successful(None))
       when(connector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(
           Future.successful(
             HttpResponse(
               200,
-              Some(Json.parse(
-                """
-                  |{
-                  |  "npsErrlist": {
-                  |    "count": 0,
-                  |    "mgt_check": 0,
-                  |    "commit_status": 2,
-                  |    "npsErritem": [],
-                  |    "bfm_return_code": 0,
-                  |    "data_not_found": 0
-                  |  },
-                  |  "npsLcdo004d": [
-                  |    {
-                  |      "liability_type_end_date": "2012-06-23",
-                  |      "liability_occurrence_no": 1,
-                  |      "liability_type_start_date": "2011-08-21",
-                  |      "liability_type_end_date_reason": "END DATE HELD",
-                  |      "liability_type": 13
-                  |    },
-                  |    {
-                  |      "liability_type_end_date": "1998-05-03",
-                  |      "liability_occurrence_no": 1,
-                  |      "liability_type_start_date": "1989-08-28",
-                  |      "liability_type_end_date_reason": "END DATE HELD",
-                  |      "liability_type": 16
-                  |    },
-                  |    {
-                  |      "liability_type_end_date": "2005-08-23",
-                  |      "liability_occurrence_no": 2,
-                  |      "liability_type_start_date": "1998-05-04",
-                  |      "liability_type_end_date_reason": "END DATE HELD",
-                  |      "liability_type": 16
-                  |    },
-                  |    {
-                  |      "liability_type_end_date": "1995-02-11",
-                  |      "liability_occurrence_no": 1,
-                  |      "liability_type_start_date": "1995-02-06",
-                  |      "liability_type_end_date_reason": "END DATE HELD",
-                  |      "liability_type": 34
-                  |    },
-                  |    {
-                  |      "liability_type_end_date": "1998-06-13",
-                  |      "liability_occurrence_no": 2,
-                  |      "liability_type_start_date": "1997-04-06",
-                  |      "liability_type_end_date_reason": "END DATE HELD",
-                  |      "liability_type": 34
-                  |    },
-                  |    {
-                  |      "liability_type_end_date": "2000-09-25",
-                  |      "liability_occurrence_no": 1,
-                  |      "liability_type_start_date": "2000-03-28",
-                  |      "liability_type_end_date_reason": "END DATE HELD",
-                  |      "liability_type": 71
-                  |    },
-                  |    {
-                  |      "liability_type_end_date": "2004-04-05",
-                  |      "liability_occurrence_no": 1,
-                  |      "liability_type_start_date": "2003-09-12",
-                  |      "liability_type_end_date_reason": "END DATE HELD",
-                  |      "liability_type": 83
-                  |    }
-                  |  ]
-                  |}
-                """.stripMargin
-              ))))
+              Some(testLiabilitiesJson)))
         )
 
       val npsLiabilitiesF = await(connector.getLiabilities(nino)(HeaderCarrier()))
@@ -288,6 +300,8 @@ class NpsConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
       override val serviceOriginatorId: String = "key"
       override val http: HttpGet = mock[HttpGet]
       override val summaryRepository: CachingService[SummaryCache, NpsSummary] = mockSummaryRepo
+      override val liabilitiesRepository: CachingService[LiabilitiesCache, NpsLiabilities] = mockLiabilitiesRepo
+      override val nirecordRepository: CachingService[NIRecordCache, NpsNIRecord] = mockNIRecordRepo
     }
 
     val nino = generateNino()
@@ -309,5 +323,30 @@ class NpsConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
       await(npsSummaryF) shouldBe testSummaryModel
       verify(connector.http, never()).GET(Matchers.any())(Matchers.any(), Matchers.any())
     }
+
+    "return valid NIRecord response" in {
+      when(mockNIRecordRepo.findByNino(Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.successful(Some(niRecord)))
+      val npsNIRecordF = connector.getNationalInsuranceRecord(generateNino())(HeaderCarrier())
+      await(npsNIRecordF) shouldBe niRecord
+    }
+
+    "return valid NIRecord from cache" in {
+      val npNIRecordF = connector.getNationalInsuranceRecord(generateNino())(HeaderCarrier())
+      await(npNIRecordF) shouldBe niRecord
+      verify(connector.http, never()).GET(Matchers.any())(Matchers.any(), Matchers.any())
+    }
+
+    "return valid Liabilities response" in {
+      when(mockLiabilitiesRepo.findByNino(Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.successful(Some(liabilities)))
+      val npsLiabilitiesF = connector.getLiabilities(generateNino())(HeaderCarrier())
+      await(npsLiabilitiesF) shouldBe liabilities
+    }
+
+    "return valid Liabilities from cache" in {
+      val npsLiabilitiesF = connector.getLiabilities(generateNino())(HeaderCarrier())
+      await(npsLiabilitiesF) shouldBe liabilities
+      verify(connector.http, never()).GET(Matchers.any())(Matchers.any(), Matchers.any())
+    }
+
   }
 }

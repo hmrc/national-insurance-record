@@ -23,7 +23,7 @@ import uk.gov.hmrc.nationalinsurancerecord.domain.nps.{NpsLiabilities, NpsNIReco
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet, HttpReads, HttpResponse}
 import uk.gov.hmrc.nationalinsurancerecord.WSHttp
-import uk.gov.hmrc.nationalinsurancerecord.cache.{SummaryCache, SummaryRepository}
+import uk.gov.hmrc.nationalinsurancerecord.cache._
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.services.CachingService
@@ -40,6 +40,8 @@ object NpsConnector extends NpsConnector with ServicesConfig {
   override def http: HttpGet = WSHttp
 
   override val summaryRepository: CachingService[SummaryCache, NpsSummary] = SummaryRepository()
+  override val liabilitiesRepository: CachingService[LiabilitiesCache, NpsLiabilities] = LiabilitiesRepository()
+  override val nirecordRepository: CachingService[NIRecordCache, NpsNIRecord] = NIRecordRepository()
 }
 
 trait NpsConnector {
@@ -48,6 +50,8 @@ trait NpsConnector {
   val serviceOriginatorIdKey: String
   val serviceOriginatorId: String
   val summaryRepository: CachingService[SummaryCache, NpsSummary]
+  val liabilitiesRepository: CachingService[LiabilitiesCache, NpsLiabilities]
+  val nirecordRepository: CachingService[NIRecordCache, NpsNIRecord]
 
   class JsonValidationException(message: String) extends Exception(message)
 
@@ -58,12 +62,20 @@ trait NpsConnector {
 
   def getLiabilities(nino: Nino)(implicit hc: HeaderCarrier): Future[NpsLiabilities] = {
     val urlToRead = url(s"/nps-rest-service/services/nps/pensions/${ninoWithoutSuffix(nino)}/liabilities")
-    connectToNps[NpsLiabilities](urlToRead, APITypes.Liabilities, requestHeaderCarrier)
+    connectToCache[NpsLiabilities, LiabilitiesCache](
+      nino,
+      urlToRead,
+      APITypes.Liabilities,
+      liabilitiesRepository)
   }
 
   def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[NpsNIRecord] = {
     val urlToRead = url(s"/nps-rest-service/services/nps/pensions/${ninoWithoutSuffix(nino)}/ni_record")
-    connectToNps[NpsNIRecord](urlToRead, APITypes.NIRecord, requestHeaderCarrier)
+    connectToCache[NpsNIRecord, NIRecordCache](
+      nino,
+      urlToRead,
+      APITypes.NIRecord,
+      nirecordRepository)
   }
 
   def getSummary(nino: Nino)(implicit hc: HeaderCarrier): Future[NpsSummary] = {

@@ -39,12 +39,21 @@ case class NpsNITaxYear(
 
 object NpsNITaxYear {
 
-  val readBooleanFromInt: JsPath => Reads[Boolean] = jsPath => jsPath.read[Int].map(_.equals(1))
   val readBigDecimal: JsPath => Reads[BigDecimal] = jsPath => jsPath.readNullable[BigDecimal].map(_.getOrElse(0))
-  val readBigDecimalFromString: JsPath => Reads[BigDecimal] = jsPath => jsPath.formatNullable[String].map(_.map(BigDecimal(_)).getOrElse(0))
-  val readIntFromString: JsPath => Reads[Int] = jsPath => jsPath.formatNullable[String].map(_.map(_.toInt).getOrElse(0))
 
-  implicit val reads: Reads[NpsNITaxYear] = (
+  val readBigDecimalFromString: JsPath => Reads[BigDecimal] = jsPath => jsPath.readNullable[String].map(_.map(BigDecimal(_)).getOrElse(0))
+  val writeStringFromBigDecimal: JsPath => OWrites[BigDecimal] = jsPath => jsPath.write[String].contramap[BigDecimal](_.toString)
+
+  val readIntFromString: JsPath => Reads[Int] = jsPath => jsPath.readNullable[String].map(_.map(_.toInt).getOrElse(0))
+  val writeStringFromInt: JsPath => OWrites[Int] = jsPath => jsPath.write[String].contramap[Int](_.toString)
+
+  val readBooleanFromInt: JsPath => Reads[Boolean] = jsPath => jsPath.read[Int].map(_.equals(1))
+  val writeIntFromBoolean: JsPath => OWrites[Boolean] = jsPath => jsPath.write[Int].contramap[Boolean] {
+    case true => 1
+    case _ => 0
+  }
+
+  val reads: Reads[NpsNITaxYear] = (
         (__ \ "rattd_tax_year").read[Int] and
         readBooleanFromInt(__ \ "qualifying") and
         readBooleanFromInt(__ \ "under_investigation_flag") and
@@ -57,6 +66,22 @@ object NpsNITaxYear {
         readIntFromString(__ \ "ni_earnings_voluntary") and
         (__ \ "npsLothcred").read[List[NpsOtherCredits]]
     )(NpsNITaxYear.apply _)
+
+  val writes: Writes[NpsNITaxYear] = (
+      (__ \ "rattd_tax_year").write[Int] and
+      writeIntFromBoolean(__ \ "qualifying") and
+      writeIntFromBoolean(__ \ "under_investigation_flag") and
+      writeIntFromBoolean(__ \ "payable") and
+      (__ \ "class_three_payable").write[BigDecimal] and
+      (__ \ "class_three_payable_by").writeNullable[LocalDate] and
+      (__ \ "class_three_payable_by_penalty").writeNullable[LocalDate] and
+        writeStringFromBigDecimal(__ \ "ni_earnings_employed") and
+      writeStringFromInt(__ \ "ni_earnings_self_employed") and
+      writeStringFromInt(__ \ "ni_earnings_voluntary") and
+      (__ \ "npsLothcred").write[List[NpsOtherCredits]]
+    )(unlift(NpsNITaxYear.unapply))
+
+  implicit val format: Format[NpsNITaxYear] = Format(reads, writes)
 }
 
 
