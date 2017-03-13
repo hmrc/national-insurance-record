@@ -22,9 +22,18 @@ import play.api.libs.json._
 case class NpsOtherCredits(creditContributionType: Int, creditSourceType: Int, numberOfCredits: Int)
 
 object NpsOtherCredits {
-  implicit val reads: Reads[NpsOtherCredits] = (
-    (__ \ "cc_type").read[Int] and
+  val reads: Reads[NpsOtherCredits] = (
+      (__ \ "cc_type").read[Int] and
       (__ \ "credit_source_type").read[Int] and
       (__ \ "no_of_credits_and_conts").read[Int]
     )(NpsOtherCredits.apply _)
+
+  val writes: Writes[NpsOtherCredits] = (
+      (__ \ "cc_type").write[Int] and
+      (__ \ "credit_source_type").write[Int] and
+      (__ \ "no_of_credits_and_conts").write[Int]
+    )(unlift(NpsOtherCredits.unapply))
+
+  implicit val format: Format[NpsOtherCredits] = Format(reads, writes)
+
 }

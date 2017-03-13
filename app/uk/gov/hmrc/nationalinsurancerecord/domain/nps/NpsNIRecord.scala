@@ -44,12 +44,23 @@ case class NpsNIRecord(
 }
 
 object NpsNIRecord {
-  implicit val reads: Reads[NpsNIRecord] = (
+  val reads: Reads[NpsNIRecord] = (
         (__ \ "number_of_qualifying_years").read[Int] and
         (__ \ "non_qualifying_years").read[Int] and
         (__ \ "non_qualifying_years_payable").read[Int] and
         (__ \ "pre_75_cc_count").read[Int] and
         (__ \ "date_of_entry").read[LocalDate] and
         (__ \ "npsLnitaxyr").read[List[NpsNITaxYear]]
-    ) (NpsNIRecord.apply _)
+    )(NpsNIRecord.apply _)
+
+  val writes: Writes[NpsNIRecord] = (
+    (__ \ "number_of_qualifying_years").write[Int] and
+    (__ \ "non_qualifying_years").write[Int] and
+    (__ \ "non_qualifying_years_payable").write[Int] and
+    (__ \ "pre_75_cc_count").write[Int] and
+    (__ \ "date_of_entry").write[LocalDate] and
+    (__ \ "npsLnitaxyr").write[List[NpsNITaxYear]]
+    )(unlift(NpsNIRecord.unapply))
+
+  implicit val format: Format[NpsNIRecord] = Format(reads, writes)
 }

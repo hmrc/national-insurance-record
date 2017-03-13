@@ -19,5 +19,5 @@ package uk.gov.hmrc.nationalinsurancerecord.cache
 import uk.gov.hmrc.nationalinsurancerecord.config.ApplicationConfig
 
 object StubApplicationConfig extends ApplicationConfig {
-  override val responseCacheTTL: Int = 60
+  override val responseCacheTTL: Int = 30
 }

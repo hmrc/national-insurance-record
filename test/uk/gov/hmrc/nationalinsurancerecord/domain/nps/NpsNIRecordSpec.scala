@@ -23,7 +23,7 @@ import uk.gov.hmrc.play.test.UnitSpec
 class NpsNIRecordSpec extends UnitSpec{
   // scalastyle:off magic.number
 
-  val niTaxYearJson = Json.parse(
+  val niRecordJson = Json.parse(
     """
     | {
         | "years_to_fry": 1,
@@ -97,7 +97,7 @@ class NpsNIRecordSpec extends UnitSpec{
         |}
     """.stripMargin)
 
-    val niRecord = niTaxYearJson.as[NpsNIRecord]
+    val niRecord = niRecordJson.as[NpsNIRecord]
     "NIRecord" should {
       "parse number of Qualifying year correctly" in {
         niRecord.numberOfQualifyingYears shouldBe 27
