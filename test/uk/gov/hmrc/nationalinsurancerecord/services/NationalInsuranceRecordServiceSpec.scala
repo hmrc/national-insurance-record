@@ -17,6 +17,7 @@
 package uk.gov.hmrc.nationalinsurancerecord.services
 
 import org.joda.time.LocalDate
+import org.mockito.{Matchers, Mockito}
 import org.scalatest.concurrent.ScalaFutures
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import org.scalatestplus.play.OneAppPerSuite
@@ -251,10 +252,12 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
 
   "NationalInsuranceRecordService with a HOD Connection" when {
 
+    val mockMetrics = mock[MetricsService]
     val service = new NpsConnection {
       override lazy val nps: NpsConnector = mock[NpsConnector]
       override lazy val citizenDetailsService: CitizenDetailsService = mock[CitizenDetailsService]
       override lazy val now: LocalDate = new LocalDate(2017, 1, 16)
+      override def metrics: MetricsService = mockMetrics
     }
 
 
@@ -405,6 +408,7 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
   }
 
   "NationalInsuranceRecordService exclusion with HOD connection" should {
+    val mockMetrics = mock[MetricsService]
     val service = new NpsConnection {
       override lazy val nps: NpsConnector = mock[NpsConnector]
       override lazy val citizenDetailsService: CitizenDetailsService = {
@@ -413,6 +417,8 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
       override lazy val now: LocalDate = {
         new LocalDate(2017, 1, 16)
       }
+
+      override def metrics: MetricsService = mockMetrics
     }
 
     "NI Summary with exclusions" should {
@@ -427,6 +433,7 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
       val liabilities = NpsLiabilities(List(NpsLiability(14), NpsLiability(15)))
       val nino = generateNino()
 
+      reset(mockMetrics)
       when(service.citizenDetailsService.checkManualCorrespondenceIndicator(nino)).thenReturn(Future.successful(false))
       when(service.nps.getNationalInsuranceRecord(nino)).thenReturn(Future.successful(niRecordHOD))
       when(service.nps.getLiabilities(nino)).thenReturn(Future.successful(liabilities))
@@ -437,6 +444,12 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
       "return Isle of Man and married women reduced rate election exclusion" in {
         whenReady(niRecordF) { niExclusion =>
           niExclusion.exclusionReasons shouldBe List(Exclusion.IsleOfMan, Exclusion.MarriedWomenReducedRateElection)
+        }
+      }
+
+      "log exclusion in metrics" in {
+        whenReady(niRecordF) { niExclusion =>
+          verify(mockMetrics, Mockito.atLeastOnce()).exclusion(Matchers.any())
         }
       }
     }

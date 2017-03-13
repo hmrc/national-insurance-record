@@ -26,9 +26,9 @@ import uk.gov.hmrc.mongo.MongoSpecSupport
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.nps.{NpsLiabilities, NpsLiability}
-import uk.gov.hmrc.nationalinsurancerecord.services.CachingMongoService
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.nationalinsurancerecord.services.{CachingMongoService, MetricsService}
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class LiabilitiesRespositorySpec extends NationalInsuranceRecordUnitSpec with OneServerPerSuite with MongoSpecSupport with MockitoSugar {
@@ -41,7 +41,7 @@ class LiabilitiesRespositorySpec extends NationalInsuranceRecordUnitSpec with On
     val nino = generateNino()
     val excluedNino = generateNino()
     val service = new CachingMongoService[LiabilitiesCache, NpsLiabilities](LiabilitiesCache.formats,
-      LiabilitiesCache.apply, APITypes.Liabilities, StubApplicationConfig)
+      LiabilitiesCache.apply, APITypes.Liabilities, StubApplicationConfig, mock[MetricsService])
 
     "persist a Liabilities in the repo" in {
 
@@ -67,7 +67,7 @@ class LiabilitiesRespositorySpec extends NationalInsuranceRecordUnitSpec with On
       when(stubCollection.indexesManager).thenReturn(stubIndexesManager)
 
       class TestSummaryMongoService extends CachingMongoService[LiabilitiesCache, NpsLiabilities
-        ](LiabilitiesCache.formats, LiabilitiesCache.apply, APITypes.Liabilities, StubApplicationConfig) {
+        ](LiabilitiesCache.formats, LiabilitiesCache.apply, APITypes.Liabilities, StubApplicationConfig, mock[MetricsService]) {
         override lazy val collection = stubCollection
       }
       when(stubCollection.find(Matchers.any())(Matchers.any())).thenThrow(new RuntimeException)

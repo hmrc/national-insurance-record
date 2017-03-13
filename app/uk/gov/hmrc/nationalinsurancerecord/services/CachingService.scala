@@ -40,10 +40,12 @@ trait CachingService[A, B] {
   def findByNino(nino: Nino)(implicit formats: Reads[A], e: ExecutionContext): Future[Option[B]]
   def insertByNino(nino: Nino, response: B)(implicit formats: OFormat[A], e: ExecutionContext): Future[Boolean]
   val timeToLive: Int
+
+  def metrics: MetricsService
 }
 
 class CachingMongoService[A <: CachingModel[A, B], B]
-(formats: Format[A], apply: (String, B, DateTime) => A, apiType: APITypes, appConfig: ApplicationConfig)
+(formats: Format[A], apply: (String, B, DateTime) => A, apiType: APITypes, appConfig: ApplicationConfig, metricsX: MetricsService)
 (implicit mongo: () => DefaultDB, m: Manifest[A], e: ExecutionContext)
   extends ReactiveRepository[A, BSONObjectID]("responses", mongo, formats)
     with CachingService[A, B] {
@@ -88,6 +90,7 @@ class CachingMongoService[A <: CachingModel[A, B], B]
 
   override def findByNino(nino: Nino)(implicit formats: Reads[A], e: ExecutionContext): Future[Option[B]] = {
     val tryResult = Try {
+      metrics.cacheRead()
       collection.find(Json.obj("key" -> cacheKey(nino, apiType))).cursor[A](ReadPreference.primary).collect[List]()
     }
 
@@ -97,9 +100,11 @@ class CachingMongoService[A <: CachingModel[A, B], B]
           Logger.debug(s"[$apiType][findByNino] : { cacheKey : ${cacheKey(nino, apiType)}, result: $results }")
           val response = results.headOption.map(_.response)
           response match {
-            case Some(summaryModel) =>
-              Some(summaryModel)
+            case Some(data) =>
+              metrics.cacheReadFound()
+              Some(data)
             case None =>
+              metrics.cacheReadNotFound()
               None
           }
         } recover {
@@ -108,6 +113,7 @@ class CachingMongoService[A <: CachingModel[A, B], B]
       }
       case Failure(f) =>
         Logger.debug(s"[$apiType][findByNino] : { cacheKey : ${cacheKey(nino, apiType)}, exception: ${f.getMessage} }")
+        metrics.cacheReadNotFound()
         Future.successful(None)
     }
   }
@@ -120,6 +126,7 @@ class CachingMongoService[A <: CachingModel[A, B], B]
     collection.update(query, doc, upsert = true).map { result =>
       Logger.debug(s"[$apiType][insertByNino] : { cacheKey : ${cacheKey(nino, apiType)}, " +
         s"request: $response, result: ${result.ok}, errors: ${result.errmsg} }")
+      metrics.cacheWritten()
       result.errmsg.foreach(msg => Logger.warn(s"[$apiType][insertByNino] : { cacheKey : ${cacheKey(nino, apiType)}, results: $msg }"))
       result.ok
     } recover {
@@ -127,4 +134,5 @@ class CachingMongoService[A <: CachingModel[A, B], B]
     }
   }
 
+  override def metrics: MetricsService = metricsX
 }

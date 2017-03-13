@@ -40,7 +40,8 @@ private object AppDependencies {
     "uk.gov.hmrc" %% "play-hmrc-api" % playHmrcApiVersion,
     "uk.gov.hmrc" %% "play-hal" % playHalVersion,
     "uk.gov.hmrc" %% "play-reactivemongo" % "5.2.0",
-    "uk.gov.hmrc" %% "simple-reactivemongo" % "5.2.0"
+    "uk.gov.hmrc" %% "simple-reactivemongo" % "5.2.0",
+    "uk.gov.hmrc" %% "play-graphite" % "3.2.0"
   )
 
   trait TestDependencies {

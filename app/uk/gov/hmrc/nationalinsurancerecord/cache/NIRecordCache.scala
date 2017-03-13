@@ -23,7 +23,8 @@ import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 import uk.gov.hmrc.nationalinsurancerecord.config.ApplicationConfig
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.nps.NpsNIRecord
-import uk.gov.hmrc.nationalinsurancerecord.services.{CachingModel, CachingMongoService}
+import uk.gov.hmrc.nationalinsurancerecord.services.{CachingModel, CachingMongoService, MetricsService}
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
 case class NIRecordCache(key: String, response: NpsNIRecord, expiresAt: DateTime)
@@ -38,7 +39,7 @@ object NIRecordCache {
 object NIRecordRepository extends MongoDbConnection {
 
   private lazy val cacheService = new CachingMongoService[NIRecordCache, NpsNIRecord](
-    NIRecordCache.formats, NIRecordCache.apply, APITypes.NIRecord, ApplicationConfig
+    NIRecordCache.formats, NIRecordCache.apply, APITypes.NIRecord, ApplicationConfig, MetricsService
   )
 
   def apply(): CachingMongoService[NIRecordCache, NpsNIRecord] = cacheService
