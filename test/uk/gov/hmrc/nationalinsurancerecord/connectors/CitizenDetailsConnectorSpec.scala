@@ -16,7 +16,8 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.connectors
 
-import org.mockito.Matchers
+import com.codahale.metrics.Timer
+import org.mockito.{Matchers, Mockito}
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfter
 import org.scalatest.concurrent.ScalaFutures
@@ -24,7 +25,10 @@ import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
 import play.api.test.FakeRequest
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
+import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
+import uk.gov.hmrc.nationalinsurancerecord.services.MetricsService
 import uk.gov.hmrc.play.http._
+
 import scala.concurrent.Future
 
 class CitizenDetailsConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar with BeforeAndAfter with ScalaFutures with OneAppPerSuite {
@@ -33,13 +37,17 @@ class CitizenDetailsConnectorSpec extends NationalInsuranceRecordUnitSpec with M
   val nino = generateNino()
   lazy val fakeRequest = FakeRequest()
   implicit val hc = HeaderCarrier()
+  val mockMetrics: MetricsService = mock[MetricsService]
+  val mockTimerContext = mock[Timer.Context]
   val citizenDetailsConnector = new CitizenDetailsConnector {
     override val serviceUrl: String = "/"
     override val http: HttpGet = mock[HttpGet]
+    override val metrics: MetricsService = mockMetrics
   }
 
   "CitizenDetailsConnector" should {
     "return OK status when successful" in {
+      when(mockMetrics.startCitizenDetailsTimer).thenReturn(mockTimerContext)
       when(citizenDetailsConnector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any())) thenReturn Future.successful(HttpResponse(200))
       val resultF = citizenDetailsConnector.retrieveMCIStatus(nino)(hc)
       await(resultF) shouldBe 200
@@ -66,5 +74,9 @@ class CitizenDetailsConnectorSpec extends NationalInsuranceRecordUnitSpec with M
       await(resultF.failed) shouldBe a[InternalServerException]
     }
 
+    "log correct CitizenDetailsConnector metrics" in {
+      verify(mockMetrics, Mockito.atLeastOnce()).startCitizenDetailsTimer()
+      verify(mockTimerContext, Mockito.atLeastOnce()).stop()
+    }
   }
 }
