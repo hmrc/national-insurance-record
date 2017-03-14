@@ -141,7 +141,7 @@ trait NpsConnection extends NationalInsuranceRecordService {
         ).getExclusions
 
         if(exclusions.nonEmpty) {
-          metrics.exclusion(exclusions)
+          metrics.exclusion(exclusions.head)
           Left(ExclusionResponse(exclusions))
         } else {
           val niRecord = NationalInsuranceRecord(
@@ -183,7 +183,7 @@ trait NpsConnection extends NationalInsuranceRecordService {
       ).getExclusions
 
       if (exclusions.nonEmpty) {
-        metrics.exclusion(exclusions)
+        metrics.exclusion(exclusions.head)
         Left(ExclusionResponse(exclusions))
       } else {
         purgedNIRecord.niTaxYears.map(npsTaxYearToNIRecordTaxYear).find(x => x.taxYear == taxYear.taxYear) match {

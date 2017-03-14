@@ -449,7 +449,7 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
 
       "log exclusion in metrics" in {
         whenReady(niRecordF) { niExclusion =>
-          verify(mockMetrics, Mockito.atLeastOnce()).exclusion(Matchers.any())
+          verify(mockMetrics, Mockito.atLeastOnce()).exclusion(Matchers.eq(Exclusion.IsleOfMan))
         }
       }
     }

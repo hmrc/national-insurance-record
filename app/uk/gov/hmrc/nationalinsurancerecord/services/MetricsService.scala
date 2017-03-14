@@ -28,7 +28,7 @@ trait MetricsService {
   def incrementFailedCounter(api: APITypes): Unit
   def incrementCounter(api: APITypes): Unit
   def niRecord(gaps: Int, payableGaps: Int, pre75Years: Int, qualifyingYears: Int): Unit
-  def exclusion(exclusions: List[Exclusion]): Unit
+  def exclusion(exclusion: Exclusion): Unit
   def cacheRead()
   def cacheReadFound()
   def cacheReadNotFound()
@@ -79,7 +79,7 @@ object MetricsService extends MetricsService with MicroserviceMetrics{
     Exclusion.ManualCorrespondenceIndicator -> metrics.defaultRegistry.counter("exclusion-manual-correspondence")
   )
 
-  override def exclusion(exclusions: List[Exclusion]): Unit = exclusions.foreach(exclusionMeters(_).inc())
+  override def exclusion(exclusion: Exclusion): Unit = exclusionMeters(exclusion).inc()
 
   override def cacheRead(): Unit = metrics.defaultRegistry.meter("cache-read").mark
   override def cacheReadFound(): Unit = metrics.defaultRegistry.meter("cache-read-found").mark
