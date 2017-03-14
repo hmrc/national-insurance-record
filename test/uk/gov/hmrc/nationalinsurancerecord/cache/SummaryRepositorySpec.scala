@@ -17,7 +17,7 @@
 package uk.gov.hmrc.nationalinsurancerecord.cache
 
 import org.joda.time.LocalDate
-import org.mockito.Matchers
+import org.mockito.{Matchers, Mockito}
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
@@ -27,7 +27,7 @@ import uk.gov.hmrc.mongo.MongoSpecSupport
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.nps.NpsSummary
-import uk.gov.hmrc.nationalinsurancerecord.services.CachingMongoService
+import uk.gov.hmrc.nationalinsurancerecord.services.{CachingMongoService, MetricsService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -40,24 +40,34 @@ class SummaryRepositorySpec extends NationalInsuranceRecordUnitSpec with OneAppP
   )
 
   "SummaryMongoService" should {
+    val mockMetrics = mock[MetricsService]
     val nino = generateNino()
-    val service = new CachingMongoService[SummaryCache, NpsSummary](SummaryCache.formats, SummaryCache.apply, APITypes.Summary, StubApplicationConfig) {
+    val service = new CachingMongoService[SummaryCache, NpsSummary](SummaryCache.formats, SummaryCache.apply,
+      APITypes.Summary, StubApplicationConfig, mockMetrics) {
       override val timeToLive = 30
     }
 
     "persist a SummaryModel in the repo" in {
+      reset(mockMetrics)
       val resultF = service.insertByNino(nino, testSummaryModel)
       await(resultF) shouldBe true
+      verify(mockMetrics, Mockito.atLeastOnce()).cacheWritten()
     }
 
     "find a SummaryModel in the repo" in {
+      reset(mockMetrics)
       val resultF = service.findByNino(nino)
       resultF.get shouldBe testSummaryModel
+      verify(mockMetrics, Mockito.atLeastOnce()).cacheRead()
+      verify(mockMetrics, Mockito.atLeastOnce()).cacheReadFound()
     }
 
     "return None when there is nothing in the repo" in {
+      reset(mockMetrics)
       val resultF = service.findByNino(generateNino())
       await(resultF) shouldBe None
+      verify(mockMetrics, Mockito.atLeastOnce()).cacheRead()
+      verify(mockMetrics, Mockito.atLeastOnce()).cacheReadNotFound()
     }
 
     "return None when there is a Mongo error" in {
@@ -69,10 +79,11 @@ class SummaryRepositorySpec extends NationalInsuranceRecordUnitSpec with OneAppP
       when(stubCollection.indexesManager).thenReturn(stubIndexesManager)
 
       class TestSummaryMongoService extends CachingMongoService[SummaryCache, NpsSummary](
-        SummaryCache.formats, SummaryCache.apply, APITypes.Summary, StubApplicationConfig) {
+        SummaryCache.formats, SummaryCache.apply, APITypes.Summary, StubApplicationConfig, mockMetrics) {
         override lazy val collection = stubCollection
         override val timeToLive = 30
       }
+      reset(mockMetrics)
       when(stubCollection.find(Matchers.any())(Matchers.any())).thenThrow(new RuntimeException)
       when(stubCollection.indexesManager.ensure(Matchers.any())).thenReturn(Future.successful(true))
 
@@ -80,6 +91,8 @@ class SummaryRepositorySpec extends NationalInsuranceRecordUnitSpec with OneAppP
 
       val found = await(testRepository.findByNino(generateNino()))
       found shouldBe None
+      verify(mockMetrics, Mockito.atLeastOnce()).cacheRead()
+      verify(mockMetrics, Mockito.atLeastOnce()).cacheReadNotFound()
     }
 
     "multiple calls to insertByNino should be fine (upsert)" in {

@@ -115,6 +115,7 @@ trait NpsConnection extends NationalInsuranceRecordService {
   def nps: NpsConnector
   def citizenDetailsService: CitizenDetailsService
   def now: LocalDate
+  def metrics: MetricsService
 
   override def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceRecord]] = {
 
@@ -140,9 +141,10 @@ trait NpsConnection extends NationalInsuranceRecordService {
         ).getExclusions
 
         if(exclusions.nonEmpty) {
+          metrics.exclusion(exclusions.head)
           Left(ExclusionResponse(exclusions))
         } else {
-          Right(NationalInsuranceRecord(
+          val niRecord = NationalInsuranceRecord(
             purgedNIRecord.numberOfQualifyingYears,
             calcPre75QualifyingYears(purgedNIRecord.pre75ContributionCount, purgedNIRecord.dateOfEntry, npsSummary.dateOfBirth).getOrElse(0),
             purgedNIRecord.nonQualifyingYears,
@@ -151,7 +153,9 @@ trait NpsConnection extends NationalInsuranceRecordService {
             homeResponsibilitiesProtection(npsLiabilities.liabilities),
             npsSummary.earningsIncludedUpTo,
             purgedNIRecord.niTaxYears.map(npsTaxYearToNIRecordTaxYear).sortBy(_.taxYear)(Ordering[String].reverse)
-          ))
+          )
+          metrics.niRecord(niRecord.numberOfGaps, niRecord.numberOfGapsPayable, niRecord.qualifyingYearsPriorTo1975, niRecord.qualifyingYears)
+          Right(niRecord)
         }
       }
   }
@@ -179,6 +183,7 @@ trait NpsConnection extends NationalInsuranceRecordService {
       ).getExclusions
 
       if (exclusions.nonEmpty) {
+        metrics.exclusion(exclusions.head)
         Left(ExclusionResponse(exclusions))
       } else {
         purgedNIRecord.niTaxYears.map(npsTaxYearToNIRecordTaxYear).find(x => x.taxYear == taxYear.taxYear) match {
@@ -229,4 +234,5 @@ object NationalInsuranceRecordService extends NationalInsuranceRecordService wit
   override lazy val nps: NpsConnector = NpsConnector
   override def citizenDetailsService: CitizenDetailsService = CitizenDetailsService
   override def now: LocalDate = LocalDate.now(DateTimeZone.forTimeZone(TimeZone.getTimeZone("Europe/London")))
+  override def metrics: MetricsService = MetricsService
 }

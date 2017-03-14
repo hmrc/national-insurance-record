@@ -27,9 +27,9 @@ import uk.gov.hmrc.mongo.MongoSpecSupport
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.nps.NpsNIRecord
-import uk.gov.hmrc.nationalinsurancerecord.services.CachingMongoService
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.nationalinsurancerecord.services.{CachingMongoService, MetricsService}
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class NIRecordRepositorySpec extends NationalInsuranceRecordUnitSpec with OneServerPerSuite with MongoSpecSupport with MockitoSugar {
@@ -116,7 +116,7 @@ class NIRecordRepositorySpec extends NationalInsuranceRecordUnitSpec with OneSer
   "NationalInsuranceRepository" should {
 
     val service = new CachingMongoService[NIRecordCache, NpsNIRecord](NIRecordCache.formats, NIRecordCache.apply,
-      APITypes.NIRecord, StubApplicationConfig)
+      APITypes.NIRecord, StubApplicationConfig, mock[MetricsService])
 
     "persist a NIRecord in the repo" in {
       val resultF = service.insertByNino(nino, niRecord)
@@ -141,7 +141,7 @@ class NIRecordRepositorySpec extends NationalInsuranceRecordUnitSpec with OneSer
       when(stubCollection.indexesManager).thenReturn(stubIndexesManager)
 
       class TestSummaryMongoService extends CachingMongoService[NIRecordCache, NpsNIRecord
-        ](NIRecordCache.formats, NIRecordCache.apply, APITypes.NIRecord, StubApplicationConfig)  {
+        ](NIRecordCache.formats, NIRecordCache.apply, APITypes.NIRecord, StubApplicationConfig, mock[MetricsService])  {
         override lazy val collection = stubCollection
       }
       when(stubCollection.find(Matchers.any())(Matchers.any())).thenThrow(new RuntimeException)

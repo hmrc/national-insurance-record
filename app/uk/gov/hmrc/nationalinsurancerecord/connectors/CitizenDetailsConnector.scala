@@ -21,6 +21,8 @@ import uk.gov.hmrc.nationalinsurancerecord.WSHttp
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet, HttpResponse, Upstream4xxResponse}
 import play.api.http.Status._
+import uk.gov.hmrc.nationalinsurancerecord.services.MetricsService
+
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -28,22 +30,26 @@ import scala.concurrent.ExecutionContext.Implicits.global
 object CitizenDetailsConnector extends CitizenDetailsConnector with ServicesConfig {
   override val serviceUrl = baseUrl("citizen-details")
   override val http: HttpGet = WSHttp
+  override val metrics: MetricsService = MetricsService
 }
 
 
 trait CitizenDetailsConnector {
   val serviceUrl: String
   val http: HttpGet
+  val metrics: MetricsService
 
   private def url(nino: Nino) = s"$serviceUrl/citizen-details/$nino/designatory-details/"
 
   def retrieveMCIStatus(nino: Nino)(implicit hc: HeaderCarrier): Future[Int] = {
+    val timerContext = metrics.startCitizenDetailsTimer()
     http.GET[HttpResponse](url(nino)) map {
       personResponse =>
+        timerContext.stop()
         Success(personResponse.status)
     } recover {
       case ex: Upstream4xxResponse if ex.upstreamResponseCode == LOCKED => Success(ex.upstreamResponseCode)
-      case ex: Throwable => Failure(ex)
+      case ex: Throwable => timerContext.stop(); Failure(ex)
     } flatMap (handleResult(url(nino), _))
   }
 

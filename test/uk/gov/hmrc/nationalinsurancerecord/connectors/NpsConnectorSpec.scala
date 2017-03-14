@@ -16,9 +16,10 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.connectors
 
+import com.codahale.metrics.Timer
 import org.joda.time.LocalDate
 import org.mockito.Mockito._
-import org.mockito.Matchers
+import org.mockito.{Matchers, Mockito}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
@@ -26,8 +27,9 @@ import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.cache.{LiabilitiesCache, NIRecordCache, SummaryCache}
+import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.nps.{NpsLiabilities, NpsNIRecord, NpsSummary}
-import uk.gov.hmrc.nationalinsurancerecord.services.CachingService
+import uk.gov.hmrc.nationalinsurancerecord.services.{CachingService, MetricsService}
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet}
 
 import scala.concurrent.Future
@@ -181,6 +183,8 @@ class NpsConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
     """.stripMargin
   )
   val liabilities = testLiabilitiesJson.as[NpsLiabilities]
+  val mockMetrics = mock[MetricsService]
+  val mockTimerContext = mock[Timer.Context]
 
     "NpsConnector - No Caching" should {
     val connector = new NpsConnector {
@@ -191,11 +195,14 @@ class NpsConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
       override val summaryRepository: CachingService[SummaryCache, NpsSummary] = mockSummaryRepo
       override val liabilitiesRepository: CachingService[LiabilitiesCache, NpsLiabilities] = mockLiabilitiesRepo
       override val nirecordRepository: CachingService[NIRecordCache, NpsNIRecord] = mockNIRecordRepo
+      override def metrics: MetricsService = mockMetrics
     }
 
     val nino = generateNino()
 
     "return valid Summary in HTTP response" in {
+      reset(mockMetrics)
+      when(mockMetrics.startTimer(APITypes.Summary)).thenReturn(mockTimerContext)
       when(mockSummaryRepo.findByNino(Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.successful(None))
       when(connector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(
@@ -222,7 +229,15 @@ class NpsConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
       npsSummaryF.earningsIncludedUpTo shouldBe new LocalDate(2014,4,5)
     }
 
+    "log correct Summary metrics" in {
+      verify(mockMetrics, Mockito.atLeastOnce()).incrementCounter(APITypes.Summary)
+      verify(mockMetrics, Mockito.atLeastOnce()).startTimer(APITypes.Summary)
+      verify(mockTimerContext, Mockito.atLeastOnce()).stop()
+    }
+
     "return valid NIRecord response" in {
+      reset(mockMetrics)
+      when(mockMetrics.startTimer(APITypes.NIRecord)).thenReturn(mock[Timer.Context])
       when(mockNIRecordRepo.findByNino(Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.successful(None))
       when(connector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(
@@ -260,6 +275,12 @@ class NpsConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
       npsNIRecordF.niTaxYears(1).otherCredits shouldBe List()
     }
 
+    "log correct NIRecord metrics" in {
+      verify(mockMetrics, Mockito.atLeastOnce()).incrementCounter(APITypes.NIRecord)
+      verify(mockMetrics, Mockito.atLeastOnce()).startTimer(APITypes.NIRecord)
+      verify(mockTimerContext, Mockito.atLeastOnce()).stop()
+    }
+
     "return a failed NIRecord when there is an http error and pass on the exception" in {
       when(connector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.failed(new BadRequestException("Bad Request exception")))
@@ -269,6 +290,8 @@ class NpsConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
     }
 
     "return valid Liabilities response" in {
+      reset(mockMetrics)
+      when(mockMetrics.startTimer(APITypes.Liabilities)).thenReturn(mock[Timer.Context])
       when(mockLiabilitiesRepo.findByNino(Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.successful(None))
       when(connector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(
@@ -281,6 +304,12 @@ class NpsConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
       val npsLiabilitiesF = await(connector.getLiabilities(nino)(HeaderCarrier()))
       npsLiabilitiesF.liabilities.head.liabilityType shouldBe 13
       npsLiabilitiesF.liabilities(4).liabilityType shouldBe 34
+    }
+
+    "log correct Liabilities metrics" in {
+      verify(mockMetrics, Mockito.atLeastOnce()).incrementCounter(APITypes.Liabilities)
+      verify(mockMetrics, Mockito.atLeastOnce()).startTimer(APITypes.Liabilities)
+      verify(mockTimerContext, Mockito.atLeastOnce()).stop()
     }
 
     "return a failed Liabilities when there is an http error and pass on the exception" in {
@@ -302,6 +331,7 @@ class NpsConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
       override val summaryRepository: CachingService[SummaryCache, NpsSummary] = mockSummaryRepo
       override val liabilitiesRepository: CachingService[LiabilitiesCache, NpsLiabilities] = mockLiabilitiesRepo
       override val nirecordRepository: CachingService[NIRecordCache, NpsNIRecord] = mockNIRecordRepo
+      override def metrics: MetricsService = mock[MetricsService]
     }
 
     val nino = generateNino()

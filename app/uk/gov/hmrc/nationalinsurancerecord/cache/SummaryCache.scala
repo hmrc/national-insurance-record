@@ -23,7 +23,8 @@ import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 import uk.gov.hmrc.nationalinsurancerecord.config.ApplicationConfig
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.nps.NpsSummary
-import uk.gov.hmrc.nationalinsurancerecord.services.{CachingModel, CachingMongoService}
+import uk.gov.hmrc.nationalinsurancerecord.services.{CachingModel, CachingMongoService, MetricsService}
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
 case class SummaryCache(key: String, response: NpsSummary, expiresAt: DateTime)
@@ -38,7 +39,7 @@ object SummaryCache {
 object SummaryRepository extends MongoDbConnection {
 
   private lazy val cacheService = new CachingMongoService[SummaryCache, NpsSummary](
-    SummaryCache.formats, SummaryCache.apply, APITypes.Summary, ApplicationConfig
+    SummaryCache.formats, SummaryCache.apply, APITypes.Summary, ApplicationConfig, MetricsService
   )
 
   def apply(): CachingMongoService[SummaryCache, NpsSummary] = cacheService

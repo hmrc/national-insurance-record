@@ -26,7 +26,7 @@ import uk.gov.hmrc.nationalinsurancerecord.WSHttp
 import uk.gov.hmrc.nationalinsurancerecord.cache._
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes.APITypes
-import uk.gov.hmrc.nationalinsurancerecord.services.CachingService
+import uk.gov.hmrc.nationalinsurancerecord.services.{CachingService, MetricsService}
 import uk.gov.hmrc.nationalinsurancerecord.util.NIRecordConstants
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -42,10 +42,12 @@ object NpsConnector extends NpsConnector with ServicesConfig {
   override val summaryRepository: CachingService[SummaryCache, NpsSummary] = SummaryRepository()
   override val liabilitiesRepository: CachingService[LiabilitiesCache, NpsLiabilities] = LiabilitiesRepository()
   override val nirecordRepository: CachingService[NIRecordCache, NpsNIRecord] = NIRecordRepository()
+
+  override def metrics: MetricsService = MetricsService
 }
 
 trait NpsConnector {
-
+  def metrics: MetricsService
   val serviceUrl: String
   val serviceOriginatorIdKey: String
   val serviceOriginatorId: String
@@ -62,6 +64,7 @@ trait NpsConnector {
 
   def getLiabilities(nino: Nino)(implicit hc: HeaderCarrier): Future[NpsLiabilities] = {
     val urlToRead = url(s"/nps-rest-service/services/nps/pensions/${ninoWithoutSuffix(nino)}/liabilities")
+    metrics.incrementCounter(APITypes.Liabilities)
     connectToCache[NpsLiabilities, LiabilitiesCache](
       nino,
       urlToRead,
@@ -71,6 +74,7 @@ trait NpsConnector {
 
   def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[NpsNIRecord] = {
     val urlToRead = url(s"/nps-rest-service/services/nps/pensions/${ninoWithoutSuffix(nino)}/ni_record")
+    metrics.incrementCounter(APITypes.NIRecord)
     connectToCache[NpsNIRecord, NIRecordCache](
       nino,
       urlToRead,
@@ -80,6 +84,7 @@ trait NpsConnector {
 
   def getSummary(nino: Nino)(implicit hc: HeaderCarrier): Future[NpsSummary] = {
     val urlToRead = url(s"/nps-rest-service/services/nps/pensions/${ninoWithoutSuffix(nino)}/sp_summary")
+    metrics.incrementCounter(APITypes.Summary)
     connectToCache[NpsSummary, SummaryCache](
       nino,
       urlToRead,
@@ -101,9 +106,11 @@ trait NpsConnector {
   }
 
   private def connectToNps[A](url: String, api: APITypes, requestHc: HeaderCarrier)(implicit hc: HeaderCarrier, reads: Reads[A]): Future[A] = {
+    val timerContext = metrics.startTimer(api)
     val futureResponse = http.GET[HttpResponse](url)(hc = requestHc, rds = HttpReads.readRaw)
 
     futureResponse.map { httpResponse =>
+      timerContext.stop()
       Try(httpResponse.json.validate[A](reads)).flatMap( jsResult =>
         jsResult.fold(errs => Failure(new JsonValidationException(formatJsonErrors(errs))), valid => Success(valid))
       )
@@ -116,6 +123,7 @@ trait NpsConnector {
   private def handleResult[A](api: APITypes, url: String, tryResult: Try[A]): Future[A] = {
     tryResult match {
       case Failure(ex) =>
+        metrics.incrementFailedCounter(api)
         Future.failed(ex)
       case Success(value) =>
         Future.successful(value)
