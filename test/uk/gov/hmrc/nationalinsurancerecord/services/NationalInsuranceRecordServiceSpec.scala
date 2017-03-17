@@ -430,7 +430,7 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
         dateOfBirth = new LocalDate(1954, 7, 7),
         finalRelevantYear = 2049
       )
-      val liabilities = NpsLiabilities(List(NpsLiability(14), NpsLiability(15)))
+      val liabilities = NpsLiabilities(List(NpsLiability(14), NpsLiability(5)))
       val nino = generateNino()
 
       reset(mockMetrics)
