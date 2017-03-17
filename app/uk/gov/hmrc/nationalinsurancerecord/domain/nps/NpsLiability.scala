@@ -26,5 +26,5 @@ object NpsLiability {
 
 
 object LiabilityType {
-  final val ISLE_OF_MAN = 15
+  final val ISLE_OF_MAN = 5
 }
