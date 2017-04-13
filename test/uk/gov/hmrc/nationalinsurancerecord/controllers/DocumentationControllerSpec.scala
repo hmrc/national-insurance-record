@@ -39,8 +39,6 @@ class DocumentationControllerSpec extends UnitSpec with WithFakeApplication {
 
       override def apiGatewayContext: String = ""
 
-      override def appUrl: String = ""
-
       override def access: Option[Configuration] = apiConfig
 
       override def status: Option[String] = apiStatus
