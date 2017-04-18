@@ -22,7 +22,6 @@ import uk.gov.hmrc.play.config.ServicesConfig
 
 trait AppContext {
   def appName: String
-  def appUrl: String
   def apiGatewayContext: String
   def access: Option[Configuration]
   def status: Option[String]
@@ -31,7 +30,6 @@ trait AppContext {
 
 object AppContext extends AppContext with ServicesConfig {
   lazy val appName = current.configuration.getString("appName").getOrElse(throw new RuntimeException("appName is not configured"))
-  lazy val appUrl = current.configuration.getString("appUrl").getOrElse(throw new RuntimeException("appUrl is not configured"))
   lazy val apiGatewayContext = current.configuration.getString("api.gateway.context")
     .getOrElse(throw new RuntimeException("api.gateway.context is not configured"))
   lazy val access = current.configuration.getConfig("api.access")
