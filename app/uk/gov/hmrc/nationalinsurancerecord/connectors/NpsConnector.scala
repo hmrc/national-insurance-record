@@ -27,16 +27,16 @@ import uk.gov.hmrc.nationalinsurancerecord.cache._
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.services.{CachingService, MetricsService}
-import uk.gov.hmrc.nationalinsurancerecord.util.NIRecordConstants
+import uk.gov.hmrc.nationalinsurancerecord.util.{JsonDepersonaliser, NIRecordConstants}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
 object NpsConnector extends NpsConnector with ServicesConfig {
-  override val serviceUrl = baseUrl("nps-hod")
-  override val serviceOriginatorIdKey = getConfString("nps-hod.originatoridkey", "")
-  override val serviceOriginatorId = getConfString("nps-hod.originatoridvalue", "")
+  override val serviceUrl: String = baseUrl("nps-hod")
+  override val serviceOriginatorIdKey: String = getConfString("nps-hod.originatoridkey", "")
+  override val serviceOriginatorId: String = getConfString("nps-hod.originatoridvalue", "")
   override def http: HttpGet = WSHttp
 
   override val summaryRepository: CachingService[SummaryCache, NpsSummary] = SummaryRepository()
@@ -99,7 +99,7 @@ trait NpsConnector {
       case None =>
         connectToNps(url, api, requestHeaderCarrier)(hc, formatA) map {
           response =>
-            repository.insertByNino(nino, response);
+            repository.insertByNino(nino, response)
             response
         }
     }
@@ -111,8 +111,16 @@ trait NpsConnector {
 
     futureResponse.map { httpResponse =>
       timerContext.stop()
-      Try(httpResponse.json.validate[A](reads)).flatMap( jsResult =>
-        jsResult.fold(errs => Failure(new JsonValidationException(formatJsonErrors(errs))), valid => Success(valid))
+
+      httpResponse.json.validate[A].fold(
+        errs => {
+          val json = JsonDepersonaliser.depersonalise(httpResponse.json) match {
+            case Success(s) => s"Depersonalised JSON\n$s"
+            case Failure(e) => s"JSON could not be depersonalised\n${e.toString}"
+          }
+          throw new JsonValidationException(s"Unable to deserialise $api: ${formatJsonErrors(errs)}\n$json")
+        },
+        valid => Success(valid)
       )
     } recover {
       // http-verbs throws exceptions, convert to Try
@@ -131,7 +139,14 @@ trait NpsConnector {
   }
 
   private def formatJsonErrors(errors: Seq[(JsPath, Seq[ValidationError])]): String = {
-    "JSON Validation Error: " + errors.map(p => p._1 + " - " + p._2.map(_.message).mkString(",")).mkString(" | ")
+    "JSON Validation Error: " + errors.map(p => p._1 + " - " + p._2.map(e => removeJson(e.message)).mkString(",")).mkString(" | ")
+  }
+
+  private def removeJson(message: String): String = {
+    message.indexOf("{") match {
+      case i if i != -1  => message.substring(0, i - 1) + " [JSON removed]"
+      case _ => message
+    }
   }
 
 }

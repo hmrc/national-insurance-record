@@ -31,6 +31,7 @@ import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.nps.{NpsLiabilities, NpsNIRecord, NpsSummary}
 import uk.gov.hmrc.nationalinsurancerecord.services.{CachingService, MetricsService}
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet}
+import NpsConnector.JsonValidationException
 
 import scala.concurrent.Future
 
@@ -320,6 +321,44 @@ class NpsConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
       }
     }
 
+    "return a depersonalised JSON structure following validation error" in {
+      val invalidJson = Json.parse(
+        """
+        | {
+        | "years_to_fry": "a",
+        | "non_qualifying_years": 13,
+        | "date_of_entry": "1973-10-01",
+        | "npsLniemply": [],
+        | "pre_75_cc_count": 51,
+        | "number_of_qualifying_years": 27,
+        | "npsErrlist": {
+        |   "count": 0,
+        |   "mgt_check": 0,
+        |   "commit_status": 2,
+        |   "npsErritem": [],
+        |   "bfm_return_code": 0,
+        |   "data_not_found": 0
+        |  }
+        |}
+        """.stripMargin)
+
+      reset(mockMetrics)
+      when(mockMetrics.startTimer(APITypes.NIRecord)).thenReturn(mock[Timer.Context])
+      when(connector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any()))
+      .thenReturn(
+        Future.successful(
+          HttpResponse(
+            200,
+            Some(invalidJson)
+          ))
+      )
+
+      ScalaFutures.whenReady(connector.getNationalInsuranceRecord(nino)(HeaderCarrier()).failed) { ex =>
+        ex shouldBe a[JsonValidationException]
+        ex.getMessage.contains("1973-10-01") shouldBe false
+        ex.getMessage.contains("1111-11-11") shouldBe true
+      }
+    }
   }
 
   "NpsConnector - Caching" should {
