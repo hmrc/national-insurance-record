@@ -17,9 +17,8 @@ private object AppDependencies {
   private val playAuthVersion = "4.2.0"
   private val playHealthVersion = "2.0.0"
   private val logbackJsonLoggerVersion = "3.1.0"
-  private val playUrlBindersVersion = "2.0.0"
   private val playConfigVersion = "3.0.0"
-  private val domainVersion = "4.0.0"
+  private val domainVersion = "4.1.0"
   private val hmrcTestVersion = "2.2.0"
   private val scalaTestVersion = "2.2.6"
   private val pegdownVersion = "1.6.0"
@@ -33,7 +32,6 @@ private object AppDependencies {
     "uk.gov.hmrc" %% "microservice-bootstrap" % microserviceBootstrapVersion,
     "uk.gov.hmrc" %% "play-authorisation" % playAuthVersion,
     "uk.gov.hmrc" %% "play-health" % playHealthVersion,
-    "uk.gov.hmrc" %% "play-url-binders" % playUrlBindersVersion,
     "uk.gov.hmrc" %% "play-config" % playConfigVersion,
     "uk.gov.hmrc" %% "logback-json-logger" % logbackJsonLoggerVersion,
     "uk.gov.hmrc" %% "domain" % domainVersion,
