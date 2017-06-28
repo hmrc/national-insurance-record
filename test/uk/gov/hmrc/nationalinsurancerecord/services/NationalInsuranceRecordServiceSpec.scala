@@ -38,7 +38,7 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
     numberOfQualifyingYears = 36,
     nonQualifyingYears = 10,
     nonQualifyingYearsPayable = 4,
-    dateOfEntry = new LocalDate(1969,8,1),
+    dateOfEntry = Some(new LocalDate(1969,8,1)),
     pre75ContributionCount = 250,
     niTaxYears = List(
       NpsNITaxYear(
@@ -89,7 +89,7 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
     qualifyingYearsPriorTo1975 = 5,
     numberOfGaps = 10,
     numberOfGapsPayable = 4,
-    dateOfEntry = new LocalDate(1969, 8, 1),
+    dateOfEntry = Some(new LocalDate(1969, 8, 1)),
     homeResponsibilitiesProtection = false,
     earningsIncludedUpTo = new LocalDate(2016, 4, 5),
     List(
@@ -296,7 +296,7 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
       }
       "return date of entry to be 1969/8/1"  in {
         whenReady(niRecordF) { ni =>
-          ni.dateOfEntry shouldBe new LocalDate(1969,8,1)
+          ni.dateOfEntry shouldBe Some(new LocalDate(1969,8,1))
         }
       }
       "return homeResponsibilities to be true"  in {
@@ -384,25 +384,31 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
 
     "calc pre75 years" should {
       "return 3 when the number of conts in 157 and the date of entry is 04/10/1972 and their date of birth is 04/10/1956" in {
-        NationalInsuranceRecordService.calcPre75QualifyingYears(157, new LocalDate(1972, 10, 4), new LocalDate(1956, 10, 4)) shouldBe Some(3)
+        NationalInsuranceRecordService.calcPre75QualifyingYears(157, Some(new LocalDate(1972, 10, 4)), new LocalDate(1956, 10, 4)) shouldBe Some(3)
       }
       "return 8 when the number of conts in 408 and the date of entry is 08/01/1968 and their date of birth is 08/01/1952" in {
-        NationalInsuranceRecordService.calcPre75QualifyingYears(408, new LocalDate(1968, 1, 8), new LocalDate(1952, 1, 8)) shouldBe Some(8)
+        NationalInsuranceRecordService.calcPre75QualifyingYears(408, Some(new LocalDate(1968, 1, 8)), new LocalDate(1952, 1, 8)) shouldBe Some(8)
       }
       "return 2 when the number of conts in 157 and the date of entry is 06/04/1973 and their date of birth is 04/10/1956" in {
-        NationalInsuranceRecordService.calcPre75QualifyingYears(157, new LocalDate(1973, 4, 6), new LocalDate(1956, 10, 4)) shouldBe Some(2)
+        NationalInsuranceRecordService.calcPre75QualifyingYears(157, Some(new LocalDate(1973, 4, 6)), new LocalDate(1956, 10, 4)) shouldBe Some(2)
       }
       "return 1 when the number of conts in 157 and the date of entry is 06/04/1973 and their date of birth is 06/04/1958" in {
-        NationalInsuranceRecordService.calcPre75QualifyingYears(157, new LocalDate(1973, 4, 6), new LocalDate(1958, 4, 6)) shouldBe Some(1)
+        NationalInsuranceRecordService.calcPre75QualifyingYears(157, Some(new LocalDate(1973, 4, 6)), new LocalDate(1958, 4, 6)) shouldBe Some(1)
       }
-      "return 3 when the number of conts in 157 and the date of entry is 06/04/1973 and their date of birth is 24/05/1996" in {
-        NationalInsuranceRecordService.calcPre75QualifyingYears(157, new LocalDate(1973, 4, 6), new LocalDate(1996, 5, 24)) shouldBe None
+      "return null when the number of conts in 157 and the date of entry is 06/04/1973 and their date of birth is 24/05/1996" in {
+        NationalInsuranceRecordService.calcPre75QualifyingYears(157, Some(new LocalDate(1973, 4, 6)), new LocalDate(1996, 5, 24)) shouldBe None
       }
-      "return 3 when the number of conts in 157 and the date of entry is 06/04/1976 and their date of birth is 06/04/1960" in {
-        NationalInsuranceRecordService.calcPre75QualifyingYears(157, new LocalDate(1976, 4, 6), new LocalDate(1960, 4, 6)) shouldBe None
+      "return null when the number of conts in 157 and the date of entry is 06/04/1976 and their date of birth is 06/04/1960" in {
+        NationalInsuranceRecordService.calcPre75QualifyingYears(157, Some(new LocalDate(1976, 4, 6)), new LocalDate(1960, 4, 6)) shouldBe None
       }
-      "return 3 when the number of conts in 157 and the date of entry is 06/04/2005 and their date of birth is 06/04/1958" in {
-        NationalInsuranceRecordService.calcPre75QualifyingYears(157, new LocalDate(2005, 4, 6), new LocalDate(1958, 4, 6)) shouldBe None
+      "return null when the number of conts in 157 and the date of entry is 06/04/2005 and their date of birth is 06/04/1958" in {
+        NationalInsuranceRecordService.calcPre75QualifyingYears(157, Some(new LocalDate(2005, 4, 6)), new LocalDate(1958, 4, 6)) shouldBe None
+      }
+      "when the date_of_entry is null, should still perform calc" in {
+        NationalInsuranceRecordService.calcPre75QualifyingYears(157, None, new LocalDate(1922, 4, 6)) shouldBe Some(4)
+      }
+      "when the date_of_entry is null, should still restrict by 16th Birthday calc" in {
+        NationalInsuranceRecordService.calcPre75QualifyingYears(157, None, new LocalDate(1957, 4, 6)) shouldBe Some(2)
       }
     }
   }

@@ -649,7 +649,7 @@ class NispConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSuga
           qualifyingYearsPriorTo1975 = 5,
           numberOfGaps = 10,
           numberOfGapsPayable = 4,
-          dateOfEntry = new LocalDate(1969, 8, 1),
+          dateOfEntry = Some(new LocalDate(1969, 8, 1)),
           homeResponsibilitiesProtection = false,
           earningsIncludedUpTo = new LocalDate(2015, 4, 5),
           taxYears = List(

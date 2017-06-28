@@ -197,11 +197,14 @@ trait NpsConnection extends NationalInsuranceRecordService {
   def homeResponsibilitiesProtection(liabilities: List[NpsLiability]): Boolean =
     liabilities.exists(liability => NIRecordConstants.homeResponsibilitiesProtectionTypes.contains(liability.liabilityType))
 
-  def calcPre75QualifyingYears(pre75Contributions: Int, dateOfEntry: LocalDate, dateOfBirth: LocalDate): Option[Int] = {
+  def calcPre75QualifyingYears(pre75Contributions: Int, dateOfEntry: Option[LocalDate], dateOfBirth: LocalDate): Option[Int] = {
     val yearCalc: BigDecimal = BigDecimal(pre75Contributions)/50
     val sixteenthBirthday: LocalDate = new LocalDate(dateOfBirth.plusYears(NIRecordConstants.niRecordMinAge))
-    val yearsPre75 = (NIRecordConstants.niRecordStart - TaxYearResolver.taxYearFor(dateOfEntry))
-      .min(NIRecordConstants.niRecordStart - TaxYearResolver.taxYearFor(sixteenthBirthday))
+    val sixteenthBirthdayDiff: Int = NIRecordConstants.niRecordStart - TaxYearResolver.taxYearFor(sixteenthBirthday)
+    val yearsPre75 = dateOfEntry match {
+      case Some(doe) => (NIRecordConstants.niRecordStart - TaxYearResolver.taxYearFor(doe)).min(sixteenthBirthdayDiff)
+      case None => sixteenthBirthdayDiff
+    }
     if (yearsPre75 > 0) {
       Some(yearCalc.setScale(0, BigDecimal.RoundingMode.CEILING).min(yearsPre75).toInt)
     } else {

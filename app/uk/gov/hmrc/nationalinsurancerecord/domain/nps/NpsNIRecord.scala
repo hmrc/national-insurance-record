@@ -26,7 +26,7 @@ case class NpsNIRecord(
                        nonQualifyingYears: Int = 0,
                        nonQualifyingYearsPayable: Int = 0,
                        pre75ContributionCount: Int = 0,
-                       dateOfEntry: LocalDate,
+                       dateOfEntry: Option[LocalDate],
                        niTaxYears: List[NpsNITaxYear]
                       ) {
 
@@ -49,7 +49,7 @@ object NpsNIRecord {
         (__ \ "non_qualifying_years").read[Int] and
         (__ \ "non_qualifying_years_payable").read[Int] and
         (__ \ "pre_75_cc_count").read[Int] and
-        (__ \ "date_of_entry").read[LocalDate] and
+        (__ \ "date_of_entry").readNullable[LocalDate] and
         (__ \ "npsLnitaxyr").read[List[NpsNITaxYear]]
     )(NpsNIRecord.apply _)
 
@@ -58,7 +58,7 @@ object NpsNIRecord {
     (__ \ "non_qualifying_years").write[Int] and
     (__ \ "non_qualifying_years_payable").write[Int] and
     (__ \ "pre_75_cc_count").write[Int] and
-    (__ \ "date_of_entry").write[LocalDate] and
+    (__ \ "date_of_entry").writeNullable[LocalDate] and
     (__ \ "npsLnitaxyr").write[List[NpsNITaxYear]]
     )(unlift(NpsNIRecord.unapply))
 

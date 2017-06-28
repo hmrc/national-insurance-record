@@ -22,21 +22,15 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 
 object NationalInsuranceRecord {
   def apply(nino: Nino, qualifyingYears: Int, qualifyingYearsPriorTo1975: Int,
-            numberOfGaps: Int, numberOfGapsPayable: Int, dateOfEntry: LocalDate,
+            numberOfGaps: Int, numberOfGapsPayable: Int, dateOfEntry: Option[LocalDate],
             homeResponsibilitiesProtection: Boolean, earningsIncludedUpTo: LocalDate, numberOfTaxYears: Int)(implicit hc: HeaderCarrier): NationalInsuranceRecord =
-    new NationalInsuranceRecord(nino: Nino, qualifyingYears: Int,
-      qualifyingYearsPriorTo1975: Int,
-      numberOfGaps: Int,
-      numberOfGapsPayable: Int,
-      dateOfEntry: LocalDate,
-      homeResponsibilitiesProtection: Boolean,
-      earningsIncludedUpTo: LocalDate,
-      numberOfTaxYears: Int
-    )
+    new NationalInsuranceRecord(nino: Nino, qualifyingYears, qualifyingYearsPriorTo1975, numberOfGaps,
+      numberOfGapsPayable, dateOfEntry, homeResponsibilitiesProtection: Boolean, earningsIncludedUpTo: LocalDate,
+      numberOfTaxYears: Int)
 }
 
 class NationalInsuranceRecord(nino: Nino, qualifyingYears: Int, qualifyingYearsPriorTo1975: Int,
-                              numberOfGaps: Int, numberOfGapsPayable: Int, dateOfEntry: LocalDate,
+                              numberOfGaps: Int, numberOfGapsPayable: Int, dateOfEntry: Option[LocalDate],
                               homeResponsibilitiesProtection: Boolean, earningsIncludedUpTo: LocalDate, numberOfTaxYears: Int)(implicit hc: HeaderCarrier)
   extends BusinessEvent("NationalInsuranceRecord", nino,
     Map(
@@ -44,7 +38,7 @@ class NationalInsuranceRecord(nino: Nino, qualifyingYears: Int, qualifyingYearsP
       "qualifyingYearsPriorTo1975" -> qualifyingYearsPriorTo1975.toString,
       "numberOfGaps" -> numberOfGaps.toString,
       "numberOfGapsPayable" -> numberOfGapsPayable.toString,
-      "dateOfEntry" -> dateOfEntry.toString,
+      "dateOfEntry" -> dateOfEntry.fold("")(_.toString),
       "homeResponsibilitiesProtection" -> homeResponsibilitiesProtection.toString,
       "earningsIncludedUpTo" -> earningsIncludedUpTo.toString,
       "numberOfTaxYears" -> numberOfTaxYears.toString
