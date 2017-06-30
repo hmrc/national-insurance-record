@@ -26,7 +26,7 @@ case class NationalInsuranceRecord(
                                     qualifyingYearsPriorTo1975: Int,
                                     numberOfGaps: Int,
                                     numberOfGapsPayable: Int,
-                                    dateOfEntry: LocalDate,
+                                    dateOfEntry: Option[LocalDate],
                                     homeResponsibilitiesProtection: Boolean,
                                     earningsIncludedUpTo: LocalDate,
                                     taxYears: List[NationalInsuranceTaxYear]
@@ -39,7 +39,7 @@ object NationalInsuranceRecord {
     (JsPath \ "qualifyingYearsPriorTo1975").write[Int] and
     (JsPath \ "numberOfGaps").write[Int] and
     (JsPath \ "numberOfGapsPayable").write[Int] and
-    (JsPath \ "dateOfEntry").write[LocalDate] and
+    (JsPath \ "dateOfEntry").writeNullable[LocalDate] and
     (JsPath \ "homeResponsibilitiesProtection").write[Boolean] and
     (JsPath \ "earningsIncludedUpTo").write[LocalDate]
     )((ni: NationalInsuranceRecord) => (

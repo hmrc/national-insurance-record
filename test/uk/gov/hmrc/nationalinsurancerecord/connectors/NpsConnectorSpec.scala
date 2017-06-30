@@ -23,15 +23,14 @@ import org.mockito.{Matchers, Mockito}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
-import play.api.libs.json.{JsValue, Json}
-import uk.gov.hmrc.play.http._
+import play.api.libs.json.Json
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.cache.{LiabilitiesCache, NIRecordCache, SummaryCache}
+import uk.gov.hmrc.nationalinsurancerecord.connectors.NpsConnector.JsonValidationException
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.nps.{NpsLiabilities, NpsNIRecord, NpsSummary}
 import uk.gov.hmrc.nationalinsurancerecord.services.{CachingService, MetricsService}
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet}
-import NpsConnector.JsonValidationException
+import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet, _}
 
 import scala.concurrent.Future
 
@@ -253,7 +252,7 @@ class NpsConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
       npsNIRecordF.nonQualifyingYears shouldBe 13
       npsNIRecordF.numberOfQualifyingYears shouldBe 27
       npsNIRecordF.pre75ContributionCount shouldBe 51
-      npsNIRecordF.dateOfEntry shouldBe new LocalDate(1973,10,1)
+      npsNIRecordF.dateOfEntry shouldBe Some(new LocalDate(1973,10,1))
       npsNIRecordF.niTaxYears.head.qualifying shouldBe true
       npsNIRecordF.niTaxYears(1).qualifying shouldBe false
       npsNIRecordF.niTaxYears.head.underInvestigation shouldBe false

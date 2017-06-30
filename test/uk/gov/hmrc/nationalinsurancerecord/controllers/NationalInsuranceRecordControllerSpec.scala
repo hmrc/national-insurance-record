@@ -95,7 +95,7 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
     qualifyingYearsPriorTo1975 = 5,
     numberOfGaps = 10,
     numberOfGapsPayable = 4,
-    dateOfEntry = new LocalDate(1969, 8, 1),
+    dateOfEntry = Some(new LocalDate(1969, 8, 1)),
     homeResponsibilitiesProtection = false,
     earningsIncludedUpTo = new LocalDate(2016, 4, 5),
     List(
@@ -482,6 +482,16 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
         ((json \ "_links" \ "self") \ "href" ).as[String] shouldBe s"/test/ni/$testNino"
       }
 
+    }
+
+    "the date of entry is nullable" should {
+      "not return the date of entry field" in {
+        val testNino = generateNino()
+        val responseSummary = generateSummaryResponse(Right(dummyRecord.copy(dateOfEntry = None)), testNino)
+        val json = contentAsJson(responseSummary)
+
+        (json \ "dateOfEntry") shouldBe an[JsUndefined]
+      }
     }
   }
 
