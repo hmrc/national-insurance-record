@@ -8,9 +8,35 @@
   </thead>
   <tbody>
     <tr>
-      <td>Regular taxpayer</td>
-      <td>(Any not prefixed as below)</td>
+      <th>National Insruance record variants</th>
+    </tr>
+    <tr>
+      <td>Taxpayer with gaps in their record</td>
+      <td><code class="code--slim">YN315615A</code></td>
       <td>200 (OK) Payload as regular example above</td>
+    </tr>
+    <tr>
+      <td>Taxpayer with only gaps in their record</td>
+      <td><code class="code--slim">AB216913B</code></td>
+      <td>200 (OK) Payload as regular example above</td>
+    </tr>
+    <tr>
+      <td>Taxpayer with no gaps in their record</td>
+      <td><code class="code--slim">PJ523813C</code></td>
+      <td>200 (OK) Payload as regular example above</td>
+    </tr>
+    <tr>
+      <td>Taxpayer with no years at all on their record</td>
+      <td><code class="code--slim">NE541113B</code></td>
+      <td>200 (OK) Payload as regular example above</td>
+    </tr>
+    <tr>
+      <td>Taxpayer with Home Responsibilities Protection (HRP)</td>
+      <td><code class="code--slim">AA252813D</code></td>
+      <td>200 (OK) Payload as regular example above</td>
+    </tr>
+    <tr>
+      <th>Exclusions</th>
     </tr>
     <tr>
       <td>Taxpayer with the Isle of Man exclusion</td>
