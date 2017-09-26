@@ -8,7 +8,7 @@
   </thead>
   <tbody>
     <tr>
-      <th>National Insruance record variants</th>
+      <th colspan="3">National Insruance record variants</th>
     </tr>
     <tr>
       <td>Taxpayer who has gaps in their record</td>
@@ -36,7 +36,7 @@
       <td>200 (OK) Payload as regular example above</td>
     </tr>
     <tr>
-      <th>Exclusions</th>
+      <th colspan="3">Exclusions</th>
     </tr>
     <tr>
       <td>Taxpayer who has Isle of Man liability</td>
