@@ -13,14 +13,18 @@ private object AppDependencies {
   import play.sbt.PlayImport._
   import play.core.PlayVersion
 
-  private val microserviceBootstrapVersion = "6.9.0"
-  private val domainVersion = "4.1.0"
-  private val hmrcTestVersion = "2.2.0"
-  private val scalaTestVersion = "2.2.6"
+  private val microserviceBootstrapVersion = "6.12.0"
+  private val domainVersion = "5.0.0"
   private val pegdownVersion = "1.6.0"
   private val playHmrcApiVersion = "2.1.0"
   private val playHalVersion = "1.2.0"
+  private val reactivemongoVersion = "5.2.0"
 
+  private val hmrcTestVersion = "2.2.0"
+  private val scalaTestVersion = "2.2.6"
+  private val scalaTestPlusVersion = "1.5.1"
+  private val mockitoAllVersion = "1.9.5"
+  private val reactivemongoTestVersion = "1.6.0"
 
   val compile = Seq(
 
@@ -29,8 +33,8 @@ private object AppDependencies {
     "uk.gov.hmrc" %% "domain" % domainVersion,
     "uk.gov.hmrc" %% "play-hmrc-api" % playHmrcApiVersion,
     "uk.gov.hmrc" %% "play-hal" % playHalVersion,
-    "uk.gov.hmrc" %% "play-reactivemongo" % "5.2.0",
-    "uk.gov.hmrc" %% "simple-reactivemongo" % "5.2.0"
+    "uk.gov.hmrc" %% "play-reactivemongo" % reactivemongoVersion,
+    "uk.gov.hmrc" %% "simple-reactivemongo" % reactivemongoVersion
   )
 
   trait TestDependencies {
@@ -44,9 +48,9 @@ private object AppDependencies {
         "uk.gov.hmrc" %% "hmrctest" % hmrcTestVersion % scope,
         "org.pegdown" % "pegdown" % pegdownVersion % scope,
         "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
-        "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % scope,
-        "org.mockito" % "mockito-all" % "1.9.5" % scope,
-        "uk.gov.hmrc" %% "reactivemongo-test" % "1.6.0" % scope
+        "org.scalatestplus.play" %% "scalatestplus-play" % scalaTestPlusVersion % scope,
+        "org.mockito" % "mockito-all" % mockitoAllVersion % scope,
+        "uk.gov.hmrc" %% "reactivemongo-test" % reactivemongoTestVersion % scope
       )
     }.test
   }
@@ -61,8 +65,8 @@ private object AppDependencies {
         "org.scalatest" %% "scalatest" % scalaTestVersion % scope,
         "org.pegdown" % "pegdown" % pegdownVersion % scope,
         "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
-        "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % scope,
-        "org.mockito" % "mockito-all" % "1.9.5" % scope
+        "org.scalatestplus.play" %% "scalatestplus-play" % scalaTestPlusVersion % scope,
+        "org.mockito" % "mockito-all" % mockitoAllVersion % scope
       )
     }.test
   }
