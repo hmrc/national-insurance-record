@@ -23,7 +23,6 @@ import play.api.Logger
 import play.api.libs.json.{Json, Reads}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nationalinsurancerecord.domain._
-import uk.gov.hmrc.play.http.{HeaderCarrier, NotFoundException}
 import play.api.Play.current
 import uk.gov.hmrc.nationalinsurancerecord.connectors.{NispConnector, NpsConnector}
 import uk.gov.hmrc.nationalinsurancerecord.domain.Exclusion.Exclusion
@@ -34,6 +33,7 @@ import uk.gov.hmrc.nationalinsurancerecord.util.NIRecordConstants
 import scala.concurrent.Future
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import uk.gov.hmrc.time.TaxYearResolver
+import uk.gov.hmrc.http.{ HeaderCarrier, NotFoundException }
 
 trait NationalInsuranceRecordService {
   def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceRecord]]

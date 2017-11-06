@@ -25,12 +25,12 @@ import uk.gov.hmrc.nationalinsurancerecord.connectors.CustomAuditConnector
 import uk.gov.hmrc.nationalinsurancerecord.domain._
 import uk.gov.hmrc.nationalinsurancerecord.services.NationalInsuranceRecordService
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.play.audit.model.AuditEvent
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.play.audit.model.DataEvent
 import uk.gov.hmrc.play.test.WithFakeApplication
 import play.api.test.Helpers.{contentAsJson, _}
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitSpec with WithFakeApplication {
 
@@ -40,7 +40,7 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
   val mockAuditConnector = new CustomAuditConnector {
     override lazy val auditConnector: AuditConnector = ???
 
-    override def sendEvent(event: AuditEvent)(implicit hc: HeaderCarrier): Unit = {}
+    override def sendEvent(event: DataEvent)(implicit hc: HeaderCarrier): Unit = {}
   }
 
   def testNationalInsuranceRecordController(niRecordService: NationalInsuranceRecordService): NationalInsuranceRecordController

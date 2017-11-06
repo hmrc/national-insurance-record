@@ -28,8 +28,9 @@ import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.services.MetricsService
 import uk.gov.hmrc.play.http._
-
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpGet, HttpResponse, InternalServerException, NotFoundException, Upstream4xxResponse }
 
 class CitizenDetailsConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar with BeforeAndAfter with ScalaFutures with OneAppPerSuite {
   // scalastyle:off magic.number
@@ -48,27 +49,27 @@ class CitizenDetailsConnectorSpec extends NationalInsuranceRecordUnitSpec with M
   "CitizenDetailsConnector" should {
     "return OK status when successful" in {
       when(mockMetrics.startCitizenDetailsTimer).thenReturn(mockTimerContext)
-      when(citizenDetailsConnector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any())) thenReturn Future.successful(HttpResponse(200))
+      when(citizenDetailsConnector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any())) thenReturn Future.successful(HttpResponse(200))
       val resultF = citizenDetailsConnector.retrieveMCIStatus(nino)(hc)
       await(resultF) shouldBe 200
     }
 
     "return 423 status when the Upstream is 423" in {
-      when(citizenDetailsConnector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any())) thenReturn
+      when(citizenDetailsConnector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any())) thenReturn
         Future.failed(new Upstream4xxResponse(":(", 423, 423, Map()))
       val resultF = citizenDetailsConnector.retrieveMCIStatus(nino)(hc)
       await(resultF) shouldBe 423
     }
 
     "return NotFoundException for invalid nino" in {
-      when(citizenDetailsConnector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any())) thenReturn
+      when(citizenDetailsConnector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any())) thenReturn
         Future.failed(new NotFoundException("Not Found"))
       val resultF = citizenDetailsConnector.retrieveMCIStatus(nino)(hc)
       await(resultF.failed) shouldBe a[NotFoundException]
     }
 
     "return 500 response code when there is Upstream is 4XX" in {
-      when(citizenDetailsConnector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any())) thenReturn
+      when(citizenDetailsConnector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any())) thenReturn
         Future.failed(new InternalServerException("InternalServerError"))
       val resultF = citizenDetailsConnector.retrieveMCIStatus(nino)(hc)
       await(resultF.failed) shouldBe a[InternalServerException]

@@ -18,7 +18,7 @@ package uk.gov.hmrc.nationalinsurancerecord.events
 
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.play.audit.model.DataEvent
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 
 abstract class BusinessEvent(auditType: String, nino: Nino, detail: Map[String, String])(implicit hc: HeaderCarrier)
   extends DataEvent(auditSource = "national-insurance-record", auditType = auditType, detail = detail + ("nino" -> nino.value), tags = Map(
