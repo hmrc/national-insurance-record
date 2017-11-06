@@ -21,12 +21,11 @@ import play.api.libs.json.JsPath
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nationalinsurancerecord.WSHttp
 import uk.gov.hmrc.nationalinsurancerecord.domain.{ExclusionResponse, NationalInsuranceRecord, NationalInsuranceTaxYear, TaxYear}
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet, HttpReads, HttpResponse}
 import uk.gov.hmrc.nationalinsurancerecord.util.EitherReads.eitherReads
 import uk.gov.hmrc.play.config.ServicesConfig
-
 import scala.concurrent.Future
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpGet, HttpReads, HttpResponse }
+import scala.concurrent.ExecutionContext.Implicits.global
 
 trait NispConnector {
   def nispBaseUrl: String
@@ -39,7 +38,7 @@ trait NispConnector {
   }
 
   def getSummary(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceRecord]] = {
-    val response = http.GET[HttpResponse](s"$nispBaseUrl/ni/$nino")(rds = HttpReads.readRaw, hc)
+    val response = http.GET[HttpResponse](s"$nispBaseUrl/ni/$nino")(rds = HttpReads.readRaw, hc, ec = global)
     response.flatMap { httpResponse =>
       httpResponse.json.validate[Either[ExclusionResponse, NationalInsuranceRecord]].fold(
         invalid => Future.failed(new JsonValidationException(formatJsonErrors(invalid))),
@@ -49,7 +48,7 @@ trait NispConnector {
   }
 
   def getTaxYear(nino: Nino, taxYear: TaxYear)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceTaxYear]] = {
-    val response = http.GET[HttpResponse](s"$nispBaseUrl/ni/$nino/taxyear/${taxYear.taxYear}")(rds = HttpReads.readRaw, hc)
+    val response = http.GET[HttpResponse](s"$nispBaseUrl/ni/$nino/taxyear/${taxYear.taxYear}")(rds = HttpReads.readRaw, hc, ec = global)
     response.flatMap { httpResponse =>
       httpResponse.json.validate[Either[ExclusionResponse, NationalInsuranceTaxYear]].fold(
         invalid => Future.failed(new JsonValidationException(formatJsonErrors(invalid))),
@@ -61,5 +60,5 @@ trait NispConnector {
 
 object NispConnector extends NispConnector with ServicesConfig {
   override val nispBaseUrl: String = baseUrl("nisp")
-  override def http: HttpGet = WSHttp
+  override def http: HttpGet = new HttpGet with WSHttp
 }

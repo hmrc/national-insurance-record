@@ -21,23 +21,22 @@ import play.api.libs.json.{Format, JsPath, OFormat, Reads}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nationalinsurancerecord.domain.nps.{NpsLiabilities, NpsNIRecord, NpsSummary}
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet, HttpReads, HttpResponse}
 import uk.gov.hmrc.nationalinsurancerecord.WSHttp
 import uk.gov.hmrc.nationalinsurancerecord.cache._
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.services.{CachingService, MetricsService}
 import uk.gov.hmrc.nationalinsurancerecord.util.{JsonDepersonaliser, NIRecordConstants}
-
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpGet, HttpReads, HttpResponse }
 
 object NpsConnector extends NpsConnector with ServicesConfig {
   override val serviceUrl: String = baseUrl("nps-hod")
   override val serviceOriginatorIdKey: String = getConfString("nps-hod.originatoridkey", "")
   override val serviceOriginatorId: String = getConfString("nps-hod.originatoridvalue", "")
-  override def http: HttpGet = WSHttp
+  override def http: HttpGet = new HttpGet with WSHttp
 
   override val summaryRepository: CachingService[SummaryCache, NpsSummary] = SummaryRepository()
   override val liabilitiesRepository: CachingService[LiabilitiesCache, NpsLiabilities] = LiabilitiesRepository()
@@ -107,7 +106,7 @@ trait NpsConnector {
 
   private def connectToNps[A](url: String, api: APITypes, requestHc: HeaderCarrier)(implicit hc: HeaderCarrier, reads: Reads[A]): Future[A] = {
     val timerContext = metrics.startTimer(api)
-    val futureResponse = http.GET[HttpResponse](url)(hc = requestHc, rds = HttpReads.readRaw)
+    val futureResponse = http.GET[HttpResponse](url)(hc = requestHc, rds = HttpReads.readRaw, ec = global)
 
     futureResponse.map { httpResponse =>
       timerContext.stop()

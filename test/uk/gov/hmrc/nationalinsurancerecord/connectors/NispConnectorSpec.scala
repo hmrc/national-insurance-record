@@ -26,8 +26,10 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.domain._
 import uk.gov.hmrc.play.http._
+import scala.concurrent.ExecutionContext.Implicits.global
 import uk.gov.hmrc.nationalinsurancerecord.connectors.NispConnector.JsonValidationException
 import scala.concurrent.Future
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpGet, HttpResponse}
 
 class NispConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar with OneAppPerSuite {
 
@@ -79,7 +81,7 @@ class NispConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSuga
   "NispConnector - getSummary" when {
     "there is exclusion JSON" should {
       "return Left(Exclusion)" in {
-        when(testNispConnector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.successful(HttpResponse(
+        when(testNispConnector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any())).thenReturn(Future.successful(HttpResponse(
           200,
           Some(Json.parse(
             """
@@ -104,7 +106,7 @@ class NispConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSuga
     "when there is valid json" should {
 
       "return Right(NationalInsuranceRecord)" in {
-        when(testNispConnector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.successful(HttpResponse(
+        when(testNispConnector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any())).thenReturn(Future.successful(HttpResponse(
           200,
           Some(Json.parse(
             """
@@ -702,7 +704,7 @@ class NispConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSuga
     "when it cannot parse to Either an exclusion or ni record" should {
 
       "fail and report validation errors" in {
-        when(testNispConnector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.successful(HttpResponse(
+        when(testNispConnector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any())).thenReturn(Future.successful(HttpResponse(
           200,
           Some(Json.parse(
             """
@@ -726,7 +728,7 @@ class NispConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSuga
 
     "when there is an http error" should {
       "return the failed future and pass the http exception" in {
-        when(testNispConnector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.failed(new BadRequestException("You want me to do what?")))
+        when(testNispConnector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any())).thenReturn(Future.failed(new BadRequestException("You want me to do what?")))
         ScalaFutures.whenReady(testNispConnector.getSummary(generateNino()).failed) { ex =>
           ex shouldBe a[BadRequestException]
         }
@@ -737,7 +739,7 @@ class NispConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSuga
   "NispConnector - getTaxYear" when {
     "there is exclusion JSON" should {
       "return Left(Exclusion)" in {
-        when(testNispConnector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.successful(HttpResponse(
+        when(testNispConnector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any())).thenReturn(Future.successful(HttpResponse(
           200,
           Some(Json.parse(
             """
@@ -762,7 +764,7 @@ class NispConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSuga
     "there is valid json" should {
 
       "return Right(NationalInsuranceRecordTaxYear)" in {
-        when(testNispConnector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.successful(HttpResponse(
+        when(testNispConnector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any())).thenReturn(Future.successful(HttpResponse(
           200,
           Some(Json.parse(
             """
@@ -804,7 +806,7 @@ class NispConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSuga
     "it cannot parse to Either an exclusion or ni record" should {
 
       "fail and report validation errors" in {
-        when(testNispConnector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.successful(HttpResponse(
+        when(testNispConnector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any())).thenReturn(Future.successful(HttpResponse(
           200,
           Some(Json.parse(
             """
@@ -826,7 +828,7 @@ class NispConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSuga
 
     "when there is an http error" should {
       "return the failed future and pass the http exception" in {
-        when(testNispConnector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.failed(new BadRequestException("You want me to do what?")))
+        when(testNispConnector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any())).thenReturn(Future.failed(new BadRequestException("You want me to do what?")))
         ScalaFutures.whenReady(testNispConnector.getTaxYear(generateNino(), TaxYear("1999-00")).failed) { ex =>
           ex shouldBe a[BadRequestException]
         }

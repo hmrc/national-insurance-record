@@ -25,6 +25,7 @@ import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.{ BadGatewayException, BadRequestException, GatewayTimeoutException, HeaderCarrier, NotFoundException, Upstream4xxResponse, Upstream5xxResponse }
 
 trait ErrorHandling {
   self: BaseController =>

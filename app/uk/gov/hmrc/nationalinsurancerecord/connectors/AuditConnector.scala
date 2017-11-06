@@ -16,12 +16,12 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.connectors
 
-import uk.gov.hmrc.play.audit.http.config.LoadAuditingConfig
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.play.audit.model.AuditEvent
 import uk.gov.hmrc.play.config.AppName
-import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.audit.model.DataEvent
+import uk.gov.hmrc.play.microservice.config.LoadAuditingConfig
 
 
 object CustomAuditConnector extends CustomAuditConnector {
@@ -32,7 +32,7 @@ trait CustomAuditConnector {
 
   val auditConnector: AuditConnector
 
-  def sendEvent(event: AuditEvent)(implicit hc: HeaderCarrier): Unit =
+  def sendEvent(event: DataEvent)(implicit hc: HeaderCarrier): Unit =
     auditConnector.sendEvent(event)
 }
 

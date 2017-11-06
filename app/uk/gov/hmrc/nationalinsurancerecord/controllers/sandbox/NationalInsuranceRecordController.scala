@@ -22,14 +22,14 @@ import uk.gov.hmrc.nationalinsurancerecord.connectors.CustomAuditConnector
 import uk.gov.hmrc.nationalinsurancerecord.controllers.NationalInsuranceRecordController
 import uk.gov.hmrc.nationalinsurancerecord.services.{NationalInsuranceRecordService, SandboxNationalInsuranceService}
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.play.audit.model.AuditEvent
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.play.audit.model.DataEvent
+import uk.gov.hmrc.http.HeaderCarrier
 
 object NationalInsuranceRecordController extends NationalInsuranceRecordController {
   override val nationalInsuranceRecordService: NationalInsuranceRecordService = SandboxNationalInsuranceService
   override val customAuditConnector: CustomAuditConnector = new CustomAuditConnector {
     override lazy val auditConnector: AuditConnector = ???
-    override def sendEvent(event: AuditEvent)(implicit hc: HeaderCarrier): Unit = Logger.info(s"Sandbox Audit event sent ${event.auditType}")
+    override def sendEvent(event: DataEvent)(implicit hc: HeaderCarrier): Unit = Logger.info(s"Sandbox Audit event sent ${event.auditType}")
   }
   override val context: String = AppContext.apiGatewayContext
   override val app: String = "Sandbox-National-Insurance-Record"
