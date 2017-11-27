@@ -24,7 +24,7 @@ import play.api.libs.json.{Json, Reads}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nationalinsurancerecord.domain._
 import play.api.Play.current
-import uk.gov.hmrc.nationalinsurancerecord.connectors.{NispConnector, NpsConnector}
+import uk.gov.hmrc.nationalinsurancerecord.connectors.NpsConnector
 import uk.gov.hmrc.nationalinsurancerecord.domain.Exclusion.Exclusion
 import uk.gov.hmrc.nationalinsurancerecord.domain.nps.{NpsLiability, NpsNITaxYear}
 import uk.gov.hmrc.nationalinsurancerecord.util.EitherReads._
@@ -100,14 +100,6 @@ object SandboxNationalInsuranceService extends NationalInsuranceRecordService {
       case Some(exclusionResponse) => Future.successful(Left(exclusionResponse))
       case None => Future(getTaxYearFileFromPrefix(nino, taxYear))
     }
-}
-
-trait NispConnection extends NationalInsuranceRecordService {
-  val nisp: NispConnector = NispConnector
-  override def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceRecord]] =
-    nisp.getSummary(nino)
-  override def getTaxYear(nino: Nino, taxYear: TaxYear)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceTaxYear]] =
-    nisp.getTaxYear(nino, taxYear)
 }
 
 trait NpsConnection extends NationalInsuranceRecordService {
@@ -230,9 +222,6 @@ trait NpsConnection extends NationalInsuranceRecordService {
 
 }
 
-
-
-object NationalInsuranceRecordServiceViaNisp extends NationalInsuranceRecordService with NispConnection
 object NationalInsuranceRecordService extends NationalInsuranceRecordService with NpsConnection {
   override lazy val nps: NpsConnector = NpsConnector
   override def citizenDetailsService: CitizenDetailsService = CitizenDetailsService
