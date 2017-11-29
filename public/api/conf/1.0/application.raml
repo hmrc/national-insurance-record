@@ -86,7 +86,6 @@ traits:
           - errorResponses
         (annotations.scope): "read:national-insurance-record"
         securedBy: [ sec.oauth_2_0: { scopes: [ "read:national-insurance-record" ] } ]
-        (annotations.sandboxData): !include sandbox/sandbox.md
         responses:
           200:
             body:
@@ -109,7 +108,6 @@ traits:
               - errorResponses
             (annotations.scope): "read:national-insurance-record"
             securedBy: [ sec.oauth_2_0: { scopes: [ "read:national-insurance-record" ] } ]
-            (annotations.sandboxData): !include sandbox/sandbox.md
             responses:
               200:
                 body:
