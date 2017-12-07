@@ -58,31 +58,31 @@ trait NpsConnection extends NationalInsuranceRecordService {
 
       val purgedNIRecord = npsNIRecord.purge(npsSummary.finalRelevantYear)
 
-        val exclusions: List[Exclusion] = new ExclusionService(
-          dateOfDeath = npsSummary.dateOfDeath,
-          reducedRateElection = npsSummary.rreToConsider,
-          npsLiabilities.liabilities,
-          manualCorrespondence
-        ).getExclusions
+      val exclusions: List[Exclusion] = new ExclusionService(
+        dateOfDeath = npsSummary.dateOfDeath,
+        reducedRateElection = npsSummary.rreToConsider,
+        npsLiabilities.liabilities,
+        manualCorrespondence
+      ).getExclusions
 
-        if(exclusions.nonEmpty) {
-          metrics.exclusion(exclusions.head)
-          Left(ExclusionResponse(exclusions))
-        } else {
-          val niRecord = NationalInsuranceRecord(
-            purgedNIRecord.numberOfQualifyingYears,
-            calcPre75QualifyingYears(purgedNIRecord.pre75ContributionCount, purgedNIRecord.dateOfEntry, npsSummary.dateOfBirth).getOrElse(0),
-            purgedNIRecord.nonQualifyingYears,
-            purgedNIRecord.nonQualifyingYearsPayable,
-            purgedNIRecord.dateOfEntry,
-            homeResponsibilitiesProtection(npsLiabilities.liabilities),
-            npsSummary.earningsIncludedUpTo,
-            purgedNIRecord.niTaxYears.map(npsTaxYearToNIRecordTaxYear).sortBy(_.taxYear)(Ordering[String].reverse)
-          )
-          metrics.niRecord(niRecord.numberOfGaps, niRecord.numberOfGapsPayable, niRecord.qualifyingYearsPriorTo1975, niRecord.qualifyingYears)
-          Right(niRecord)
-        }
+      if(exclusions.nonEmpty) {
+        metrics.exclusion(exclusions.head)
+        Left(ExclusionResponse(exclusions))
+      } else {
+        val niRecord = NationalInsuranceRecord(
+          purgedNIRecord.numberOfQualifyingYears,
+          calcPre75QualifyingYears(purgedNIRecord.pre75ContributionCount, purgedNIRecord.dateOfEntry, npsSummary.dateOfBirth).getOrElse(0),
+          purgedNIRecord.nonQualifyingYears,
+          purgedNIRecord.nonQualifyingYearsPayable,
+          purgedNIRecord.dateOfEntry,
+          homeResponsibilitiesProtection(npsLiabilities.liabilities),
+          npsSummary.earningsIncludedUpTo,
+          purgedNIRecord.niTaxYears.map(npsTaxYearToNIRecordTaxYear).sortBy(_.taxYear)(Ordering[String].reverse)
+        )
+        metrics.niRecord(niRecord.numberOfGaps, niRecord.numberOfGapsPayable, niRecord.qualifyingYearsPriorTo1975, niRecord.qualifyingYears)
+        Right(niRecord)
       }
+    }
   }
 
   override def getTaxYear(nino: Nino, taxYear: TaxYear)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceTaxYear]] = {
