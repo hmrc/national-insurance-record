@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -198,22 +198,6 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
 
     }
 
-    "there is a married women's reduced rate election exclusion" should {
-
-      val response = generateSummaryResponse(Left(ExclusionResponse(List(Exclusion.MarriedWomenReducedRateElection))))
-
-      "return status 403" in {
-        status(response) shouldBe 403
-      }
-
-      "return the mwrre message" in {
-        contentAsJson(response) shouldBe Json.parse(
-          """{"code":"EXCLUSION_MARRIED_WOMENS_REDUCED_RATE","message": "The customer needs to contact the National Insurance helpline"}"""
-        )
-      }
-
-    }
-
     "there is an Isle of Man exclusion" should {
 
       val response = generateSummaryResponse(Left(ExclusionResponse(List(Exclusion.IsleOfMan))))
@@ -229,13 +213,12 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
       }
     }
 
-    "there is a a list of dead, MCI, MWRRE, IoM exclusions" should {
+    "there is a list of dead, MCI, IoM exclusions" should {
 
       val response = generateSummaryResponse(Left(ExclusionResponse(List(
         Exclusion.IsleOfMan,
         Exclusion.ManualCorrespondenceIndicator,
-        Exclusion.Dead,
-        Exclusion.MarriedWomenReducedRateElection
+        Exclusion.Dead
       ))))
 
       "return status 403" in {
@@ -249,12 +232,11 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
       }
     }
 
-    "there is a a list of MCI, MWRRE, IoM exclusions" should {
+    "there is a list of MCI, IoM exclusions" should {
 
       val response = generateSummaryResponse(Left(ExclusionResponse(List(
         Exclusion.IsleOfMan,
-        Exclusion.ManualCorrespondenceIndicator,
-        Exclusion.MarriedWomenReducedRateElection
+        Exclusion.ManualCorrespondenceIndicator
       ))))
 
       "return status 403" in {
@@ -268,11 +250,10 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
       }
     }
 
-    "there is a a list of MWRRE and IoM exclusions" should {
+    "there is a list of IoM exclusion" should {
 
       val response = generateSummaryResponse(Left(ExclusionResponse(List(
-        Exclusion.IsleOfMan,
-        Exclusion.MarriedWomenReducedRateElection
+        Exclusion.IsleOfMan
       ))))
 
       "return status 403" in {
@@ -548,22 +529,6 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
 
     }
 
-    "there is a married women's reduced rate election exclusion" should {
-
-      val response = generateTaxYearResponse(Left(ExclusionResponse(List(Exclusion.MarriedWomenReducedRateElection))))
-
-      "return status 403" in {
-        status(response) shouldBe 403
-      }
-
-      "return the mwrre message" in {
-        contentAsJson(response) shouldBe Json.parse(
-          """{"code":"EXCLUSION_MARRIED_WOMENS_REDUCED_RATE","message": "The customer needs to contact the National Insurance helpline"}"""
-        )
-      }
-
-    }
-
     "there is an Isle of Man exclusion" should {
 
       val response = generateTaxYearResponse(Left(ExclusionResponse(List(Exclusion.IsleOfMan))))
@@ -579,13 +544,12 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
       }
     }
 
-    "there is a a list of dead, MCI, MWRRE, IoM exclusions" should {
+    "there is a list of dead, MCI, IoM exclusions" should {
 
       val response = generateTaxYearResponse(Left(ExclusionResponse(List(
         Exclusion.IsleOfMan,
         Exclusion.ManualCorrespondenceIndicator,
-        Exclusion.Dead,
-        Exclusion.MarriedWomenReducedRateElection
+        Exclusion.Dead
       ))))
 
       "return status 403" in {
@@ -599,12 +563,11 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
       }
     }
 
-    "there is a a list of MCI, MWRRE, IoM exclusions" should {
+    "there is a list of MCI, IoM exclusions" should {
 
       val response = generateTaxYearResponse(Left(ExclusionResponse(List(
         Exclusion.IsleOfMan,
-        Exclusion.ManualCorrespondenceIndicator,
-        Exclusion.MarriedWomenReducedRateElection
+        Exclusion.ManualCorrespondenceIndicator
       ))))
 
       "return status 403" in {
@@ -618,11 +581,10 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
       }
     }
 
-    "there is a a list of MWRRE and IoM exclusions" should {
+    "there is a list of IoM exclusion" should {
 
       val response = generateTaxYearResponse(Left(ExclusionResponse(List(
-        Exclusion.IsleOfMan,
-        Exclusion.MarriedWomenReducedRateElection
+        Exclusion.IsleOfMan
       ))))
 
       "return status 403" in {

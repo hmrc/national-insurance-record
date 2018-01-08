@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,6 @@ object MetricsService extends MetricsService with MicroserviceMetrics{
   }
 
   val exclusionMeters: Map[Exclusion, Counter] = Map(
-    Exclusion.MarriedWomenReducedRateElection -> metrics.defaultRegistry.counter("exclusion-mwrre"),
     Exclusion.Dead -> metrics.defaultRegistry.counter("exclusion-dead"),
     Exclusion.IsleOfMan -> metrics.defaultRegistry.counter("exclusion-isle-of-man"),
     Exclusion.ManualCorrespondenceIndicator -> metrics.defaultRegistry.counter("exclusion-manual-correspondence")

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,10 +28,9 @@ class ExclusionServiceSpec extends NationalInsuranceRecordServiceSpec {
 
   private def exclusionServiceBuilder(
                                 dateOfDeath: Option[LocalDate] = None,
-                                reducedRateElection: Boolean = false,
                                 liabilities: List[NpsLiability] = List(),
                                 manualCorrespondenceOnly: Boolean = false
-                             ) = new ExclusionService(dateOfDeath, reducedRateElection, liabilities, manualCorrespondenceOnly)
+                             ) = new ExclusionService(dateOfDeath, liabilities, manualCorrespondenceOnly)
 
   "getExclusions" when {
     "there is no exclusions" should {
@@ -43,18 +42,6 @@ class ExclusionServiceSpec extends NationalInsuranceRecordServiceSpec {
     "there is a date of death" should {
       "return a List(Dead)" in {
         exclusionServiceBuilder(dateOfDeath = Some(new LocalDate(2000, 9, 13))).getExclusions shouldBe List(Exclusion.Dead)
-      }
-    }
-
-    "there is reduced rate election" should {
-      "return a List(MarriwedWomensReducedRateElection" in {
-        exclusionServiceBuilder(reducedRateElection = true).getExclusions shouldBe List(Exclusion.MarriedWomenReducedRateElection)
-      }
-    }
-
-    "there is no reduced rate election" should {
-      "return no exclusions" in {
-        exclusionServiceBuilder(reducedRateElection = false).getExclusions shouldBe Nil
       }
     }
 
@@ -87,17 +74,15 @@ class ExclusionServiceSpec extends NationalInsuranceRecordServiceSpec {
     }
 
     "all the exclusion criteria are met" should {
-      "return a sorted list of Dead, PostSPA, MWRRE" in {
+      "return a sorted list of Dead, MCI, IoM exclusions" in {
         exclusionServiceBuilder(
           dateOfDeath = Some(new LocalDate(1999, 12, 31)),
-          reducedRateElection = true,
           liabilities = List(NpsLiability(5), NpsLiability(15), NpsLiability(1)),
           manualCorrespondenceOnly = true
         ).getExclusions shouldBe List(
           Exclusion.Dead,
           Exclusion.ManualCorrespondenceIndicator,
-          Exclusion.IsleOfMan,
-          Exclusion.MarriedWomenReducedRateElection
+          Exclusion.IsleOfMan
         )
       }
     }

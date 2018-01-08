@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import org.joda.time.LocalDate
 import uk.gov.hmrc.nationalinsurancerecord.util.FunctionHelper
 
 class ExclusionService(dateOfDeath: Option[LocalDate],
-                       reducedRateElection: Boolean,
                        liabilities: List[NpsLiability],
                        manualCorrespondenceOnly: Boolean) {
 
@@ -40,13 +39,9 @@ class ExclusionService(dateOfDeath: Option[LocalDate],
     if (liabilities.exists(_.liabilityType == LiabilityType.ISLE_OF_MAN)) Exclusion.IsleOfMan :: exclusionList
     else exclusionList
 
-  private val checkMarriedWomensReducedRateElection = (exclusionList: List[Exclusion]) =>
-    if (reducedRateElection) Exclusion.MarriedWomenReducedRateElection :: exclusionList else exclusionList
-
   private val exclusions = FunctionHelper.composeAll(List(
     checkDead,
     checkManualCorrespondence,
-    checkIsleOfMan,
-    checkMarriedWomensReducedRateElection
+    checkIsleOfMan
    ))
 }
