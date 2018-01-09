@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,9 @@ package uk.gov.hmrc.nationalinsurancerecord.domain
 
 import play.api.libs.json._
 
-
 object Exclusion extends Enumeration {
   type Exclusion = Value
   val IsleOfMan = Value
-  val MarriedWomenReducedRateElection = Value
   val Dead = Value
   val ManualCorrespondenceIndicator = Value
 
@@ -31,7 +29,6 @@ object Exclusion extends Enumeration {
     def writes(exclusion: Exclusion): JsValue = JsString(exclusion.toString)
   }
 }
-
 
 case class ExclusionResponse(exclusionReasons: List[Exclusion.Exclusion])
 
