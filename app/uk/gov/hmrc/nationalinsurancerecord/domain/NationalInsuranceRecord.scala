@@ -29,7 +29,8 @@ case class NationalInsuranceRecord(
                                     dateOfEntry: Option[LocalDate],
                                     homeResponsibilitiesProtection: Boolean,
                                     earningsIncludedUpTo: LocalDate,
-                                    taxYears: List[NationalInsuranceTaxYear]
+                                    taxYears: List[NationalInsuranceTaxYear],
+                                    reducedRateElection:Boolean
                                   )
 
 object NationalInsuranceRecord {
@@ -41,7 +42,8 @@ object NationalInsuranceRecord {
     (JsPath \ "numberOfGapsPayable").write[Int] and
     (JsPath \ "dateOfEntry").writeNullable[LocalDate] and
     (JsPath \ "homeResponsibilitiesProtection").write[Boolean] and
-    (JsPath \ "earningsIncludedUpTo").write[LocalDate]
+    (JsPath \ "earningsIncludedUpTo").write[LocalDate] and
+    (JsPath \ "reducedRateElection").write[Boolean]
     )((ni: NationalInsuranceRecord) => (
       ni.qualifyingYears,
       ni.qualifyingYearsPriorTo1975,
@@ -49,7 +51,8 @@ object NationalInsuranceRecord {
       ni.numberOfGapsPayable,
       ni.dateOfEntry,
       ni.homeResponsibilitiesProtection,
-      ni.earningsIncludedUpTo
+      ni.earningsIncludedUpTo,
+      ni.reducedRateElection
     ))
   implicit val formats: Format[NationalInsuranceRecord] = Format(reads, writes)
 

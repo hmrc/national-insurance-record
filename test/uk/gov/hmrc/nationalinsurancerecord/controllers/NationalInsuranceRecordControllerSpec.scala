@@ -140,7 +140,8 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
       generateTaxYear("1977-78", true),
       generateTaxYear("1976-77", true),
       generateTaxYear("1975-76", true)
-    )
+    ),
+    reducedRateElection = false
   )
 
 
@@ -298,6 +299,10 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
 
       "have a Boolean called homeResponsibilitiesProtection which is false" in {
         (json \ "homeResponsibilitiesProtection").as[Boolean] shouldBe  false
+      }
+
+      "have a Boolean called reducedRateElection which is false" in {
+        (json \ "reducedRateElection").as[Boolean] shouldBe  false
       }
 
       "have a LocalDate called earningsIncludedUpTo which is 5/4/2016" in {

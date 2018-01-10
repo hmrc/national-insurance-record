@@ -76,7 +76,8 @@ trait NpsConnection extends NationalInsuranceRecordService {
             purgedNIRecord.dateOfEntry,
             homeResponsibilitiesProtection(npsLiabilities.liabilities),
             npsSummary.earningsIncludedUpTo,
-            purgedNIRecord.niTaxYears.map(npsTaxYearToNIRecordTaxYear).sortBy(_.taxYear)(Ordering[String].reverse)
+            purgedNIRecord.niTaxYears.map(npsTaxYearToNIRecordTaxYear).sortBy(_.taxYear)(Ordering[String].reverse),
+            npsSummary.rreToConsider
           )
           metrics.niRecord(niRecord.numberOfGaps, niRecord.numberOfGapsPayable, niRecord.qualifyingYearsPriorTo1975, niRecord.qualifyingYears)
           Right(niRecord)
