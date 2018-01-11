@@ -34,6 +34,10 @@
       "description": "This is always the end date of the last posted tax year",
       "$ref": "common.json#/definitions/iso8601Date"
     },
+    "reducedRateElection": {
+      "description": "The flag for Married Women\u2019s Reduced Rate Election (MWRRE)",
+      "type": "boolean"
+    },
     "_embedded": {
       "type": "object",
       "properties": {
