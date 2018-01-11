@@ -35,7 +35,7 @@
       "$ref": "common.json#/definitions/iso8601Date"
     },
     "reducedRateElection": {
-      "description": "The flag for Married Women's Reduced Rate Election (MWRRE)",
+      "description": "The flag for Married Women\u2019s Reduced Rate Election (MWRRE)",
       "type": "boolean"
     },
     "_embedded": {
