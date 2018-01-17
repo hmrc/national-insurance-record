@@ -28,7 +28,6 @@ import uk.gov.hmrc.nationalinsurancerecord.domain.nps._
 import uk.gov.hmrc.nationalinsurancerecord.domain.{NationalInsuranceTaxYear, _}
 import scala.concurrent.Future
 
-
 class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec with OneAppPerSuite with ScalaFutures with MockitoSugar {
   // scalastyle:off magic.number
 
@@ -39,6 +38,120 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
     dateOfEntry = Some(new LocalDate(1969,8,1)),
     pre75ContributionCount = 250,
     niTaxYears = List(
+      NpsNITaxYear(
+        startTaxYear = 2017,
+        qualifying = true,
+        underInvestigation = false,
+        payable = false,
+        classThreePayable = 0,
+        classThreePayableBy = None,
+        classThreePayableByPenalty = None,
+        classOneContribution = 2430.24,
+        classTwoCredits = 0,
+        classThreeCredits = 0,
+        otherCredits = List()
+      ),
+      NpsNITaxYear(
+        startTaxYear = 2016,
+        qualifying = true,
+        underInvestigation = false,
+        payable = false,
+        classThreePayable = 0,
+        classThreePayableBy = None,
+        classThreePayableByPenalty = None,
+        classOneContribution = 2430.24,
+        classTwoCredits = 0,
+        classThreeCredits = 0,
+        otherCredits = List()
+      ),
+      NpsNITaxYear(
+        startTaxYear = 2015,
+        qualifying = true,
+        underInvestigation = false,
+        payable = false,
+        classThreePayable = 0,
+        classThreePayableBy = None,
+        classThreePayableByPenalty = None,
+        classOneContribution = 2430.24,
+        classTwoCredits = 0,
+        classThreeCredits = 0,
+        otherCredits = List()
+      ),
+      NpsNITaxYear(
+        startTaxYear = 2014,
+        qualifying = true,
+        underInvestigation = false,
+        payable = true,
+        classThreePayable = 9,
+        classThreePayableBy = Some(new LocalDate(2019, 4, 5)),
+        classThreePayableByPenalty = None,
+        classOneContribution = 430.4,
+        classTwoCredits = 0,
+        classThreeCredits = 0,
+        otherCredits = List()
+      ),
+      NpsNITaxYear(
+        startTaxYear = 2013,
+        qualifying = true,
+        underInvestigation = false,
+        payable = true,
+        classThreePayable = 720,
+        classThreePayableBy = Some(new LocalDate(2019, 4, 5)),
+        classThreePayableByPenalty = Some(new LocalDate(2023, 4, 5)),
+        classOneContribution = 0,
+        classTwoCredits = 10,
+        classThreeCredits = 3,
+        otherCredits = List(NpsOtherCredits(1,2,7))
+      ),
+      NpsNITaxYear(
+        startTaxYear = 2012,
+        qualifying = false,
+        underInvestigation = false,
+        payable = true,
+        classThreePayable = 720,
+        classThreePayableBy = Some(new LocalDate(2019, 4, 5)),
+        classThreePayableByPenalty = Some(new LocalDate(2023, 4, 5)),
+        classOneContribution = 0,
+        classTwoCredits = 10,
+        classThreeCredits = 3,
+        otherCredits = List(NpsOtherCredits(1,2,7))
+      )
+    )
+  )
+
+  private val niRecordHODWithPre75QYears = NpsNIRecord(
+    numberOfQualifyingYears = 6,
+    nonQualifyingYears = 26,
+    nonQualifyingYearsPayable = 3,
+    dateOfEntry = Some(new LocalDate(1969,8,1)),
+    pre75ContributionCount = 59,
+    niTaxYears = List(
+      NpsNITaxYear(
+        startTaxYear = 2017,
+        qualifying = false,
+        underInvestigation = false,
+        payable = false,
+        classThreePayable = 0,
+        classThreePayableBy = None,
+        classThreePayableByPenalty = None,
+        classOneContribution = 2430.24,
+        classTwoCredits = 0,
+        classThreeCredits = 0,
+        otherCredits = List()
+      ),
+      NpsNITaxYear(
+        startTaxYear = 2016,
+        qualifying = true,
+        underInvestigation = false,
+        payable = false,
+        classThreePayable = 0,
+        classThreePayableBy = None,
+        classThreePayableByPenalty = None,
+        classOneContribution = 2430.24,
+        classTwoCredits = 0,
+        classThreeCredits = 0,
+        otherCredits = List()
+      ),
       NpsNITaxYear(
         startTaxYear = 2015,
         qualifying = true,
@@ -77,6 +190,106 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
         classTwoCredits = 10,
         classThreeCredits = 3,
         otherCredits = List(NpsOtherCredits(1,2,7))
+      ),
+        NpsNITaxYear(
+        startTaxYear = 2012,
+        qualifying = true,
+        underInvestigation = false,
+        payable = true,
+        classThreePayable = 720,
+        classThreePayableBy = Some(new LocalDate(2019, 4, 5)),
+        classThreePayableByPenalty = Some(new LocalDate(2023, 4, 5)),
+        classOneContribution = 0,
+        classTwoCredits = 10,
+        classThreeCredits = 3,
+        otherCredits = List(NpsOtherCredits(1,2,7))
+      )
+    )
+  )
+
+  private val niRecordHODWithoutPre75QYears = NpsNIRecord(
+    numberOfQualifyingYears = 6,
+    nonQualifyingYears = 20,
+    nonQualifyingYearsPayable = 3,
+    dateOfEntry = Some(new LocalDate(1969,8,1)),
+    pre75ContributionCount = 59,
+    niTaxYears = List(
+      NpsNITaxYear(
+        startTaxYear = 2017,
+        qualifying = true,
+        underInvestigation = false,
+        payable = false,
+        classThreePayable = 0,
+        classThreePayableBy = None,
+        classThreePayableByPenalty = None,
+        classOneContribution = 2430.24,
+        classTwoCredits = 0,
+        classThreeCredits = 0,
+        otherCredits = List()
+      ),      NpsNITaxYear(
+        startTaxYear = 2016,
+        qualifying = true,
+        underInvestigation = false,
+        payable = false,
+        classThreePayable = 0,
+        classThreePayableBy = None,
+        classThreePayableByPenalty = None,
+        classOneContribution = 2430.24,
+        classTwoCredits = 0,
+        classThreeCredits = 0,
+        otherCredits = List()
+      ),
+      NpsNITaxYear(
+        startTaxYear = 2015,
+        qualifying = true,
+        underInvestigation = false,
+        payable = false,
+        classThreePayable = 0,
+        classThreePayableBy = None,
+        classThreePayableByPenalty = None,
+        classOneContribution = 2430.24,
+        classTwoCredits = 0,
+        classThreeCredits = 0,
+        otherCredits = List()
+      ),
+      NpsNITaxYear(
+        startTaxYear = 2014,
+        qualifying = true,
+        underInvestigation = false,
+        payable = true,
+        classThreePayable = 9,
+        classThreePayableBy = Some(new LocalDate(2019, 4, 5)),
+        classThreePayableByPenalty = None,
+        classOneContribution = 430.4,
+        classTwoCredits = 0,
+        classThreeCredits = 0,
+        otherCredits = List()
+      ),
+      NpsNITaxYear(
+        startTaxYear = 2013,
+        qualifying = true,
+        underInvestigation = false,
+        payable = true,
+        classThreePayable = 720,
+        classThreePayableBy = Some(new LocalDate(2019, 4, 5)),
+        classThreePayableByPenalty = Some(new LocalDate(2023, 4, 5)),
+        classOneContribution = 0,
+        classTwoCredits = 10,
+        classThreeCredits = 3,
+        otherCredits = List(NpsOtherCredits(1,2,7))
+      ),
+        NpsNITaxYear(
+        startTaxYear = 2012,
+        qualifying = true,
+        underInvestigation = false,
+        payable = true,
+        classThreePayable = 720,
+        classThreePayableBy = Some(new LocalDate(2019, 4, 5)),
+        classThreePayableByPenalty = Some(new LocalDate(2023, 4, 5)),
+        classOneContribution = 0,
+        classTwoCredits = 10,
+        classThreeCredits = 3,
+        otherCredits = List(NpsOtherCredits(1,2,7))
       )
     )
   )
@@ -95,7 +308,6 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
     underInvestigation =  false
   )
 
-
   "NationalInsuranceRecordService with a HOD Connection" when {
 
     val mockMetrics = mock[MetricsService]
@@ -105,7 +317,6 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
       override lazy val now: LocalDate = new LocalDate(2017, 1, 16)
       override def metrics: MetricsService = mockMetrics
     }
-
 
     "regular ni record" should {
 
@@ -125,9 +336,10 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
           ni.qualifyingYears shouldBe 36
         }
       }
-      "return qualifyingyears pre 1975 to be 5"  in {
+      // Theoretically its not possible, but want to test calcualtions
+      "return qualifyingyears pre 1975 to be 31"  in {
         whenReady(niRecordF) { ni =>
-          ni.qualifyingYearsPriorTo1975 shouldBe 5
+          ni.qualifyingYearsPriorTo1975 shouldBe 31
         }
       }
       "return number of gaps to be 1"  in {
@@ -155,56 +367,56 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
           ni.earningsIncludedUpTo shouldBe new LocalDate(2016,4,5)
         }
       }
-      "return taxYear to be 2015-16"  in {
+      "return taxYear to be 2017-18"  in {
         whenReady(niRecordF) { ni =>
-          ni.taxYears.head.taxYear shouldBe "2015-16"
+          ni.taxYears.head.taxYear shouldBe "2017-18"
         }
       }
-      "return qualifying status true for taxyear 2015-16 to be"  in {
+      "return qualifying status true for taxyear 2017-18 to be"  in {
         whenReady(niRecordF) { ni =>
           ni.taxYears.head.qualifying shouldBe true
         }
       }
-      "return classOneContributions to be 2430.24 for taxyear 2015-16"  in {
+      "return classOneContributions to be 2430.24 for taxyear 2017-18"  in {
         whenReady(niRecordF) { ni =>
           ni.taxYears.head.classOneContributions shouldBe 2430.24
         }
       }
-      "return classTwoCredits to be 0 for taxyear 2015-16"  in {
+      "return classTwoCredits to be 0 for taxyear 2017-18"  in {
         whenReady(niRecordF) { ni =>
           ni.taxYears.head.classTwoCredits shouldBe 0
         }
       }
-      "return classThreeCredits to be 0 for taxyear 2015-16"  in {
+      "return classThreeCredits to be 0 for taxyear 2017-18"  in {
         whenReady(niRecordF) { ni =>
           ni.taxYears.head.classThreeCredits shouldBe 0
         }
       }
-      "return otherCredits to be 0 for taxyear 2015-16"  in {
+      "return otherCredits to be 0 for taxyear 2017-18"  in {
         whenReady(niRecordF) { ni =>
           ni.taxYears.head.otherCredits shouldBe 0
         }
       }
-      "return classThreePayable to be 0 for taxyear 2015-16"  in {
+      "return classThreePayable to be 0 for taxyear 2017-18"  in {
         whenReady(niRecordF) { ni =>
           ni.taxYears.head.classThreePayable shouldBe 0
-          ni.taxYears(2).classThreePayable shouldBe 720
+          ni.taxYears(4).classThreePayable shouldBe 720
         }
       }
-      "return classThreePayableBy to be None for taxyear 2015-16"  in {
+      "return classThreePayableBy to be None for taxyear 2017-18"  in {
         whenReady(niRecordF) { ni =>
           ni.taxYears.head.classThreePayableBy shouldBe None
-          ni.taxYears(2).classThreePayableBy shouldBe Some(new LocalDate(2019,4,5))
+          ni.taxYears(4).classThreePayableBy shouldBe Some(new LocalDate(2019,4,5))
         }
       }
-      "return classThreePayableByPenalty to be None for taxyear 2015-16"  in {
+      "return classThreePayableByPenalty to be None for taxyear 2017-18"  in {
         whenReady(niRecordF) { ni =>
           ni.taxYears.head.classThreePayableByPenalty shouldBe None
-          ni.taxYears(2).classThreePayableByPenalty shouldBe Some(new LocalDate(2023,4,5))
+          ni.taxYears(4).classThreePayableByPenalty shouldBe Some(new LocalDate(2023,4,5))
         }
       }
 
-      "return payable and underinvestigation flag to be false for taxyear 2015-16"  in {
+      "return payable and underinvestigation flag to be false for taxyear 2017-18"  in {
         whenReady(niRecordF) { ni =>
           ni.taxYears.head.payable shouldBe false
           ni.taxYears.head.underInvestigation shouldBe false
@@ -215,7 +427,7 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
           niTaxYear =>
             niTaxYear.taxYear shouldBe "2014-15"
             niTaxYear.underInvestigation shouldBe false
-            niTaxYear.qualifying shouldBe false
+            niTaxYear.qualifying shouldBe true
             niTaxYear.payable shouldBe true
             niTaxYear.classThreePayable shouldBe 9
             niTaxYear.classThreePayableBy shouldBe Some(new LocalDate(2019,4,5))
@@ -257,6 +469,17 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
         NationalInsuranceRecordService.calcPre75QualifyingYears(157, None, new LocalDate(1957, 4, 6)) shouldBe Some(2)
       }
     }
+
+    "calc pre75 qualifying years" should {
+      "return pre-75 qualifying years = 2" in {
+        NationalInsuranceRecordService.calcPre75QualifyingYears(niRecordHODWithPre75QYears) shouldBe Some(2)
+      }
+
+      "return nothing for post75 qualifying years" in {
+        NationalInsuranceRecordService.calcPre75QualifyingYears(niRecordHODWithoutPre75QYears) shouldBe None
+      }
+    }
+
   }
 
   "NationalInsuranceRecordService exclusion with HOD connection" should {
