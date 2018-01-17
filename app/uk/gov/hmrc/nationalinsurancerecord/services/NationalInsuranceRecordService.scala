@@ -73,7 +73,6 @@ trait NpsConnection extends NationalInsuranceRecordService {
           val niRecord = NationalInsuranceRecord(
             purgedNIRecord.numberOfQualifyingYears,
             calcPre75QualifyingYears(purgedNIRecord).getOrElse(0),
-            //calcPre75QualifyingYears(purgedNIRecord.pre75ContributionCount, purgedNIRecord.dateOfEntry, npsSummary.dateOfBirth).getOrElse(0),
             purgedNIRecord.nonQualifyingYears,
             purgedNIRecord.nonQualifyingYearsPayable,
             purgedNIRecord.dateOfEntry,
@@ -140,10 +139,10 @@ trait NpsConnection extends NationalInsuranceRecordService {
   }
 
   def calcPre75QualifyingYears(npsNIRecord: NpsNIRecord) : Option[Int] = {
-    val post75QualigyingYears = npsNIRecord.niTaxYears.filter(_.qualifying).size
-    val pre75QualigyingYears = npsNIRecord.numberOfQualifyingYears - post75QualigyingYears
-    if(pre75QualigyingYears > 0){
-      Some(pre75QualigyingYears)
+    val post75QualifyingYears = npsNIRecord.niTaxYears.filter(_.qualifying).size
+    val pre75QualifyingYears = npsNIRecord.numberOfQualifyingYears - post75QualifyingYears
+    if(pre75QualifyingYears > 0){
+      Some(pre75QualifyingYears)
     } else {
       None
     }
