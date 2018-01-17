@@ -17,18 +17,20 @@
 package uk.gov.hmrc.nationalinsurancerecord.services
 
 import java.util.TimeZone
+
 import org.joda.time.{DateTimeZone, LocalDate}
 import uk.gov.hmrc.domain.Nino
 import play.api.Play.current
 import uk.gov.hmrc.nationalinsurancerecord.connectors.NpsConnector
 import uk.gov.hmrc.nationalinsurancerecord.domain.Exclusion.Exclusion
 import uk.gov.hmrc.nationalinsurancerecord.domain._
-import uk.gov.hmrc.nationalinsurancerecord.domain.nps.{NpsLiability, NpsNITaxYear}
+import uk.gov.hmrc.nationalinsurancerecord.domain.nps.{NpsLiability, NpsNIRecord, NpsNITaxYear}
 import uk.gov.hmrc.nationalinsurancerecord.util.NIRecordConstants
+
 import scala.concurrent.Future
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import uk.gov.hmrc.time.TaxYearResolver
-import uk.gov.hmrc.http.{ HeaderCarrier, NotFoundException }
+import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
 
 trait NationalInsuranceRecordService {
   def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceRecord]]
@@ -70,7 +72,8 @@ trait NpsConnection extends NationalInsuranceRecordService {
         } else {
           val niRecord = NationalInsuranceRecord(
             purgedNIRecord.numberOfQualifyingYears,
-            calcPre75QualifyingYears(purgedNIRecord.pre75ContributionCount, purgedNIRecord.dateOfEntry, npsSummary.dateOfBirth).getOrElse(0),
+            calcPre75QualifyingYears(purgedNIRecord).getOrElse(0),
+            //calcPre75QualifyingYears(purgedNIRecord.pre75ContributionCount, purgedNIRecord.dateOfEntry, npsSummary.dateOfBirth).getOrElse(0),
             purgedNIRecord.nonQualifyingYears,
             purgedNIRecord.nonQualifyingYearsPayable,
             purgedNIRecord.dateOfEntry,
@@ -131,6 +134,16 @@ trait NpsConnection extends NationalInsuranceRecordService {
     }
     if (yearsPre75 > 0) {
       Some(yearCalc.setScale(0, BigDecimal.RoundingMode.CEILING).min(yearsPre75).toInt)
+    } else {
+      None
+    }
+  }
+
+  def calcPre75QualifyingYears(npsNIRecord: NpsNIRecord) : Option[Int] = {
+    val post75QualigyingYears = npsNIRecord.niTaxYears.filter(_.qualifying).size
+    val pre75QualigyingYears = npsNIRecord.numberOfQualifyingYears - post75QualigyingYears
+    if(pre75QualigyingYears > 0){
+      Some(pre75QualigyingYears)
     } else {
       None
     }
