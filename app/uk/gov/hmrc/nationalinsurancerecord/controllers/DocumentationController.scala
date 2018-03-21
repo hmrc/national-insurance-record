@@ -34,7 +34,7 @@ class DocumentationController (errorHandler: HttpErrorHandler, appContext: AppCo
     APIAccess(access.accessType, access.whiteListedApplicationIds)
   }
 
-  private def buildStatus(): String = appContext.status.getOrElse("PROTOTYPED")
+  private def buildStatus(): String = appContext.status.getOrElse("BETA")
 }
 
 object DocumentationController extends DocumentationController(LazyHttpErrorHandler, AppContext)
