@@ -89,7 +89,7 @@ trait DesConnector {
   }
 
   def getSummary(nino: Nino)(implicit hc: HeaderCarrier): Future[DesSummary] = {
-    val urlToRead = url(s"/individual/${ninoWithoutSuffix(nino)}/pensions/summary")
+    val urlToRead = url(s"/individuals/${ninoWithoutSuffix(nino)}/pensions/summary")
     metrics.incrementCounter(APITypes.Summary)
     connectToCache[DesSummary, DesSummaryCache](
       nino,
