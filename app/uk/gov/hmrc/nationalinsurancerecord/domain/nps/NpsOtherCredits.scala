@@ -18,7 +18,7 @@ package uk.gov.hmrc.nationalinsurancerecord.domain.nps
 
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
-
+//TODO delete this after testing
 case class NpsOtherCredits(creditContributionType: Int, creditSourceType: Int, numberOfCredits: Int)
 
 object NpsOtherCredits {

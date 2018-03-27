@@ -22,25 +22,25 @@ import play.modules.reactivemongo.MongoDbConnection
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 import uk.gov.hmrc.nationalinsurancerecord.config.ApplicationConfig
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
-import uk.gov.hmrc.nationalinsurancerecord.domain.nps.NpsNIRecord
+import uk.gov.hmrc.nationalinsurancerecord.domain.des.DesLiabilities
 import uk.gov.hmrc.nationalinsurancerecord.services.{CachingModel, CachingMongoService, MetricsService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-//TODO delete this after testing
-case class NIRecordCache(key: String, response: NpsNIRecord, expiresAt: DateTime)
-  extends CachingModel[NIRecordCache, NpsNIRecord]
 
-object NIRecordCache {
+case class DesLiabilitiesCache(key: String, response: DesLiabilities, expiresAt: DateTime)
+  extends CachingModel[DesLiabilitiesCache, DesLiabilities]
+
+object DesLiabilitiesCache {
   implicit val dateFormat = ReactiveMongoFormats.dateTimeFormats
   implicit val idFormat = ReactiveMongoFormats.objectIdFormats
-  implicit def formats = Json.format[NIRecordCache]
+  implicit def formats = Json.format[DesLiabilitiesCache]
 }
 
-object NIRecordRepository extends MongoDbConnection {
+object DesLiabilitiesRepository extends MongoDbConnection {
 
-  private lazy val cacheService = new CachingMongoService[NIRecordCache, NpsNIRecord](
-    NIRecordCache.formats, NIRecordCache.apply, APITypes.NIRecord, ApplicationConfig, MetricsService
+  private lazy val cacheService = new CachingMongoService[DesLiabilitiesCache, DesLiabilities](
+    DesLiabilitiesCache.formats, DesLiabilitiesCache.apply, APITypes.Liabilities, ApplicationConfig, MetricsService
   )
 
-  def apply(): CachingMongoService[NIRecordCache, NpsNIRecord] = cacheService
+  def apply(): CachingMongoService[DesLiabilitiesCache, DesLiabilities] = cacheService
 }

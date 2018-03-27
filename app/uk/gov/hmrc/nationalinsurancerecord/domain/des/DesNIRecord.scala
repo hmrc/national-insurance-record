@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nationalinsurancerecord.domain.nps
+package uk.gov.hmrc.nationalinsurancerecord.domain.des
 
 import org.joda.time.LocalDate
 import play.Logger
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
-//TODO delete this after testing
-case class NpsNIRecord(
+
+case class DesNIRecord(
                        numberOfQualifyingYears: Int = 0,
                        nonQualifyingYears: Int = 0,
                        nonQualifyingYearsPayable: Int = 0,
                        pre75ContributionCount: Int = 0,
                        dateOfEntry: Option[LocalDate],
-                       niTaxYears: List[NpsNITaxYear]
+                       niTaxYears: List[DesNITaxYear]
                       ) {
 
-  def purge(finalRelevantStartYear: Int): NpsNIRecord = {
+  def purge(finalRelevantStartYear: Int): DesNIRecord = {
     val taxYears = niTaxYears.filter(_.startTaxYear <= finalRelevantStartYear)
     val purgedYears = niTaxYears.filter(_.startTaxYear > finalRelevantStartYear)
     if(purgedYears.nonEmpty) Logger.info(s"Purged years (FRY $finalRelevantStartYear): ${purgedYears.map(_.startTaxYear).mkString(",")}")
@@ -43,24 +43,24 @@ case class NpsNIRecord(
   }
 }
 
-object NpsNIRecord {
-  val reads: Reads[NpsNIRecord] = (
-        (__ \ "number_of_qualifying_years").read[Int] and
-        (__ \ "non_qualifying_years").read[Int] and
-        (__ \ "non_qualifying_years_payable").read[Int] and
-        (__ \ "pre_75_cc_count").read[Int] and
-        (__ \ "date_of_entry").readNullable[LocalDate] and
-        (__ \ "npsLnitaxyr").read[List[NpsNITaxYear]]
-    )(NpsNIRecord.apply _)
+object DesNIRecord {
+  val reads: Reads[DesNIRecord] = (
+        (__ \ "numberOfQualifyingYears").read[Int] and
+        (__ \ "nonQualifyingYears").read[Int] and
+        (__ \ "nonQualifyingYearsPayable").read[Int] and
+        (__ \ "pre75CcCount").read[Int] and
+        (__ \ "dateOfEntry").readNullable[LocalDate] and
+        (__ \ "taxYears").read[List[DesNITaxYear]]
+    )(DesNIRecord.apply _)
 
-  val writes: Writes[NpsNIRecord] = (
+  val writes: Writes[DesNIRecord] = (
     (__ \ "number_of_qualifying_years").write[Int] and
-    (__ \ "non_qualifying_years").write[Int] and
-    (__ \ "non_qualifying_years_payable").write[Int] and
-    (__ \ "pre_75_cc_count").write[Int] and
-    (__ \ "date_of_entry").writeNullable[LocalDate] and
-    (__ \ "npsLnitaxyr").write[List[NpsNITaxYear]]
-    )(unlift(NpsNIRecord.unapply))
+    (__ \ "nonQualifyingYears").write[Int] and
+    (__ \ "nonQualifyingYearsPayable").write[Int] and
+    (__ \ "pre75CcCount").write[Int] and
+    (__ \ "dateOfEntry").writeNullable[LocalDate] and
+    (__ \ "taxYears").write[List[DesNITaxYear]]
+    )(unlift(DesNIRecord.unapply))
 
-  implicit val format: Format[NpsNIRecord] = Format(reads, writes)
+  implicit val format: Format[DesNIRecord] = Format(reads, writes)
 }

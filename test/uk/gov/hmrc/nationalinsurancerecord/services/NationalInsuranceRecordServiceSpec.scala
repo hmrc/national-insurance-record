@@ -23,9 +23,10 @@ import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
-import uk.gov.hmrc.nationalinsurancerecord.connectors.NpsConnector
+import uk.gov.hmrc.nationalinsurancerecord.connectors.{DesConnector, NpsConnector}
 import uk.gov.hmrc.nationalinsurancerecord.domain.nps._
 import uk.gov.hmrc.nationalinsurancerecord.domain.{NationalInsuranceTaxYear, _}
+
 import scala.concurrent.Future
 
 
@@ -101,9 +102,11 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
     val mockMetrics = mock[MetricsService]
     val service = new NpsConnection {
       override lazy val nps: NpsConnector = mock[NpsConnector]
+      override lazy val des: DesConnector = mock[DesConnector]
       override lazy val citizenDetailsService: CitizenDetailsService = mock[CitizenDetailsService]
       override lazy val now: LocalDate = new LocalDate(2017, 1, 16)
       override def metrics: MetricsService = mockMetrics
+      override def isDesEnabled: Boolean = false
     }
 
 
@@ -263,6 +266,7 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
     val mockMetrics = mock[MetricsService]
     val service = new NpsConnection {
       override lazy val nps: NpsConnector = mock[NpsConnector]
+      override lazy val des: DesConnector = mock[DesConnector]
       override lazy val citizenDetailsService: CitizenDetailsService = {
         mock[CitizenDetailsService]
       }
@@ -271,6 +275,7 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
       }
 
       override def metrics: MetricsService = mockMetrics
+      override def isDesEnabled: Boolean = false
     }
 
     "NI Summary with exclusions" should {

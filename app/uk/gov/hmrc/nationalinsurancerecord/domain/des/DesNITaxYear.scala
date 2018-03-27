@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nationalinsurancerecord.domain.nps
+package uk.gov.hmrc.nationalinsurancerecord.domain.des
 
 import org.joda.time.LocalDate
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import uk.gov.hmrc.nationalinsurancerecord.domain.TaxYear
-//TODO delete this after testing
-case class NpsNITaxYear(
+
+case class DesNITaxYear(
                          startTaxYear: Int = 0,
                          qualifying: Boolean = false,
                          underInvestigation: Boolean = false,
@@ -32,12 +32,12 @@ case class NpsNITaxYear(
                          classOneContribution: BigDecimal = 0,
                          classTwoCredits: Int = 0,
                          classThreeCredits: Int = 0,
-                         otherCredits: List[NpsOtherCredits] = List()
+                         otherCredits: List[DesOtherCredits] = List()
                        ) {
   lazy val taxYear: String = TaxYear.getTaxYear(startTaxYear).taxYear
 }
 
-object NpsNITaxYear {
+object DesNITaxYear {
 
   val readBigDecimal: JsPath => Reads[BigDecimal] = jsPath => jsPath.readNullable[BigDecimal].map(_.getOrElse(0))
 
@@ -53,33 +53,33 @@ object NpsNITaxYear {
     case _ => 0
   }
 
-  val reads: Reads[NpsNITaxYear] = (
-        (__ \ "rattd_tax_year").read[Int] and
-        readBooleanFromInt(__ \ "qualifying") and
-        readBooleanFromInt(__ \ "under_investigation_flag") and
-        readBooleanFromInt(__ \ "payable") and
-        readBigDecimal(__ \ "class_three_payable") and
-        (__ \ "class_three_payable_by").readNullable[LocalDate] and
-        (__ \ "class_three_payable_by_penalty").readNullable[LocalDate] and
-        readBigDecimalFromString(__ \ "ni_earnings_employed") and
-        readIntFromString(__ \ "ni_earnings_self_employed") and
-        readIntFromString(__ \ "ni_earnings_voluntary") and
-        (__ \ "npsLothcred").read[List[NpsOtherCredits]]
-    )(NpsNITaxYear.apply _)
+  val reads: Reads[DesNITaxYear] = (
+        readIntFromString(__ \ "rattdTaxYear") and
+        (__ \ "qualifying").read[Boolean] and
+        (__ \ "underInvestigationFlag").read[Boolean] and
+        (__ \ "payable").read[Boolean] and
+        (__ \ "classThreePayable").read[BigDecimal] and
+        (__ \ "classThreePayableBy").readNullable[LocalDate] and
+        (__ \ "classThreePayableByPenalty").readNullable[LocalDate] and
+        (__ \ "niEarningsEmployed").read[BigDecimal] and
+        (__ \ "niEarningsSelfEmployed").read[Int] and
+        (__ \ "niEarningsVoluntary").read[Int] and
+        (__ \ "otherCredits").read[List[DesOtherCredits]]
+    )(DesNITaxYear.apply _)
 
-  val writes: Writes[NpsNITaxYear] = (
-      (__ \ "rattd_tax_year").write[Int] and
-      writeIntFromBoolean(__ \ "qualifying") and
-      writeIntFromBoolean(__ \ "under_investigation_flag") and
-      writeIntFromBoolean(__ \ "payable") and
-      (__ \ "class_three_payable").write[BigDecimal] and
-      (__ \ "class_three_payable_by").writeNullable[LocalDate] and
-      (__ \ "class_three_payable_by_penalty").writeNullable[LocalDate] and
-        writeStringFromBigDecimal(__ \ "ni_earnings_employed") and
-      writeStringFromInt(__ \ "ni_earnings_self_employed") and
-      writeStringFromInt(__ \ "ni_earnings_voluntary") and
-      (__ \ "npsLothcred").write[List[NpsOtherCredits]]
-    )(unlift(NpsNITaxYear.unapply))
+  val writes: Writes[DesNITaxYear] = (
+    writeStringFromInt(__ \ "rattdTaxYear") and
+      (__ \ "qualifying").write[Boolean] and
+      (__ \ "underInvestigationFlag").write[Boolean] and
+      (__ \ "payable").write[Boolean] and
+      (__ \ "classThreePayable").write[BigDecimal] and
+      (__ \ "classThreePayableBy").writeNullable[LocalDate] and
+      (__ \ "classThreePayableByPenalty").writeNullable[LocalDate] and
+      (__ \ "niEarningsEmployed").write[BigDecimal] and
+      (__ \ "niEarningsSelfEmployed").write[Int] and
+      (__ \ "niEarningsVoluntary").write[Int] and
+      (__ \ "otherCredits").write[List[DesOtherCredits]]
+    )(unlift(DesNITaxYear.unapply))
 
-  implicit val format: Format[NpsNITaxYear] = Format(reads, writes)
+  implicit val format: Format[DesNITaxYear] = Format(reads, writes)
 }
