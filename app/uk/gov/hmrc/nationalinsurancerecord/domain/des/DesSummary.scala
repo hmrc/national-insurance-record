@@ -45,7 +45,7 @@ object DesSummary {
     )(unlift(DesSummary.unapply))
 
   val reads: Reads[DesSummary] = (
-      readBooleanFromInt(__ \ "reducedRateElectionToConsider") and
+      (__ \ "reducedRateElectionToConsider").read[Boolean] and
       (__ \ "dateOfDeath").readNullable[LocalDate] and
       (__ \ "earningsIncludedUpto").read[LocalDate] and
       (__ \ "dateOfBirth").read[LocalDate] and

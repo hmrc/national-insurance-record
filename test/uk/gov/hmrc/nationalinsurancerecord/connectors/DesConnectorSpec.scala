@@ -215,7 +215,7 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
                   | "finalRelevantYear": 2016,
                   | "dateOfDeath": null,
                   | "dateOfBirth": "1952-11-21",
-                  | "reducedRateElectionToConsider": 0,
+                  | "reducedRateElectionToConsider": false,
                   | "earningsIncludedUpto": "2014-04-05"
                   |}
                 """.stripMargin
