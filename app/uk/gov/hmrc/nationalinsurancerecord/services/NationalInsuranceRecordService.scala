@@ -53,7 +53,6 @@ trait NpsConnection extends NationalInsuranceRecordService {
   override def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceRecord]] = {
 
     if(isDesEnabled){
-      Logger.debug("\n\n\n------------------>")
       val desNIRecordF = des.getNationalInsuranceRecord(nino)
       val desLiabilitiesF = des.getLiabilities(nino)
       val desSummaryF = des.getSummary(nino)

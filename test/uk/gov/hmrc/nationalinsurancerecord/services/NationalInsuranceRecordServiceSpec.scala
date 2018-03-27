@@ -24,6 +24,7 @@ import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.connectors.{DesConnector, NpsConnector}
+import uk.gov.hmrc.nationalinsurancerecord.domain.des._
 import uk.gov.hmrc.nationalinsurancerecord.domain.nps._
 import uk.gov.hmrc.nationalinsurancerecord.domain.{NationalInsuranceTaxYear, _}
 
@@ -32,7 +33,7 @@ import scala.concurrent.Future
 
 class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec with OneAppPerSuite with ScalaFutures with MockitoSugar {
   // scalastyle:off magic.number
-
+// TODO should be deleted after testing
   private val niRecordHOD = NpsNIRecord(
     numberOfQualifyingYears = 36,
     nonQualifyingYears = 10,
@@ -82,6 +83,55 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
     )
   )
 
+  private val niRecordDES = DesNIRecord(
+    numberOfQualifyingYears = 36,
+    nonQualifyingYears = 10,
+    nonQualifyingYearsPayable = 4,
+    dateOfEntry = Some(new LocalDate(1969,8,1)),
+    pre75ContributionCount = 250,
+    niTaxYears = List(
+      DesNITaxYear(
+        startTaxYear = 2015,
+        qualifying = true,
+        underInvestigation = false,
+        payable = false,
+        classThreePayable = 0,
+        classThreePayableBy = None,
+        classThreePayableByPenalty = None,
+        classOneContribution = 2430.24,
+        classTwoCredits = 0,
+        classThreeCredits = 0,
+        otherCredits = List()
+      ),
+      DesNITaxYear(
+        startTaxYear = 2014,
+        qualifying = false,
+        underInvestigation = false,
+        payable = true,
+        classThreePayable = 9,
+        classThreePayableBy = Some(new LocalDate(2019, 4, 5)),
+        classThreePayableByPenalty = None,
+        classOneContribution = 430.4,
+        classTwoCredits = 0,
+        classThreeCredits = 0,
+        otherCredits = List()
+      ),
+      DesNITaxYear(
+        startTaxYear = 2013,
+        qualifying = true,
+        underInvestigation = false,
+        payable = true,
+        classThreePayable = 720,
+        classThreePayableBy = Some(new LocalDate(2019, 4, 5)),
+        classThreePayableByPenalty = Some(new LocalDate(2023, 4, 5)),
+        classOneContribution = 0,
+        classTwoCredits = 10,
+        classThreeCredits = 3,
+        otherCredits = List(DesOtherCredits(1,2,7))
+      )
+    )
+  )
+
   private val dummyTaxYearDefault: NationalInsuranceTaxYear = NationalInsuranceTaxYear(
     taxYear =  "2010-11",
     qualifying = false,
@@ -106,19 +156,25 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
       override lazy val citizenDetailsService: CitizenDetailsService = mock[CitizenDetailsService]
       override lazy val now: LocalDate = new LocalDate(2017, 1, 16)
       override def metrics: MetricsService = mockMetrics
-      override def isDesEnabled: Boolean = false
+      override def isDesEnabled: Boolean = true
     }
 
 
     "regular ni record" should {
 
       val liabilities = NpsLiabilities(List(NpsLiability(14)))
+      val desLiabilities = DesLiabilities(List(DesLiability(14)))
       val nino = generateNino()
-
       when(service.citizenDetailsService.checkManualCorrespondenceIndicator(nino)).thenReturn(Future.successful(false))
       when(service.nps.getNationalInsuranceRecord(nino)).thenReturn(Future.successful(niRecordHOD))
       when(service.nps.getLiabilities(nino)).thenReturn(Future.successful(liabilities))
       when(service.nps.getSummary(nino)).thenReturn(Future.successful(NpsSummary(false, None, new LocalDate(2016, 4, 5), new LocalDate(1951, 4 , 5), 2017)))
+
+
+      when(service.des.getNationalInsuranceRecord(nino)).thenReturn(Future.successful(niRecordDES))
+      when(service.des.getLiabilities(nino)).thenReturn(Future.successful(desLiabilities))
+      when(service.des.getSummary(nino)).thenReturn(Future.successful(DesSummary(false, None, new LocalDate(2016, 4, 5), new LocalDate(1951, 4 , 5), 2017)))
+
 
       lazy val niRecordF: Future[NationalInsuranceRecord] = service.getNationalInsuranceRecord(nino).right.get
       lazy val niTaxYearF: Future[NationalInsuranceTaxYear] = service.getTaxYear(nino,TaxYear("2014-15")).right.get
