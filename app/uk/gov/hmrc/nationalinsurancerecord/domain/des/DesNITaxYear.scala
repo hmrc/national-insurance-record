@@ -48,7 +48,10 @@ object DesNITaxYear {
   val writeStringFromInt: JsPath => OWrites[Int] = jsPath => jsPath.write[String].contramap[Int](_.toString)
 
   val readBooleanFromInt: JsPath => Reads[Boolean] = jsPath => jsPath.read[Int].map(_.equals(1))
+
   val readIntWithDefault: JsPath => Reads[Int] = jsPath => jsPath.readNullable[Int].map(_.getOrElse(0))
+  val readBigDecimalWithDefault: JsPath => Reads[BigDecimal] = jsPath => jsPath.readNullable[BigDecimal].map(_.getOrElse(0))
+
   val writeIntFromBoolean: JsPath => OWrites[Boolean] = jsPath => jsPath.write[Int].contramap[Boolean] {
     case true => 1
     case _ => 0
@@ -62,7 +65,7 @@ object DesNITaxYear {
         (__ \ "classThreePayable").read[BigDecimal] and
         (__ \ "classThreePayableBy").readNullable[LocalDate] and
         (__ \ "classThreePayableByPenalty").readNullable[LocalDate] and
-        (__ \ "niEarningsEmployed").read[BigDecimal] and
+          readBigDecimalWithDefault(__ \ "niEarningsEmployed") and
           readIntWithDefault(__ \ "niEarningsSelfEmployed") and
           readIntWithDefault(__ \ "niEarningsVoluntary") and
         (__ \ "otherCredits").read[List[DesOtherCredits]]
