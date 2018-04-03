@@ -54,7 +54,7 @@ object DesNIRecord {
     )(DesNIRecord.apply _)
 
   val writes: Writes[DesNIRecord] = (
-    (__ \ "number_of_qualifying_years").write[Int] and
+    (__ \ "numberOfQualifyingYears").write[Int] and
     (__ \ "nonQualifyingYears").write[Int] and
     (__ \ "nonQualifyingYearsPayable").write[Int] and
     (__ \ "pre75CcCount").write[Int] and
