@@ -138,33 +138,69 @@ trait NpsConnection extends NationalInsuranceRecordService {
   }
 
   override def getTaxYear(nino: Nino, taxYear: TaxYear)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceTaxYear]] = {
-    val npsNIRecordF = nps.getNationalInsuranceRecord(nino)
-    val npsSummaryF = nps.getSummary(nino)
-    val npsLiabilitiesF = nps.getLiabilities(nino)
-    val manualCorrespondenceIndicatorF = citizenDetailsService.checkManualCorrespondenceIndicator(nino)
 
-    for (
-      npsNIRecord <- npsNIRecordF;
-      npsSummary <- npsSummaryF;
-      npsLiabilities <- npsLiabilitiesF;
-      manualCorrespondenceIndicator <- manualCorrespondenceIndicatorF
-    ) yield {
+    if(isDesEnabled){
+      val desNIRecordF = des.getNationalInsuranceRecord(nino)
+      val desSummaryF = des.getSummary(nino)
+      val desLiabilitiesF = des.getLiabilities(nino)
+      val manualCorrespondenceIndicatorF = citizenDetailsService.checkManualCorrespondenceIndicator(nino)
 
-      val purgedNIRecord = npsNIRecord.purge(npsSummary.finalRelevantYear)
+      for (
+        desNIRecord <- desNIRecordF;
+        desSummary <- desSummaryF;
+        desLiabilities <- desLiabilitiesF;
+        manualCorrespondenceIndicator <- manualCorrespondenceIndicatorF
+      ) yield {
 
-      val exclusions = new ExclusionService(
-        npsSummary.dateOfDeath,
-        npsLiabilities.liabilities,
-        manualCorrespondenceIndicator
-      ).getExclusions
+        val purgedNIRecord = desNIRecord.purge(desSummary.finalRelevantYear)
 
-      if (exclusions.nonEmpty) {
-        metrics.exclusion(exclusions.head)
-        Left(ExclusionResponse(exclusions))
-      } else {
-        purgedNIRecord.niTaxYears.map(npsTaxYearToNIRecordTaxYear).find(x => x.taxYear == taxYear.taxYear) match {
-          case Some(nationalInsuranceRecordTaxYear) => Right(nationalInsuranceRecordTaxYear)
-          case _ => throw new NotFoundException(s"taxYear ${taxYear.taxYear} Not Found for $nino")
+        val exclusions = new DesExclusionService(
+          desSummary.dateOfDeath,
+          desLiabilities.liabilities,
+          manualCorrespondenceIndicator
+        ).getExclusions
+
+        if (exclusions.nonEmpty) {
+          metrics.exclusion(exclusions.head)
+          Left(ExclusionResponse(exclusions))
+        } else {
+          purgedNIRecord.niTaxYears.map(desTaxYearToNIRecordTaxYear).find(x => x.taxYear == taxYear.taxYear) match {
+            case Some(nationalInsuranceRecordTaxYear) => Right(nationalInsuranceRecordTaxYear)
+            case _ => throw new NotFoundException(s"taxYear ${taxYear.taxYear} Not Found for $nino")
+          }
+        }
+      }
+
+    } else {
+      
+      val npsNIRecordF = nps.getNationalInsuranceRecord(nino)
+      val npsSummaryF = nps.getSummary(nino)
+      val npsLiabilitiesF = nps.getLiabilities(nino)
+      val manualCorrespondenceIndicatorF = citizenDetailsService.checkManualCorrespondenceIndicator(nino)
+
+      for (
+        npsNIRecord <- npsNIRecordF;
+        npsSummary <- npsSummaryF;
+        npsLiabilities <- npsLiabilitiesF;
+        manualCorrespondenceIndicator <- manualCorrespondenceIndicatorF
+      ) yield {
+
+        val purgedNIRecord = npsNIRecord.purge(npsSummary.finalRelevantYear)
+
+        val exclusions = new ExclusionService(
+          npsSummary.dateOfDeath,
+          npsLiabilities.liabilities,
+          manualCorrespondenceIndicator
+        ).getExclusions
+
+        if (exclusions.nonEmpty) {
+          metrics.exclusion(exclusions.head)
+          Left(ExclusionResponse(exclusions))
+        } else {
+          purgedNIRecord.niTaxYears.map(npsTaxYearToNIRecordTaxYear).find(x => x.taxYear == taxYear.taxYear) match {
+            case Some(nationalInsuranceRecordTaxYear) => Right(nationalInsuranceRecordTaxYear)
+            case _ => throw new NotFoundException(s"taxYear ${taxYear.taxYear} Not Found for $nino")
+          }
         }
       }
     }
