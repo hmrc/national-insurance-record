@@ -26,7 +26,7 @@ object DesLiabilities {
     (__ \ "liabilities").read[List[DesLiability]].map(DesLiabilities.apply)
   }
   val writes: Writes[DesLiabilities] = {
-    (__ \ "liabilities").write[List[DesLiability]].contramap(_.liabilities)
+    (__ \ "npsLcdo004d").write[List[DesLiability]].contramap(_.liabilities)
   }
   implicit val formats: Format[DesLiabilities] = Format(reads, writes)
 }

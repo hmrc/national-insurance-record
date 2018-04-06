@@ -212,11 +212,11 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
               Some(Json.parse(
                 """
                   |{
-                  | "finalRelevantYear": 2016,
-                  | "dateOfDeath": null,
-                  | "dateOfBirth": "1952-11-21",
-                  | "reducedRateElectionToConsider": false,
-                  | "earningsIncludedUpto": "2014-04-05"
+                  | "final_relevant_year": 2016,
+                  | "date_of_death": null,
+                  | "date_of_birth": "1952-11-21",
+                  | "rre_to_consider": false,
+                  | "earnings_included_upto": "2014-04-05"
                   |}
                 """.stripMargin
               ))))

@@ -29,9 +29,9 @@ object DesOtherCredits {
     )(DesOtherCredits.apply _)
 
   val writes: Writes[DesOtherCredits] = (
-      (__ \ "ccType").write[Int] and
-      (__ \ "creditSourceType").write[Int] and
-      (__ \ "numberOfCredits").write[Int]
+      (__ \ "cc_type").write[Int] and
+      (__ \ "credit_source_type").write[Int] and
+      (__ \ "no_of_credits_and_conts").write[Int]
     )(unlift(DesOtherCredits.unapply))
 
   implicit val format: Format[DesOtherCredits] = Format(reads, writes)

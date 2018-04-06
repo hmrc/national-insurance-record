@@ -72,17 +72,17 @@ object DesNITaxYear {
     )(DesNITaxYear.apply _)
 
   val writes: Writes[DesNITaxYear] = (
-    writeStringFromInt(__ \ "rattdTaxYear") and
+    writeStringFromInt(__ \ "rattd_tax_year") and
       (__ \ "qualifying").write[Boolean] and
-      (__ \ "underInvestigationFlag").write[Boolean] and
+      (__ \ "under_investigation_flag").write[Boolean] and
       (__ \ "payable").write[Boolean] and
-      (__ \ "classThreePayable").write[BigDecimal] and
-      (__ \ "classThreePayableBy").writeNullable[LocalDate] and
-      (__ \ "classThreePayableByPenalty").writeNullable[LocalDate] and
-      (__ \ "niEarningsEmployed").write[BigDecimal] and
-      (__ \ "niEarningsSelfEmployed").write[Int] and
-      (__ \ "niEarningsVoluntary").write[Int] and
-      (__ \ "otherCredits").write[List[DesOtherCredits]]
+      (__ \ "class_three_payable").write[BigDecimal] and
+      (__ \ "class_three_payable_by").writeNullable[LocalDate] and
+      (__ \ "class_three_payable_by_penalty").writeNullable[LocalDate] and
+      (__ \ "ni_earnings_employed").write[BigDecimal] and
+      (__ \ "ni_earnings_self_employed").write[Int] and
+      (__ \ "ni_earnings_voluntary").write[Int] and
+      (__ \ "npsLothcred").write[List[DesOtherCredits]]
     )(unlift(DesNITaxYear.unapply))
 
   implicit val format: Format[DesNITaxYear] = Format(reads, writes)
