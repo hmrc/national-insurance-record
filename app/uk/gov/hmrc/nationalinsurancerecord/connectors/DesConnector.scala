@@ -19,72 +19,79 @@ package uk.gov.hmrc.nationalinsurancerecord.connectors
 import play.api.data.validation.ValidationError
 import play.api.libs.json.{Format, JsPath, OFormat, Reads}
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.nationalinsurancerecord.domain.nps.{NpsLiabilities, NpsNIRecord, NpsSummary}
-import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.http.logging.Authorization
+import uk.gov.hmrc.http.{HeaderCarrier, HttpGet, HttpReads, HttpResponse}
 import uk.gov.hmrc.nationalinsurancerecord.WSHttp
 import uk.gov.hmrc.nationalinsurancerecord.cache._
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes.APITypes
+import uk.gov.hmrc.nationalinsurancerecord.domain.des.{DesLiabilities, DesNIRecord, DesSummary}
+import uk.gov.hmrc.nationalinsurancerecord.domain.nps.NpsLiabilities
 import uk.gov.hmrc.nationalinsurancerecord.services.{CachingService, MetricsService}
 import uk.gov.hmrc.nationalinsurancerecord.util.{JsonDepersonaliser, NIRecordConstants}
+import uk.gov.hmrc.play.config.ServicesConfig
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpGet, HttpReads, HttpResponse }
-//TODO delete this after testing
-object NpsConnector extends NpsConnector with ServicesConfig {
-  override val serviceUrl: String = baseUrl("nps-hod")
-  override val serviceOriginatorIdKey: String = getConfString("nps-hod.originatoridkey", "")
-  override val serviceOriginatorId: String = getConfString("nps-hod.originatoridvalue", "")
+
+object DesConnector extends DesConnector with ServicesConfig {
+  override val serviceUrl: String = baseUrl("des-hod")
+  override val authToken: String = s"Bearer ${getConfString("des-hod.authorizationToken", "")}"
+  override val environment: String = getConfString("des-hod.environment", "")
+
+
   override def http: HttpGet = new HttpGet with WSHttp
 
-  override val summaryRepository: CachingService[SummaryCache, NpsSummary] = SummaryRepository()
-  override val liabilitiesRepository: CachingService[LiabilitiesCache, NpsLiabilities] = LiabilitiesRepository()
-  override val nirecordRepository: CachingService[NIRecordCache, NpsNIRecord] = NIRecordRepository()
+  override val summaryRepository: CachingService[DesSummaryCache, DesSummary] = DesSummaryRepository()
+  override val liabilitiesRepository: CachingService[DesLiabilitiesCache, DesLiabilities] = DesLiabilitiesRepository()
+  override val nirecordRepository: CachingService[DesNIRecordCache, DesNIRecord] = DesNIRecordRepository()
 
   override def metrics: MetricsService = MetricsService
 }
 
-trait NpsConnector {
+trait DesConnector {
   def metrics: MetricsService
   val serviceUrl: String
-  val serviceOriginatorIdKey: String
-  val serviceOriginatorId: String
-  val summaryRepository: CachingService[SummaryCache, NpsSummary]
-  val liabilitiesRepository: CachingService[LiabilitiesCache, NpsLiabilities]
-  val nirecordRepository: CachingService[NIRecordCache, NpsNIRecord]
+  val authToken: String
+  val environment: String
+  val summaryRepository: CachingService[DesSummaryCache, DesSummary]
+  val liabilitiesRepository: CachingService[DesLiabilitiesCache, DesLiabilities]
+  val nirecordRepository: CachingService[DesNIRecordCache, DesNIRecord]
 
   class JsonValidationException(message: String) extends Exception(message)
 
   def http: HttpGet
   def url(path: String): String = s"$serviceUrl$path"
-  def requestHeaderCarrier(implicit hc: HeaderCarrier): HeaderCarrier = hc.withExtraHeaders(serviceOriginatorIdKey -> serviceOriginatorId)
+  def requestHeaderCarrier(implicit hc: HeaderCarrier): HeaderCarrier = {
+    HeaderCarrier.apply(Some(Authorization(s"Bearer $authToken"))).withExtraHeaders("Originator-Id" -> "HMRC_GDS", "Environment" -> environment)
+  }
   private def ninoWithoutSuffix(nino: Nino): String = nino.value.substring(0, NIRecordConstants.ninoLengthWithoutSuffix)
 
-  def getLiabilities(nino: Nino)(implicit hc: HeaderCarrier): Future[NpsLiabilities] = {
-    val urlToRead = url(s"/nps-rest-service/services/nps/pensions/${ninoWithoutSuffix(nino)}/liabilities")
+  def getLiabilities(nino: Nino)(implicit hc: HeaderCarrier): Future[DesLiabilities] = {
+    val urlToRead = url(s"/individuals/${ninoWithoutSuffix(nino)}/pensions/liabilities")
     metrics.incrementCounter(APITypes.Liabilities)
-    connectToCache[NpsLiabilities, LiabilitiesCache](
+    connectToCache[DesLiabilities, DesLiabilitiesCache](
       nino,
       urlToRead,
       APITypes.Liabilities,
       liabilitiesRepository)
   }
 
-  def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[NpsNIRecord] = {
-    val urlToRead = url(s"/nps-rest-service/services/nps/pensions/${ninoWithoutSuffix(nino)}/ni_record")
+  def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[DesNIRecord] = {
+    val urlToRead = url(s"/individuals/${ninoWithoutSuffix(nino)}/pensions/ni")
     metrics.incrementCounter(APITypes.NIRecord)
-    connectToCache[NpsNIRecord, NIRecordCache](
+    connectToCache[DesNIRecord, DesNIRecordCache](
       nino,
       urlToRead,
       APITypes.NIRecord,
       nirecordRepository)
   }
 
-  def getSummary(nino: Nino)(implicit hc: HeaderCarrier): Future[NpsSummary] = {
-    val urlToRead = url(s"/nps-rest-service/services/nps/pensions/${ninoWithoutSuffix(nino)}/sp_summary")
+  def getSummary(nino: Nino)(implicit hc: HeaderCarrier): Future[DesSummary] = {
+    val urlToRead = url(s"/individuals/${ninoWithoutSuffix(nino)}/pensions/summary")
     metrics.incrementCounter(APITypes.Summary)
-    connectToCache[NpsSummary, SummaryCache](
+    connectToCache[DesSummary, DesSummaryCache](
       nino,
       urlToRead,
       APITypes.Summary,
@@ -96,7 +103,7 @@ trait NpsConnector {
     repository.findByNino(nino).flatMap {
       case Some(responseModel) => Future.successful(responseModel)
       case None =>
-        connectToNps(url, api, requestHeaderCarrier)(hc, formatA) map {
+        connectToDes(url, api, requestHeaderCarrier)(hc, formatA) map {
           response =>
             repository.insertByNino(nino, response)
             response
@@ -104,7 +111,7 @@ trait NpsConnector {
     }
   }
 
-  private def connectToNps[A](url: String, api: APITypes, requestHc: HeaderCarrier)(implicit hc: HeaderCarrier, reads: Reads[A]): Future[A] = {
+  private def connectToDes[A](url: String, api: APITypes, requestHc: HeaderCarrier)(implicit hc: HeaderCarrier, reads: Reads[A]): Future[A] = {
     val timerContext = metrics.startTimer(api)
     val futureResponse = http.GET[HttpResponse](url)(hc = requestHc, rds = HttpReads.readRaw, ec = global)
 

@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nationalinsurancerecord.domain.nps
+package uk.gov.hmrc.nationalinsurancerecord.domain.des
 
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
-//TODO delete this after testing
-case class NpsOtherCredits(creditContributionType: Int, creditSourceType: Int, numberOfCredits: Int)
 
-object NpsOtherCredits {
-  val reads: Reads[NpsOtherCredits] = (
-      (__ \ "cc_type").read[Int] and
-      (__ \ "credit_source_type").read[Int] and
-      (__ \ "no_of_credits_and_conts").read[Int]
-    )(NpsOtherCredits.apply _)
+case class DesOtherCredits(creditContributionType: Int, creditSourceType: Int, numberOfCredits: Int)
 
-  val writes: Writes[NpsOtherCredits] = (
+object DesOtherCredits {
+  val reads: Reads[DesOtherCredits] = (
+      (__ \ "ccType").read[Int] and
+      (__ \ "creditSourceType").read[Int] and
+      (__ \ "numberOfCredits").read[Int]
+    )(DesOtherCredits.apply _)
+
+  val writes: Writes[DesOtherCredits] = (
       (__ \ "cc_type").write[Int] and
       (__ \ "credit_source_type").write[Int] and
       (__ \ "no_of_credits_and_conts").write[Int]
-    )(unlift(NpsOtherCredits.unapply))
+    )(unlift(DesOtherCredits.unapply))
 
-  implicit val format: Format[NpsOtherCredits] = Format(reads, writes)
+  implicit val format: Format[DesOtherCredits] = Format(reads, writes)
 
 }

@@ -18,7 +18,7 @@ package uk.gov.hmrc.nationalinsurancerecord.domain.nps
 
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
-
+//TODO delete this after testing
 case class NpsLiability(liabilityType: Int)
 
 object NpsLiability {

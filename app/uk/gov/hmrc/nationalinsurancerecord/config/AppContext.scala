@@ -26,6 +26,7 @@ trait AppContext {
   def access: Option[Configuration]
   def status: Option[String]
   def connectToHOD: Boolean
+  def connectToDES: Boolean
 }
 
 object AppContext extends AppContext with ServicesConfig {
@@ -35,4 +36,5 @@ object AppContext extends AppContext with ServicesConfig {
   lazy val access = current.configuration.getConfig("api.access")
   lazy val status = current.configuration.getString("api.status")
   lazy val connectToHOD = current.configuration.getBoolean("feature.connectToHOD").getOrElse(false)
+  lazy val connectToDES = current.configuration.getBoolean("feature.connectToDES").getOrElse(false)
 }

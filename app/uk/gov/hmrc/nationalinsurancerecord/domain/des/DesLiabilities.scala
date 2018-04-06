@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nationalinsurancerecord.domain.nps
+package uk.gov.hmrc.nationalinsurancerecord.domain.des
 
-import play.api.libs.json._
 import play.api.libs.functional.syntax._
-//TODO delete this after testing
-case class NpsLiabilities(liabilities: List[NpsLiability])
+import play.api.libs.json._
 
-object NpsLiabilities {
-  val reads: Reads[NpsLiabilities] = {
-    (__ \ "npsLcdo004d").read[List[NpsLiability]].map(NpsLiabilities.apply)
+case class DesLiabilities(liabilities: List[DesLiability])
+
+object DesLiabilities {
+  val reads: Reads[DesLiabilities] = {
+    (__ \ "liabilities").read[List[DesLiability]].map(DesLiabilities.apply)
   }
-  val writes: Writes[NpsLiabilities] = {
-    (__ \ "npsLcdo004d").write[List[NpsLiability]].contramap(_.liabilities)
+  val writes: Writes[DesLiabilities] = {
+    (__ \ "npsLcdo004d").write[List[DesLiability]].contramap(_.liabilities)
   }
-  implicit val formats: Format[NpsLiabilities] = Format(reads, writes)
+  implicit val formats: Format[DesLiabilities] = Format(reads, writes)
 }

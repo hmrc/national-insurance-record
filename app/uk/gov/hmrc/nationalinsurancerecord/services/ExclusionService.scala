@@ -20,8 +20,10 @@ import uk.gov.hmrc.nationalinsurancerecord.domain.Exclusion
 import uk.gov.hmrc.nationalinsurancerecord.domain.Exclusion.Exclusion
 import uk.gov.hmrc.nationalinsurancerecord.domain.nps.{LiabilityType, NpsLiability}
 import org.joda.time.LocalDate
+import uk.gov.hmrc.nationalinsurancerecord.domain.des.DesLiability
 import uk.gov.hmrc.nationalinsurancerecord.util.FunctionHelper
 
+//TODO delete this after testing
 class ExclusionService(dateOfDeath: Option[LocalDate],
                        liabilities: List[NpsLiability],
                        manualCorrespondenceOnly: Boolean) {
@@ -44,4 +46,28 @@ class ExclusionService(dateOfDeath: Option[LocalDate],
     checkManualCorrespondence,
     checkIsleOfMan
    ))
+}
+
+class DesExclusionService(dateOfDeath: Option[LocalDate],
+                          liabilities: List[DesLiability],
+                          manualCorrespondenceOnly: Boolean) {
+
+  lazy val getExclusions: List[Exclusion] = exclusions(List())
+
+  private val checkDead = (exclusionList: List[Exclusion]) =>
+    dateOfDeath.fold(exclusionList)(_ => Exclusion.Dead :: exclusionList)
+
+  private val checkManualCorrespondence = (exclusionList: List[Exclusion]) =>
+    if (manualCorrespondenceOnly) Exclusion.ManualCorrespondenceIndicator :: exclusionList
+    else exclusionList
+
+  private val checkIsleOfMan = (exclusionList: List[Exclusion]) =>
+    if (liabilities.exists(_.liabilityType == LiabilityType.ISLE_OF_MAN)) Exclusion.IsleOfMan :: exclusionList
+    else exclusionList
+
+  private val exclusions = FunctionHelper.composeAll(List(
+    checkDead,
+    checkManualCorrespondence,
+    checkIsleOfMan
+  ))
 }
