@@ -45,11 +45,11 @@ object DesSummary {
     )(unlift(DesSummary.unapply))
 
   val reads: Reads[DesSummary] = (
-      (__ \ "rre_to_consider").read[Boolean] and
-      (__ \ "date_of_death").readNullable[LocalDate] and
-      (__ \ "earnings_included_upto").read[LocalDate] and
-      (__ \ "date_of_birth").read[LocalDate] and
-      (__ \ "final_relevant_year").read[Int]
+      (__ \ "reducedRateElectionToConsider").read[Boolean] and
+      (__ \ "dateOfDeath").readNullable[LocalDate] and
+      (__ \ "earningsIncludedUpto").read[LocalDate] and
+      (__ \ "dateOfBirth").read[LocalDate] and
+      (__ \ "finalRelevantYear").read[Int]
     )(DesSummary.apply _)
 
   implicit val formats: Format[DesSummary] = Format(reads, writes)

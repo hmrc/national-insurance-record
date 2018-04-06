@@ -212,11 +212,11 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
               Some(Json.parse(
                 """
                   |{
-                  | "final_relevant_year": 2016,
-                  | "date_of_death": null,
-                  | "date_of_birth": "1952-11-21",
-                  | "rre_to_consider": false,
-                  | "earnings_included_upto": "2014-04-05"
+                  | "finalRelevantYear": 2016,
+                  | "dateOfDeath": null,
+                  | "dateOfBirth": "1952-11-21",
+                  | "reducedRateElectionToConsider": false,
+                  | "earningsIncludedUpto": "2014-04-05"
                   |}
                 """.stripMargin
               ))))
@@ -262,7 +262,6 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
       desNIRecordF.niTaxYears.head.classThreePayable shouldBe 0
       desNIRecordF.niTaxYears(1).classThreePayable shouldBe 722.80
       desNIRecordF.niTaxYears.head.classThreePayableBy shouldBe None
-      println("\n\n\n--"+desNIRecordF)
       desNIRecordF.niTaxYears(1).classThreePayableBy shouldBe Some(new LocalDate(2019, 4, 5))
       desNIRecordF.niTaxYears.head.classThreePayableByPenalty shouldBe None
       desNIRecordF.niTaxYears(1).classThreePayableByPenalty shouldBe Some(new LocalDate(2023, 4, 5))
