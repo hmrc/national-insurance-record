@@ -20,11 +20,11 @@ private object AppDependencies {
   private val playHalVersion = "1.2.0"
   private val reactivemongoVersion = "5.2.0"
 
-  private val hmrcTestVersion = "2.2.0"
+  private val hmrcTestVersion = "3.0.0"
   private val scalaTestVersion = "2.2.6"
   private val scalaTestPlusVersion = "1.5.1"
   private val mockitoAllVersion = "1.9.5"
-  private val reactivemongoTestVersion = "1.6.0"
+  private val reactivemongoTestVersion = "3.1.0"
 
   val compile = Seq(
 
