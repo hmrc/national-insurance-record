@@ -64,7 +64,7 @@ trait DesConnector {
   def http: HttpGet
   def url(path: String): String = s"$serviceUrl$path"
   def requestHeaderCarrier(implicit hc: HeaderCarrier): HeaderCarrier = {
-    HeaderCarrier.apply(Some(Authorization(s"Bearer $authToken"))).withExtraHeaders("Originator-Id" -> "HMRC_GDS", "Environment" -> environment)
+    HeaderCarrier.apply(Some(Authorization(s"Bearer $authToken"))).withExtraHeaders("Originator-Id" -> "DA_PF", "Environment" -> environment)
   }
   private def ninoWithoutSuffix(nino: Nino): String = nino.value.substring(0, NIRecordConstants.ninoLengthWithoutSuffix)
 
