@@ -269,9 +269,9 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
       desNIRecordF.niTaxYears(1).classOneContribution shouldBe 0
       desNIRecordF.niTaxYears.head.classTwoCredits shouldBe 0
       desNIRecordF.niTaxYears(1).classTwoCredits shouldBe 52
-      desNIRecordF.niTaxYears.head.otherCredits.head.creditSourceType shouldBe 2
-      desNIRecordF.niTaxYears.head.otherCredits.head.creditContributionType shouldBe 23
-      desNIRecordF.niTaxYears.head.otherCredits.head.numberOfCredits shouldBe 4
+      desNIRecordF.niTaxYears.head.otherCredits.head.creditSourceType.get shouldBe 2
+      desNIRecordF.niTaxYears.head.otherCredits.head.creditContributionType.get shouldBe 23
+      desNIRecordF.niTaxYears.head.otherCredits.head.numberOfCredits.get shouldBe 4
       desNIRecordF.niTaxYears(1).otherCredits shouldBe List()
     }
 
@@ -325,7 +325,7 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
         """
         | {
         | "years_to_fry": "a",
-        | "nonQualifyingYears": 13,
+        | "nonQualifyingYears": "13",
         | "dateOfEntry": "1973-10-01",
         | "npsLniemply": [],
         | "pre75CcCount": 51,

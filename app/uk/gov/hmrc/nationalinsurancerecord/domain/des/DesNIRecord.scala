@@ -44,13 +44,20 @@ case class DesNIRecord(
 }
 
 object DesNIRecord {
+
+  val readNullableInt: JsPath => Reads[Int] =
+    jsPath => jsPath.readNullable[Int].map(_.getOrElse(0))
+
+  val readNullableList:JsPath => Reads[List[DesNITaxYear]] =
+    jsPath => jsPath.readNullable[List[DesNITaxYear]].map(_.getOrElse(List.empty))
+
   val reads: Reads[DesNIRecord] = (
-        (__ \ "numberOfQualifyingYears").read[Int] and
-        (__ \ "nonQualifyingYears").read[Int] and
-        (__ \ "nonQualifyingYearsPayable").read[Int] and
-        (__ \ "pre75CcCount").read[Int] and
-        (__ \ "dateOfEntry").readNullable[LocalDate] and
-        (__ \ "taxYears").read[List[DesNITaxYear]]
+    readNullableInt(__ \ "numberOfQualifyingYears") and
+    readNullableInt(__ \ "nonQualifyingYears") and
+    readNullableInt(__ \ "nonQualifyingYearsPayable") and
+    readNullableInt(__ \ "pre75CcCount") and
+    (__ \ "dateOfEntry").readNullable[LocalDate] and
+    readNullableList(__ \ "taxYears")
     )(DesNIRecord.apply _)
 
   val writes: Writes[DesNIRecord] = (

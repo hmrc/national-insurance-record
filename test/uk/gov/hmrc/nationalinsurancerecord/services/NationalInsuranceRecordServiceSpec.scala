@@ -127,7 +127,7 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
         classOneContribution = 0,
         classTwoCredits = 10,
         classThreeCredits = 3,
-        otherCredits = List(DesOtherCredits(1,2,7))
+        otherCredits = List(DesOtherCredits(Some(1),Some(2),Some(7)))
       )
     )
   )

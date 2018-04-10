@@ -19,19 +19,19 @@ package uk.gov.hmrc.nationalinsurancerecord.domain.des
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
-case class DesOtherCredits(creditContributionType: Int, creditSourceType: Int, numberOfCredits: Int)
+case class DesOtherCredits(creditContributionType: Option[Int], creditSourceType: Option[Int], numberOfCredits: Option[Int])
 
 object DesOtherCredits {
   val reads: Reads[DesOtherCredits] = (
-      (__ \ "ccType").read[Int] and
-      (__ \ "creditSourceType").read[Int] and
-      (__ \ "numberOfCredits").read[Int]
+      (__ \ "ccType").readNullable[Int] and
+      (__ \ "creditSourceType").readNullable[Int] and
+      (__ \ "numberOfCredits").readNullable[Int]
     )(DesOtherCredits.apply _)
 
   val writes: Writes[DesOtherCredits] = (
-      (__ \ "cc_type").write[Int] and
-      (__ \ "credit_source_type").write[Int] and
-      (__ \ "no_of_credits_and_conts").write[Int]
+      (__ \ "cc_type").writeNullable[Int] and
+      (__ \ "credit_source_type").writeNullable[Int] and
+      (__ \ "no_of_credits_and_conts").writeNullable[Int]
     )(unlift(DesOtherCredits.unapply))
 
   implicit val format: Format[DesOtherCredits] = Format(reads, writes)
