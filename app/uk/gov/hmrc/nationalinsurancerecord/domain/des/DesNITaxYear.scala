@@ -57,18 +57,23 @@ object DesNITaxYear {
     case _ => 0
   }
 
+  val readBooleanWithDefault: JsPath => Reads[Boolean] = jsPath => jsPath.readNullable[Boolean].map(_.getOrElse(false))
+
+  val readNullableList:JsPath => Reads[List[DesOtherCredits]] =
+    jsPath => jsPath.readNullable[List[DesOtherCredits]].map(_.getOrElse(List.empty))
+
   val reads: Reads[DesNITaxYear] = (
         readIntFromString(__ \ "rattdTaxYear") and
-        (__ \ "qualifying").read[Boolean] and
-        (__ \ "underInvestigationFlag").read[Boolean] and
-        (__ \ "payable").read[Boolean] and
-        (__ \ "classThreePayable").read[BigDecimal] and
+        readBooleanWithDefault(__ \ "qualifying") and
+        readBooleanWithDefault(__ \ "underInvestigationFlag") and
+        readBooleanWithDefault(__ \ "payable") and
+        readBigDecimalWithDefault(__ \ "classThreePayable") and
         (__ \ "classThreePayableBy").readNullable[LocalDate] and
         (__ \ "classThreePayableByPenalty").readNullable[LocalDate] and
-          readBigDecimalWithDefault(__ \ "niEarningsEmployed") and
-          readIntWithDefault(__ \ "niEarningsSelfEmployed") and
-          readIntWithDefault(__ \ "niEarningsVoluntary") and
-        (__ \ "otherCredits").read[List[DesOtherCredits]]
+        readBigDecimalWithDefault(__ \ "niEarningsEmployed") and
+        readIntWithDefault(__ \ "niEarningsSelfEmployed") and
+        readIntWithDefault(__ \ "niEarningsVoluntary") and
+        readNullableList(__ \ "otherCredits")
     )(DesNITaxYear.apply _)
 
   val writes: Writes[DesNITaxYear] = (
