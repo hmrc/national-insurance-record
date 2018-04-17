@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.connectors
 
+import play.api.Logger
 import play.api.data.validation.ValidationError
 import play.api.libs.json.{Format, JsPath, OFormat, Reads}
 import uk.gov.hmrc.domain.Nino
@@ -105,6 +106,7 @@ trait DesConnector {
       case None =>
         connectToDes(url, api, requestHeaderCarrier)(hc, formatA) map {
           response =>
+            Logger.debug("*~* - writing nino to cache:" + nino)
             repository.insertByNino(nino, response)
             response
         }

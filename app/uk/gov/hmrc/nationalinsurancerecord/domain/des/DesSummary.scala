@@ -37,11 +37,11 @@ object DesSummary {
   }
 
   val writes: Writes[DesSummary] = (
-    (__ \ "rre_to_consider").write[Boolean] and
-    (__ \ "date_of_death").write[Option[LocalDate]] and
-    (__ \ "earnings_included_upto").write[LocalDate] and
-    (__ \ "date_of_birth").write[LocalDate] and
-    (__ \ "final_relevant_year").write[Int]
+    (__ \ "reducedRateElectionToConsider").write[Boolean] and
+    (__ \ "dateOfDeath").write[Option[LocalDate]] and
+    (__ \ "earningsIncludedUpto").write[LocalDate] and
+    (__ \ "dateOfBirth").write[LocalDate] and
+    (__ \ "finalRelevantYear").write[Int]
     )(unlift(DesSummary.unapply))
 
   val reads: Reads[DesSummary] = (

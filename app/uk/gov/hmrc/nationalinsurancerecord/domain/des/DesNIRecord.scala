@@ -61,12 +61,12 @@ object DesNIRecord {
     )(DesNIRecord.apply _)
 
   val writes: Writes[DesNIRecord] = (
-    (__ \ "number_of_qualifying_years").write[Int] and
-    (__ \ "non_qualifying_years").write[Int] and
-    (__ \ "non_qualifying_years_payable").write[Int] and
-    (__ \ "pre_75_cc_count").write[Int] and
-    (__ \ "date_of_entry").writeNullable[LocalDate] and
-    (__ \ "npsLnitaxyr").write[List[DesNITaxYear]]
+    (__ \ "numberOfQualifyingYears").write[Int] and
+    (__ \ "nonQualifyingYears").write[Int] and
+    (__ \ "nonQualifyingYearsPayable").write[Int] and
+    (__ \ "pre75CcCount").write[Int] and
+    (__ \ "dateOfEntry").writeNullable[LocalDate] and
+    (__ \ "taxYears").write[List[DesNITaxYear]]
     )(unlift(DesNIRecord.unapply))
 
   implicit val format: Format[DesNIRecord] = Format(reads, writes)

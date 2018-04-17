@@ -23,7 +23,7 @@ case class DesLiability(liabilityType: Int)
 
 object DesLiability {
   val reads: Reads[DesLiability] = (__ \ "liabilityType").read[Int].map(DesLiability.apply)
-  val writes: Writes[DesLiability] = (__ \ "liability_type").write[Int].contramap(_.liabilityType)
+  val writes: Writes[DesLiability] = (__ \ "liabilityType").write[Int].contramap(_.liabilityType)
   implicit val formats: Format[DesLiability] = Format(reads, writes)
 }
 
