@@ -57,32 +57,37 @@ object DesNITaxYear {
     case _ => 0
   }
 
+  val readBooleanWithDefault: JsPath => Reads[Boolean] = jsPath => jsPath.readNullable[Boolean].map(_.getOrElse(false))
+
+  val readNullableList:JsPath => Reads[List[DesOtherCredits]] =
+    jsPath => jsPath.readNullable[List[DesOtherCredits]].map(_.getOrElse(List.empty))
+
   val reads: Reads[DesNITaxYear] = (
         readIntFromString(__ \ "rattdTaxYear") and
-        (__ \ "qualifying").read[Boolean] and
-        (__ \ "underInvestigationFlag").read[Boolean] and
-        (__ \ "payable").read[Boolean] and
-        (__ \ "classThreePayable").read[BigDecimal] and
+        readBooleanWithDefault(__ \ "qualifying") and
+        readBooleanWithDefault(__ \ "underInvestigationFlag") and
+        readBooleanWithDefault(__ \ "payable") and
+        readBigDecimalWithDefault(__ \ "classThreePayable") and
         (__ \ "classThreePayableBy").readNullable[LocalDate] and
         (__ \ "classThreePayableByPenalty").readNullable[LocalDate] and
-          readBigDecimalWithDefault(__ \ "niEarningsEmployed") and
-          readIntWithDefault(__ \ "niEarningsSelfEmployed") and
-          readIntWithDefault(__ \ "niEarningsVoluntary") and
-        (__ \ "otherCredits").read[List[DesOtherCredits]]
+        readBigDecimalWithDefault(__ \ "niEarningsEmployed") and
+        readIntWithDefault(__ \ "niEarningsSelfEmployed") and
+        readIntWithDefault(__ \ "niEarningsVoluntary") and
+        readNullableList(__ \ "otherCredits")
     )(DesNITaxYear.apply _)
 
   val writes: Writes[DesNITaxYear] = (
-    writeStringFromInt(__ \ "rattd_tax_year") and
+    writeStringFromInt(__ \ "rattdTaxYear") and
       (__ \ "qualifying").write[Boolean] and
-      (__ \ "under_investigation_flag").write[Boolean] and
+      (__ \ "underInvestigationFlag").write[Boolean] and
       (__ \ "payable").write[Boolean] and
-      (__ \ "class_three_payable").write[BigDecimal] and
-      (__ \ "class_three_payable_by").writeNullable[LocalDate] and
-      (__ \ "class_three_payable_by_penalty").writeNullable[LocalDate] and
-      (__ \ "ni_earnings_employed").write[BigDecimal] and
-      (__ \ "ni_earnings_self_employed").write[Int] and
-      (__ \ "ni_earnings_voluntary").write[Int] and
-      (__ \ "npsLothcred").write[List[DesOtherCredits]]
+      (__ \ "classThreePayable").write[BigDecimal] and
+      (__ \ "classThreePayableBy").writeNullable[LocalDate] and
+      (__ \ "classThreePayableByPenalty").writeNullable[LocalDate] and
+      (__ \ "niEarningsEmployed").write[BigDecimal] and
+      (__ \ "niEarningsSelfEmployed").write[Int] and
+      (__ \ "niEarningsVoluntary").write[Int] and
+      (__ \ "otherCredits").write[List[DesOtherCredits]]
     )(unlift(DesNITaxYear.unapply))
 
   implicit val format: Format[DesNITaxYear] = Format(reads, writes)

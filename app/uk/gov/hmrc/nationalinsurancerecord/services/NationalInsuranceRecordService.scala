@@ -235,7 +235,7 @@ trait NpsConnection extends NationalInsuranceRecordService {
       desNITaxYear.classOneContribution,
       desNITaxYear.classTwoCredits,
       desNITaxYear.classThreeCredits,
-      desNITaxYear.otherCredits.foldRight(0)(_.numberOfCredits + _),
+      desNITaxYear.otherCredits.foldRight(0)(_.numberOfCredits.getOrElse(0) + _),
       desNITaxYear.classThreePayable,
       desNITaxYear.classThreePayableBy,
       desNITaxYear.classThreePayableByPenalty,

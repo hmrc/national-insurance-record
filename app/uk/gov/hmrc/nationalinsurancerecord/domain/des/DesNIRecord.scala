@@ -44,22 +44,29 @@ case class DesNIRecord(
 }
 
 object DesNIRecord {
+
+  val readNullableInt: JsPath => Reads[Int] =
+    jsPath => jsPath.readNullable[Int].map(_.getOrElse(0))
+
+  val readNullableList:JsPath => Reads[List[DesNITaxYear]] =
+    jsPath => jsPath.readNullable[List[DesNITaxYear]].map(_.getOrElse(List.empty))
+
   val reads: Reads[DesNIRecord] = (
-        (__ \ "numberOfQualifyingYears").read[Int] and
-        (__ \ "nonQualifyingYears").read[Int] and
-        (__ \ "nonQualifyingYearsPayable").read[Int] and
-        (__ \ "pre75CcCount").read[Int] and
-        (__ \ "dateOfEntry").readNullable[LocalDate] and
-        (__ \ "taxYears").read[List[DesNITaxYear]]
+    readNullableInt(__ \ "numberOfQualifyingYears") and
+    readNullableInt(__ \ "nonQualifyingYears") and
+    readNullableInt(__ \ "nonQualifyingYearsPayable") and
+    readNullableInt(__ \ "pre75CcCount") and
+    (__ \ "dateOfEntry").readNullable[LocalDate] and
+    readNullableList(__ \ "taxYears")
     )(DesNIRecord.apply _)
 
   val writes: Writes[DesNIRecord] = (
-    (__ \ "number_of_qualifying_years").write[Int] and
-    (__ \ "non_qualifying_years").write[Int] and
-    (__ \ "non_qualifying_years_payable").write[Int] and
-    (__ \ "pre_75_cc_count").write[Int] and
-    (__ \ "date_of_entry").writeNullable[LocalDate] and
-    (__ \ "npsLnitaxyr").write[List[DesNITaxYear]]
+    (__ \ "numberOfQualifyingYears").write[Int] and
+    (__ \ "nonQualifyingYears").write[Int] and
+    (__ \ "nonQualifyingYearsPayable").write[Int] and
+    (__ \ "pre75CcCount").write[Int] and
+    (__ \ "dateOfEntry").writeNullable[LocalDate] and
+    (__ \ "taxYears").write[List[DesNITaxYear]]
     )(unlift(DesNIRecord.unapply))
 
   implicit val format: Format[DesNIRecord] = Format(reads, writes)

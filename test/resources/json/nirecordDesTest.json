@@ -1,0 +1,391 @@
+{
+  "dateOfEntry": "1986-09-08",
+  "nino": "XX000002",
+  "nonQualifyingYears": 2,
+  "nonQualifyingYearsPayable": 2,
+  "numberOfQualifyingYears": 37,
+  "pre75CcCount": 0,
+  "yearsToFry": 18,
+  "employmentDetails": [
+    {}
+  ],
+  "taxYears": [
+    {
+      "coClassOnePaid": 239.15,
+      "coPrimaryPaidEarnings": 3491.24,
+      "niEarningsEmployed": 416.99,
+      "otherCredits": [
+        {}
+      ],
+      "payable": false,
+      "qualifying": true,
+      "rattdTaxYear": "1986",
+      "underInvestigationFlag": false,
+      "primaryPaidEarnings": 6221.58
+    },
+    {
+      "coClassOnePaid": 284.33,
+      "coPrimaryPaidEarnings": 4151,
+      "niEarningsEmployed": 466.85,
+      "otherCredits": [
+        {}
+      ],
+      "payable": false,
+      "qualifying": true,
+      "rattdTaxYear": "1987",
+      "underInvestigationFlag": false,
+      "primaryPaidEarnings": 6179
+    },
+    {
+      "coClassOnePaid": 337.83,
+      "coPrimaryPaidEarnings": 4826,
+      "niEarningsEmployed": 530.07,
+      "otherCredits": [
+        {}
+      ],
+      "payable": false,
+      "qualifying": true,
+      "rattdTaxYear": "1988",
+      "underInvestigationFlag": false,
+      "primaryPaidEarnings": 6962
+    },
+    {
+      "coClassOnePaid": 382.46,
+      "coPrimaryPaidEarnings": 5463,
+      "niEarningsEmployed": 505.88,
+      "otherCredits": [
+        {}
+      ],
+      "payable": false,
+      "qualifying": true,
+      "rattdTaxYear": "1989",
+      "underInvestigationFlag": false,
+      "primaryPaidEarnings": 7707
+    },
+    {
+      "coClassOnePaid": 403.94,
+      "coPrimaryPaidEarnings": 5770,
+      "niEarningsEmployed": 451.94,
+      "otherCredits": [
+        {}
+      ],
+      "payable": false,
+      "qualifying": true,
+      "rattdTaxYear": "1990",
+      "underInvestigationFlag": false,
+      "primaryPaidEarnings": 8170
+    },
+    {
+      "coClassOnePaid": 289.98,
+      "coPrimaryPaidEarnings": 4142,
+      "niEarningsEmployed": 538.23,
+      "otherCredits": [
+        {}
+      ],
+      "payable": false,
+      "qualifying": true,
+      "rattdTaxYear": "1991",
+      "underInvestigationFlag": false,
+      "primaryPaidEarnings": 9009
+    },
+    {
+      "niEarningsEmployed": 494.29,
+      "otherCredits": [
+        {}
+      ],
+      "payable": false,
+      "qualifying": true,
+      "rattdTaxYear": "1992",
+      "underInvestigationFlag": false,
+      "primaryPaidEarnings": 7676
+    },
+    {
+      "niEarningsEmployed": 524.07,
+      "otherCredits": [
+        {}
+      ],
+      "payable": false,
+      "qualifying": true,
+      "rattdTaxYear": "1993",
+      "underInvestigationFlag": false,
+      "primaryPaidEarnings": 8091
+    },
+    {
+      "niEarningsEmployed": 569.75,
+      "otherCredits": [
+        {}
+      ],
+      "payable": false,
+      "qualifying": true,
+      "rattdTaxYear": "1994",
+      "underInvestigationFlag": false,
+      "primaryPaidEarnings": 8068
+    },
+    {
+      "niEarningsEmployed": 567.16,
+      "otherCredits": [
+        {}
+      ],
+      "payable": false,
+      "qualifying": true,
+      "rattdTaxYear": "1995",
+      "underInvestigationFlag": false,
+      "primaryPaidEarnings": 8090
+    },
+    {
+      "niEarningsEmployed": 615.65,
+      "otherCredits": [
+        {}
+      ],
+      "payable": false,
+      "qualifying": true,
+      "rattdTaxYear": "1996",
+      "underInvestigationFlag": false,
+      "primaryPaidEarnings": 8700
+    },
+    {
+      "niEarningsEmployed": 649.07,
+      "otherCredits": [
+        {}
+      ],
+      "payable": false,
+      "qualifying": true,
+      "rattdTaxYear": "1997",
+      "underInvestigationFlag": false,
+      "primaryPaidEarnings": 9073
+    },
+    {
+      "niEarningsEmployed": 664.31,
+      "otherCredits": [
+        {}
+      ],
+      "payable": false,
+      "qualifying": true,
+      "rattdTaxYear": "1998",
+      "underInvestigationFlag": false,
+      "primaryPaidEarnings": 9312
+    },
+    {
+      "niEarningsEmployed": 684.88,
+      "otherCredits": [
+        {}
+      ],
+      "payable": false,
+      "qualifying": true,
+      "rattdTaxYear": "1999",
+      "underInvestigationFlag": false,
+      "primaryPaidEarnings": 10280
+    },
+    {
+      "niEarningsEmployed": 656.58,
+      "otherCredits": [
+        {}
+      ],
+      "payable": false,
+      "qualifying": true,
+      "rattdTaxYear": "2000",
+      "underInvestigationFlag": false,
+      "primaryPaidEarnings": 10513
+    },
+    {
+      "niEarningsEmployed": 635.64,
+      "otherCredits": [
+        {}
+      ],
+      "payable": false,
+      "qualifying": true,
+      "rattdTaxYear": "2001",
+      "underInvestigationFlag": false,
+      "primaryPaidEarnings": 10892
+    },
+    {
+      "niEarningsEmployed": 677.91,
+      "otherCredits": [
+        {}
+      ],
+      "payable": false,
+      "qualifying": true,
+      "rattdTaxYear": "2002",
+      "underInvestigationFlag": false,
+      "primaryPaidEarnings": 11399
+    },
+    {
+      "niEarningsEmployed": 763.28,
+      "otherCredits": [
+        {
+          "ccType": 24,
+          "creditSourceType": 47,
+          "numberOfCredits": 53
+        }
+      ],
+      "payable": false,
+      "qualifying": true,
+      "rattdTaxYear": "2003",
+      "underInvestigationFlag": false,
+      "primaryPaidEarnings": 11558
+    },
+    {
+      "niEarningsEmployed": 837.34,
+      "otherCredits": [
+        {
+          "ccType": 24,
+          "creditSourceType": 47,
+          "numberOfCredits": 52
+        }
+      ],
+      "payable": false,
+      "qualifying": true,
+      "rattdTaxYear": "2004",
+      "underInvestigationFlag": false,
+      "primaryPaidEarnings": 12352
+    },
+    {
+      "niEarningsEmployed": 858.79,
+      "otherCredits": [
+        {
+          "ccType": 24,
+          "creditSourceType": 47,
+          "numberOfCredits": 52
+        }
+      ],
+      "payable": false,
+      "qualifying": true,
+      "rattdTaxYear": "2005",
+      "underInvestigationFlag": false,
+      "primaryPaidEarnings": 12703
+    },
+    {
+      "niEarningsEmployed": 1229.98,
+      "otherCredits": [
+        {
+          "ccType": 24,
+          "creditSourceType": 47,
+          "numberOfCredits": 52
+        }
+      ],
+      "payable": false,
+      "qualifying": true,
+      "rattdTaxYear": "2006",
+      "underInvestigationFlag": false,
+      "primaryPaidEarnings": 16221
+    },
+    {
+      "niEarningsEmployed": 1283.26,
+      "otherCredits": [
+        {}
+      ],
+      "payable": false,
+      "qualifying": true,
+      "rattdTaxYear": "2007",
+      "underInvestigationFlag": false,
+      "primaryPaidEarnings": 16886
+    },
+    {
+      "niEarningsEmployed": 1480.16,
+      "otherCredits": [
+        {}
+      ],
+      "payable": false,
+      "qualifying": true,
+      "rattdTaxYear": "2008",
+      "underInvestigationFlag": false,
+      "primaryPaidEarnings": 18892
+    },
+    {
+      "niEarningsEmployed": 1511.52,
+      "otherCredits": [
+        {}
+      ],
+      "payable": false,
+      "qualifying": true,
+      "rattdTaxYear": "2009",
+      "underInvestigationFlag": false,
+      "primaryPaidEarnings": 19453
+    },
+    {
+      "niEarningsEmployed": 1553.33,
+      "otherCredits": [
+        {}
+      ],
+      "payable": false,
+      "qualifying": true,
+      "rattdTaxYear": "2010",
+      "underInvestigationFlag": false,
+      "primaryPaidEarnings": 19833
+    },
+    {
+      "niEarningsEmployed": 1561.71,
+      "otherCredits": [
+        {}
+      ],
+      "payable": false,
+      "qualifying": true,
+      "rattdTaxYear": "2011",
+      "underInvestigationFlag": false,
+      "primaryPaidEarnings": 20238
+    },
+    {
+      "niEarningsEmployed": 1573.7,
+      "otherCredits": [
+        {}
+      ],
+      "payable": false,
+      "qualifying": true,
+      "rattdTaxYear": "2012",
+      "underInvestigationFlag": false,
+      "primaryPaidEarnings": 20722
+    },
+    {
+      "coClassOnePaid": 869.61,
+      "coPrimaryPaidEarnings": 9770.67,
+      "niEarningsEmployed": 1426.67,
+      "otherCredits": [
+        {}
+      ],
+      "payable": false,
+      "qualifying": true,
+      "rattdTaxYear": "2013",
+      "underInvestigationFlag": false,
+      "primaryPaidEarnings": 20780.78
+    },
+    {
+      "coClassOnePaid": 1274.95,
+      "coPrimaryPaidEarnings": 14500.59,
+      "niEarningsEmployed": 1274.95,
+      "otherCredits": [
+        {}
+      ],
+      "payable": false,
+      "qualifying": true,
+      "rattdTaxYear": "2014",
+      "underInvestigationFlag": false,
+      "primaryPaidEarnings": 20272.59
+    },
+    {
+      "amountNeeded": 733.2,
+      "classThreePayable": 733.2,
+      "classThreePayableBy": "2019-04-05",
+      "classThreePayableByPenalty": "2023-04-05",
+      "otherCredits": [
+        {}
+      ],
+      "payable": true,
+      "qualifying": false,
+      "rattdTaxYear": "2015",
+      "underInvestigationFlag": false
+    },
+    {
+      "amountNeeded": 733.2,
+      "classThreePayable": 733.2,
+      "classThreePayableBy": "2019-04-05",
+      "classThreePayableByPenalty": "2023-04-05",
+      "otherCredits": [
+        {}
+      ],
+      "payable": true,
+      "qualifying": false,
+      "rattdTaxYear": "2016",
+      "underInvestigationFlag": false
+    }
+  ]
+}

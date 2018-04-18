@@ -16,17 +16,20 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.domain.des
 
-import play.api.libs.functional.syntax._
-import play.api.libs.json._
+import play.api.libs.json.Json
+import uk.gov.hmrc.play.test.UnitSpec
 
-case class DesLiabilities(liabilities: List[DesLiability])
+import scala.io.Source
 
-object DesLiabilities {
-  val reads: Reads[DesLiabilities] = {
-    (__ \ "liabilities").read[List[DesLiability]].map(DesLiabilities.apply)
+class DesNIRecordSpec extends UnitSpec {
+
+  val testRecord = Source.fromInputStream(getClass().getResourceAsStream("/json/nirecordDesTest.json")).mkString
+
+  "reading DesNIRecord " should {
+
+    "Parse DesNiREcord correctly" in {
+      val niRecord = Json.parse(testRecord).as[DesNIRecord]
+      niRecord.numberOfQualifyingYears shouldBe 37
+    }
   }
-  val writes: Writes[DesLiabilities] = {
-    (__ \ "liabilities").write[List[DesLiability]].contramap(_.liabilities)
-  }
-  implicit val formats: Format[DesLiabilities] = Format(reads, writes)
 }
