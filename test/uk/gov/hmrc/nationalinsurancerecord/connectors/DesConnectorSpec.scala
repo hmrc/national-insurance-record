@@ -223,10 +223,10 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
         )
       val desSummaryF = await(connector.getSummary(nino)(HeaderCarrier()))
       desSummaryF.rreToConsider shouldBe false
-      desSummaryF.finalRelevantYear shouldBe 2016
-      desSummaryF.dateOfBirth shouldBe new LocalDate(1952,11,21)
+      desSummaryF.finalRelevantYear.get shouldBe 2016
+      desSummaryF.dateOfBirth.get shouldBe new LocalDate(1952,11,21)
       desSummaryF.dateOfDeath shouldBe None
-      desSummaryF.earningsIncludedUpTo shouldBe new LocalDate(2014,4,5)
+      desSummaryF.earningsIncludedUpTo.get shouldBe new LocalDate(2014,4,5)
     }
 
     "log correct Summary metrics" in {
@@ -373,17 +373,17 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
     }
 
     val nino = generateNino()
-    val testSummaryModel = DesSummary(rreToConsider = false, dateOfDeath = None, earningsIncludedUpTo = new LocalDate(2014, 4, 5),
-      dateOfBirth = new LocalDate(1952, 11, 21), finalRelevantYear = 2016)
+    val testSummaryModel = DesSummary(rreToConsider = false, dateOfDeath = None, earningsIncludedUpTo = Some(new LocalDate(2014, 4, 5)),
+      dateOfBirth = Some(new LocalDate(1952, 11, 21)), finalRelevantYear = Some(2016))
 
     "return valid Summary response" in {
       when(mockSummaryRepo.findByNino(Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.successful(Some(testSummaryModel)))
       val desSummaryF = connector.getSummary(generateNino())(HeaderCarrier())
       desSummaryF.rreToConsider shouldBe false
-      desSummaryF.finalRelevantYear shouldBe 2016
-      desSummaryF.dateOfBirth shouldBe new LocalDate(1952, 11, 21)
+      desSummaryF.finalRelevantYear.get shouldBe 2016
+      desSummaryF.dateOfBirth.get shouldBe new LocalDate(1952, 11, 21)
       desSummaryF.dateOfDeath shouldBe None
-      desSummaryF.earningsIncludedUpTo shouldBe new LocalDate(2014, 4, 5)
+      desSummaryF.earningsIncludedUpTo.get shouldBe new LocalDate(2014, 4, 5)
     }
 
     "return valid Summary from cache" in {

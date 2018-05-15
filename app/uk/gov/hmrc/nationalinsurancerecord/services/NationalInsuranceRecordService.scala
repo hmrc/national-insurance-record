@@ -65,7 +65,7 @@ trait NpsConnection extends NationalInsuranceRecordService {
         manualCorrespondence <- manualCorrespondenceF
       ) yield {
 
-        val purgedNIRecord = desNIRecord.purge(desSummary.finalRelevantYear)
+        val purgedNIRecord = desNIRecord.purge(desSummary.finalRelevantYear.get)
 
         val exclusions: List[Exclusion] = new DesExclusionService(
           dateOfDeath = desSummary.dateOfDeath,
@@ -79,12 +79,12 @@ trait NpsConnection extends NationalInsuranceRecordService {
         } else {
           val niRecord = NationalInsuranceRecord(
             purgedNIRecord.numberOfQualifyingYears,
-            calcPre75QualifyingYears(purgedNIRecord.pre75ContributionCount, purgedNIRecord.dateOfEntry, desSummary.dateOfBirth).getOrElse(0),
+            calcPre75QualifyingYears(purgedNIRecord.pre75ContributionCount, purgedNIRecord.dateOfEntry, desSummary.dateOfBirth.get).getOrElse(0),
             purgedNIRecord.nonQualifyingYears,
             purgedNIRecord.nonQualifyingYearsPayable,
             purgedNIRecord.dateOfEntry,
             desHomeResponsibilitiesProtection(desLiabilities.liabilities),
-            desSummary.earningsIncludedUpTo,
+            desSummary.earningsIncludedUpTo.get,
             purgedNIRecord.niTaxYears.map(desTaxYearToNIRecordTaxYear).sortBy(_.taxYear)(Ordering[String].reverse),
             desSummary.rreToConsider
           )
@@ -152,7 +152,7 @@ trait NpsConnection extends NationalInsuranceRecordService {
         manualCorrespondenceIndicator <- manualCorrespondenceIndicatorF
       ) yield {
 
-        val purgedNIRecord = desNIRecord.purge(desSummary.finalRelevantYear)
+        val purgedNIRecord = desNIRecord.purge(desSummary.finalRelevantYear.get)
 
         val exclusions = new DesExclusionService(
           desSummary.dateOfDeath,

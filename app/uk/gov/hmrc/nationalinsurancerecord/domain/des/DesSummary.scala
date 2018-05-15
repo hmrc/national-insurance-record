@@ -24,9 +24,9 @@ import play.api.libs.json._
 case class DesSummary(
                      rreToConsider: Boolean = false,
                      dateOfDeath: Option[LocalDate] = None,
-                     earningsIncludedUpTo: LocalDate,
-                     dateOfBirth: LocalDate,
-                     finalRelevantYear: Int
+                     earningsIncludedUpTo: Option[LocalDate],
+                     dateOfBirth: Option[LocalDate],
+                     finalRelevantYear: Option[Int]
                      )
 
 object DesSummary {
@@ -36,20 +36,23 @@ object DesSummary {
     case _ => 0
   }
 
+  val readBooleanwithDefault: JsPath => Reads[Boolean] = jsPath => jsPath.readNullable[Boolean].map(_.getOrElse(false))
+
+
   val writes: Writes[DesSummary] = (
     (__ \ "reducedRateElectionToConsider").write[Boolean] and
     (__ \ "dateOfDeath").write[Option[LocalDate]] and
-    (__ \ "earningsIncludedUpto").write[LocalDate] and
-    (__ \ "dateOfBirth").write[LocalDate] and
-    (__ \ "finalRelevantYear").write[Int]
+    (__ \ "earningsIncludedUpto").write[Option[LocalDate]] and
+    (__ \ "dateOfBirth").write[Option[LocalDate]] and
+    (__ \ "finalRelevantYear").write[Option[Int]]
     )(unlift(DesSummary.unapply))
 
   val reads: Reads[DesSummary] = (
-      (__ \ "reducedRateElectionToConsider").read[Boolean] and
+    readBooleanwithDefault(__ \ "reducedRateElectionToConsider") and
       (__ \ "dateOfDeath").readNullable[LocalDate] and
-      (__ \ "earningsIncludedUpto").read[LocalDate] and
-      (__ \ "dateOfBirth").read[LocalDate] and
-      (__ \ "finalRelevantYear").read[Int]
+      (__ \ "earningsIncludedUpto").readNullable[LocalDate] and
+      (__ \ "dateOfBirth").readNullable[LocalDate] and
+      (__ \ "finalRelevantYear").readNullable[Int]
     )(DesSummary.apply _)
 
   implicit val formats: Format[DesSummary] = Format(reads, writes)
