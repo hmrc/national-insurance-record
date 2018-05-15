@@ -173,7 +173,7 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
 
       when(service.des.getNationalInsuranceRecord(nino)).thenReturn(Future.successful(niRecordDES))
       when(service.des.getLiabilities(nino)).thenReturn(Future.successful(desLiabilities))
-      when(service.des.getSummary(nino)).thenReturn(Future.successful(DesSummary(false, None, new LocalDate(2016, 4, 5), new LocalDate(1951, 4 , 5), 2017)))
+      when(service.des.getSummary(nino)).thenReturn(Future.successful(DesSummary(false, None, Some(new LocalDate(2016, 4, 5)), Some(new LocalDate(1951, 4 , 5)), Some(2017))))
 
 
       lazy val niRecordF: Future[NationalInsuranceRecord] = service.getNationalInsuranceRecord(nino).right.get
