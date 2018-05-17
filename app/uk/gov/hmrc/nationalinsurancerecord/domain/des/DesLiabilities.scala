@@ -25,7 +25,7 @@ case class DesLiabilities(liabilities: List[DesLiability])
 object DesLiabilities {
 
   val readNullableList:JsPath => Reads[List[DesLiability]] =
-    jsPath => jsPath.readNullable[List[DesLiability]].map(_.getOrElse(List.empty))
+    jsPath => jsPath.readNullable[List[DesLiability]].map(_.getOrElse(List.empty).filter(_.liabilityType.isDefined))
 
   val reads: Reads[DesLiabilities] = {
     readNullableList(__ \ "liabilities").map(DesLiabilities.apply)

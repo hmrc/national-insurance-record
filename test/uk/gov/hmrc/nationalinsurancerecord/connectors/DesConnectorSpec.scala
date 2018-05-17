@@ -182,6 +182,25 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
       |}
     """.stripMargin
   )
+
+  val testEmptyLiabilitiesJson = Json.parse(
+    """
+      |{
+      |  "npsErrlist": {
+      |    "count": 0,
+      |    "mgt_check": 0,
+      |    "commit_status": 2,
+      |    "npsErritem": [],
+      |    "bfm_return_code": 0,
+      |    "data_not_found": 0
+      |  },
+      |  "liabilities": [
+      |    {
+      |    }
+      |  ]
+      |}
+    """.stripMargin)
+
   val liabilities = testLiabilitiesJson.as[DesLiabilities]
   val mockMetrics = mock[MetricsService]
   val mockTimerContext = mock[Timer.Context]
@@ -302,8 +321,24 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
         )
 
       val desLiabilitiesF = await(connector.getLiabilities(nino)(HeaderCarrier()))
-      desLiabilitiesF.liabilities.head.liabilityType shouldBe 13
-      desLiabilitiesF.liabilities(4).liabilityType shouldBe 34
+      desLiabilitiesF.liabilities.head.liabilityType shouldBe Some(13)
+      desLiabilitiesF.liabilities(4).liabilityType shouldBe Some(34)
+    }
+
+    "return an empty Liabilities list" in {
+      reset(mockMetrics)
+      when(mockMetrics.startTimer(APITypes.Liabilities)).thenReturn(mock[Timer.Context])
+      when(mockLiabilitiesRepo.findByNino(Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.successful(None))
+      when(connector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any()))
+        .thenReturn(
+          Future.successful(
+            HttpResponse(
+              200,
+              Some(testEmptyLiabilitiesJson)))
+        )
+
+      val desLiabilitiesF = await(connector.getLiabilities(nino)(HeaderCarrier()))
+      desLiabilitiesF.liabilities.size shouldBe 0
     }
 
     "log correct Liabilities metrics" in {

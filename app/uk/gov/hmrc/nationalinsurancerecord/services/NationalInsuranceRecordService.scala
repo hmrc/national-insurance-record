@@ -207,7 +207,7 @@ trait NpsConnection extends NationalInsuranceRecordService {
   }
 
   def desHomeResponsibilitiesProtection(liabilities: List[DesLiability]): Boolean =
-    liabilities.exists(liability => NIRecordConstants.homeResponsibilitiesProtectionTypes.contains(liability.liabilityType))
+    liabilities.exists(liability => NIRecordConstants.homeResponsibilitiesProtectionTypes.contains(liability.liabilityType.get))
 
   //TODO delete this after testing
   def homeResponsibilitiesProtection(liabilities: List[NpsLiability]): Boolean =
