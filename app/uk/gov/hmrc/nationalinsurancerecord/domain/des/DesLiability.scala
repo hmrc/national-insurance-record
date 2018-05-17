@@ -22,7 +22,11 @@ import play.api.libs.functional.syntax._
 case class DesLiability(liabilityType: Int)
 
 object DesLiability {
-  val reads: Reads[DesLiability] = (__ \ "liabilityType").read[Int].map(DesLiability.apply)
+
+  val readNullableInt: JsPath => Reads[Int] =
+    jsPath => jsPath.readNullable[Int].map(_.getOrElse(0))
+
+  val reads: Reads[DesLiability] = readNullableInt(__ \ "liabilityType").map(DesLiability.apply)
   val writes: Writes[DesLiability] = (__ \ "liabilityType").write[Int].contramap(_.liabilityType)
   implicit val formats: Format[DesLiability] = Format(reads, writes)
 }

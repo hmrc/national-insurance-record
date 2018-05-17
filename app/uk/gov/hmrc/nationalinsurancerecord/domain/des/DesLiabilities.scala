@@ -18,12 +18,17 @@ package uk.gov.hmrc.nationalinsurancerecord.domain.des
 
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
+import uk.gov.hmrc.nationalinsurancerecord.domain.des.DesNIRecord.readNullableList
 
 case class DesLiabilities(liabilities: List[DesLiability])
 
 object DesLiabilities {
+
+  val readNullableList:JsPath => Reads[List[DesLiability]] =
+    jsPath => jsPath.readNullable[List[DesLiability]].map(_.getOrElse(List.empty))
+
   val reads: Reads[DesLiabilities] = {
-    (__ \ "liabilities").read[List[DesLiability]].map(DesLiabilities.apply)
+    readNullableList(__ \ "liabilities").map(DesLiabilities.apply)
   }
   val writes: Writes[DesLiabilities] = {
     (__ \ "liabilities").write[List[DesLiability]].contramap(_.liabilities)
