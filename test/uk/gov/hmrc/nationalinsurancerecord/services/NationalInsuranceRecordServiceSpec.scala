@@ -163,7 +163,7 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
     "regular ni record" should {
 
       val liabilities = NpsLiabilities(List(NpsLiability(14)))
-      val desLiabilities = DesLiabilities(List(DesLiability(14)))
+      val desLiabilities = DesLiabilities(List(DesLiability(Some(14))))
       val nino = generateNino()
       when(service.citizenDetailsService.checkManualCorrespondenceIndicator(nino)).thenReturn(Future.successful(false))
       when(service.nps.getNationalInsuranceRecord(nino)).thenReturn(Future.successful(niRecordHOD))

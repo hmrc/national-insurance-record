@@ -62,7 +62,7 @@ class DesExclusionService(dateOfDeath: Option[LocalDate],
     else exclusionList
 
   private val checkIsleOfMan = (exclusionList: List[Exclusion]) =>
-    if (liabilities.exists(_.liabilityType == LiabilityType.ISLE_OF_MAN)) Exclusion.IsleOfMan :: exclusionList
+    if (liabilities.exists(_.liabilityType.contains(LiabilityType.ISLE_OF_MAN))) Exclusion.IsleOfMan :: exclusionList
     else exclusionList
 
   private val exclusions = FunctionHelper.composeAll(List(
