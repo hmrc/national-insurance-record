@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nationalinsurancerecord.domain.nps
+package uk.gov.hmrc.nationalinsurancerecord.domain.des
 
-import uk.gov.hmrc.play.test.UnitSpec
 import play.api.libs.json.Json
+import uk.gov.hmrc.play.test.UnitSpec
 
-class NpsLiabilitySpec extends UnitSpec{
+class DesLiabilitySpec extends UnitSpec{
   // scalastyle:off magic.number
 
   "NPS Liability" should {
 
     "return liability type and dates correctly" in {
-      NpsLiability(13).liabilityType shouldBe 13
+      DesLiability(Some(13)).liabilityType shouldBe Some(13)
     }
 
     "parse Nps response liability type correctly" in {
@@ -39,7 +39,7 @@ class NpsLiabilitySpec extends UnitSpec{
            |    "liability_type": 16,
            |    "award_amount": null
            |}
-         """.stripMargin).as[NpsLiability].liabilityType shouldBe 16
+         """.stripMargin).as[DesLiability].liabilityType shouldBe Some(16)
     }
   }
 }

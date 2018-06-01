@@ -20,13 +20,14 @@ import org.mockito.Matchers
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.OneServerPerSuite
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
 import reactivemongo.api.indexes.CollectionIndexesManager
 import reactivemongo.json.collection.JSONCollection
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.mongo.MongoSpecSupport
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
-import uk.gov.hmrc.nationalinsurancerecord.domain.nps.NpsNIRecord
+import uk.gov.hmrc.nationalinsurancerecord.domain.des.DesNIRecord
 import uk.gov.hmrc.nationalinsurancerecord.services.{CachingMongoService, MetricsService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -34,7 +35,7 @@ import scala.concurrent.Future
 
 class NIRecordRepositorySpec extends NationalInsuranceRecordUnitSpec with OneServerPerSuite with MongoSpecSupport with MockitoSugar {
 
-  val niRecordJson = Json.parse(
+  val niRecordJson: JsValue = Json.parse(
     """
       | {
       | "years_to_fry": 1,
@@ -108,14 +109,14 @@ class NIRecordRepositorySpec extends NationalInsuranceRecordUnitSpec with OneSer
       |}
     """.stripMargin)
 
-  val niRecord = niRecordJson.as[NpsNIRecord]
+  val niRecord: DesNIRecord = niRecordJson.as[DesNIRecord]
 
-  val nino = generateNino()
-  val excludedNino = generateNino()
+  val nino: Nino = generateNino()
+  val excludedNino: Nino = generateNino()
 
   "NationalInsuranceRepository" should {
 
-    val service = new CachingMongoService[NIRecordCache, NpsNIRecord](NIRecordCache.formats, NIRecordCache.apply,
+    val service = new CachingMongoService[DesNIRecordCache, DesNIRecord](DesNIRecordCache.formats, DesNIRecordCache.apply,
       APITypes.NIRecord, StubApplicationConfig, mock[MetricsService])
 
     "persist a NIRecord in the repo" in {
@@ -140,9 +141,9 @@ class NIRecordRepositorySpec extends NationalInsuranceRecordUnitSpec with OneSer
 
       when(stubCollection.indexesManager).thenReturn(stubIndexesManager)
 
-      class TestSummaryMongoService extends CachingMongoService[NIRecordCache, NpsNIRecord
-        ](NIRecordCache.formats, NIRecordCache.apply, APITypes.NIRecord, StubApplicationConfig, mock[MetricsService])  {
-        override lazy val collection = stubCollection
+      class TestSummaryMongoService extends CachingMongoService[DesNIRecordCache, DesNIRecord
+        ](DesNIRecordCache.formats, DesNIRecordCache.apply, APITypes.NIRecord, StubApplicationConfig, mock[MetricsService])  {
+        override lazy val collection: JSONCollection = stubCollection
       }
       when(stubCollection.find(Matchers.any())(Matchers.any())).thenThrow(new RuntimeException)
       when(stubCollection.indexesManager.ensure(Matchers.any())).thenReturn(Future.successful(true))

@@ -17,8 +17,8 @@
 package uk.gov.hmrc.nationalinsurancerecord.cache
 
 import org.joda.time.LocalDate
-import org.mockito.{Matchers, Mockito}
 import org.mockito.Mockito._
+import org.mockito.{Matchers, Mockito}
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
 import reactivemongo.api.indexes.CollectionIndexesManager
@@ -26,7 +26,7 @@ import reactivemongo.json.collection.JSONCollection
 import uk.gov.hmrc.mongo.MongoSpecSupport
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
-import uk.gov.hmrc.nationalinsurancerecord.domain.nps.NpsSummary
+import uk.gov.hmrc.nationalinsurancerecord.domain.des.DesSummary
 import uk.gov.hmrc.nationalinsurancerecord.services.{CachingMongoService, MetricsService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -35,14 +35,18 @@ import scala.concurrent.Future
 class SummaryRepositorySpec extends NationalInsuranceRecordUnitSpec with OneAppPerSuite with MongoSpecSupport with MockitoSugar {
   // scalastyle:off magic.number
 
-  val testSummaryModel = NpsSummary(rreToConsider = false, dateOfDeath = None,
-    earningsIncludedUpTo = new LocalDate(2014, 4, 5), dateOfBirth = new LocalDate(1952, 11, 21), finalRelevantYear = 2016
+  val testSummaryModel = DesSummary(
+    rreToConsider = false,
+    dateOfDeath = None,
+    earningsIncludedUpTo = Some(new LocalDate(2014, 4, 5)),
+    dateOfBirth = Some(new LocalDate(1952, 11, 21)),
+    finalRelevantYear = Some(2016)
   )
 
   "SummaryMongoService" should {
     val mockMetrics = mock[MetricsService]
     val nino = generateNino()
-    val service = new CachingMongoService[SummaryCache, NpsSummary](SummaryCache.formats, SummaryCache.apply,
+    val service = new CachingMongoService[DesSummaryCache, DesSummary](DesSummaryCache.formats, DesSummaryCache.apply,
       APITypes.Summary, StubApplicationConfig, mockMetrics) {
       override val timeToLive = 30
     }
@@ -78,9 +82,9 @@ class SummaryRepositorySpec extends NationalInsuranceRecordUnitSpec with OneAppP
 
       when(stubCollection.indexesManager).thenReturn(stubIndexesManager)
 
-      class TestSummaryMongoService extends CachingMongoService[SummaryCache, NpsSummary](
-        SummaryCache.formats, SummaryCache.apply, APITypes.Summary, StubApplicationConfig, mockMetrics) {
-        override lazy val collection = stubCollection
+      class TestSummaryMongoService extends CachingMongoService[DesSummaryCache, DesSummary](
+        DesSummaryCache.formats, DesSummaryCache.apply, APITypes.Summary, StubApplicationConfig, mockMetrics) {
+        override lazy val collection: JSONCollection = stubCollection
         override val timeToLive = 30
       }
       reset(mockMetrics)

@@ -18,7 +18,7 @@ package uk.gov.hmrc.nationalinsurancerecord.services
 
 import org.joda.time.LocalDate
 import uk.gov.hmrc.nationalinsurancerecord.domain.Exclusion
-import uk.gov.hmrc.nationalinsurancerecord.domain.nps.NpsLiability
+import uk.gov.hmrc.nationalinsurancerecord.domain.des.DesLiability
 
 class ExclusionServiceSpec extends NationalInsuranceRecordServiceSpec {
   // scalastyle:off magic.number
@@ -28,9 +28,9 @@ class ExclusionServiceSpec extends NationalInsuranceRecordServiceSpec {
 
   private def exclusionServiceBuilder(
                                 dateOfDeath: Option[LocalDate] = None,
-                                liabilities: List[NpsLiability] = List(),
+                                liabilities: List[DesLiability] = List(),
                                 manualCorrespondenceOnly: Boolean = false
-                             ) = new ExclusionService(dateOfDeath, liabilities, manualCorrespondenceOnly)
+                             ) = new DesExclusionService(dateOfDeath, liabilities, manualCorrespondenceOnly)
 
   "getExclusions" when {
     "there is no exclusions" should {
@@ -53,10 +53,10 @@ class ExclusionServiceSpec extends NationalInsuranceRecordServiceSpec {
       }
       "there is some liabilities" should {
         "return List(IsleOfMan) if the list includes liability type 15" in {
-          exclusionServiceBuilder(liabilities = List(NpsLiability(5), NpsLiability(16))).getExclusions shouldBe List(Exclusion.IsleOfMan)
+          exclusionServiceBuilder(liabilities = List(DesLiability(Some(5)), DesLiability(Some(16)))).getExclusions shouldBe List(Exclusion.IsleOfMan)
         }
         "return no exclusions if the list does not include liability type 15" in {
-          exclusionServiceBuilder(liabilities = List(NpsLiability(15), NpsLiability(16))).getExclusions shouldBe Nil
+          exclusionServiceBuilder(liabilities = List(DesLiability(Some(15)), DesLiability(Some(16)))).getExclusions shouldBe Nil
         }
       }
     }
@@ -77,7 +77,7 @@ class ExclusionServiceSpec extends NationalInsuranceRecordServiceSpec {
       "return a sorted list of Dead, MCI, IoM exclusions" in {
         exclusionServiceBuilder(
           dateOfDeath = Some(new LocalDate(1999, 12, 31)),
-          liabilities = List(NpsLiability(5), NpsLiability(15), NpsLiability(1)),
+          liabilities = List(DesLiability(Some(5)), DesLiability(Some(15)), DesLiability(Some(1))),
           manualCorrespondenceOnly = true
         ).getExclusions shouldBe List(
           Exclusion.Dead,
