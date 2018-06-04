@@ -19,27 +19,70 @@ package uk.gov.hmrc.nationalinsurancerecord.domain.des
 import play.api.libs.json.Json
 import uk.gov.hmrc.play.test.UnitSpec
 
-class DesLiabilitySpec extends UnitSpec{
-  // scalastyle:off magic.number
+class DesLiabilitySpec extends UnitSpec {
 
-  "NPS Liability" should {
+  "DesLiability" should {
+    "deserialise correctly" in {
+      val jsonPayload =
+        """
+          |{
+          |    "liabilities": [
+          |        {
+          |            "awardAmount": 123.49,
+          |            "liabilityOccurrenceNo": 89,
+          |            "liabilityType": 45,
+          |            "liabilityTypeEndDate": "2014-08-25",
+          |            "liabilityTypeEndDateReason": "END DATE HELD",
+          |            "liabilityTypeStartDate": "2014-08-25",
+          |            "nino":"SK196234"
+          |        },
+          |        {
+          |            "awardAmount": 456.54,
+          |            "liabilityOccurrenceNo": 90,
+          |            "liabilityType": 45,
+          |            "liabilityTypeEndDate": "2018-08-25",
+          |            "liabilityTypeEndDateReason": "END DATE HELD",
+          |            "liabilityTypeStartDate": "2017-08-26",
+          |            "nino":"SK196234"
+          |        }
+          |
+          |    ]
+          |}
+        """.stripMargin
 
-    "return liability type and dates correctly" in {
-      DesLiability(Some(13)).liabilityType shouldBe Some(13)
+      val testData = DesLiabilities(
+        List(
+          DesLiability(liabilityType = Some(45)),
+          DesLiability(liabilityType = Some(45))
+        )
+      )
+
+      Json.parse(jsonPayload).as[DesLiabilities] shouldBe testData
     }
 
-    "parse Nps response liability type correctly" in {
-      Json.parse(
+    "give an emptyList for empty json object" in {
+      val jsonPayload =
         """
-           |{
-           |    "liability_type_end_date": "2000-02-17",
-           |    "liability_occurrence_no": 1,
-           |    "liability_type_start_date": "1984-02-20",
-           |    "liability_type_end_date_reason": "END DATE HELD",
-           |    "liability_type": 16,
-           |    "award_amount": null
-           |}
-         """.stripMargin).as[DesLiability].liabilityType shouldBe Some(16)
+          |{
+          |    "liabilities": [
+          |        {
+          |            "awardAmount": 123.49,
+          |            "liabilityOccurrenceNo": 89,
+          |            "liabilityTypeEndDate": "2014-08-25",
+          |            "liabilityTypeEndDateReason": "END DATE HELD",
+          |            "liabilityTypeStartDate": "2014-08-25",
+          |            "nino":"SK196234"
+          |        }
+          |    ]
+          |}
+        """.stripMargin
+
+      val testData = DesLiabilities(
+        List()
+      )
+
+      Json.parse(jsonPayload).as[DesLiabilities] shouldBe testData
     }
   }
+
 }
