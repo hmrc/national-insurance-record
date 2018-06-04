@@ -115,6 +115,29 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
     """.stripMargin
   )
 
+  val testNIRecordNoTaxYearsJson = Json.parse(
+    """
+      | {
+      | "years_to_fry": 1,
+      | "nonQualifyingYears": 13,
+      | "dateOfEntry": "1973-10-01",
+      | "npsLniemply": [],
+      | "pre75CcCount": 51,
+      | "numberOfQualifyingYears": 27,
+      | "npsErrlist": {
+      |   "count": 0,
+      | "mgt_check": 0,
+      | "commit_status": 2,
+      | "npsErritem": [],
+      | "bfm_return_code": 0,
+      | "data_not_found": 0
+      |},
+      |"nonQualifyingYearsPayable": 0,
+      | "nino": "<NINO>"
+      |}
+    """.stripMargin
+  )
+
   val niRecord = testNIRecordJson.as[DesNIRecord]
 
   val testLiabilitiesJson = Json.parse(
@@ -293,6 +316,22 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
       desNIRecordF.niTaxYears.head.otherCredits.head.numberOfCredits.get shouldBe 4
       desNIRecordF.niTaxYears(1).otherCredits shouldBe List()
     }
+
+      "return valid NIRecord response when no tax years are present" in {
+        reset(mockMetrics)
+        when(mockMetrics.startTimer(APITypes.NIRecord)).thenReturn(mock[Timer.Context])
+        when(mockNIRecordRepo.findByNino(Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.successful(None))
+        when(connector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any()))
+          .thenReturn(
+            Future.successful(
+              HttpResponse(
+                200,
+                Some(testNIRecordNoTaxYearsJson)
+              ))
+          )
+        val desNIRecordF = await(connector.getNationalInsuranceRecord(nino)(HeaderCarrier()))
+        desNIRecordF.niTaxYears shouldBe List.empty
+      }
 
     "log correct NIRecord metrics" in {
       verify(mockMetrics, Mockito.atLeastOnce()).incrementCounter(APITypes.NIRecord)
