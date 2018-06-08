@@ -23,7 +23,7 @@ import org.mockito.{Matchers, Mockito}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpGet, HttpResponse}
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.cache._
@@ -37,10 +37,10 @@ import scala.concurrent.Future
 class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar with OneAppPerSuite with ScalaFutures {
   // scalastyle:off magic.number
 
-  val mockSummaryRepo = mock[CachingService[DesSummaryCache, DesSummary]]
-  val mockLiabilitiesRepo = mock[CachingService[DesLiabilitiesCache, DesLiabilities]]
-  val mockNIRecordRepo = mock[CachingService[DesNIRecordCache, DesNIRecord]]
-  val testNIRecordJson = Json.parse(
+  val mockSummaryRepo: CachingService[DesSummaryCache, DesSummary] = mock[CachingService[DesSummaryCache, DesSummary]]
+  val mockLiabilitiesRepo: CachingService[DesLiabilitiesCache, DesLiabilities] = mock[CachingService[DesLiabilitiesCache, DesLiabilities]]
+  val mockNIRecordRepo: CachingService[DesNIRecordCache, DesNIRecord] = mock[CachingService[DesNIRecordCache, DesNIRecord]]
+  val testNIRecordJson: JsValue = Json.parse(
     """
       | {
       | "years_to_fry": 1,
@@ -115,6 +115,8 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
     """.stripMargin
   )
 
+  val niRecord: DesNIRecord = testNIRecordJson.as[DesNIRecord]
+
   val testNIRecordNoTaxYearsJson = Json.parse(
     """
       | {
@@ -138,9 +140,7 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
     """.stripMargin
   )
 
-  val niRecord = testNIRecordJson.as[DesNIRecord]
-
-  val testLiabilitiesJson = Json.parse(
+  val testLiabilitiesJson: JsValue = Json.parse(
     """
       |{
       |  "npsErrlist": {
@@ -206,7 +206,7 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
     """.stripMargin
   )
 
-  val testEmptyLiabilitiesJson = Json.parse(
+  val testEmptyLiabilitiesJson: JsValue = Json.parse(
     """
       |{
       |  "npsErrlist": {
@@ -224,12 +224,12 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
       |}
     """.stripMargin)
 
-  val liabilities = testLiabilitiesJson.as[DesLiabilities]
-  val mockMetrics = mock[MetricsService]
-  val mockTimerContext = mock[Timer.Context]
+  val liabilities: DesLiabilities = testLiabilitiesJson.as[DesLiabilities]
+  val mockMetrics: MetricsService = mock[MetricsService]
+  val mockTimerContext: Timer.Context = mock[Timer.Context]
 
-    "DesConnector - No Caching" should {
-    val connector = new DesConnector {
+  "DesConnector - No Caching" should {
+    val connector: DesConnector = new DesConnector {
       override val serviceUrl: String = ""
       override val authToken: String = "auth"
       override val environment: String = "env"
@@ -247,9 +247,7 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
       when(mockMetrics.startTimer(APITypes.Summary)).thenReturn(mockTimerContext)
       when(mockSummaryRepo.findByNino(Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.successful(None))
       when(connector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any()))
-        .thenReturn(
-          Future.successful(
-            HttpResponse(
+        .thenReturn(Future.successful(HttpResponse(
               200,
               Some(Json.parse(
                 """
@@ -261,8 +259,8 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
                   | "earningsIncludedUpto": "2014-04-05"
                   |}
                 """.stripMargin
-              ))))
-        )
+              ))
+            )))
       val desSummaryF = await(connector.getSummary(nino)(HeaderCarrier()))
       desSummaryF.rreToConsider shouldBe false
       desSummaryF.finalRelevantYear shouldBe Some(2016)
@@ -317,22 +315,6 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
       desNIRecordF.niTaxYears(1).otherCredits shouldBe List()
     }
 
-      "return valid NIRecord response when no tax years are present" in {
-        reset(mockMetrics)
-        when(mockMetrics.startTimer(APITypes.NIRecord)).thenReturn(mock[Timer.Context])
-        when(mockNIRecordRepo.findByNino(Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.successful(None))
-        when(connector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any()))
-          .thenReturn(
-            Future.successful(
-              HttpResponse(
-                200,
-                Some(testNIRecordNoTaxYearsJson)
-              ))
-          )
-        val desNIRecordF = await(connector.getNationalInsuranceRecord(nino)(HeaderCarrier()))
-        desNIRecordF.niTaxYears shouldBe List.empty
-      }
-
     "log correct NIRecord metrics" in {
       verify(mockMetrics, Mockito.atLeastOnce()).incrementCounter(APITypes.NIRecord)
       verify(mockMetrics, Mockito.atLeastOnce()).startTimer(APITypes.NIRecord)
@@ -362,6 +344,22 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
       val desLiabilitiesF = await(connector.getLiabilities(nino)(HeaderCarrier()))
       desLiabilitiesF.liabilities.head.liabilityType shouldBe Some(13)
       desLiabilitiesF.liabilities(4).liabilityType shouldBe Some(34)
+    }
+
+    "return valid NIRecord response when no tax years are present" in {
+      reset(mockMetrics)
+      when(mockMetrics.startTimer(APITypes.NIRecord)).thenReturn(mock[Timer.Context])
+      when(mockNIRecordRepo.findByNino(Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.successful(None))
+      when(connector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any()))
+        .thenReturn(
+          Future.successful(
+            HttpResponse(
+              200,
+              Some(testNIRecordNoTaxYearsJson)
+            ))
+        )
+      val desNIRecordF = await(connector.getNationalInsuranceRecord(nino)(HeaderCarrier()))
+      desNIRecordF.niTaxYears shouldBe List.empty
     }
 
     "return an empty Liabilities list" in {
@@ -434,8 +432,8 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
     }
   }
 
-  "NpsConnector - Caching" should {
-    val connector = new DesConnector {
+  "DesConnector - Caching" should {
+    val connector: DesConnector = new DesConnector {
       override val serviceUrl: String = ""
       override val authToken: String = "auth"
       override val environment: String = "env"

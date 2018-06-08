@@ -27,7 +27,6 @@ import uk.gov.hmrc.nationalinsurancerecord.cache._
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.des.{DesLiabilities, DesNIRecord, DesSummary}
-import uk.gov.hmrc.nationalinsurancerecord.domain.nps.NpsLiabilities
 import uk.gov.hmrc.nationalinsurancerecord.services.{CachingService, MetricsService}
 import uk.gov.hmrc.nationalinsurancerecord.util.{JsonDepersonaliser, NIRecordConstants}
 import uk.gov.hmrc.play.config.ServicesConfig

@@ -44,8 +44,6 @@ class DocumentationControllerSpec extends UnitSpec with WithFakeApplication {
       override def status: Option[String] = apiStatus
 
       override def connectToHOD: Boolean = false
-
-      override def connectToDES: Boolean = false
     }
 
     new DocumentationController(LazyHttpErrorHandler, appContext).definition()(FakeRequest())

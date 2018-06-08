@@ -18,7 +18,6 @@ package uk.gov.hmrc.nationalinsurancerecord.domain.des
 
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
-import uk.gov.hmrc.nationalinsurancerecord.domain.des.DesNIRecord.readNullableList
 
 case class DesLiabilities(liabilities: List[DesLiability])
 

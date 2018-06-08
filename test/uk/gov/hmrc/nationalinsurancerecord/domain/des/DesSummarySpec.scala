@@ -23,8 +23,8 @@ import uk.gov.hmrc.play.test.UnitSpec
 import scala.io.Source
 
 class DesSummarySpec extends UnitSpec {
-  val testCompletedRecord = Source.fromInputStream(getClass().getResourceAsStream("/json/nisummaryDesTest.json")).mkString
-  val testEmptyRecord = Source.fromInputStream(getClass().getResourceAsStream("/json/nisummaryEmptyDesTest.json")).mkString
+  val testCompletedRecord: String = Source.fromInputStream(getClass.getResourceAsStream("/json/nisummaryDesTest.json")).mkString
+  val testEmptyRecord: String = Source.fromInputStream(getClass.getResourceAsStream("/json/nisummaryEmptyDesTest.json")).mkString
 
   "reading DesSummary" should {
 

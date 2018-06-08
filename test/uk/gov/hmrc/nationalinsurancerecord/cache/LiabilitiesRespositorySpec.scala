@@ -25,7 +25,7 @@ import reactivemongo.json.collection.JSONCollection
 import uk.gov.hmrc.mongo.MongoSpecSupport
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
-import uk.gov.hmrc.nationalinsurancerecord.domain.nps.{NpsLiabilities, NpsLiability}
+import uk.gov.hmrc.nationalinsurancerecord.domain.des.{DesLiabilities, DesLiability}
 import uk.gov.hmrc.nationalinsurancerecord.services.{CachingMongoService, MetricsService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -34,14 +34,14 @@ import scala.concurrent.Future
 class LiabilitiesRespositorySpec extends NationalInsuranceRecordUnitSpec with OneServerPerSuite with MongoSpecSupport with MockitoSugar {
   // scalastyle:off magic.number
 
-  val testLiablitiesModel = NpsLiabilities(List(NpsLiability(15), NpsLiability(100)))
+  val testLiablitiesModel = DesLiabilities(List(DesLiability(Some(15)), DesLiability(Some(100))))
 
   "LiabilitiesRepository" should {
 
     val nino = generateNino()
     val excluedNino = generateNino()
-    val service = new CachingMongoService[LiabilitiesCache, NpsLiabilities](LiabilitiesCache.formats,
-      LiabilitiesCache.apply, APITypes.Liabilities, StubApplicationConfig, mock[MetricsService])
+    val service = new CachingMongoService[DesLiabilitiesCache, DesLiabilities](DesLiabilitiesCache.formats,
+      DesLiabilitiesCache.apply, APITypes.Liabilities, StubApplicationConfig, mock[MetricsService])
 
     "persist a Liabilities in the repo" in {
 
@@ -66,9 +66,14 @@ class LiabilitiesRespositorySpec extends NationalInsuranceRecordUnitSpec with On
 
       when(stubCollection.indexesManager).thenReturn(stubIndexesManager)
 
-      class TestSummaryMongoService extends CachingMongoService[LiabilitiesCache, NpsLiabilities
-        ](LiabilitiesCache.formats, LiabilitiesCache.apply, APITypes.Liabilities, StubApplicationConfig, mock[MetricsService]) {
-        override lazy val collection = stubCollection
+      class TestSummaryMongoService extends CachingMongoService[DesLiabilitiesCache, DesLiabilities](
+        DesLiabilitiesCache.formats,
+        DesLiabilitiesCache.apply,
+        APITypes.Liabilities,
+        StubApplicationConfig,
+        mock[MetricsService]
+      ) {
+        override lazy val collection: JSONCollection = stubCollection
       }
       when(stubCollection.find(Matchers.any())(Matchers.any())).thenThrow(new RuntimeException)
       when(stubCollection.indexesManager.ensure(Matchers.any())).thenReturn(Future.successful(true))
