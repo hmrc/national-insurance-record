@@ -20,7 +20,6 @@ import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.Result
 import uk.gov.hmrc.api.controllers.{ErrorGenericBadRequest, ErrorInternalServerError, ErrorNotFound}
-import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
