@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,8 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.connectors
 
-import play.api.Logger
+import play.api.Mode.Mode
+import play.api.{Configuration, Logger, Play}
 import play.api.data.validation.ValidationError
 import play.api.libs.json.{Format, JsPath, OFormat, Reads}
 import uk.gov.hmrc.domain.Nino
@@ -48,6 +49,8 @@ object DesConnector extends DesConnector with ServicesConfig {
   override val nirecordRepository: CachingService[DesNIRecordCache, DesNIRecord] = DesNIRecordRepository()
 
   override def metrics: MetricsService = MetricsService
+  override protected def mode: Mode = Play.current.mode
+  override protected def runModeConfiguration: Configuration = Play.current.configuration
 }
 
 trait DesConnector {
