@@ -13,18 +13,19 @@ private object AppDependencies {
   import play.sbt.PlayImport._
   import play.core.PlayVersion
 
-  private val microserviceBootstrapVersion = "6.18.0"
-  private val domainVersion = "5.1.0"
+  private val microserviceBootstrapVersion = "10.4.0"
+  private val domainVersion = "5.3.0"
   private val pegdownVersion = "1.6.0"
-  private val playHmrcApiVersion = "2.1.0"
-  private val playHalVersion = "1.2.0"
-  private val reactivemongoVersion = "5.2.0"
+  private val playHmrcApiVersion = "3.4.0-play-25"
+  private val playHalVersion = "1.8.0-play-25"
+  private val reactivemongoVersion = "6.4.0"
+  private val reactiveSimpleMongoVersion = "7.14.0-play-25"
 
-  private val hmrcTestVersion = "2.4.0"
+  private val hmrcTestVersion = "3.5.0-play-25"
   private val scalaTestVersion = "2.2.6"
-  private val scalaTestPlusVersion = "1.5.1"
-  private val mockitoAllVersion = "1.9.5"
-  private val reactivemongoTestVersion = "2.0.0"
+  private val scalaTestPlusVersion = "2.0.1"
+  private val mockitoAllVersion = "1.10.19"
+  private val reactivemongoTestVersion = "4.9.0-play-25"
 
   val compile = Seq(
 
@@ -34,7 +35,7 @@ private object AppDependencies {
     "uk.gov.hmrc" %% "play-hmrc-api" % playHmrcApiVersion,
     "uk.gov.hmrc" %% "play-hal" % playHalVersion,
     "uk.gov.hmrc" %% "play-reactivemongo" % reactivemongoVersion,
-    "uk.gov.hmrc" %% "simple-reactivemongo" % reactivemongoVersion
+    "uk.gov.hmrc" %% "simple-reactivemongo" % reactiveSimpleMongoVersion
   )
 
   trait TestDependencies {

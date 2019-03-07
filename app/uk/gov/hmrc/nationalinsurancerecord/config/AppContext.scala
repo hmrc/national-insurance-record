@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ trait AppContext {
   def connectToHOD: Boolean
 }
 
-object AppContext extends AppContext with ServicesConfig {
+object AppContext extends AppContext{
   lazy val appName = current.configuration.getString("appName").getOrElse(throw new RuntimeException("appName is not configured"))
   lazy val apiGatewayContext = current.configuration.getString("api.gateway.context")
     .getOrElse(throw new RuntimeException("api.gateway.context is not configured"))

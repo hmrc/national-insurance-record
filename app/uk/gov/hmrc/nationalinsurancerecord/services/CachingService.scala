@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,14 @@ package uk.gov.hmrc.nationalinsurancerecord.services
 import org.joda.time.{DateTime, DateTimeZone}
 import play.api.Logger
 import play.api.libs.json.{Format, Json, OFormat, Reads}
-import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes.APITypes
 import reactivemongo.api.indexes.{Index, IndexType}
-import reactivemongo.api.{DefaultDB, ReadPreference}
+import reactivemongo.api.{Cursor, DefaultDB, ReadPreference}
 import reactivemongo.bson.{BSONDocument, BSONObjectID}
+import reactivemongo.play.json.ImplicitBSONHandlers._
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.nationalinsurancerecord.config.ApplicationConfig
+import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes.APITypes
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
@@ -65,8 +66,8 @@ class CachingMongoService[A <: CachingModel[A, B], B]
 
   private def createIndex(field: String, indexName: String, ttl: Option[Int], uniqueField: Boolean)(implicit e: ExecutionContext): Future[Boolean] = {
 
-    val ttlOption = ttl.fold(BSONDocument())(time => BSONDocument(expireAfterSeconds -> time))
-    val options = if(uniqueField) ttlOption.add(unique -> true) else ttlOption
+    val ttlOption: BSONDocument = ttl.fold(BSONDocument())(time => BSONDocument(expireAfterSeconds -> time))
+    val options: BSONDocument = if(uniqueField) ttlOption.merge(unique -> true) else ttlOption
 
     collection.indexesManager.ensure(Index(Seq((field, IndexType.Ascending)), Some(indexName),
       options = options)) map {
@@ -91,7 +92,7 @@ class CachingMongoService[A <: CachingModel[A, B], B]
   override def findByNino(nino: Nino)(implicit formats: Reads[A], e: ExecutionContext): Future[Option[B]] = {
     val tryResult = Try {
       metrics.cacheRead()
-      collection.find(Json.obj("key" -> cacheKey(nino, apiType))).cursor[A](ReadPreference.primary).collect[List]()
+      collection.find(Json.obj("key" -> cacheKey(nino, apiType))).cursor[A](ReadPreference.primary).collect[List](maxDocs = -1, Cursor.FailOnError())
     }
 
     tryResult match {
