@@ -17,6 +17,7 @@
 package uk.gov.hmrc.nationalinsurancerecord.controllers
 
 import org.joda.time.LocalDate
+import org.scalatestplus.play.OneAppPerSuite
 import play.api.libs.json._
 import play.api.test.FakeRequest
 import uk.gov.hmrc.domain.Nino
@@ -38,19 +39,16 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
   val emptyRequestWithHeader = FakeRequest().withHeaders("Accept" -> "application/vnd.hmrc.1.0+json")
 
   val mockAuditConnector = new CustomAuditConnector {
-    override lazy val auditConnector: AuditConnector = ???
+    override lazy val auditConnector = ???
 
     override def sendEvent(event: DataEvent)(implicit hc: HeaderCarrier): Unit = {}
   }
 
   def testNationalInsuranceRecordController(niRecordService: NationalInsuranceRecordService): NationalInsuranceRecordController
-  = new NationalInsuranceRecordController {
-    override val nationalInsuranceRecordService: NationalInsuranceRecordService = niRecordService
+  = new NationalInsuranceRecordController(niRecordService, mockAuditConnector) {
     override val app: String = "Test National Insurance Record"
     override val context: String = "test"
-    override val customAuditConnector: CustomAuditConnector = mockAuditConnector
   }
-
 
   private val dummyTaxYearQualifying: NationalInsuranceTaxYear = NationalInsuranceTaxYear(
     taxYear = "2010-11",
@@ -143,8 +141,6 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
     ),
     reducedRateElection = false
   )
-
-
 
   "getSummary" when {
 

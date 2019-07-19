@@ -100,11 +100,11 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
   "NationalInsuranceRecordService with a HOD Connection" when {
 
     val mockMetrics = mock[MetricsService]
-    val service: NpsConnection = new NpsConnection {
+    val service: NationalInsuranceRecordService = new NationalInsuranceRecordService {
       override lazy val des: DesConnector = mock[DesConnector]
       override lazy val citizenDetailsService: CitizenDetailsService = mock[CitizenDetailsService]
-      override lazy val now: LocalDate = new LocalDate(2017, 1, 16)
-      override def metrics: MetricsService = mockMetrics
+      override val now: LocalDate = new LocalDate(2017, 1, 16)
+      override lazy val metrics: MetricsService = mockMetrics
     }
 
 
@@ -240,47 +240,47 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
 
     "calc pre75 years" should {
       "return 3 when the number of conts in 157 and the date of entry is 04/10/1972 and their date of birth is 04/10/1956" in {
-        NationalInsuranceRecordService.calcPre75QualifyingYears(
+        service.calcPre75QualifyingYears(
           157, Some(new LocalDate(1972, 10, 4)), new LocalDate(1956, 10, 4)
         ) shouldBe Some(3)
       }
       "return 8 when the number of conts in 408 and the date of entry is 08/01/1968 and their date of birth is 08/01/1952" in {
-        NationalInsuranceRecordService.calcPre75QualifyingYears(
+        service.calcPre75QualifyingYears(
           408, Some(new LocalDate(1968, 1, 8)), new LocalDate(1952, 1, 8)
         ) shouldBe Some(8)
       }
       "return 2 when the number of conts in 157 and the date of entry is 06/04/1973 and their date of birth is 04/10/1956" in {
-        NationalInsuranceRecordService.calcPre75QualifyingYears(
+        service.calcPre75QualifyingYears(
           157, Some(new LocalDate(1973, 4, 6)), new LocalDate(1956, 10, 4)
         ) shouldBe Some(2)
       }
       "return 1 when the number of conts in 157 and the date of entry is 06/04/1973 and their date of birth is 06/04/1958" in {
-        NationalInsuranceRecordService.calcPre75QualifyingYears(
+        service.calcPre75QualifyingYears(
           157, Some(new LocalDate(1973, 4, 6)), new LocalDate(1958, 4, 6)
         ) shouldBe Some(1)
       }
       "return null when the number of conts in 157 and the date of entry is 06/04/1973 and their date of birth is 24/05/1996" in {
-        NationalInsuranceRecordService.calcPre75QualifyingYears(
+        service.calcPre75QualifyingYears(
           157, Some(new LocalDate(1973, 4, 6)), new LocalDate(1996, 5, 24)
         ) shouldBe None
       }
       "return null when the number of conts in 157 and the date of entry is 06/04/1976 and their date of birth is 06/04/1960" in {
-        NationalInsuranceRecordService.calcPre75QualifyingYears(
+        service.calcPre75QualifyingYears(
           157, Some(new LocalDate(1976, 4, 6)), new LocalDate(1960, 4, 6)
         ) shouldBe None
       }
       "return null when the number of conts in 157 and the date of entry is 06/04/2005 and their date of birth is 06/04/1958" in {
-        NationalInsuranceRecordService.calcPre75QualifyingYears(
+        service.calcPre75QualifyingYears(
           157, Some(new LocalDate(2005, 4, 6)), new LocalDate(1958, 4, 6)
         ) shouldBe None
       }
       "when the date_of_entry is null, should still perform calc" in {
-        NationalInsuranceRecordService.calcPre75QualifyingYears(
+        service.calcPre75QualifyingYears(
           157, None, new LocalDate(1922, 4, 6)
         ) shouldBe Some(4)
       }
       "when the date_of_entry is null, should still restrict by 16th Birthday calc" in {
-        NationalInsuranceRecordService.calcPre75QualifyingYears(
+        service.calcPre75QualifyingYears(
           157, None, new LocalDate(1957, 4, 6)
         ) shouldBe Some(2)
       }
@@ -289,16 +289,16 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
 
   "NationalInsuranceRecordService exclusion with HOD connection" should {
     val mockMetrics = mock[MetricsService]
-    val service: NpsConnection = new NpsConnection {
+    val service: NationalInsuranceRecordService = new NationalInsuranceRecordService {
       override lazy val des: DesConnector = mock[DesConnector]
       override lazy val citizenDetailsService: CitizenDetailsService = {
         mock[CitizenDetailsService]
       }
-      override lazy val now: LocalDate = {
+      override val now: LocalDate = {
         new LocalDate(2017, 1, 16)
       }
 
-      override def metrics: MetricsService = mockMetrics
+      override lazy val metrics: MetricsService = mockMetrics
     }
 
     "NI Summary with exclusions" should {
