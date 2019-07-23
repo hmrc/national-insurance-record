@@ -16,8 +16,9 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.connectors
 
+import com.google.inject.Inject
 import play.api.Mode.Mode
-import play.api.{Configuration, Logger, Play}
+import play.api.{Configuration, Environment, Logger, Play}
 import play.api.data.validation.ValidationError
 import play.api.libs.json.{Format, JsPath, OFormat, Reads}
 import uk.gov.hmrc.domain.Nino
@@ -36,38 +37,26 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
-object DesConnector extends DesConnector with ServicesConfig {
-  override val serviceUrl: String = baseUrl("des-hod")
-  override val authToken: String = s"Bearer ${getConfString("des-hod.authorizationToken", "")}"
-  override val environment: String = getConfString("des-hod.environment", "")
+class DesConnector @Inject()(environment: Environment,
+                             configuration: Configuration,
+                             metrics: MetricsService) extends ServicesConfig {
 
+  val serviceUrl: String = baseUrl("des-hod")
+  val authToken: String = s"Bearer ${getConfString("des-hod.authorizationToken", "")}"
+  val desEnvironment: String = getConfString("des-hod.environment", "")
+  val summaryRepository: CachingService[DesSummaryCache, DesSummary] = DesSummaryRepository()
+  val liabilitiesRepository: CachingService[DesLiabilitiesCache, DesLiabilities] = DesLiabilitiesRepository()
+  val nirecordRepository: CachingService[DesNIRecordCache, DesNIRecord] = DesNIRecordRepository()
 
-  override def http: HttpGet = new HttpGet with WSHttp
-
-  override val summaryRepository: CachingService[DesSummaryCache, DesSummary] = DesSummaryRepository()
-  override val liabilitiesRepository: CachingService[DesLiabilitiesCache, DesLiabilities] = DesLiabilitiesRepository()
-  override val nirecordRepository: CachingService[DesNIRecordCache, DesNIRecord] = DesNIRecordRepository()
-
-  override def metrics: MetricsService = Play.current.injector.instanceOf[MetricsService]
-  override protected def mode: Mode = Play.current.mode
-  override protected def runModeConfiguration: Configuration = Play.current.configuration
-}
-
-trait DesConnector {
-  def metrics: MetricsService
-  val serviceUrl: String
-  val authToken: String
-  val environment: String
-  val summaryRepository: CachingService[DesSummaryCache, DesSummary]
-  val liabilitiesRepository: CachingService[DesLiabilitiesCache, DesLiabilities]
-  val nirecordRepository: CachingService[DesNIRecordCache, DesNIRecord]
+  override protected def mode: Mode = environment.mode
+  override protected def runModeConfiguration: Configuration = configuration
 
   class JsonValidationException(message: String) extends Exception(message)
 
-  def http: HttpGet
+  def http: HttpGet = new HttpGet with WSHttp
   def url(path: String): String = s"$serviceUrl$path"
   def requestHeaderCarrier(implicit hc: HeaderCarrier): HeaderCarrier = {
-    HeaderCarrier.apply(Some(Authorization(authToken))).withExtraHeaders("Originator-Id" -> "DA_PF", "Environment" -> environment)
+    HeaderCarrier.apply(Some(Authorization(authToken))).withExtraHeaders("Originator-Id" -> "DA_PF", "Environment" -> desEnvironment)
   }
   private def ninoWithoutSuffix(nino: Nino): String = nino.value.substring(0, NIRecordConstants.ninoLengthWithoutSuffix)
 

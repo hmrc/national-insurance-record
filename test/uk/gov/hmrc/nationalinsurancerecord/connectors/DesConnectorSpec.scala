@@ -23,11 +23,11 @@ import org.mockito.{Matchers, Mockito}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
+import play.api.Environment
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpGet, HttpResponse}
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.cache._
-import uk.gov.hmrc.nationalinsurancerecord.connectors.DesConnector.JsonValidationException
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.des.{DesLiabilities, DesNIRecord, DesSummary}
 import uk.gov.hmrc.nationalinsurancerecord.services.{CachingService, MetricsService}
@@ -229,15 +229,14 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
   val mockTimerContext: Timer.Context = mock[Timer.Context]
 
   "DesConnector - No Caching" should {
-    val connector: DesConnector = new DesConnector {
+    val connector: DesConnector = new DesConnector(app.injector.instanceOf[Environment], app.configuration, mockMetrics) {
       override val serviceUrl: String = ""
       override val authToken: String = "auth"
-      override val environment: String = "env"
+      override val desEnvironment: String = "env"
       override val http: HttpGet = mock[HttpGet]
       override val summaryRepository: CachingService[DesSummaryCache, DesSummary] = mockSummaryRepo
       override val liabilitiesRepository: CachingService[DesLiabilitiesCache, DesLiabilities] = mockLiabilitiesRepo
       override val nirecordRepository: CachingService[DesNIRecordCache, DesNIRecord] = mockNIRecordRepo
-      override def metrics: MetricsService = mockMetrics
     }
 
     val nino = generateNino()
@@ -425,7 +424,7 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
       )
 
       ScalaFutures.whenReady(connector.getNationalInsuranceRecord(nino)(HeaderCarrier()).failed) { ex =>
-        ex shouldBe a[JsonValidationException]
+        ex shouldBe a[connector.JsonValidationException]
         ex.getMessage.contains("1973-10-01") shouldBe false
         ex.getMessage.contains("1111-11-11") shouldBe true
       }
@@ -433,15 +432,14 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
   }
 
   "DesConnector - Caching" should {
-    val connector: DesConnector = new DesConnector {
+    val connector: DesConnector = new DesConnector(app.injector.instanceOf[Environment], app.configuration, mockMetrics) {
       override val serviceUrl: String = ""
       override val authToken: String = "auth"
-      override val environment: String = "env"
+      override val desEnvironment: String = "env"
       override val http: HttpGet = mock[HttpGet]
       override val summaryRepository: CachingService[DesSummaryCache, DesSummary] = mockSummaryRepo
       override val liabilitiesRepository: CachingService[DesLiabilitiesCache, DesLiabilities] = mockLiabilitiesRepo
       override val nirecordRepository: CachingService[DesNIRecordCache, DesNIRecord] = mockNIRecordRepo
-      override def metrics: MetricsService = mock[MetricsService]
     }
 
     val nino = generateNino()

@@ -25,7 +25,6 @@ import uk.gov.hmrc.nationalinsurancerecord.services.{CitizenDetailsService, Metr
 class NIModule extends Module{
     override def bindings(environment: Environment, configuration: Configuration): Seq[Binding[_]] = Seq(
 //      bind[HttpErrorHandler].to(LazyHttpErrorHandler),
-      bind[DesConnector].to(DesConnector),
       bind[CitizenDetailsConnector].to(CitizenDetailsConnector)
     )
   }
