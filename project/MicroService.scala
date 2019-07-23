@@ -2,6 +2,7 @@ import sbt.Keys._
 import sbt.Tests.{Group, SubProcess}
 import sbt._
 import play.routes.compiler.{InjectedRoutesGenerator, StaticRoutesGenerator}
+import play.sbt.PlayImport.PlayKeys
 import play.sbt.PlayScala
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 import play.sbt.routes.RoutesKeys
@@ -40,6 +41,7 @@ trait MicroService {
       scalaVersion := "2.11.11",
       libraryDependencies ++= appDependencies,
       retrieveManaged := true,
+      PlayKeys.playDefaultPort := 9312,
       evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
       RoutesKeys.routesGenerator := InjectedRoutesGenerator
     )

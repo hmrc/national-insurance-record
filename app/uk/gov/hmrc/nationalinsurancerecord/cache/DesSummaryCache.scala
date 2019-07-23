@@ -18,7 +18,6 @@ package uk.gov.hmrc.nationalinsurancerecord.cache
 
 import com.google.inject.Inject
 import org.joda.time.DateTime
-import play.api.Play
 import play.api.libs.json.Json
 import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.DefaultDB
