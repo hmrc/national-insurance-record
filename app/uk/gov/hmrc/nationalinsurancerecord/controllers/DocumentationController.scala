@@ -16,13 +16,14 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.controllers
 
-import play.api.http.{HttpErrorHandler, LazyHttpErrorHandler}
+import com.google.inject.Inject
+import play.api.http.HttpErrorHandler
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.nationalinsurancerecord.config.{APIAccessConfig, AppContext}
 import uk.gov.hmrc.nationalinsurancerecord.domain.APIAccess
 import uk.gov.hmrc.nationalinsurancerecord.views._
 
-class DocumentationController (errorHandler: HttpErrorHandler, appContext: AppContext)
+class DocumentationController @Inject()(errorHandler: HttpErrorHandler, appContext: AppContext)
   extends uk.gov.hmrc.api.controllers.DocumentationController(errorHandler = errorHandler) {
 
   override def definition(): Action[AnyContent] = Action {
@@ -36,5 +37,3 @@ class DocumentationController (errorHandler: HttpErrorHandler, appContext: AppCo
 
   private def buildStatus(): String = appContext.status.getOrElse("BETA")
 }
-
-object DocumentationController extends DocumentationController(LazyHttpErrorHandler, AppContext)

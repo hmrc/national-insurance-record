@@ -17,6 +17,7 @@
 package uk.gov.hmrc.nationalinsurancerecord.controllers
 
 import org.joda.time.LocalDate
+import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
 import play.api.libs.json._
 import play.api.test.FakeRequest
@@ -32,8 +33,9 @@ import play.api.test.Helpers.{contentAsJson, _}
 
 import scala.concurrent.Future
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.nationalinsurancerecord.config.AppContext
 
-class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitSpec with WithFakeApplication {
+class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitSpec with WithFakeApplication with MockitoSugar {
 
   val emptyRequest = FakeRequest()
   val emptyRequestWithHeader = FakeRequest().withHeaders("Accept" -> "application/vnd.hmrc.1.0+json")
@@ -45,7 +47,7 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
   }
 
   def testNationalInsuranceRecordController(niRecordService: NationalInsuranceRecordService): NationalInsuranceRecordController
-  = new NationalInsuranceRecordController(niRecordService, mockAuditConnector) {
+  = new NationalInsuranceRecordController(niRecordService, mockAuditConnector, mock[AppContext]) {
     override val app: String = "Test National Insurance Record"
     override lazy val context: String = "test"
   }

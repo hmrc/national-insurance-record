@@ -32,14 +32,14 @@ import uk.gov.hmrc.nationalinsurancerecord.domain.NationalInsuranceTaxYear
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 class NationalInsuranceRecordController @Inject()(nationalInsuranceRecordService: NationalInsuranceRecordService,
-                                                  customAuditConnector: CustomAuditConnector) extends BaseController
+                                                  customAuditConnector: CustomAuditConnector, appContext: AppContext) extends BaseController
   with HeaderValidator
   with ErrorHandling
   with HalSupport
   with Links {
 
   override val app: String = "National-Insurance-Record"
-  override lazy val context: String = AppContext.apiGatewayContext
+  override lazy val context: String = appContext.apiGatewayContext
 
   private def halResourceWithTaxYears(nino: Nino, content: JsValue, selfLink: String, years: List[NationalInsuranceTaxYear]): HalResource = {
     halResourceSelfLink(
