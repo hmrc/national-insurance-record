@@ -16,32 +16,29 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.connectors
 
-import play.api.{Configuration, Play}
+import com.google.inject.Inject
 import play.api.Mode.Mode
-import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.nationalinsurancerecord.WSHttp
-import uk.gov.hmrc.play.config.ServicesConfig
 import play.api.http.Status._
+import play.api.{Configuration, Environment}
+import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.http.{HeaderCarrier, HttpGet, HttpResponse, Upstream4xxResponse}
+import uk.gov.hmrc.nationalinsurancerecord.WSHttp
 import uk.gov.hmrc.nationalinsurancerecord.services.MetricsService
+import uk.gov.hmrc.play.config.ServicesConfig
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
-import scala.concurrent.ExecutionContext.Implicits.global
-import uk.gov.hmrc.http.{HeaderCarrier, HttpGet, HttpResponse, Upstream4xxResponse}
 
-object CitizenDetailsConnector extends CitizenDetailsConnector with ServicesConfig {
-  override val serviceUrl = baseUrl("citizen-details")
-  override val http: HttpGet = new HttpGet with WSHttp
-  override val metrics: MetricsService = Play.current.injector.instanceOf[MetricsService]
-  override protected def mode: Mode = Play.current.mode
-  override protected def runModeConfiguration: Configuration = Play.current.configuration
-}
+class CitizenDetailsConnector @Inject()(environment: Environment,
+                                        configuration: Configuration,
+                                        metrics: MetricsService) extends ServicesConfig{
 
+  val serviceUrl = baseUrl("citizen-details")
+  val http: HttpGet = new HttpGet with WSHttp
 
-trait CitizenDetailsConnector {
-  val serviceUrl: String
-  val http: HttpGet
-  val metrics: MetricsService
+  override protected def mode: Mode = environment.mode
+  override protected def runModeConfiguration: Configuration = configuration
 
   private def url(nino: Nino) = s"$serviceUrl/citizen-details/$nino/designatory-details/"
 
