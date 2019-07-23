@@ -39,7 +39,7 @@ class NationalInsuranceRecordController @Inject()(nationalInsuranceRecordService
   with Links {
 
   override val app: String = "National-Insurance-Record"
-  override val context: String = AppContext.apiGatewayContext
+  override lazy val context: String = AppContext.apiGatewayContext
 
   private def halResourceWithTaxYears(nino: Nino, content: JsValue, selfLink: String, years: List[NationalInsuranceTaxYear]): HalResource = {
     halResourceSelfLink(

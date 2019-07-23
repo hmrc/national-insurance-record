@@ -47,7 +47,7 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
   def testNationalInsuranceRecordController(niRecordService: NationalInsuranceRecordService): NationalInsuranceRecordController
   = new NationalInsuranceRecordController(niRecordService, mockAuditConnector) {
     override val app: String = "Test National Insurance Record"
-    override val context: String = "test"
+    override lazy val context: String = "test"
   }
 
   private val dummyTaxYearQualifying: NationalInsuranceTaxYear = NationalInsuranceTaxYear(
