@@ -21,7 +21,7 @@ import org.mockito.{Matchers, Mockito}
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfter
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
 import play.api.test.FakeRequest
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec

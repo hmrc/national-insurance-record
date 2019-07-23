@@ -16,56 +16,46 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.services
 
-import com.codahale.metrics.{Counter, Timer}
+import com.codahale.metrics.Counter
 import com.codahale.metrics.Timer.Context
-import uk.gov.hmrc.nationalinsurancerecord.domain.{APITypes, Exclusion}
+import com.google.inject.Inject
+import com.kenshoo.play.metrics.Metrics
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.Exclusion.Exclusion
-import uk.gov.hmrc.play.graphite.MicroserviceMetrics
+import uk.gov.hmrc.nationalinsurancerecord.domain.{APITypes, Exclusion}
 
-trait MetricsService {
-  def startTimer(api: APITypes): Timer.Context
-  def incrementFailedCounter(api: APITypes): Unit
-  def incrementCounter(api: APITypes): Unit
-  def niRecord(gaps: Int, payableGaps: Int, pre75Years: Int, qualifyingYears: Int): Unit
-  def exclusion(exclusion: Exclusion): Unit
-  def cacheRead()
-  def cacheReadFound()
-  def cacheReadNotFound()
-  def cacheWritten()
-  def startCitizenDetailsTimer(): Timer.Context
-}
+class MetricsService @Inject()(metrics: Metrics){
 
-object MetricsService extends MetricsService with MicroserviceMetrics{
+  val registry = metrics.defaultRegistry
 
   val incrementCounters = Map(
-    APITypes.Summary -> metrics.defaultRegistry.counter("spsummary-counter"),
-    APITypes.NIRecord -> metrics.defaultRegistry.counter("nirecord-counter"),
-    APITypes.Liabilities -> metrics.defaultRegistry.counter("liabilities-counter")
+    APITypes.Summary -> registry.counter("spsummary-counter"),
+    APITypes.NIRecord -> registry.counter("nirecord-counter"),
+    APITypes.Liabilities -> registry.counter("liabilities-counter")
   )
 
   val timers = Map(
-    APITypes.Summary -> metrics.defaultRegistry.timer("summary-response-timer"),
-    APITypes.NIRecord -> metrics.defaultRegistry.timer("nirecord-response-timer"),
-    APITypes.Liabilities -> metrics.defaultRegistry.timer("liabilities-response-timer")
+    APITypes.Summary -> registry.timer("summary-response-timer"),
+    APITypes.NIRecord -> registry.timer("nirecord-response-timer"),
+    APITypes.Liabilities -> registry.timer("liabilities-response-timer")
   )
 
   val failedCounters = Map(
-    APITypes.Summary -> metrics.defaultRegistry.counter("summary-failed-counter"),
-    APITypes.NIRecord -> metrics.defaultRegistry.counter("nirecord-failed-counter"),
-    APITypes.Liabilities -> metrics.defaultRegistry.counter("liabilities-failed-counter")
+    APITypes.Summary -> registry.counter("summary-failed-counter"),
+    APITypes.NIRecord -> registry.counter("nirecord-failed-counter"),
+    APITypes.Liabilities -> registry.counter("liabilities-failed-counter")
   )
 
-  override def startTimer(api: APITypes): Context = timers(api).time()
-  override def incrementFailedCounter(api: APITypes): Unit = failedCounters(api).inc()
-  override def incrementCounter(api: APITypes): Unit = incrementCounters(api).inc()
+  def startTimer(api: APITypes): Context = timers(api).time()
+  def incrementFailedCounter(api: APITypes): Unit = failedCounters(api).inc()
+  def incrementCounter(api: APITypes): Unit = incrementCounters(api).inc()
 
-  val gapsMeter = metrics.defaultRegistry.histogram("gaps")
-  val payableGapsMeter = metrics.defaultRegistry.histogram("payable-gaps")
-  val pre75YearsMeter = metrics.defaultRegistry.histogram("pre75-years")
-  val qualifyingYearsMeter = metrics.defaultRegistry.histogram("qualifying-years")
+  val gapsMeter = registry.histogram("gaps")
+  val payableGapsMeter = registry.histogram("payable-gaps")
+  val pre75YearsMeter = registry.histogram("pre75-years")
+  val qualifyingYearsMeter = registry.histogram("qualifying-years")
 
-  override def niRecord(gaps: Int, payableGaps: Int, pre75Years: Int, qualifyingYears: Int): Unit = {
+  def niRecord(gaps: Int, payableGaps: Int, pre75Years: Int, qualifyingYears: Int): Unit = {
     gapsMeter.update(gaps)
     payableGapsMeter.update(payableGaps)
     pre75YearsMeter.update(pre75Years)
@@ -73,16 +63,16 @@ object MetricsService extends MetricsService with MicroserviceMetrics{
   }
 
   val exclusionMeters: Map[Exclusion, Counter] = Map(
-    Exclusion.Dead -> metrics.defaultRegistry.counter("exclusion-dead"),
-    Exclusion.IsleOfMan -> metrics.defaultRegistry.counter("exclusion-isle-of-man"),
-    Exclusion.ManualCorrespondenceIndicator -> metrics.defaultRegistry.counter("exclusion-manual-correspondence")
+    Exclusion.Dead -> registry.counter("exclusion-dead"),
+    Exclusion.IsleOfMan -> registry.counter("exclusion-isle-of-man"),
+    Exclusion.ManualCorrespondenceIndicator -> registry.counter("exclusion-manual-correspondence")
   )
 
-  override def exclusion(exclusion: Exclusion): Unit = exclusionMeters(exclusion).inc()
+  def exclusion(exclusion: Exclusion): Unit = exclusionMeters(exclusion).inc()
 
-  override def cacheRead(): Unit = metrics.defaultRegistry.meter("cache-read").mark
-  override def cacheReadFound(): Unit = metrics.defaultRegistry.meter("cache-read-found").mark
-  override def cacheReadNotFound(): Unit = metrics.defaultRegistry.meter("cache-read-not-found").mark
-  override def cacheWritten(): Unit = metrics.defaultRegistry.meter("cache-written").mark
-  override def startCitizenDetailsTimer(): Context = metrics.defaultRegistry.timer("citizen-details-timer").time()
+  def cacheRead(): Unit = registry.meter("cache-read").mark
+  def cacheReadFound(): Unit = registry.meter("cache-read-found").mark
+  def cacheReadNotFound(): Unit = registry.meter("cache-read-not-found").mark
+  def cacheWritten(): Unit = registry.meter("cache-written").mark
+  def startCitizenDetailsTimer(): Context = registry.timer("citizen-details-timer").time()
 }

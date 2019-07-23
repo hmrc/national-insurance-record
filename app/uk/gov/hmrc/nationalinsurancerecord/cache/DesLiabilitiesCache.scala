@@ -17,6 +17,7 @@
 package uk.gov.hmrc.nationalinsurancerecord.cache
 
 import org.joda.time.DateTime
+import play.api.Play
 import play.api.libs.json.Json
 import play.modules.reactivemongo.MongoDbConnection
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
@@ -39,7 +40,7 @@ object DesLiabilitiesCache {
 object DesLiabilitiesRepository extends MongoDbConnection {
 
   private lazy val cacheService = new CachingMongoService[DesLiabilitiesCache, DesLiabilities](
-    DesLiabilitiesCache.formats, DesLiabilitiesCache.apply, APITypes.Liabilities, ApplicationConfig, MetricsService
+    DesLiabilitiesCache.formats, DesLiabilitiesCache.apply, APITypes.Liabilities, ApplicationConfig, Play.current.injector.instanceOf[MetricsService]
   )
 
   def apply(): CachingMongoService[DesLiabilitiesCache, DesLiabilities] = cacheService

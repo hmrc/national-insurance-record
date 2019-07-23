@@ -48,7 +48,7 @@ object DesConnector extends DesConnector with ServicesConfig {
   override val liabilitiesRepository: CachingService[DesLiabilitiesCache, DesLiabilities] = DesLiabilitiesRepository()
   override val nirecordRepository: CachingService[DesNIRecordCache, DesNIRecord] = DesNIRecordRepository()
 
-  override def metrics: MetricsService = MetricsService
+  override def metrics: MetricsService = Play.current.injector.instanceOf[MetricsService]
   override protected def mode: Mode = Play.current.mode
   override protected def runModeConfiguration: Configuration = Play.current.configuration
 }

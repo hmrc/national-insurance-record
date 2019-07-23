@@ -32,7 +32,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpGet, HttpResponse, Upstream4xxRespon
 object CitizenDetailsConnector extends CitizenDetailsConnector with ServicesConfig {
   override val serviceUrl = baseUrl("citizen-details")
   override val http: HttpGet = new HttpGet with WSHttp
-  override val metrics: MetricsService = MetricsService
+  override val metrics: MetricsService = Play.current.injector.instanceOf[MetricsService]
   override protected def mode: Mode = Play.current.mode
   override protected def runModeConfiguration: Configuration = Play.current.configuration
 }
