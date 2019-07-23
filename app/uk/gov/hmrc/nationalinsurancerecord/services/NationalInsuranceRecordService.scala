@@ -18,6 +18,7 @@ package uk.gov.hmrc.nationalinsurancerecord.services
 
 import java.util.TimeZone
 
+import com.google.inject.Inject
 import org.joda.time.{DateTimeZone, LocalDate}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
@@ -26,16 +27,16 @@ import uk.gov.hmrc.nationalinsurancerecord.domain.Exclusion.Exclusion
 import uk.gov.hmrc.nationalinsurancerecord.domain._
 import uk.gov.hmrc.nationalinsurancerecord.domain.des.{DesLiability, DesNITaxYear}
 import uk.gov.hmrc.nationalinsurancerecord.util.NIRecordConstants
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import services.TaxYearResolver
 
-class NationalInsuranceRecordService {
+class NationalInsuranceRecordService @Inject()(des: DesConnector,
+                                               citizenDetailsService: CitizenDetailsService,
+                                               metrics: MetricsService) {
 
-  lazy val des: DesConnector = DesConnector
-  lazy val citizenDetailsService: CitizenDetailsService = CitizenDetailsService
   val now: LocalDate = LocalDate.now(DateTimeZone.forTimeZone(TimeZone.getTimeZone("Europe/London")))
-  lazy val metrics: MetricsService = MetricsService
 
   def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceRecord]] = {
 

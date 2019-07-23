@@ -21,7 +21,7 @@ import uk.gov.hmrc.nationalinsurancerecord.domain.TaxYear
 
 trait Links {
 
-  def context: String
+  val context: String
 
   private def createLink(endpointUrl: String) = if(context.isEmpty) endpointUrl else s"/$context$endpointUrl"
 

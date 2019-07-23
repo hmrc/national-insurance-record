@@ -100,11 +100,11 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
   "NationalInsuranceRecordService with a HOD Connection" when {
 
     val mockMetrics = mock[MetricsService]
-    val service: NationalInsuranceRecordService = new NationalInsuranceRecordService {
-      override lazy val des: DesConnector = mock[DesConnector]
-      override lazy val citizenDetailsService: CitizenDetailsService = mock[CitizenDetailsService]
+    val mockDesConnector = mock[DesConnector]
+    val mockCitizenDetailsService = mock[CitizenDetailsService]
+
+    val service: NationalInsuranceRecordService = new NationalInsuranceRecordService(mockDesConnector, mockCitizenDetailsService, mockMetrics) {
       override val now: LocalDate = new LocalDate(2017, 1, 16)
-      override lazy val metrics: MetricsService = mockMetrics
     }
 
 
@@ -112,17 +112,17 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
 
       val desLiabilities = DesLiabilities(List(DesLiability(Some(14))))
       val nino = generateNino()
-      when(service.citizenDetailsService.checkManualCorrespondenceIndicator(nino)).thenReturn(Future.successful(false))
-      when(service.des.getNationalInsuranceRecord(nino)).thenReturn(Future.successful(niRecordDES))
-      when(service.des.getLiabilities(nino)).thenReturn(Future.successful(desLiabilities))
-      when(service.des.getSummary(nino)).thenReturn(Future.successful(
+      when(mockCitizenDetailsService.checkManualCorrespondenceIndicator(nino)).thenReturn(Future.successful(false))
+      when(mockDesConnector.getNationalInsuranceRecord(nino)).thenReturn(Future.successful(niRecordDES))
+      when(mockDesConnector.getLiabilities(nino)).thenReturn(Future.successful(desLiabilities))
+      when(mockDesConnector.getSummary(nino)).thenReturn(Future.successful(
         DesSummary(false, None, Some(new LocalDate(2016,4,5)), Some(new LocalDate(1951, 4 , 5)), Some(2017))
       ))
 
 
-      when(service.des.getNationalInsuranceRecord(nino)).thenReturn(Future.successful(niRecordDES))
-      when(service.des.getLiabilities(nino)).thenReturn(Future.successful(desLiabilities))
-      when(service.des.getSummary(nino)).thenReturn(Future.successful(
+      when(mockDesConnector.getNationalInsuranceRecord(nino)).thenReturn(Future.successful(niRecordDES))
+      when(mockDesConnector.getLiabilities(nino)).thenReturn(Future.successful(desLiabilities))
+      when(mockDesConnector.getSummary(nino)).thenReturn(Future.successful(
         DesSummary(false, None, Some(new LocalDate(2016,4,5)), Some(new LocalDate(1951,4 ,5)), Some(2017))
       ))
 
@@ -289,16 +289,13 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
 
   "NationalInsuranceRecordService exclusion with HOD connection" should {
     val mockMetrics = mock[MetricsService]
-    val service: NationalInsuranceRecordService = new NationalInsuranceRecordService {
-      override lazy val des: DesConnector = mock[DesConnector]
-      override lazy val citizenDetailsService: CitizenDetailsService = {
-        mock[CitizenDetailsService]
-      }
-      override val now: LocalDate = {
-        new LocalDate(2017, 1, 16)
-      }
+    val mockDesConnector = mock[DesConnector]
+    val mockCitizenDetailsService = mock[CitizenDetailsService]
 
-      override lazy val metrics: MetricsService = mockMetrics
+    val service: NationalInsuranceRecordService = new NationalInsuranceRecordService(mockDesConnector, mockCitizenDetailsService, mockMetrics) {
+
+      override val now: LocalDate = new LocalDate(2017, 1, 16)
+
     }
 
     "NI Summary with exclusions" should {
@@ -314,10 +311,10 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
       val nino = generateNino()
 
       reset(mockMetrics)
-      when(service.citizenDetailsService.checkManualCorrespondenceIndicator(nino)).thenReturn(Future.successful(false))
-      when(service.des.getNationalInsuranceRecord(nino)).thenReturn(Future.successful(niRecordDES))
-      when(service.des.getLiabilities(nino)).thenReturn(Future.successful(liabilities))
-      when(service.des.getSummary(nino)).thenReturn(Future.successful(summary))
+      when(mockCitizenDetailsService.checkManualCorrespondenceIndicator(nino)).thenReturn(Future.successful(false))
+      when(mockDesConnector.getNationalInsuranceRecord(nino)).thenReturn(Future.successful(niRecordDES))
+      when(mockDesConnector.getLiabilities(nino)).thenReturn(Future.successful(liabilities))
+      when(mockDesConnector.getSummary(nino)).thenReturn(Future.successful(summary))
 
       lazy val niRecordF: Future[ExclusionResponse] = service.getNationalInsuranceRecord(nino).left.get
 

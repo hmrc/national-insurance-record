@@ -16,13 +16,14 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.controllers
 
-import com.google.inject.Inject
+import com.google.inject.{Inject, Singleton}
 import play.api.http.HttpErrorHandler
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.nationalinsurancerecord.config.{APIAccessConfig, AppContext}
 import uk.gov.hmrc.nationalinsurancerecord.domain.APIAccess
 import uk.gov.hmrc.nationalinsurancerecord.views._
 
+@Singleton
 class DocumentationController @Inject()(errorHandler: HttpErrorHandler, appContext: AppContext)
   extends uk.gov.hmrc.api.controllers.DocumentationController(errorHandler = errorHandler) {
 

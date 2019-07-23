@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.controllers
 
-import com.google.inject.Inject
+import com.google.inject.{Inject, Singleton}
 import play.api.hal.HalResource
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
@@ -29,8 +29,10 @@ import uk.gov.hmrc.nationalinsurancerecord.events.{NationalInsuranceExclusion, N
 import uk.gov.hmrc.nationalinsurancerecord.services.NationalInsuranceRecordService
 import uk.gov.hmrc.play.microservice.controller.BaseController
 import uk.gov.hmrc.nationalinsurancerecord.domain.NationalInsuranceTaxYear
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
+@Singleton
 class NationalInsuranceRecordController @Inject()(nationalInsuranceRecordService: NationalInsuranceRecordService,
                                                   customAuditConnector: CustomAuditConnector, appContext: AppContext) extends BaseController
   with HeaderValidator
@@ -38,8 +40,8 @@ class NationalInsuranceRecordController @Inject()(nationalInsuranceRecordService
   with HalSupport
   with Links {
 
-  override val app: String = "National-Insurance-Record"
-  override lazy val context: String = appContext.apiGatewayContext
+  override val app: String = appContext.appName
+  override val context: String = appContext.apiGatewayContext
 
   private def halResourceWithTaxYears(nino: Nino, content: JsValue, selfLink: String, years: List[NationalInsuranceTaxYear]): HalResource = {
     halResourceSelfLink(
