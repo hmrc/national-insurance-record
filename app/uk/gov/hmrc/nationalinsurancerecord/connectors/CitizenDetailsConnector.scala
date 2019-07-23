@@ -22,7 +22,7 @@ import play.api.http.Status._
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{HeaderCarrier, HttpGet, HttpResponse, Upstream4xxResponse}
-import uk.gov.hmrc.nationalinsurancerecord.WSHttp
+import uk.gov.hmrc.nationalinsurancerecord.config.WSHttp
 import uk.gov.hmrc.nationalinsurancerecord.services.MetricsService
 import uk.gov.hmrc.play.config.ServicesConfig
 

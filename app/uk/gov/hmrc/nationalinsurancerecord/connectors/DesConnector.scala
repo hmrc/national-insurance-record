@@ -18,14 +18,14 @@ package uk.gov.hmrc.nationalinsurancerecord.connectors
 
 import com.google.inject.Inject
 import play.api.Mode.Mode
-import play.api.{Configuration, Environment, Logger, Play}
 import play.api.data.validation.ValidationError
 import play.api.libs.json.{Format, JsPath, OFormat, Reads}
+import play.api.{Configuration, Environment, Logger}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.http.{HeaderCarrier, HttpGet, HttpReads, HttpResponse}
-import uk.gov.hmrc.nationalinsurancerecord.WSHttp
 import uk.gov.hmrc.nationalinsurancerecord.cache._
+import uk.gov.hmrc.nationalinsurancerecord.config.WSHttp
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.des.{DesLiabilities, DesNIRecord, DesSummary}
@@ -39,14 +39,17 @@ import scala.util.{Failure, Success, Try}
 
 class DesConnector @Inject()(environment: Environment,
                              configuration: Configuration,
+                             desSummaryRepository: DesSummaryRepository,
+                             desNIRecordRepository: DesNIRecordRepository,
+                             desLiabilitiesRepository: DesLiabilitiesRepository,
                              metrics: MetricsService) extends ServicesConfig {
 
   val serviceUrl: String = baseUrl("des-hod")
   val authToken: String = s"Bearer ${getConfString("des-hod.authorizationToken", "")}"
   val desEnvironment: String = getConfString("des-hod.environment", "")
-  val summaryRepository: CachingService[DesSummaryCache, DesSummary] = DesSummaryRepository()
-  val liabilitiesRepository: CachingService[DesLiabilitiesCache, DesLiabilities] = DesLiabilitiesRepository()
-  val nirecordRepository: CachingService[DesNIRecordCache, DesNIRecord] = DesNIRecordRepository()
+  val summaryRepository: CachingService[DesSummaryCache, DesSummary] = desSummaryRepository()
+  val liabilitiesRepository: CachingService[DesLiabilitiesCache, DesLiabilities] = desLiabilitiesRepository()
+  val nirecordRepository: CachingService[DesNIRecordCache, DesNIRecord] = desNIRecordRepository()
 
   override protected def mode: Mode = environment.mode
   override protected def runModeConfiguration: Configuration = configuration

@@ -16,15 +16,12 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.config
 
-import play.api.http.{HttpErrorHandler, LazyHttpErrorHandler}
 import play.api.inject.{Binding, Module}
 import play.api.{Configuration, Environment}
-import uk.gov.hmrc.nationalinsurancerecord.connectors.{CitizenDetailsConnector, DesConnector}
-import uk.gov.hmrc.nationalinsurancerecord.services.{CitizenDetailsService, MetricsService}
 
 class NIModule extends Module{
     override def bindings(environment: Environment, configuration: Configuration): Seq[Binding[_]] = Seq(
-//      bind[HttpErrorHandler].to(LazyHttpErrorHandler),
+
 
     )
   }
