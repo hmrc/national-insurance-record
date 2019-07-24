@@ -236,6 +236,7 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
   val liabilities: DesLiabilities = testLiabilitiesJson.as[DesLiabilities]
   val mockMetrics: MetricsService = mock[MetricsService]
   val mockTimerContext: Timer.Context = mock[Timer.Context]
+  val appConfig = app.injector.instanceOf[StubApplicationConfig]
 
   "DesConnector - No Caching" should {
     val connector: DesConnector = new DesConnector(
@@ -244,7 +245,9 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
       mockSummaryRepo,
       mockNIRecordRepo,
       mockLiabilitiesRepo,
-      mockMetrics) {
+      mockMetrics,
+      appConfig
+    ) {
       override val serviceUrl: String = ""
       override val authToken: String = "auth"
       override val desEnvironment: String = "env"
@@ -446,13 +449,16 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
   }
 
   "DesConnector - Caching" should {
+    val appConfig = app.injector.instanceOf[StubApplicationConfig]
+
     val connector: DesConnector = new DesConnector(
       app.injector.instanceOf[Environment],
       app.configuration,
       mockSummaryRepo,
       mockNIRecordRepo,
       mockLiabilitiesRepo,
-      mockMetrics) {
+      mockMetrics,
+      appConfig) {
       override val serviceUrl: String = ""
       override val authToken: String = "auth"
       override val desEnvironment: String = "env"

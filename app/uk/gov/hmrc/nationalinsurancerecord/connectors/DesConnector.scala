@@ -25,7 +25,7 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.http.{HeaderCarrier, HttpGet, HttpReads, HttpResponse}
 import uk.gov.hmrc.nationalinsurancerecord.cache._
-import uk.gov.hmrc.nationalinsurancerecord.config.WSHttp
+import uk.gov.hmrc.nationalinsurancerecord.config.{ApplicationConfig, WSHttp}
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.des.{DesLiabilities, DesNIRecord, DesSummary}
@@ -42,11 +42,12 @@ class DesConnector @Inject()(environment: Environment,
                              desSummaryRepository: DesSummaryRepository,
                              desNIRecordRepository: DesNIRecordRepository,
                              desLiabilitiesRepository: DesLiabilitiesRepository,
-                             metrics: MetricsService) extends ServicesConfig {
+                             metrics: MetricsService,
+                             applicationConfig: ApplicationConfig) extends ServicesConfig {
 
   val serviceUrl: String = baseUrl("des-hod")
-  val authToken: String = s"Bearer ${getConfString("des-hod.authorizationToken", "")}"
-  val desEnvironment: String = getConfString("des-hod.environment", "")
+  val authToken: String = applicationConfig.authorization
+  val desEnvironment: String = applicationConfig.desEnvironment
   val summaryRepository: CachingService[DesSummaryCache, DesSummary] = desSummaryRepository()
   val liabilitiesRepository: CachingService[DesLiabilitiesCache, DesLiabilities] = desLiabilitiesRepository()
   val nirecordRepository: CachingService[DesNIRecordCache, DesNIRecord] = desNIRecordRepository()

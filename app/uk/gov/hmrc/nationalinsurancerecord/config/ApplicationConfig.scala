@@ -22,4 +22,8 @@ import play.api.Configuration
 @Singleton
 class ApplicationConfig @Inject()(configuration: Configuration) {
   val responseCacheTTL = configuration.getInt("mongodb.responseTTL").getOrElse(throw new RuntimeException("MongoDB TTL is not configured"))
+
+  lazy val authorization: String = s"Bearer ${configuration.getString("microservice.services.des-hod.authorizationToken").getOrElse("Local")}"
+
+  lazy val desEnvironment: String = configuration.getString("microservice.services.des-hod.environment").getOrElse("Local")
 }
