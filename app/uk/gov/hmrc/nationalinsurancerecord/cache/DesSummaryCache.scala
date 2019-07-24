@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.cache
 
-import com.google.inject.Inject
+import com.google.inject.{Inject, Singleton}
 import org.joda.time.DateTime
 import play.api.libs.json.Json
 import play.modules.reactivemongo.ReactiveMongoComponent
@@ -38,6 +38,7 @@ object DesSummaryCache {
   implicit def formats = Json.format[DesSummaryCache]
 }
 
+@Singleton
 class DesSummaryRepository @Inject()(implicit val reactiveMongoComponent: ReactiveMongoComponent, metricsService: MetricsService) {
 
   implicit val db: () => DefaultDB = reactiveMongoComponent.mongoConnector.db
