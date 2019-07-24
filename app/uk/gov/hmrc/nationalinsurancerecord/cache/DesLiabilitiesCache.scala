@@ -38,6 +38,7 @@ object DesLiabilitiesCache {
   implicit def formats = Json.format[DesLiabilitiesCache]
 }
 
+//TODO: look to extend CachingMongoService?
 @Singleton
 class DesLiabilitiesRepository @Inject()(reactiveMongoComponent: ReactiveMongoComponent,
                                          metricsService: MetricsService,

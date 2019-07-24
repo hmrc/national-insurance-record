@@ -38,6 +38,7 @@ object DesSummaryCache {
   implicit def formats = Json.format[DesSummaryCache]
 }
 
+//TODO: look to extend CachingMongoService?
 @Singleton
 class DesSummaryRepository @Inject()(reactiveMongoComponent: ReactiveMongoComponent,
                                      metricsService: MetricsService,
