@@ -29,6 +29,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class LiabilitiesRespositorySpec extends NationalInsuranceRecordUnitSpec with OneServerPerSuite with MongoSpecSupport with MockitoSugar {
   // scalastyle:off magic.number
 
+  val stubApplicationConfig = app.injector.instanceOf[StubApplicationConfig]
   val testLiablitiesModel = DesLiabilities(List(DesLiability(Some(15)), DesLiability(Some(100))))
 
   "LiabilitiesRepository" should {
@@ -36,7 +37,7 @@ class LiabilitiesRespositorySpec extends NationalInsuranceRecordUnitSpec with On
     val nino = generateNino()
     val excluedNino = generateNino()
     val service = new CachingMongoService[DesLiabilitiesCache, DesLiabilities](DesLiabilitiesCache.formats,
-      DesLiabilitiesCache.apply, APITypes.Liabilities, StubApplicationConfig, mock[MetricsService])
+      DesLiabilitiesCache.apply, APITypes.Liabilities, stubApplicationConfig, mock[MetricsService])
 
     "persist a Liabilities in the repo" in {
 

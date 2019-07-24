@@ -17,8 +17,8 @@
 package uk.gov.hmrc.nationalinsurancerecord.events
 
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.nationalinsurancerecord.domain.Exclusion
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.nationalinsurancerecord.domain.Exclusion
 
 object NationalInsuranceExclusion{
   def apply(nino: Nino, exclusionReasons: List[Exclusion.Exclusion])(implicit hc: HeaderCarrier): NationalInsuranceExclusion =

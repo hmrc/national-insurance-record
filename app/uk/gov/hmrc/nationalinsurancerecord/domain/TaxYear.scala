@@ -16,10 +16,11 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.domain
 
-import scala.util.matching.Regex
-import scala.util.matching.Regex.Match
 import play.api.libs.json.{Reads, Writes}
 import uk.gov.hmrc.domain.{SimpleName, SimpleObjectReads, SimpleObjectWrites, TaxIdentifier}
+
+import scala.util.matching.Regex
+import scala.util.matching.Regex.Match
 
 case class TaxYear(taxYear: String) extends TaxIdentifier with SimpleName {
   if(!TaxYear.isValid(taxYear)) throw new IllegalArgumentException

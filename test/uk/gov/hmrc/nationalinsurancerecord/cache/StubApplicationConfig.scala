@@ -16,8 +16,10 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.cache
 
+import com.google.inject.Inject
+import play.api.Configuration
 import uk.gov.hmrc.nationalinsurancerecord.config.ApplicationConfig
 
-object StubApplicationConfig extends ApplicationConfig {
+class StubApplicationConfig @Inject()(configuration: Configuration) extends ApplicationConfig(configuration) {
   override val responseCacheTTL: Int = 60
 }

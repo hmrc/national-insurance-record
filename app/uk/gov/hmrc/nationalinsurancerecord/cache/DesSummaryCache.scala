@@ -39,12 +39,14 @@ object DesSummaryCache {
 }
 
 @Singleton
-class DesSummaryRepository @Inject()(implicit val reactiveMongoComponent: ReactiveMongoComponent, metricsService: MetricsService) {
+class DesSummaryRepository @Inject()(reactiveMongoComponent: ReactiveMongoComponent,
+                                     metricsService: MetricsService,
+                                     applicationConfig: ApplicationConfig) {
 
   implicit val db: () => DefaultDB = reactiveMongoComponent.mongoConnector.db
 
   private lazy val cacheService = new CachingMongoService[DesSummaryCache, DesSummary](
-    DesSummaryCache.formats, DesSummaryCache.apply, APITypes.Summary, ApplicationConfig, metricsService
+    DesSummaryCache.formats, DesSummaryCache.apply, APITypes.Summary, applicationConfig, metricsService
   )
 
   def apply(): CachingMongoService[DesSummaryCache, DesSummary] = cacheService

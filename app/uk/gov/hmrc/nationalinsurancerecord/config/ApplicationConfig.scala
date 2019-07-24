@@ -16,13 +16,10 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.config
 
-import play.api.Play._
-import uk.gov.hmrc.play.config.ServicesConfig
+import com.google.inject.{Inject, Singleton}
+import play.api.Configuration
 
-trait ApplicationConfig {
-  val responseCacheTTL: Int
-}
-
-object ApplicationConfig extends ApplicationConfig {
-  override val responseCacheTTL = configuration.getInt("mongodb.responseTTL").getOrElse(throw new RuntimeException("MongoDB TTL is not configured"))
+@Singleton
+class ApplicationConfig @Inject()(configuration: Configuration) {
+  val responseCacheTTL = configuration.getInt("mongodb.responseTTL").getOrElse(throw new RuntimeException("MongoDB TTL is not configured"))
 }

@@ -41,10 +41,11 @@ class SummaryRepositorySpec extends NationalInsuranceRecordUnitSpec with OneAppP
   )
 
   "SummaryMongoService" should {
+    val stubApplicationConfig = app.injector.instanceOf[StubApplicationConfig]
     val mockMetrics = mock[MetricsService]
     val nino = generateNino()
     val service = new CachingMongoService[DesSummaryCache, DesSummary](DesSummaryCache.formats, DesSummaryCache.apply,
-      APITypes.Summary, StubApplicationConfig, mockMetrics) {
+      APITypes.Summary, stubApplicationConfig, mockMetrics) {
       override val timeToLive = 30
     }
 

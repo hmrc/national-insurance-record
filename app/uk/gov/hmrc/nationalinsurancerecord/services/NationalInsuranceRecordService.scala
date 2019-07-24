@@ -20,6 +20,7 @@ import java.util.TimeZone
 
 import com.google.inject.Inject
 import org.joda.time.{DateTimeZone, LocalDate}
+import services.TaxYearResolver
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
 import uk.gov.hmrc.nationalinsurancerecord.connectors.DesConnector
@@ -30,7 +31,6 @@ import uk.gov.hmrc.nationalinsurancerecord.util.NIRecordConstants
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import services.TaxYearResolver
 
 class NationalInsuranceRecordService @Inject()(des: DesConnector,
                                                citizenDetailsService: CitizenDetailsService,
