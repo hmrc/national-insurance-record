@@ -33,11 +33,13 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
 class NationalInsuranceRecordController @Inject()(nationalInsuranceRecordService: NationalInsuranceRecordService,
-                                                  customAuditConnector: CustomAuditConnector, appContext: AppContext) extends BaseController
-  with HeaderValidator
-  with ErrorHandling
-  with HalSupport
-  with Links {
+                                                  customAuditConnector: CustomAuditConnector,
+                                                  appContext: AppContext
+                                                 ) extends BaseController
+                                                    with HeaderValidator
+                                                    with ErrorHandling
+                                                    with HalSupport
+                                                    with Links {
 
   override val app: String = appContext.appName
   override val context: String = appContext.apiGatewayContext
