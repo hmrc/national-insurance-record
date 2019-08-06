@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nationalinsurancerecord
+package uk.gov.hmrc.nationalinsurancerecord.config
 
 import akka.actor.ActorSystem
 import com.typesafe.config.Config

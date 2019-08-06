@@ -17,20 +17,19 @@
 package uk.gov.hmrc.nationalinsurancerecord.connectors
 
 import com.codahale.metrics.Timer
-import org.mockito.{Matchers, Mockito}
 import org.mockito.Mockito._
+import org.mockito.{Matchers, Mockito}
 import org.scalatest.BeforeAndAfter
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
+import play.api.Environment
 import play.api.test.FakeRequest
+import uk.gov.hmrc.http._
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
-import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.services.MetricsService
-import uk.gov.hmrc.play.http._
-import scala.concurrent.ExecutionContext.Implicits.global
+
 import scala.concurrent.Future
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpGet, HttpResponse, InternalServerException, NotFoundException, Upstream4xxResponse }
 
 class CitizenDetailsConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar with BeforeAndAfter with ScalaFutures with OneAppPerSuite {
   // scalastyle:off magic.number
@@ -40,10 +39,9 @@ class CitizenDetailsConnectorSpec extends NationalInsuranceRecordUnitSpec with M
   implicit val hc = HeaderCarrier()
   val mockMetrics: MetricsService = mock[MetricsService]
   val mockTimerContext = mock[Timer.Context]
-  val citizenDetailsConnector = new CitizenDetailsConnector {
+  val citizenDetailsConnector = new CitizenDetailsConnector(app.injector.instanceOf[Environment], app.configuration, mockMetrics) {
     override val serviceUrl: String = "/"
     override val http: HttpGet = mock[HttpGet]
-    override val metrics: MetricsService = mockMetrics
   }
 
   "CitizenDetailsConnector" should {

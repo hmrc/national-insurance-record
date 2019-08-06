@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.cache
 
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneServerPerSuite
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.domain.Nino
@@ -110,9 +110,10 @@ class NIRecordRepositorySpec extends NationalInsuranceRecordUnitSpec with OneSer
   val excludedNino: Nino = generateNino()
 
   "NationalInsuranceRepository" should {
+    val stubApplicationConfig = app.injector.instanceOf[StubApplicationConfig]
 
     val service = new CachingMongoService[DesNIRecordCache, DesNIRecord](DesNIRecordCache.formats, DesNIRecordCache.apply,
-      APITypes.NIRecord, StubApplicationConfig, mock[MetricsService])
+      APITypes.NIRecord, stubApplicationConfig, mock[MetricsService])
 
     "persist a NIRecord in the repo" in {
       val resultF = service.insertByNino(nino, niRecord)

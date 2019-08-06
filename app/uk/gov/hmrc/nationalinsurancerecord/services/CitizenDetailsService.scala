@@ -16,21 +16,16 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.services
 
-import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.nationalinsurancerecord.connectors.CitizenDetailsConnector
+import com.google.inject.Inject
 import play.api.http.Status.LOCKED
+import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.nationalinsurancerecord.connectors.CitizenDetailsConnector
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import uk.gov.hmrc.http.HeaderCarrier
 
-object CitizenDetailsService extends CitizenDetailsService {
-  override val citizenDetailsConnector: CitizenDetailsConnector = CitizenDetailsConnector
-}
-
-
-trait CitizenDetailsService {
-
-  val citizenDetailsConnector: CitizenDetailsConnector
+class CitizenDetailsService @Inject()(citizenDetailsConnector: CitizenDetailsConnector) {
 
   def checkManualCorrespondenceIndicator(nino: Nino)(implicit hc: HeaderCarrier): Future[Boolean] = {
     citizenDetailsConnector.retrieveMCIStatus(nino).map(status => status == LOCKED)

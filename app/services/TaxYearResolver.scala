@@ -36,7 +36,7 @@ import uk.gov.hmrc.time.DateTimeUtils
 
 trait TaxYearResolver {
 
-  import org.joda.time.{Interval, LocalDate, DateTimeZone, DateTime}
+  import org.joda.time.{DateTime, DateTimeZone, Interval, LocalDate}
 
   lazy val now: () => DateTime = ???
 

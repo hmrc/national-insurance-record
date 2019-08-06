@@ -16,22 +16,33 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.controllers
 
+import com.google.inject.{Inject, Singleton}
 import play.api.hal.HalResource
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
 import uk.gov.hmrc.api.controllers.HeaderValidator
 import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.nationalinsurancerecord.config.AppContext
 import uk.gov.hmrc.nationalinsurancerecord.connectors.CustomAuditConnector
-import uk.gov.hmrc.nationalinsurancerecord.domain.{Exclusion, TaxYear}
+import uk.gov.hmrc.nationalinsurancerecord.domain.{Exclusion, NationalInsuranceTaxYear, TaxYear}
 import uk.gov.hmrc.nationalinsurancerecord.events.{NationalInsuranceExclusion, NationalInsuranceRecord}
 import uk.gov.hmrc.nationalinsurancerecord.services.NationalInsuranceRecordService
 import uk.gov.hmrc.play.microservice.controller.BaseController
-import uk.gov.hmrc.nationalinsurancerecord.domain.NationalInsuranceTaxYear
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
-trait NationalInsuranceRecordController extends BaseController with HeaderValidator with ErrorHandling with HalSupport with Links {
-  val nationalInsuranceRecordService: NationalInsuranceRecordService
-  val customAuditConnector: CustomAuditConnector
+import scala.concurrent.ExecutionContext.Implicits.global
+
+@Singleton
+class NationalInsuranceRecordController @Inject()(nationalInsuranceRecordService: NationalInsuranceRecordService,
+                                                  customAuditConnector: CustomAuditConnector,
+                                                  appContext: AppContext
+                                                 ) extends BaseController
+                                                    with HeaderValidator
+                                                    with ErrorHandling
+                                                    with HalSupport
+                                                    with Links {
+
+  override val app: String = appContext.appName
+  override val context: String = appContext.apiGatewayContext
 
   private def halResourceWithTaxYears(nino: Nino, content: JsValue, selfLink: String, years: List[NationalInsuranceTaxYear]): HalResource = {
     halResourceSelfLink(

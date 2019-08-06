@@ -16,23 +16,15 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.config
 
+import com.google.inject.Inject
 import play.api.Configuration
-import play.api.Play._
-import uk.gov.hmrc.play.config.ServicesConfig
 
-trait AppContext {
-  def appName: String
-  def apiGatewayContext: String
-  def access: Option[Configuration]
-  def status: Option[String]
-  def connectToHOD: Boolean
-}
 
-object AppContext extends AppContext{
-  lazy val appName = current.configuration.getString("appName").getOrElse(throw new RuntimeException("appName is not configured"))
-  lazy val apiGatewayContext = current.configuration.getString("api.gateway.context")
+class AppContext @Inject()(configuration: Configuration) {
+  lazy val appName = configuration.getString("appName").getOrElse(throw new RuntimeException("appName is not configured"))
+  lazy val apiGatewayContext = configuration.getString("api.gateway.context")
     .getOrElse(throw new RuntimeException("api.gateway.context is not configured"))
-  lazy val access = current.configuration.getConfig("api.access")
-  lazy val status = current.configuration.getString("api.status")
-  lazy val connectToHOD = current.configuration.getBoolean("feature.connectToHOD").getOrElse(false)
+  lazy val access = configuration.getConfig("api.access")
+  lazy val status = configuration.getString("api.status")
+  lazy val connectToHOD = configuration.getBoolean("feature.connectToHOD").getOrElse(false)
 }

@@ -20,7 +20,7 @@ import org.joda.time.LocalDate
 import org.mockito.Mockito._
 import org.mockito.{Matchers, Mockito}
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.connectors.DesConnector
@@ -100,11 +100,11 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
   "NationalInsuranceRecordService with a HOD Connection" when {
 
     val mockMetrics = mock[MetricsService]
-    val service: NpsConnection = new NpsConnection {
-      override lazy val des: DesConnector = mock[DesConnector]
-      override lazy val citizenDetailsService: CitizenDetailsService = mock[CitizenDetailsService]
-      override lazy val now: LocalDate = new LocalDate(2017, 1, 16)
-      override def metrics: MetricsService = mockMetrics
+    val mockDesConnector = mock[DesConnector]
+    val mockCitizenDetailsService = mock[CitizenDetailsService]
+
+    val service: NationalInsuranceRecordService = new NationalInsuranceRecordService(mockDesConnector, mockCitizenDetailsService, mockMetrics) {
+      override val now: LocalDate = new LocalDate(2017, 1, 16)
     }
 
 
@@ -112,17 +112,17 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
 
       val desLiabilities = DesLiabilities(List(DesLiability(Some(14))))
       val nino = generateNino()
-      when(service.citizenDetailsService.checkManualCorrespondenceIndicator(nino)).thenReturn(Future.successful(false))
-      when(service.des.getNationalInsuranceRecord(nino)).thenReturn(Future.successful(niRecordDES))
-      when(service.des.getLiabilities(nino)).thenReturn(Future.successful(desLiabilities))
-      when(service.des.getSummary(nino)).thenReturn(Future.successful(
+      when(mockCitizenDetailsService.checkManualCorrespondenceIndicator(nino)).thenReturn(Future.successful(false))
+      when(mockDesConnector.getNationalInsuranceRecord(nino)).thenReturn(Future.successful(niRecordDES))
+      when(mockDesConnector.getLiabilities(nino)).thenReturn(Future.successful(desLiabilities))
+      when(mockDesConnector.getSummary(nino)).thenReturn(Future.successful(
         DesSummary(false, None, Some(new LocalDate(2016,4,5)), Some(new LocalDate(1951, 4 , 5)), Some(2017))
       ))
 
 
-      when(service.des.getNationalInsuranceRecord(nino)).thenReturn(Future.successful(niRecordDES))
-      when(service.des.getLiabilities(nino)).thenReturn(Future.successful(desLiabilities))
-      when(service.des.getSummary(nino)).thenReturn(Future.successful(
+      when(mockDesConnector.getNationalInsuranceRecord(nino)).thenReturn(Future.successful(niRecordDES))
+      when(mockDesConnector.getLiabilities(nino)).thenReturn(Future.successful(desLiabilities))
+      when(mockDesConnector.getSummary(nino)).thenReturn(Future.successful(
         DesSummary(false, None, Some(new LocalDate(2016,4,5)), Some(new LocalDate(1951,4 ,5)), Some(2017))
       ))
 
@@ -240,47 +240,47 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
 
     "calc pre75 years" should {
       "return 3 when the number of conts in 157 and the date of entry is 04/10/1972 and their date of birth is 04/10/1956" in {
-        NationalInsuranceRecordService.calcPre75QualifyingYears(
+        service.calcPre75QualifyingYears(
           157, Some(new LocalDate(1972, 10, 4)), new LocalDate(1956, 10, 4)
         ) shouldBe Some(3)
       }
       "return 8 when the number of conts in 408 and the date of entry is 08/01/1968 and their date of birth is 08/01/1952" in {
-        NationalInsuranceRecordService.calcPre75QualifyingYears(
+        service.calcPre75QualifyingYears(
           408, Some(new LocalDate(1968, 1, 8)), new LocalDate(1952, 1, 8)
         ) shouldBe Some(8)
       }
       "return 2 when the number of conts in 157 and the date of entry is 06/04/1973 and their date of birth is 04/10/1956" in {
-        NationalInsuranceRecordService.calcPre75QualifyingYears(
+        service.calcPre75QualifyingYears(
           157, Some(new LocalDate(1973, 4, 6)), new LocalDate(1956, 10, 4)
         ) shouldBe Some(2)
       }
       "return 1 when the number of conts in 157 and the date of entry is 06/04/1973 and their date of birth is 06/04/1958" in {
-        NationalInsuranceRecordService.calcPre75QualifyingYears(
+        service.calcPre75QualifyingYears(
           157, Some(new LocalDate(1973, 4, 6)), new LocalDate(1958, 4, 6)
         ) shouldBe Some(1)
       }
       "return null when the number of conts in 157 and the date of entry is 06/04/1973 and their date of birth is 24/05/1996" in {
-        NationalInsuranceRecordService.calcPre75QualifyingYears(
+        service.calcPre75QualifyingYears(
           157, Some(new LocalDate(1973, 4, 6)), new LocalDate(1996, 5, 24)
         ) shouldBe None
       }
       "return null when the number of conts in 157 and the date of entry is 06/04/1976 and their date of birth is 06/04/1960" in {
-        NationalInsuranceRecordService.calcPre75QualifyingYears(
+        service.calcPre75QualifyingYears(
           157, Some(new LocalDate(1976, 4, 6)), new LocalDate(1960, 4, 6)
         ) shouldBe None
       }
       "return null when the number of conts in 157 and the date of entry is 06/04/2005 and their date of birth is 06/04/1958" in {
-        NationalInsuranceRecordService.calcPre75QualifyingYears(
+        service.calcPre75QualifyingYears(
           157, Some(new LocalDate(2005, 4, 6)), new LocalDate(1958, 4, 6)
         ) shouldBe None
       }
       "when the date_of_entry is null, should still perform calc" in {
-        NationalInsuranceRecordService.calcPre75QualifyingYears(
+        service.calcPre75QualifyingYears(
           157, None, new LocalDate(1922, 4, 6)
         ) shouldBe Some(4)
       }
       "when the date_of_entry is null, should still restrict by 16th Birthday calc" in {
-        NationalInsuranceRecordService.calcPre75QualifyingYears(
+        service.calcPre75QualifyingYears(
           157, None, new LocalDate(1957, 4, 6)
         ) shouldBe Some(2)
       }
@@ -289,16 +289,13 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
 
   "NationalInsuranceRecordService exclusion with HOD connection" should {
     val mockMetrics = mock[MetricsService]
-    val service: NpsConnection = new NpsConnection {
-      override lazy val des: DesConnector = mock[DesConnector]
-      override lazy val citizenDetailsService: CitizenDetailsService = {
-        mock[CitizenDetailsService]
-      }
-      override lazy val now: LocalDate = {
-        new LocalDate(2017, 1, 16)
-      }
+    val mockDesConnector = mock[DesConnector]
+    val mockCitizenDetailsService = mock[CitizenDetailsService]
 
-      override def metrics: MetricsService = mockMetrics
+    val service: NationalInsuranceRecordService = new NationalInsuranceRecordService(mockDesConnector, mockCitizenDetailsService, mockMetrics) {
+
+      override val now: LocalDate = new LocalDate(2017, 1, 16)
+
     }
 
     "NI Summary with exclusions" should {
@@ -314,10 +311,10 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
       val nino = generateNino()
 
       reset(mockMetrics)
-      when(service.citizenDetailsService.checkManualCorrespondenceIndicator(nino)).thenReturn(Future.successful(false))
-      when(service.des.getNationalInsuranceRecord(nino)).thenReturn(Future.successful(niRecordDES))
-      when(service.des.getLiabilities(nino)).thenReturn(Future.successful(liabilities))
-      when(service.des.getSummary(nino)).thenReturn(Future.successful(summary))
+      when(mockCitizenDetailsService.checkManualCorrespondenceIndicator(nino)).thenReturn(Future.successful(false))
+      when(mockDesConnector.getNationalInsuranceRecord(nino)).thenReturn(Future.successful(niRecordDES))
+      when(mockDesConnector.getLiabilities(nino)).thenReturn(Future.successful(liabilities))
+      when(mockDesConnector.getSummary(nino)).thenReturn(Future.successful(summary))
 
       lazy val niRecordF: Future[ExclusionResponse] = service.getNationalInsuranceRecord(nino).left.get
 

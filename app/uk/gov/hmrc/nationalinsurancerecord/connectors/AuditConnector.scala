@@ -19,16 +19,13 @@ package uk.gov.hmrc.nationalinsurancerecord.connectors
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.DataEvent
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import uk.gov.hmrc.play.microservice.config.LoadAuditingConfig
 
-object CustomAuditConnector extends CustomAuditConnector {
-  override lazy val auditConnector = NationalInsuranceRecordAuditConnector
-}
+import scala.concurrent.ExecutionContext.Implicits.global
 
-trait CustomAuditConnector {
+class CustomAuditConnector {
 
-  val auditConnector: AuditConnector
+  lazy val auditConnector = NationalInsuranceRecordAuditConnector
 
   def sendEvent(event: DataEvent)(implicit hc: HeaderCarrier): Unit =
     auditConnector.sendEvent(event)

@@ -19,7 +19,7 @@ package uk.gov.hmrc.nationalinsurancerecord.cache
 import org.joda.time.LocalDate
 import org.mockito.Mockito
 import org.mockito.Mockito._
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
 import uk.gov.hmrc.mongo.MongoSpecSupport
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
@@ -41,10 +41,11 @@ class SummaryRepositorySpec extends NationalInsuranceRecordUnitSpec with OneAppP
   )
 
   "SummaryMongoService" should {
+    val stubApplicationConfig = app.injector.instanceOf[StubApplicationConfig]
     val mockMetrics = mock[MetricsService]
     val nino = generateNino()
     val service = new CachingMongoService[DesSummaryCache, DesSummary](DesSummaryCache.formats, DesSummaryCache.apply,
-      APITypes.Summary, StubApplicationConfig, mockMetrics) {
+      APITypes.Summary, stubApplicationConfig, mockMetrics) {
       override val timeToLive = 30
     }
 

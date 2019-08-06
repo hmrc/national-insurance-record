@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.controllers
 
+import org.scalatestplus.play.OneAppPerSuite
 import play.api.Configuration
 import play.api.http.LazyHttpErrorHandler
 import play.api.libs.json.{JsArray, JsDefined, JsString, JsUndefined}
@@ -23,27 +24,27 @@ import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.nationalinsurancerecord.config.AppContext
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import uk.gov.hmrc.play.test.UnitSpec
 
 
-class DocumentationControllerSpec extends UnitSpec with WithFakeApplication {
+class DocumentationControllerSpec extends UnitSpec with OneAppPerSuite {
   "respond to GET /api/definition" in {
-    val result = route(FakeRequest(GET, "/api/definition"))
+    val result = route(app, FakeRequest(GET, "/api/definition"))
     status(result.get) shouldNot be(NOT_FOUND)
   }
 
   def getDefinitionResultFromConfig(apiConfig: Option[Configuration] = None, apiStatus: Option[String] = None): Result = {
 
-    val appContext = new AppContext {
-      override def appName: String = ""
+    val appContext = new AppContext(app.configuration) {
+      override lazy val appName: String = ""
 
-      override def apiGatewayContext: String = ""
+      override lazy val apiGatewayContext: String = ""
 
-      override def access: Option[Configuration] = apiConfig
+      override lazy val access: Option[Configuration] = apiConfig
 
-      override def status: Option[String] = apiStatus
+      override lazy val status: Option[String] = apiStatus
 
-      override def connectToHOD: Boolean = false
+      override lazy val connectToHOD: Boolean = false
     }
 
     new DocumentationController(LazyHttpErrorHandler, appContext).definition()(FakeRequest())

@@ -17,9 +17,8 @@
 package uk.gov.hmrc.nationalinsurancerecord.domain
 
 import org.joda.time.LocalDate
-import play.api.libs.json.{Json, Writes}
-import play.api.libs.json._
 import play.api.libs.functional.syntax._
+import play.api.libs.json.{Json, Writes, _}
 
 case class NationalInsuranceRecord(
                                     qualifyingYears: Int,

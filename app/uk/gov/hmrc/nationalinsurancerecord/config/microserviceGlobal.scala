@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nationalinsurancerecord
+package uk.gov.hmrc.nationalinsurancerecord.config
 
 import com.typesafe.config.Config
 import net.ceedubs.ficus.Ficus._

@@ -17,40 +17,38 @@
 package uk.gov.hmrc.nationalinsurancerecord.controllers
 
 import org.joda.time.LocalDate
+import org.scalatest.mockito.MockitoSugar
 import play.api.libs.json._
 import play.api.test.FakeRequest
+import play.api.test.Helpers.{contentAsJson, _}
 import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
-import uk.gov.hmrc.nationalinsurancerecord.connectors.CustomAuditConnector
+import uk.gov.hmrc.nationalinsurancerecord.config.AppContext
+import uk.gov.hmrc.nationalinsurancerecord.connectors.{CustomAuditConnector, DesConnector}
 import uk.gov.hmrc.nationalinsurancerecord.domain._
-import uk.gov.hmrc.nationalinsurancerecord.services.NationalInsuranceRecordService
-import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+import uk.gov.hmrc.nationalinsurancerecord.services.{CitizenDetailsService, MetricsService, NationalInsuranceRecordService}
 import uk.gov.hmrc.play.audit.model.DataEvent
 import uk.gov.hmrc.play.test.WithFakeApplication
-import play.api.test.Helpers.{contentAsJson, _}
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.HeaderCarrier
 
-class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitSpec with WithFakeApplication {
+class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitSpec with WithFakeApplication with MockitoSugar {
 
   val emptyRequest = FakeRequest()
   val emptyRequestWithHeader = FakeRequest().withHeaders("Accept" -> "application/vnd.hmrc.1.0+json")
 
   val mockAuditConnector = new CustomAuditConnector {
-    override lazy val auditConnector: AuditConnector = ???
+    override lazy val auditConnector = ???
 
     override def sendEvent(event: DataEvent)(implicit hc: HeaderCarrier): Unit = {}
   }
 
   def testNationalInsuranceRecordController(niRecordService: NationalInsuranceRecordService): NationalInsuranceRecordController
-  = new NationalInsuranceRecordController {
-    override val nationalInsuranceRecordService: NationalInsuranceRecordService = niRecordService
+  = new NationalInsuranceRecordController(niRecordService, mockAuditConnector, mock[AppContext]) {
     override val app: String = "Test National Insurance Record"
     override val context: String = "test"
-    override val customAuditConnector: CustomAuditConnector = mockAuditConnector
   }
-
 
   private val dummyTaxYearQualifying: NationalInsuranceTaxYear = NationalInsuranceTaxYear(
     taxYear = "2010-11",
@@ -144,12 +142,13 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
     reducedRateElection = false
   )
 
-
-
   "getSummary" when {
+    val mockDesConnector =  mock[DesConnector]
+    val mockCitizenDetailsService = mock[CitizenDetailsService]
+    val mockMetricsService = mock[MetricsService]
 
     def generateSummaryResponse(serviceResult: Either[ExclusionResponse, NationalInsuranceRecord], nino: Nino = generateNino()) =
-      testNationalInsuranceRecordController(new NationalInsuranceRecordService {
+      testNationalInsuranceRecordController(new NationalInsuranceRecordService(mockDesConnector, mockCitizenDetailsService, mockMetricsService) {
         override def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceRecord]] = Future.successful(serviceResult)
 
         override def getTaxYear(nino: Nino, taxYear: TaxYear)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceTaxYear]] = ???
@@ -157,7 +156,7 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
 
     "the request headers are invalid" should {
       "return status code 406" in {
-        val response = testNationalInsuranceRecordController(new NationalInsuranceRecordService {
+        val response = testNationalInsuranceRecordController(new NationalInsuranceRecordService(mockDesConnector, mockCitizenDetailsService, mockMetricsService) {
           override def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceRecord]] = ???
 
           override def getTaxYear(nino: Nino, taxYear: TaxYear)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceTaxYear]] = ???
@@ -482,9 +481,12 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
   }
 
   "getTaxYear" should {
+    val mockDesConnector =  mock[DesConnector]
+    val mockCitizenDetailsService = mock[CitizenDetailsService]
+    val mockMetricsService = mock[MetricsService]
 
     def generateTaxYearResponse(serviceResult: Either[ExclusionResponse, NationalInsuranceTaxYear], nino: Nino = generateNino(), taxYear: TaxYear = TaxYear("0000-01")) =
-      testNationalInsuranceRecordController(new NationalInsuranceRecordService {
+      testNationalInsuranceRecordController(new NationalInsuranceRecordService(mockDesConnector, mockCitizenDetailsService, mockMetricsService) {
         override def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceRecord]] = ???
 
         override def getTaxYear(nino: Nino, taxYear: TaxYear)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceTaxYear]] = Future.successful(serviceResult)
@@ -492,7 +494,7 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
 
     "the request headers are invalid" should {
       "return status code 406" in {
-        val response = testNationalInsuranceRecordController(new NationalInsuranceRecordService {
+        val response = testNationalInsuranceRecordController(new NationalInsuranceRecordService(mockDesConnector, mockCitizenDetailsService, mockMetricsService) {
           override def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceRecord]] = ???
 
           override def getTaxYear(nino: Nino, taxYear: TaxYear)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceTaxYear]] = ???

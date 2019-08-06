@@ -20,11 +20,11 @@ import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.Result
 import uk.gov.hmrc.api.controllers.{ErrorGenericBadRequest, ErrorInternalServerError, ErrorNotFound}
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import uk.gov.hmrc.http.{ BadGatewayException, BadRequestException, GatewayTimeoutException, HeaderCarrier, NotFoundException, Upstream4xxResponse, Upstream5xxResponse }
 
 trait ErrorHandling {
   self: BaseController =>

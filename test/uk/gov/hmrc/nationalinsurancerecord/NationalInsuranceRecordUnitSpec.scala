@@ -17,8 +17,9 @@
 package uk.gov.hmrc.nationalinsurancerecord
 
 import uk.gov.hmrc.domain.{Generator, Nino}
-import scala.util.Random
 import uk.gov.hmrc.http.HeaderCarrier
+
+import scala.util.Random
 
 trait NationalInsuranceRecordUnitSpec extends uk.gov.hmrc.play.test.UnitSpec {
   private val ninoGenerator = new Generator(new Random())

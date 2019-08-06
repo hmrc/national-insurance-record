@@ -16,9 +16,11 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.cache
 
+import com.google.inject.{Inject, Singleton}
 import org.joda.time.DateTime
 import play.api.libs.json.Json
-import play.modules.reactivemongo.MongoDbConnection
+import play.modules.reactivemongo.ReactiveMongoComponent
+import reactivemongo.api.DefaultDB
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 import uk.gov.hmrc.nationalinsurancerecord.config.ApplicationConfig
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
@@ -36,10 +38,16 @@ object DesSummaryCache {
   implicit def formats = Json.format[DesSummaryCache]
 }
 
-object DesSummaryRepository extends MongoDbConnection {
+//TODO: look to extend CachingMongoService?
+@Singleton
+class DesSummaryRepository @Inject()(reactiveMongoComponent: ReactiveMongoComponent,
+                                     metricsService: MetricsService,
+                                     applicationConfig: ApplicationConfig) {
+
+  implicit val db: () => DefaultDB = reactiveMongoComponent.mongoConnector.db
 
   private lazy val cacheService = new CachingMongoService[DesSummaryCache, DesSummary](
-    DesSummaryCache.formats, DesSummaryCache.apply, APITypes.Summary, ApplicationConfig, MetricsService
+    DesSummaryCache.formats, DesSummaryCache.apply, APITypes.Summary, applicationConfig, metricsService
   )
 
   def apply(): CachingMongoService[DesSummaryCache, DesSummary] = cacheService

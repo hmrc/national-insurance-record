@@ -18,7 +18,9 @@ package uk.gov.hmrc.nationalinsurancerecord.services
 
 import java.util.TimeZone
 
+import com.google.inject.Inject
 import org.joda.time.{DateTimeZone, LocalDate}
+import services.TaxYearResolver
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
 import uk.gov.hmrc.nationalinsurancerecord.connectors.DesConnector
@@ -26,24 +28,17 @@ import uk.gov.hmrc.nationalinsurancerecord.domain.Exclusion.Exclusion
 import uk.gov.hmrc.nationalinsurancerecord.domain._
 import uk.gov.hmrc.nationalinsurancerecord.domain.des.{DesLiability, DesNITaxYear}
 import uk.gov.hmrc.nationalinsurancerecord.util.NIRecordConstants
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import services.TaxYearResolver
 
-trait NationalInsuranceRecordService {
-  def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceRecord]]
-  def getTaxYear(nino: Nino, taxYear: TaxYear)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceTaxYear]]
-}
+class NationalInsuranceRecordService @Inject()(des: DesConnector,
+                                               citizenDetailsService: CitizenDetailsService,
+                                               metrics: MetricsService) {
 
-trait NpsConnection extends NationalInsuranceRecordService {
+  val now: LocalDate = LocalDate.now(DateTimeZone.forTimeZone(TimeZone.getTimeZone("Europe/London")))
 
-  def des: DesConnector
-  def citizenDetailsService: CitizenDetailsService
-  def now: LocalDate
-  def metrics: MetricsService
-
-  override def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceRecord]] = {
+  def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceRecord]] = {
 
     val desNIRecordF = des.getNationalInsuranceRecord(nino)
     val desLiabilitiesF = des.getLiabilities(nino)
@@ -87,7 +82,7 @@ trait NpsConnection extends NationalInsuranceRecordService {
 
   }
 
-  override def getTaxYear(nino: Nino, taxYear: TaxYear)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceTaxYear]] = {
+  def getTaxYear(nino: Nino, taxYear: TaxYear)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceTaxYear]] = {
 
     val desNIRecordF = des.getNationalInsuranceRecord(nino)
     val desSummaryF = des.getSummary(nino)
@@ -154,11 +149,4 @@ trait NpsConnection extends NationalInsuranceRecordService {
       desNITaxYear.underInvestigation
     )
   }
-}
-
-object NationalInsuranceRecordService extends NationalInsuranceRecordService with NpsConnection {
-  override lazy val des: DesConnector = DesConnector
-  override def citizenDetailsService: CitizenDetailsService = CitizenDetailsService
-  override def now: LocalDate = LocalDate.now(DateTimeZone.forTimeZone(TimeZone.getTimeZone("Europe/London")))
-  override def metrics: MetricsService = MetricsService
 }
