@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nationalinsurancerecord.controllers
+package uk.gov.hmrc.nationalinsurancerecord.controllers.nationalInsurance
 
 import com.google.inject.{Inject, Singleton}
 import play.api.hal.HalResource
@@ -24,6 +24,7 @@ import uk.gov.hmrc.api.controllers.HeaderValidator
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nationalinsurancerecord.config.AppContext
 import uk.gov.hmrc.nationalinsurancerecord.connectors.CustomAuditConnector
+import uk.gov.hmrc.nationalinsurancerecord.controllers.{ErrorHandling, ErrorResponses, HalSupport, Links}
 import uk.gov.hmrc.nationalinsurancerecord.domain.{Exclusion, NationalInsuranceTaxYear, TaxYear}
 import uk.gov.hmrc.nationalinsurancerecord.events.{NationalInsuranceExclusion, NationalInsuranceRecord}
 import uk.gov.hmrc.nationalinsurancerecord.services.NationalInsuranceRecordService

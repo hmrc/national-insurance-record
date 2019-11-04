@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nationalinsurancerecord.controllers
+package uk.gov.hmrc.nationalinsurancerecord.controllers.documentation
 
 import com.google.inject.{Inject, Singleton}
 import play.api.http.HttpErrorHandler

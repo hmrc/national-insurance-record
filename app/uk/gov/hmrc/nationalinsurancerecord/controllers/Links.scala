@@ -26,8 +26,8 @@ trait Links {
   private def createLink(endpointUrl: String) = if(context.isEmpty) endpointUrl else s"/$context$endpointUrl"
 
   def nationalInsuranceRecordHref(nino: Nino): String =
-      createLink(uk.gov.hmrc.nationalinsurancerecord.controllers.routes.NationalInsuranceRecordController.getSummary(nino).url)
+      createLink(nationalInsurance.routes.NationalInsuranceRecordController.getSummary(nino).url)
 
   def nationalInsuranceTaxYearHref(nino: Nino, taxYear: TaxYear): String =
-    createLink(uk.gov.hmrc.nationalinsurancerecord.controllers.routes.NationalInsuranceRecordController.getTaxYear(nino,taxYear).url)
+    createLink(nationalInsurance.routes.NationalInsuranceRecordController.getTaxYear(nino,taxYear).url)
 }

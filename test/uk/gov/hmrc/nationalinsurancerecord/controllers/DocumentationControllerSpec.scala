@@ -24,6 +24,7 @@ import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.nationalinsurancerecord.config.AppContext
+import uk.gov.hmrc.nationalinsurancerecord.controllers.documentation.DocumentationController
 import uk.gov.hmrc.play.test.UnitSpec
 
 
