@@ -19,11 +19,12 @@ package uk.gov.hmrc.nationalinsurancerecord.controllers.auth
 import com.google.inject.ImplementedBy
 import javax.inject.Inject
 import play.api.Mode.Mode
+import play.api.http.Status.BAD_REQUEST
 import play.api.mvc.Results._
 import play.api.mvc._
 import play.api.{Configuration, Environment, Logger}
-import uk.gov.hmrc.auth.core.{AuthorisedFunctions, ConfidenceLevel, PlayAuthConnector}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpPost}
+import uk.gov.hmrc.auth.core.{AuthorisedFunctions, ConfidenceLevel, Nino, PlayAuthConnector}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.nationalinsurancerecord.config.WSHttp
 import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.config.ServicesConfig
@@ -32,16 +33,26 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class AuthActionImpl @Inject()(val authConnector: AuthConnector)(implicit executionContext: ExecutionContext)
   extends AuthAction with AuthorisedFunctions {
+
   override protected def refine[A](request: Request[A]): Future[Either[Result, Request[A]]] = {
 
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, None)
 
-    authorised(ConfidenceLevel.L200) {
-      Future.successful(Right(request))
-    }.recover {
-      case t: Throwable => {
-        Logger.debug("Debug info - " + t.getMessage)
-        Left(Unauthorized)
+    val matchNinoInUriPattern = "/.{0}ni/([^/]+)/?.*".r
+
+    val matches = matchNinoInUriPattern.findAllIn(request.uri)
+
+    if (matches.isEmpty) {
+      Future.successful(Left(Status(BAD_REQUEST)))
+    } else {
+      val uriNino: Option[String] = Some(matches.group(1))
+      authorised(ConfidenceLevel.L200 and Nino(hasNino = true, nino = uriNino)) {
+        Future.successful(Right(request))
+      }.recover {
+        case t: Throwable => {
+          Logger.debug("Debug info - " + t.getMessage)
+          Left(Unauthorized)
+        }
       }
     }
   }
@@ -53,7 +64,8 @@ trait AuthAction extends ActionBuilder[Request] with ActionRefiner[Request, Requ
 class AuthConnector @Inject()(val http: WSHttp,
                               val runModeConfiguration: Configuration,
                               environment: Environment
-                                         ) extends PlayAuthConnector with ServicesConfig {
+                             ) extends PlayAuthConnector with ServicesConfig {
   override val serviceUrl: String = baseUrl("auth")
+
   override protected def mode: Mode = environment.mode
 }
