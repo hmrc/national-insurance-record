@@ -50,7 +50,7 @@ class DocumentationControllerSpec extends UnitSpec with OneAppPerSuite with Mock
       override lazy val connectToHOD: Boolean = false
     }
 
-    new DocumentationController(LazyHttpErrorHandler, appContext, FakeAuthAction).definition()(FakeRequest())
+    new DocumentationController(LazyHttpErrorHandler, appContext).definition()(FakeRequest())
 
   }
 
