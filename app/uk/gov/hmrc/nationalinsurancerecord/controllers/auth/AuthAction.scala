@@ -34,32 +34,31 @@ import scala.concurrent.{ExecutionContext, Future}
 class AuthActionImpl @Inject()(val authConnector: AuthConnector)(implicit executionContext: ExecutionContext)
   extends AuthAction with AuthorisedFunctions {
 
-  override protected def refine[A](request: Request[A]): Future[Either[Result, Request[A]]] = {
+  override protected def filter[A](request: Request[A]): Future[Option[Result]] = {
+      implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, None)
 
-    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, None)
+      val matchNinoInUriPattern = "/.{0}ni/([^/]+)/?.*".r
 
-    val matchNinoInUriPattern = "/.{0}ni/([^/]+)/?.*".r
+      val matches = matchNinoInUriPattern.findAllIn(request.uri)
 
-    val matches = matchNinoInUriPattern.findAllIn(request.uri)
-
-    if (matches.isEmpty) {
-      Future.successful(Left(BadRequest))
-    } else {
-      val uriNino: Option[String] = Some(matches.group(1))
-      authorised(ConfidenceLevel.L200 and Nino(hasNino = true, nino = uriNino)) {
-        Future.successful(Right(request))
-      }.recover {
-        case t: Throwable => {
-          Logger.debug("Debug info - " + t.getMessage)
-          Left(Unauthorized)
+      if (matches.isEmpty) {
+        Future.successful(Some(BadRequest))
+      } else {
+        val uriNino: Option[String] = Some(matches.group(1))
+        authorised(ConfidenceLevel.L200 and Nino(hasNino = true, nino = uriNino)) {
+          Future.successful(None)
+        }.recover {
+          case t: Throwable => {
+            Logger.debug("Debug info - " + t.getMessage)
+            Some(Unauthorized)
+          }
         }
       }
-    }
-  }
+}
 }
 
 @ImplementedBy(classOf[AuthActionImpl])
-trait AuthAction extends ActionBuilder[Request] with ActionRefiner[Request, Request]
+trait AuthAction extends ActionBuilder[Request] with ActionFilter[Request]
 
 class AuthConnector @Inject()(val http: WSHttp,
                               val runModeConfiguration: Configuration,
