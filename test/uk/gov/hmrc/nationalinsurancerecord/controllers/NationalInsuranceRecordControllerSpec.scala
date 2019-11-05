@@ -272,9 +272,9 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
 
     "there is a valid National Insurance Record" should {
 
-      val testNino = generateNino()
-      val responseSummary = generateSummaryResponse(Right(dummyRecord), testNino)
-      val json = contentAsJson(responseSummary)
+      lazy val testNino = generateNino()
+      lazy val responseSummary = generateSummaryResponse(Right(dummyRecord), testNino)
+      lazy val json = contentAsJson(responseSummary)
 
       "return 200" in {
         status(responseSummary) shouldBe 200
@@ -609,9 +609,9 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
     }
 
     "there is a valid Qualifying Tax Year" should {
-      val testNino = generateNino()
-      val response = generateTaxYearResponse(Right(dummyTaxYearQualifying), testNino, TaxYear(dummyTaxYearQualifying.taxYear))
-      val json = contentAsJson(response)
+      lazy val testNino = generateNino()
+      lazy val response = generateTaxYearResponse(Right(dummyTaxYearQualifying), testNino, TaxYear(dummyTaxYearQualifying.taxYear))
+      lazy val json = contentAsJson(response)
 
       "return 200" in {
         status(response) shouldBe 200
@@ -667,9 +667,9 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
     }
 
     "there is a valid Non-Qualifying Tax Year" should {
-      val testNino = generateNino()
-      val response = generateTaxYearResponse(Right(dummyTaxYearNonQualifying), testNino, TaxYear(dummyTaxYearNonQualifying.taxYear))
-      val json = contentAsJson(response)
+      lazy val testNino = generateNino()
+      lazy val response = generateTaxYearResponse(Right(dummyTaxYearNonQualifying), testNino, TaxYear(dummyTaxYearNonQualifying.taxYear))
+      lazy val json = contentAsJson(response)
 
       "return 200" in {
         status(response) shouldBe 200
