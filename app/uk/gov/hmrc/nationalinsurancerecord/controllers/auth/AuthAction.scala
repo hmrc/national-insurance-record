@@ -43,7 +43,7 @@ class AuthActionImpl @Inject()(val authConnector: AuthConnector)(implicit execut
     val matches = matchNinoInUriPattern.findAllIn(request.uri)
 
     if (matches.isEmpty) {
-      Future.successful(Left(Status(BAD_REQUEST)))
+      Future.successful(Left(BadRequest))
     } else {
       val uriNino: Option[String] = Some(matches.group(1))
       authorised(ConfidenceLevel.L200 and Nino(hasNino = true, nino = uriNino)) {

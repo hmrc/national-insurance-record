@@ -15,21 +15,6 @@
  */
 
 package uk.gov.hmrc.nationalinsurancerecord.controllers.auth
-/*
- * Copyright 2019 HM Revenue & Customs
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
 import akka.util.Timeout
 import org.mockito.Matchers.{any, eq => MockitoEq}
@@ -102,8 +87,6 @@ class AuthActionSpec
         status(result) mustBe UNAUTHORIZED
       }
 
-      // The following test case should not happen in the real world,
-      // but it exists to cover a code branch.
       "return BAD_REQUEST when the user is authorised and the uri doesn't match our expected format" in {
         val (result, _) =
           testAuthActionWith(Future.successful(()),
@@ -113,8 +96,7 @@ class AuthActionSpec
     }
   }
 
-  private def newMockConnectorWithAuthResult[T](
-                                                 authoriseResult: Future[T]): AuthConnector = {
+  private def newMockConnectorWithAuthResult[T](authoriseResult: Future[T]): AuthConnector = {
     val connector = mock[AuthConnector]
 
     when(connector.authorise[T](any(), any())(any(), any()))
