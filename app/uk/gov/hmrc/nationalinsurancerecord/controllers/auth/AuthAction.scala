@@ -19,11 +19,11 @@ package uk.gov.hmrc.nationalinsurancerecord.controllers.auth
 import com.google.inject.ImplementedBy
 import javax.inject.Inject
 import play.api.Mode.Mode
-import play.api.http.Status.BAD_REQUEST
 import play.api.mvc.Results._
 import play.api.mvc._
 import play.api.{Configuration, Environment, Logger}
-import uk.gov.hmrc.auth.core.{AuthorisedFunctions, ConfidenceLevel, Nino, PlayAuthConnector}
+import uk.gov.hmrc.auth.core.AuthProvider.PrivilegedApplication
+import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.nationalinsurancerecord.config.WSHttp
 import uk.gov.hmrc.play.HeaderCarrierConverter
@@ -35,26 +35,16 @@ class AuthActionImpl @Inject()(val authConnector: AuthConnector)(implicit execut
   extends AuthAction with AuthorisedFunctions {
 
   override protected def filter[A](request: Request[A]): Future[Option[Result]] = {
-      implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, None)
+    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, None)
 
-      val matchNinoInUriPattern = "/.{0}ni/([^/]+)/?.*".r
-
-      val matches = matchNinoInUriPattern.findAllIn(request.uri)
-
-      if (matches.isEmpty) {
-        Future.successful(Some(BadRequest))
-      } else {
-        val uriNino: Option[String] = Some(matches.group(1))
-        authorised(ConfidenceLevel.L200 and Nino(hasNino = true, nino = uriNino)) {
-          Future.successful(None)
-        }.recover {
-          case t: Throwable => {
-            Logger.debug("Debug info - " + t.getMessage)
-            Some(Unauthorized)
-          }
-        }
-      }
-}
+    authorised(AuthProviders(PrivilegedApplication) and ConfidenceLevel.L200 and Enrolment("read:national-insurance-record")) {
+      Future.successful(None)
+    }.recover {
+      case t: Throwable =>
+        Logger.debug("Debug info - " + t.getMessage)
+        Some(Unauthorized)
+    }
+  }
 }
 
 @ImplementedBy(classOf[AuthActionImpl])
