@@ -26,12 +26,14 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status.{BAD_REQUEST, OK, UNAUTHORIZED}
 import play.api.mvc.{Action, AnyContent, Controller}
 import play.api.test.FakeRequest
-import uk.gov.hmrc.auth.core.{ConfidenceLevel, InsufficientConfidenceLevel, InternalError, MissingBearerToken, Nino}
+import uk.gov.hmrc.auth.core.{AuthProviders, ConfidenceLevel, Enrolment, InsufficientConfidenceLevel, InsufficientEnrolments, InternalError, MissingBearerToken, Nino, UnsupportedAuthProvider}
 import uk.gov.hmrc.domain.Generator
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import play.api.test.Helpers.status
+import uk.gov.hmrc.auth.core.AuthProvider.PrivilegedApplication
 
 class AuthActionSpec
   extends PlaySpec
@@ -61,7 +63,7 @@ class AuthActionSpec
     }
 
     "the user is logged in" must {
-      "return the request when the user is authorised and the nino in the uri matches" in {
+      "return the request when the user is authorised" in {
 
         val (result, mockAuthConnector) =
           testAuthActionWith(Future.successful(()))
@@ -70,8 +72,7 @@ class AuthActionSpec
 
         verify(mockAuthConnector)
           .authorise[Unit](MockitoEq(
-            ConfidenceLevel.L200 and
-              Nino(hasNino = true, nino = Some(testNino))),
+            AuthProviders(PrivilegedApplication) and ConfidenceLevel.L200 and Enrolment("read:national-insurance-record")),
             any())(any(), any())
       }
 
@@ -81,17 +82,16 @@ class AuthActionSpec
         status(result) mustBe UNAUTHORIZED
       }
 
-      "return UNAUTHORIZED when the Nino is rejected by auth" in {
+      "return UNAUTHORIZED when the read:national-insurance-record enrolment is not present" in {
         val (result, _) =
-          testAuthActionWith(Future.failed(new InternalError("IncorrectNino")))
+          testAuthActionWith(Future.failed(new InsufficientEnrolments))
         status(result) mustBe UNAUTHORIZED
       }
 
-      "return BAD_REQUEST when the user is authorised and the uri doesn't match our expected format" in {
+      "return UNAUTHORIZED when not a Privileged application" in {
         val (result, _) =
-          testAuthActionWith(Future.successful(()),
-            "/UriThatDoesNotMatchTheRegex")
-        status(result) mustBe BAD_REQUEST
+          testAuthActionWith(Future.failed(new UnsupportedAuthProvider))
+        status(result) mustBe UNAUTHORIZED
       }
     }
   }
