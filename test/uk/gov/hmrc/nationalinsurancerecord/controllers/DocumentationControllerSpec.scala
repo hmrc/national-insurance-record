@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.controllers
 
+import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
 import play.api.Configuration
 import play.api.http.LazyHttpErrorHandler
@@ -24,10 +25,12 @@ import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.nationalinsurancerecord.config.AppContext
+import uk.gov.hmrc.nationalinsurancerecord.controllers.auth.{AuthAction, FakeAuthAction}
+import uk.gov.hmrc.nationalinsurancerecord.controllers.documentation.DocumentationController
 import uk.gov.hmrc.play.test.UnitSpec
 
 
-class DocumentationControllerSpec extends UnitSpec with OneAppPerSuite {
+class DocumentationControllerSpec extends UnitSpec with OneAppPerSuite with MockitoSugar {
   "respond to GET /api/definition" in {
     val result = route(app, FakeRequest(GET, "/api/definition"))
     status(result.get) shouldNot be(NOT_FOUND)
