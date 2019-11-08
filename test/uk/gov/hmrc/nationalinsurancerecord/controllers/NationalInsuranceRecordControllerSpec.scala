@@ -26,8 +26,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.config.AppContext
 import uk.gov.hmrc.nationalinsurancerecord.connectors.{CustomAuditConnector, DesConnector}
-import uk.gov.hmrc.nationalinsurancerecord.controllers.auth.{AuthAction, FakeAuthAction}
-import uk.gov.hmrc.nationalinsurancerecord.controllers.nationalInsurance.NationalInsuranceRecordController
 import uk.gov.hmrc.nationalinsurancerecord.domain._
 import uk.gov.hmrc.nationalinsurancerecord.services.{CitizenDetailsService, MetricsService, NationalInsuranceRecordService}
 import uk.gov.hmrc.play.audit.model.DataEvent
@@ -47,7 +45,7 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
   }
 
   def testNationalInsuranceRecordController(niRecordService: NationalInsuranceRecordService): NationalInsuranceRecordController
-  = new NationalInsuranceRecordController(niRecordService, mockAuditConnector, mock[AppContext], FakeAuthAction) {
+  = new NationalInsuranceRecordController(niRecordService, mockAuditConnector, mock[AppContext]) {
     override val app: String = "Test National Insurance Record"
     override val context: String = "test"
   }
@@ -272,9 +270,9 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
 
     "there is a valid National Insurance Record" should {
 
-      lazy val testNino = generateNino()
-      lazy val responseSummary = generateSummaryResponse(Right(dummyRecord), testNino)
-      lazy val json = contentAsJson(responseSummary)
+      val testNino = generateNino()
+      val responseSummary = generateSummaryResponse(Right(dummyRecord), testNino)
+      val json = contentAsJson(responseSummary)
 
       "return 200" in {
         status(responseSummary) shouldBe 200
@@ -609,9 +607,9 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
     }
 
     "there is a valid Qualifying Tax Year" should {
-      lazy val testNino = generateNino()
-      lazy val response = generateTaxYearResponse(Right(dummyTaxYearQualifying), testNino, TaxYear(dummyTaxYearQualifying.taxYear))
-      lazy val json = contentAsJson(response)
+      val testNino = generateNino()
+      val response = generateTaxYearResponse(Right(dummyTaxYearQualifying), testNino, TaxYear(dummyTaxYearQualifying.taxYear))
+      val json = contentAsJson(response)
 
       "return 200" in {
         status(response) shouldBe 200
@@ -667,9 +665,9 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
     }
 
     "there is a valid Non-Qualifying Tax Year" should {
-      lazy val testNino = generateNino()
-      lazy val response = generateTaxYearResponse(Right(dummyTaxYearNonQualifying), testNino, TaxYear(dummyTaxYearNonQualifying.taxYear))
-      lazy val json = contentAsJson(response)
+      val testNino = generateNino()
+      val response = generateTaxYearResponse(Right(dummyTaxYearNonQualifying), testNino, TaxYear(dummyTaxYearNonQualifying.taxYear))
+      val json = contentAsJson(response)
 
       "return 200" in {
         status(response) shouldBe 200
