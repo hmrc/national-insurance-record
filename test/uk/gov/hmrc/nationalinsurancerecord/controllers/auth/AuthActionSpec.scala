@@ -33,7 +33,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import play.api.test.Helpers.status
-import uk.gov.hmrc.auth.core.AuthProvider.PrivilegedApplication
+import uk.gov.hmrc.auth.core.AuthProvider.{GovernmentGateway, PrivilegedApplication}
 
 class AuthActionSpec
   extends PlaySpec
@@ -63,7 +63,7 @@ class AuthActionSpec
     }
 
     "the user is logged in" must {
-      "return the request when the user is authorised" in {
+      "return the request when the user is authorised and the nino in the uri matches or user is coming from a privileged application" in {
 
         val (result, mockAuthConnector) =
           testAuthActionWith(Future.successful(()))
@@ -71,8 +71,7 @@ class AuthActionSpec
         status(result) mustBe OK
 
         verify(mockAuthConnector)
-          .authorise[Unit](MockitoEq(
-            AuthProviders(PrivilegedApplication) and ConfidenceLevel.L200 and Enrolment("read:national-insurance-record")),
+          .authorise[Unit](MockitoEq((AuthProviders(PrivilegedApplication)) or (ConfidenceLevel.L200 and Nino(true, Some(testNino)))),
             any())(any(), any())
       }
 
@@ -82,16 +81,17 @@ class AuthActionSpec
         status(result) mustBe UNAUTHORIZED
       }
 
-      "return UNAUTHORIZED when the read:national-insurance-record enrolment is not present" in {
+      "return UNAUTHORIZED when the Nino is rejected by auth" in {
         val (result, _) =
-          testAuthActionWith(Future.failed(new InsufficientEnrolments))
+          testAuthActionWith(Future.failed(new InternalError("IncorrectNino")))
         status(result) mustBe UNAUTHORIZED
       }
 
-      "return UNAUTHORIZED when not a Privileged application" in {
+      "return BAD_REQUEST when the user is authorised and the uri doesn't match our expected format" in {
         val (result, _) =
-          testAuthActionWith(Future.failed(new UnsupportedAuthProvider))
-        status(result) mustBe UNAUTHORIZED
+          testAuthActionWith(Future.successful(()),
+            "/UriThatDoesNotMatchTheRegex")
+        status(result) mustBe BAD_REQUEST
       }
     }
   }
