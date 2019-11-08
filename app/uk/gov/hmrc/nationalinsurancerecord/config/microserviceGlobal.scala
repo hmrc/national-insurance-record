@@ -31,6 +31,10 @@ object ControllerConfiguration extends ControllerConfig {
   lazy val controllerConfigs = Play.current.configuration.underlying.as[Config]("controllers")
 }
 
+object AuthParamsControllerConfiguration extends AuthParamsControllerConfig {
+  lazy val controllerConfigs = ControllerConfiguration.controllerConfigs
+}
+
 object MicroserviceAuditFilter extends AuditFilter with AppName with MicroserviceFilterSupport {
   override val auditConnector = MicroserviceAuditConnector
   override def controllerNeedsAuditing(controllerName: String): Boolean = ControllerConfiguration.paramsForController(controllerName).needsAuditing
@@ -42,6 +46,12 @@ object MicroserviceLoggingFilter extends LoggingFilter with MicroserviceFilterSu
   override def controllerNeedsLogging(controllerName: String): Boolean = ControllerConfiguration.paramsForController(controllerName).needsLogging
 }
 
+object MicroserviceAuthFilter extends AuthorisationFilter with MicroserviceFilterSupport {
+  override lazy val authParamsConfig = AuthParamsControllerConfiguration
+  override lazy val authConnector = MicroserviceAuthConnector
+  override def controllerNeedsAuth(controllerName: String): Boolean = ControllerConfiguration.paramsForController(controllerName).needsAuth
+}
+
 object MicroserviceGlobal extends DefaultMicroserviceGlobal with RunMode with MicroserviceFilterSupport  with ServiceLocatorConfig {
   override val auditConnector = MicroserviceAuditConnector
 
@@ -51,8 +61,11 @@ object MicroserviceGlobal extends DefaultMicroserviceGlobal with RunMode with Mi
 
   override val microserviceAuditFilter = MicroserviceAuditFilter
 
-  override val authFilter = None
+  override val authFilter = Some(MicroserviceAuthFilter)
 
+  //override val slConnector: ServiceLocatorConnector = ServiceLocatorConnector(WSHttp)
+
+  //override implicit val hc: HeaderCarrier = HeaderCarrier()
   override protected def mode: Mode = Play.current.mode
 
   override protected def runModeConfiguration: Configuration = Play.current.configuration

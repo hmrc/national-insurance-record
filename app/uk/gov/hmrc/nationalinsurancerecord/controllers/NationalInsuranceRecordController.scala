@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nationalinsurancerecord.controllers.nationalInsurance
+package uk.gov.hmrc.nationalinsurancerecord.controllers
 
 import com.google.inject.{Inject, Singleton}
 import play.api.hal.HalResource
@@ -24,8 +24,6 @@ import uk.gov.hmrc.api.controllers.HeaderValidator
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nationalinsurancerecord.config.AppContext
 import uk.gov.hmrc.nationalinsurancerecord.connectors.CustomAuditConnector
-import uk.gov.hmrc.nationalinsurancerecord.controllers.auth.AuthAction
-import uk.gov.hmrc.nationalinsurancerecord.controllers.{ErrorHandling, ErrorResponses, HalSupport, Links}
 import uk.gov.hmrc.nationalinsurancerecord.domain.{Exclusion, NationalInsuranceTaxYear, TaxYear}
 import uk.gov.hmrc.nationalinsurancerecord.events.{NationalInsuranceExclusion, NationalInsuranceRecord}
 import uk.gov.hmrc.nationalinsurancerecord.services.NationalInsuranceRecordService
@@ -36,8 +34,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 @Singleton
 class NationalInsuranceRecordController @Inject()(nationalInsuranceRecordService: NationalInsuranceRecordService,
                                                   customAuditConnector: CustomAuditConnector,
-                                                  appContext: AppContext,
-                                                  authAction: AuthAction
+                                                  appContext: AppContext
                                                  ) extends BaseController
                                                     with HeaderValidator
                                                     with ErrorHandling
@@ -56,7 +53,7 @@ class NationalInsuranceRecordController @Inject()(nationalInsuranceRecordService
     )
   }
 
-  def getSummary(nino: Nino): Action[AnyContent] = (authAction andThen validateAccept(acceptHeaderValidationRules)).async {
+  def getSummary(nino: Nino): Action[AnyContent] = validateAccept(acceptHeaderValidationRules).async {
     implicit request =>
       errorWrapper(nationalInsuranceRecordService.getNationalInsuranceRecord(nino).map {
 
@@ -89,7 +86,7 @@ class NationalInsuranceRecordController @Inject()(nationalInsuranceRecordService
       })
   }
 
-  def getTaxYear(nino: Nino, taxYear: TaxYear): Action[AnyContent] = (authAction andThen validateAccept(acceptHeaderValidationRules)).async {
+  def getTaxYear(nino: Nino, taxYear: TaxYear): Action[AnyContent] = validateAccept(acceptHeaderValidationRules).async {
     implicit request =>
       errorWrapper(nationalInsuranceRecordService.getTaxYear(nino, taxYear).map {
 

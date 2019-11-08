@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nationalinsurancerecord.controllers.documentation
+package uk.gov.hmrc.nationalinsurancerecord.controllers
 
 import com.google.inject.{Inject, Singleton}
 import play.api.http.HttpErrorHandler
@@ -24,8 +24,7 @@ import uk.gov.hmrc.nationalinsurancerecord.domain.APIAccess
 import uk.gov.hmrc.nationalinsurancerecord.views._
 
 @Singleton
-class DocumentationController @Inject()(errorHandler: HttpErrorHandler,
-                                        appContext: AppContext)
+class DocumentationController @Inject()(errorHandler: HttpErrorHandler, appContext: AppContext)
   extends uk.gov.hmrc.api.controllers.DocumentationController(errorHandler = errorHandler) {
 
   override def definition(): Action[AnyContent] = Action {
