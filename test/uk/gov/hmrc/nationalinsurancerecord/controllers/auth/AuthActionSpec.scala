@@ -63,7 +63,7 @@ class AuthActionSpec
     }
 
     "the user is logged in" must {
-      "return the request when the user is authorised and the nino in the uri matches" in {
+      "return the request when the user is authorised and the nino in the uri matches or user is coming from a privileged application" in {
 
         val (result, mockAuthConnector) =
           testAuthActionWith(Future.successful(()))
@@ -71,7 +71,7 @@ class AuthActionSpec
         status(result) mustBe OK
 
         verify(mockAuthConnector)
-          .authorise[Unit](MockitoEq(ConfidenceLevel.L200 and Nino(true, Some(testNino))),
+          .authorise[Unit](MockitoEq((AuthProviders(PrivilegedApplication)) or (ConfidenceLevel.L200 and Nino(true, Some(testNino)))),
             any())(any(), any())
       }
 
