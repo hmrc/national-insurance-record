@@ -19,12 +19,13 @@ package uk.gov.hmrc.nationalinsurancerecord.connectors
 import com.google.inject.Inject
 import play.api.Mode.Mode
 import play.api.http.Status._
-import play.api.{Configuration, Environment}
+import play.api.{Configuration, Environment, http}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{HeaderCarrier, HttpGet, HttpResponse, Upstream4xxResponse}
-import uk.gov.hmrc.nationalinsurancerecord.config.WSHttp
+import uk.gov.hmrc.http.HttpClient
 import uk.gov.hmrc.nationalinsurancerecord.services.MetricsService
-import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -32,10 +33,9 @@ import scala.util.{Failure, Success, Try}
 
 class CitizenDetailsConnector @Inject()(environment: Environment,
                                         configuration: Configuration,
-                                        metrics: MetricsService) extends ServicesConfig{
+                                        metrics: MetricsService) extends ServicesConfig with BackendController {
 
   val serviceUrl = baseUrl("citizen-details")
-  val http: HttpGet = new HttpGet with WSHttp
 
   override protected def mode: Mode = environment.mode
   override protected def runModeConfiguration: Configuration = configuration
@@ -44,7 +44,7 @@ class CitizenDetailsConnector @Inject()(environment: Environment,
 
   def retrieveMCIStatus(nino: Nino)(implicit hc: HeaderCarrier): Future[Int] = {
     val timerContext = metrics.startCitizenDetailsTimer()
-    http.GET[HttpResponse](url(nino)) map {
+    HttpGet.GET[HttpResponse](url(nino)) map {
       personResponse =>
         timerContext.stop()
         Success(personResponse.status)

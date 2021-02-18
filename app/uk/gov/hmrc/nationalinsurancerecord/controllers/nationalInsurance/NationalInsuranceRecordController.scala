@@ -29,7 +29,7 @@ import uk.gov.hmrc.nationalinsurancerecord.controllers.{ErrorHandling, ErrorResp
 import uk.gov.hmrc.nationalinsurancerecord.domain.{Exclusion, NationalInsuranceTaxYear, TaxYear}
 import uk.gov.hmrc.nationalinsurancerecord.events.{NationalInsuranceExclusion, NationalInsuranceRecord}
 import uk.gov.hmrc.nationalinsurancerecord.services.NationalInsuranceRecordService
-import uk.gov.hmrc.play.microservice.controller.BaseController
+import uk.gov.hmrc.play.bootstrap.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
 

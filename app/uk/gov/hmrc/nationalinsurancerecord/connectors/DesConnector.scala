@@ -21,17 +21,19 @@ import play.api.Mode.Mode
 import play.api.data.validation.ValidationError
 import play.api.libs.json.{Format, JsPath, OFormat, Reads}
 import play.api.{Configuration, Environment, Logger}
+
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.http.{HeaderCarrier, HttpGet, HttpReads, HttpResponse}
 import uk.gov.hmrc.nationalinsurancerecord.cache._
-import uk.gov.hmrc.nationalinsurancerecord.config.{ApplicationConfig, WSHttp}
+import uk.gov.hmrc.nationalinsurancerecord.config.ApplicationConfig
+import uk.gov.hmrc.http.HttpClient
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.des.{DesLiabilities, DesNIRecord, DesSummary}
 import uk.gov.hmrc.nationalinsurancerecord.services.{CachingService, MetricsService}
 import uk.gov.hmrc.nationalinsurancerecord.util.{JsonDepersonaliser, NIRecordConstants}
-import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -57,7 +59,6 @@ class DesConnector @Inject()(environment: Environment,
 
   class JsonValidationException(message: String) extends Exception(message)
 
-  def http: HttpGet = new HttpGet with WSHttp
   def url(path: String): String = s"$serviceUrl$path"
   def requestHeaderCarrier(implicit hc: HeaderCarrier): HeaderCarrier = {
     HeaderCarrier.apply(Some(Authorization(authToken))).withExtraHeaders("Originator-Id" -> "DA_PF", "Environment" -> desEnvironment)
@@ -110,7 +111,7 @@ class DesConnector @Inject()(environment: Environment,
 
   private def connectToDes[A](url: String, api: APITypes, requestHc: HeaderCarrier)(implicit hc: HeaderCarrier, reads: Reads[A]): Future[A] = {
     val timerContext = metrics.startTimer(api)
-    val futureResponse = http.GET[HttpResponse](url)(hc = requestHc, rds = HttpReads.readRaw, ec = global)
+    val futureResponse = HttpClient.GET[HttpResponse](url)(hc = requestHc, rds = HttpReads.readRaw, ec = global)
 
     futureResponse.map { httpResponse =>
       timerContext.stop()
