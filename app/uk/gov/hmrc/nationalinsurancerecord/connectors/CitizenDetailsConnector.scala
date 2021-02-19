@@ -24,7 +24,7 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{HeaderCarrier, HttpGet, HttpResponse, Upstream4xxResponse}
 import uk.gov.hmrc.http.HttpClient
 import uk.gov.hmrc.nationalinsurancerecord.services.MetricsService
-import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
+import uk.gov.hmrc.play.bootstrap.backend.controller.BackendBaseController
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -33,12 +33,12 @@ import scala.util.{Failure, Success, Try}
 
 class CitizenDetailsConnector @Inject()(environment: Environment,
                                         configuration: Configuration,
-                                        metrics: MetricsService) extends ServicesConfig with BackendController {
+                                        metrics: MetricsService,
+                                        servicesConfig: ServicesConfig) extends BackendBaseController {
 
   val serviceUrl = baseUrl("citizen-details")
 
   override protected def mode: Mode = environment.mode
-  override protected def runModeConfiguration: Configuration = configuration
 
   private def url(nino: Nino) = s"$serviceUrl/citizen-details/$nino/designatory-details/"
 

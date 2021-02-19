@@ -18,9 +18,12 @@ package uk.gov.hmrc.nationalinsurancerecord.config
 
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 @Singleton
 class ApplicationConfig @Inject()(configuration: Configuration) {
+  
+
   val responseCacheTTL = configuration.getInt("mongodb.responseTTL").getOrElse(throw new RuntimeException("MongoDB TTL is not configured"))
 
   lazy val authorization: String = s"Bearer ${configuration.getString("microservice.services.des-hod.authorizationToken").getOrElse("Local")}"
