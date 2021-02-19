@@ -19,12 +19,11 @@ package uk.gov.hmrc.nationalinsurancerecord.connectors
 import com.google.inject.Inject
 import play.api.Mode.Mode
 import play.api.data.validation.ValidationError
-import play.api.libs.json.{Format, JsPath, OFormat, Reads}
+import play.api.libs.json.{Format, JsPath, JsonValidationError, OFormat, Reads}
 import play.api.{Configuration, Environment, Logger}
-
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.logging.Authorization
-import uk.gov.hmrc.http.{HeaderCarrier, HttpGet, HttpReads, HttpResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, HttpResponse}
 import uk.gov.hmrc.nationalinsurancerecord.cache._
 import uk.gov.hmrc.nationalinsurancerecord.config.ApplicationConfig
 import uk.gov.hmrc.http.HttpClient
@@ -33,7 +32,6 @@ import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.des.{DesLiabilities, DesNIRecord, DesSummary}
 import uk.gov.hmrc.nationalinsurancerecord.services.{CachingService, MetricsService}
 import uk.gov.hmrc.nationalinsurancerecord.util.{JsonDepersonaliser, NIRecordConstants}
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -45,17 +43,15 @@ class DesConnector @Inject()(environment: Environment,
                              desNIRecordRepository: DesNIRecordRepository,
                              desLiabilitiesRepository: DesLiabilitiesRepository,
                              metrics: MetricsService,
-                             applicationConfig: ApplicationConfig) extends ServicesConfig {
+                             http: HttpClient,
+                             appConfig: ApplicationConfig)  {
 
-  val serviceUrl: String = baseUrl("des-hod")
-  val authToken: String = applicationConfig.authorization
-  val desEnvironment: String = applicationConfig.desEnvironment
+  val serviceUrl: String = appConfig.desUrl
+  val authToken: String = appConfig.authorization
+  val desEnvironment: String = appConfig.desEnvironment
   val summaryRepository: CachingService[DesSummaryCache, DesSummary] = desSummaryRepository()
   val liabilitiesRepository: CachingService[DesLiabilitiesCache, DesLiabilities] = desLiabilitiesRepository()
   val nirecordRepository: CachingService[DesNIRecordCache, DesNIRecord] = desNIRecordRepository()
-
-  override protected def mode: Mode = environment.mode
-  override protected def runModeConfiguration: Configuration = configuration
 
   class JsonValidationException(message: String) extends Exception(message)
 
@@ -111,7 +107,7 @@ class DesConnector @Inject()(environment: Environment,
 
   private def connectToDes[A](url: String, api: APITypes, requestHc: HeaderCarrier)(implicit hc: HeaderCarrier, reads: Reads[A]): Future[A] = {
     val timerContext = metrics.startTimer(api)
-    val futureResponse = HttpClient.GET[HttpResponse](url)(hc = requestHc, rds = HttpReads.readRaw, ec = global)
+    val futureResponse = http.GET[HttpResponse](url)(hc = requestHc, rds = HttpReads.readRaw, ec = global)
 
     futureResponse.map { httpResponse =>
       timerContext.stop()
@@ -142,7 +138,7 @@ class DesConnector @Inject()(environment: Environment,
     }
   }
 
-  private def formatJsonErrors(errors: Seq[(JsPath, Seq[ValidationError])]): String = {
+  private def formatJsonErrors(errors: Seq[(JsPath, Seq[JsonValidationError])]): String = {
     "JSON Validation Error: " + errors.map(p => p._1 + " - " + p._2.map(e => removeJson(e.message)).mkString(",")).mkString(" | ")
   }
 

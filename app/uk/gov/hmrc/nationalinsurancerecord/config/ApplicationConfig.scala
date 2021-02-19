@@ -21,8 +21,10 @@ import play.api.Configuration
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 @Singleton
-class ApplicationConfig @Inject()(configuration: Configuration) {
-  
+class ApplicationConfig @Inject()(configuration: Configuration, servicesConfig: ServicesConfig) {
+
+  val serviceUrl = servicesConfig.baseUrl("citizen-details")
+  val desUrl = servicesConfig.baseUrl("des-hod")
 
   val responseCacheTTL = configuration.getInt("mongodb.responseTTL").getOrElse(throw new RuntimeException("MongoDB TTL is not configured"))
 

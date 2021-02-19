@@ -17,34 +17,26 @@
 package uk.gov.hmrc.nationalinsurancerecord.connectors
 
 import com.google.inject.Inject
-import play.api.Mode.Mode
-import play.api.http.Status._
-import play.api.{Configuration, Environment, http}
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.{HeaderCarrier, HttpGet, HttpResponse, Upstream4xxResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, Upstream4xxResponse}
 import uk.gov.hmrc.http.HttpClient
+import uk.gov.hmrc.nationalinsurancerecord.config.ApplicationConfig
 import uk.gov.hmrc.nationalinsurancerecord.services.MetricsService
-import uk.gov.hmrc.play.bootstrap.backend.controller.BackendBaseController
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-
+import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
-class CitizenDetailsConnector @Inject()(environment: Environment,
-                                        configuration: Configuration,
-                                        metrics: MetricsService,
-                                        servicesConfig: ServicesConfig) extends BackendBaseController {
+class CitizenDetailsConnector @Inject()(appConfig: ApplicationConfig,
+                                        http: HttpClient,
+                                        metrics: MetricsService) extends BackendController {
 
-  val serviceUrl = baseUrl("citizen-details")
-
-  override protected def mode: Mode = environment.mode
-
+  val serviceUrl: String = appConfig.serviceUrl
   private def url(nino: Nino) = s"$serviceUrl/citizen-details/$nino/designatory-details/"
 
   def retrieveMCIStatus(nino: Nino)(implicit hc: HeaderCarrier): Future[Int] = {
     val timerContext = metrics.startCitizenDetailsTimer()
-    HttpGet.GET[HttpResponse](url(nino)) map {
+    http.GET[HttpResponse](url(nino)) map {
       personResponse =>
         timerContext.stop()
         Success(personResponse.status)
@@ -62,5 +54,4 @@ class CitizenDetailsConnector @Inject()(environment: Environment,
         Future.successful(value)
     }
   }
-
 }
