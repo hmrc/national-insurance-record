@@ -19,7 +19,7 @@ package uk.gov.hmrc.nationalinsurancerecord.controllers.nationalInsurance
 import com.google.inject.{Inject, Singleton}
 import play.api.hal.HalResource
 import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.BaseController
+import play.api.mvc.{Action, AnyContent, BodyParser, ControllerComponents}
 import uk.gov.hmrc.api.controllers.HeaderValidator
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
@@ -30,15 +30,18 @@ import uk.gov.hmrc.nationalinsurancerecord.domain.{Exclusion, NationalInsuranceT
 import uk.gov.hmrc.nationalinsurancerecord.events.{NationalInsuranceExclusion, NationalInsuranceRecord}
 import uk.gov.hmrc.nationalinsurancerecord.services.NationalInsuranceRecordService
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
+import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
 class NationalInsuranceRecordController @Inject()(nationalInsuranceRecordService: NationalInsuranceRecordService,
                                                   auditConnector: AuditConnector,
                                                   appContext: AppContext,
-                                                  authAction: AuthAction
-                                                 )(implicit hc: HeaderCarrier) extends BaseController
+                                                  authAction: AuthAction,
+                                                  cc: ControllerComponents
+                                                 )(implicit hc: HeaderCarrier) extends BackendController(cc)
                                                     with HeaderValidator
                                                     with ErrorHandling
                                                     with HalSupport
@@ -121,5 +124,9 @@ class NationalInsuranceRecordController @Inject()(nationalInsuranceRecordService
       })
 
   }
+
+  //TODO: needed?
+  override def parser: BodyParser[AnyContent] = cc.parsers.defaultBodyParser
+  override implicit protected def executionContext: ExecutionContext = cc.executionContext
 
 }

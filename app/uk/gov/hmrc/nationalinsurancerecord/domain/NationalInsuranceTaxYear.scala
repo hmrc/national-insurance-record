@@ -36,7 +36,8 @@ case class NationalInsuranceTaxYear(
 }
 
 object NationalInsuranceTaxYear {
-  implicit val reads = Json.reads[NationalInsuranceTaxYear]
+  implicit val reads: Reads[NationalInsuranceTaxYear] = Json.reads[NationalInsuranceTaxYear]
+  implicit val write: OWrites[Option[LocalDate]] = Json.writes[Option[LocalDate]]
   implicit val writes: Writes[NationalInsuranceTaxYear] = (
     ( JsPath \ "taxYear").write[String] and
     ( JsPath \ "qualifying").write[Boolean] and
@@ -50,5 +51,5 @@ object NationalInsuranceTaxYear {
     ( JsPath \ "payable").write[Boolean] and
     ( JsPath \ "underInvestigation").write[Boolean]
     )(unlift(NationalInsuranceTaxYear.unapply))
-  implicit val formats = Format(reads, writes)
+  implicit val formats: Format[NationalInsuranceTaxYear] = Format(reads, writes)
 }

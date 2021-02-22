@@ -32,9 +32,7 @@ trait ErrorHandling {
 
   def errorWrapper(func: => Future[Result])(implicit hc: HeaderCarrier): Future[Result] = {
     func.recover {
-      case e: NotFoundException =>
-        NotFound(Json.toJson(ErrorNotFound))
-
+      case e: NotFoundException => NotFound(Json.toJson(ErrorNotFound))
       case e: GatewayTimeoutException => Logger.error(s"$app Gateway Timeout: ${e.getMessage}", e); GatewayTimeout
       case e: BadGatewayException => Logger.error(s"$app Bad Gateway: ${e.getMessage}", e); BadGateway
       case e: BadRequestException => BadRequest(Json.toJson(ErrorGenericBadRequest("Upstream Bad Request. Is this customer below State Pension Age?")))

@@ -68,7 +68,7 @@ object DesNITaxYear {
         readBooleanWithDefault(__ \ "underInvestigationFlag") and
         readBooleanWithDefault(__ \ "payable") and
         readBigDecimalWithDefault(__ \ "classThreePayable") and
-        (__ \ "classThreePayableBy").readNullable[LocalDate] and
+        (__ \ "classThreePayableBy").readNullable[LocalDate]                                                                                                                                                               and
         (__ \ "classThreePayableByPenalty").readNullable[LocalDate] and
         readBigDecimalWithDefault(__ \ "niEarningsEmployed") and
         readIntWithDefault(__ \ "niEarningsSelfEmployed") and
