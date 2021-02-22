@@ -25,6 +25,7 @@ class ApplicationConfig @Inject()(configuration: Configuration, servicesConfig: 
 
   val serviceUrl = servicesConfig.baseUrl("citizen-details")
   val desUrl = servicesConfig.baseUrl("des-hod")
+  val authUrl = servicesConfig.baseUrl("auth")
 
   val responseCacheTTL = configuration.getInt("mongodb.responseTTL").getOrElse(throw new RuntimeException("MongoDB TTL is not configured"))
 

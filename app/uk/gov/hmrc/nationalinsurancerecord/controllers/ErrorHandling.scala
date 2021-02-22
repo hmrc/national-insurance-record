@@ -18,10 +18,9 @@ package uk.gov.hmrc.nationalinsurancerecord.controllers
 
 import play.api.Logger
 import play.api.libs.json.Json
-import play.api.mvc.Result
+import play.api.mvc.{BaseController, Result}
 import uk.gov.hmrc.api.controllers.{ErrorGenericBadRequest, ErrorInternalServerError, ErrorNotFound}
 import uk.gov.hmrc.http._
-import uk.gov.hmrc.play.bootstrap.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

@@ -17,19 +17,22 @@
 package uk.gov.hmrc.nationalinsurancerecord.connectors
 
 import com.google.inject.Inject
+import play.api.mvc.ControllerComponents
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, Upstream4xxResponse}
 import uk.gov.hmrc.http.HttpClient
 import uk.gov.hmrc.nationalinsurancerecord.config.ApplicationConfig
 import uk.gov.hmrc.nationalinsurancerecord.services.MetricsService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
 class CitizenDetailsConnector @Inject()(appConfig: ApplicationConfig,
                                         http: HttpClient,
-                                        metrics: MetricsService) extends BackendController {
+                                        metrics: MetricsService,
+                                        cc: ControllerComponents) extends BackendController(cc) {
 
   val serviceUrl: String = appConfig.serviceUrl
   private def url(nino: Nino) = s"$serviceUrl/citizen-details/$nino/designatory-details/"

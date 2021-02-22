@@ -37,9 +37,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
-class DesConnector @Inject()(environment: Environment,
-                             configuration: Configuration,
-                             desSummaryRepository: DesSummaryRepository,
+class DesConnector @Inject()(desSummaryRepository: DesSummaryRepository,
                              desNIRecordRepository: DesNIRecordRepository,
                              desLiabilitiesRepository: DesLiabilitiesRepository,
                              metrics: MetricsService,

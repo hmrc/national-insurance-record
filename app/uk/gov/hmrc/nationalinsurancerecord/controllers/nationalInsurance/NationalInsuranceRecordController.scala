@@ -19,26 +19,26 @@ package uk.gov.hmrc.nationalinsurancerecord.controllers.nationalInsurance
 import com.google.inject.{Inject, Singleton}
 import play.api.hal.HalResource
 import play.api.libs.json.{JsValue, Json}
-import play.api.mvc._
+import play.api.mvc.BaseController
 import uk.gov.hmrc.api.controllers.HeaderValidator
 import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.nationalinsurancerecord.config.AppContext
-import uk.gov.hmrc.nationalinsurancerecord.connectors.CustomAuditConnector
 import uk.gov.hmrc.nationalinsurancerecord.controllers.auth.AuthAction
 import uk.gov.hmrc.nationalinsurancerecord.controllers.{ErrorHandling, ErrorResponses, HalSupport, Links}
 import uk.gov.hmrc.nationalinsurancerecord.domain.{Exclusion, NationalInsuranceTaxYear, TaxYear}
 import uk.gov.hmrc.nationalinsurancerecord.events.{NationalInsuranceExclusion, NationalInsuranceRecord}
 import uk.gov.hmrc.nationalinsurancerecord.services.NationalInsuranceRecordService
-import uk.gov.hmrc.play.bootstrap.controller.BaseController
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
 class NationalInsuranceRecordController @Inject()(nationalInsuranceRecordService: NationalInsuranceRecordService,
-                                                  customAuditConnector: CustomAuditConnector,
+                                                  auditConnector: AuditConnector,
                                                   appContext: AppContext,
                                                   authAction: AuthAction
-                                                 ) extends BaseController
+                                                 )(implicit hc: HeaderCarrier) extends BaseController
                                                     with HeaderValidator
                                                     with ErrorHandling
                                                     with HalSupport
@@ -62,22 +62,22 @@ class NationalInsuranceRecordController @Inject()(nationalInsuranceRecordService
 
         case Left(exclusion) => {
           if (exclusion.exclusionReasons.contains(Exclusion.Dead)) {
-            customAuditConnector.sendEvent(NationalInsuranceExclusion(nino, List(Exclusion.Dead)))
+            auditConnector.sendEvent(NationalInsuranceExclusion(nino, List(Exclusion.Dead)))
             Forbidden(Json.toJson(ErrorResponses.ExclusionDead))
           } else if (exclusion.exclusionReasons.contains(Exclusion.ManualCorrespondenceIndicator)) {
-            customAuditConnector.sendEvent(NationalInsuranceExclusion(nino, List(Exclusion.ManualCorrespondenceIndicator)))
+            auditConnector.sendEvent(NationalInsuranceExclusion(nino, List(Exclusion.ManualCorrespondenceIndicator)))
             Forbidden(Json.toJson(ErrorResponses.ExclusionManualCorrespondence))
           } else if (exclusion.exclusionReasons.contains(Exclusion.IsleOfMan)) {
-            customAuditConnector.sendEvent(NationalInsuranceExclusion(nino, List(Exclusion.IsleOfMan)))
+            auditConnector.sendEvent(NationalInsuranceExclusion(nino, List(Exclusion.IsleOfMan)))
             Forbidden(Json.toJson(ErrorResponses.ExclusionIsleOfMan))
           } else {
-            customAuditConnector.sendEvent(NationalInsuranceExclusion(nino, exclusion.exclusionReasons))
+            auditConnector.sendEvent(NationalInsuranceExclusion(nino, exclusion.exclusionReasons))
             Ok(halResourceSelfLink(Json.toJson(exclusion), nationalInsuranceRecordHref(nino)))
           }
         }
 
         case Right(nationalInsuranceRecord) =>
-          customAuditConnector.sendEvent(NationalInsuranceRecord(nino, nationalInsuranceRecord.qualifyingYears,
+          auditConnector.sendEvent(NationalInsuranceRecord(nino, nationalInsuranceRecord.qualifyingYears,
             nationalInsuranceRecord.qualifyingYearsPriorTo1975, nationalInsuranceRecord.numberOfGaps,
             nationalInsuranceRecord.numberOfGapsPayable, nationalInsuranceRecord.dateOfEntry,
             nationalInsuranceRecord.homeResponsibilitiesProtection, nationalInsuranceRecord.earningsIncludedUpTo,
@@ -95,22 +95,22 @@ class NationalInsuranceRecordController @Inject()(nationalInsuranceRecordService
 
         case Left(exclusion) =>
           if (exclusion.exclusionReasons.contains(Exclusion.Dead)) {
-            customAuditConnector.sendEvent(NationalInsuranceExclusion(nino, List(Exclusion.Dead)))
+            auditConnector.sendEvent(NationalInsuranceExclusion(nino, List(Exclusion.Dead)))
             Forbidden(Json.toJson(ErrorResponses.ExclusionDead))
           } else if (exclusion.exclusionReasons.contains(Exclusion.ManualCorrespondenceIndicator)) {
-            customAuditConnector.sendEvent(NationalInsuranceExclusion(nino, List(Exclusion.ManualCorrespondenceIndicator)))
+            auditConnector.sendEvent(NationalInsuranceExclusion(nino, List(Exclusion.ManualCorrespondenceIndicator)))
             Forbidden(Json.toJson(ErrorResponses.ExclusionManualCorrespondence))
           } else if (exclusion.exclusionReasons.contains(Exclusion.IsleOfMan)) {
-            customAuditConnector.sendEvent(NationalInsuranceExclusion(nino, List(Exclusion.IsleOfMan)))
+            auditConnector.sendEvent(NationalInsuranceExclusion(nino, List(Exclusion.IsleOfMan)))
             Forbidden(Json.toJson(ErrorResponses.ExclusionIsleOfMan))
           } else {
-            customAuditConnector.sendEvent(NationalInsuranceExclusion(nino, exclusion.exclusionReasons))
+            auditConnector.sendEvent(NationalInsuranceExclusion(nino, exclusion.exclusionReasons))
             Ok(halResourceSelfLink(Json.toJson(exclusion), nationalInsuranceTaxYearHref(nino, taxYear)))
           }
 
         case Right(nationalInsuranceTaxYear) =>
           import uk.gov.hmrc.nationalinsurancerecord.events.NationalInsuranceTaxYear
-          customAuditConnector.sendEvent(NationalInsuranceTaxYear(nino, nationalInsuranceTaxYear.taxYear,
+          auditConnector.sendEvent(NationalInsuranceTaxYear(nino, nationalInsuranceTaxYear.taxYear,
             nationalInsuranceTaxYear.qualifying, nationalInsuranceTaxYear.classOneContributions,
             nationalInsuranceTaxYear.classTwoCredits, nationalInsuranceTaxYear.classThreeCredits,
             nationalInsuranceTaxYear.otherCredits, nationalInsuranceTaxYear.classThreePayable,
