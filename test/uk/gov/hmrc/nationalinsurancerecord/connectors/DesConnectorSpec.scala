@@ -22,31 +22,54 @@ import org.mockito.Mockito._
 import org.mockito.{Matchers, Mockito}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.OneAppPerSuite
-import play.api.Environment
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.inject.bind
+import play.api.{Application, Environment}
 import play.api.libs.json.{JsValue, Json}
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpGet, HttpResponse}
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpClient, HttpGet, HttpResponse}
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.cache._
+import uk.gov.hmrc.nationalinsurancerecord.config.ApplicationConfig
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.des.{DesLiabilities, DesNIRecord, DesSummary}
 import uk.gov.hmrc.nationalinsurancerecord.services.{CachingMongoService, CachingService, MetricsService}
 
 import scala.concurrent.Future
 
-class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar with OneAppPerSuite with ScalaFutures {
+class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar with GuiceOneAppPerSuite with ScalaFutures {
   // scalastyle:off magic.number
 
   val mockSummaryRepo: DesSummaryRepository = mock[DesSummaryRepository]
   val mockDesSummary = mock[CachingMongoService[DesSummaryCache, DesSummary]]
-  when(mockSummaryRepo()).thenReturn(mockDesSummary)
-
+  val mockMetrics: MetricsService = mock[MetricsService]
+  val mockTimerContext: Timer.Context = mock[Timer.Context]
+  val mockHttpGet: HttpGet = mock[HttpGet]
+  val mockHttpClient: HttpClient = mock[HttpClient]
   val mockLiabilitiesRepo: DesLiabilitiesRepository = mock[DesLiabilitiesRepository]
   val mockDesLiabilities: CachingMongoService[DesLiabilitiesCache, DesLiabilities] = mock[CachingMongoService[DesLiabilitiesCache, DesLiabilities]]
-  when(mockLiabilitiesRepo()).thenReturn(mockDesLiabilities)
-
   val mockNIRecordRepo: DesNIRecordRepository = mock[DesNIRecordRepository]
   val mockDesNIRecord: CachingMongoService[DesNIRecordCache, DesNIRecord] = mock[CachingMongoService[DesNIRecordCache, DesNIRecord]]
+  val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
+  val liabilities: DesLiabilities = testLiabilitiesJson.as[DesLiabilities]
+
+  override def fakeApplication(): Application = GuiceApplicationBuilder()
+    .overrides(
+      bind[MetricsService].toInstance(mockMetrics),
+      bind[Timer.Context].toInstance(mockTimerContext),
+      bind[HttpGet].toInstance(mockHttpGet),
+      bind[DesLiabilitiesRepository].toInstance(mockLiabilitiesRepo),
+      bind[CachingMongoService[DesLiabilitiesCache, DesLiabilities]].toInstance(mockDesLiabilities),
+      bind[DesNIRecordRepository].toInstance(mockNIRecordRepo),
+      bind[CachingMongoService[DesNIRecordCache, DesNIRecord]].toInstance(mockDesNIRecord),
+      bind[ApplicationConfig].toInstance(mockAppConfig)
+    )
+    .build()
+
+  when(mockSummaryRepo()).thenReturn(mockDesSummary)
+
+  when(mockLiabilitiesRepo()).thenReturn(mockDesLiabilities)
+
   when(mockNIRecordRepo()).thenReturn(mockDesNIRecord)
 
   val testNIRecordJson: JsValue = Json.parse(
@@ -233,25 +256,18 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
       |}
     """.stripMargin)
 
-  val liabilities: DesLiabilities = testLiabilitiesJson.as[DesLiabilities]
-  val mockMetrics: MetricsService = mock[MetricsService]
-  val mockTimerContext: Timer.Context = mock[Timer.Context]
-  val appConfig = app.injector.instanceOf[StubApplicationConfig]
-
   "DesConnector - No Caching" should {
     val connector: DesConnector = new DesConnector(
-      app.injector.instanceOf[Environment],
-      app.configuration,
       mockSummaryRepo,
       mockNIRecordRepo,
       mockLiabilitiesRepo,
       mockMetrics,
-      appConfig
+      mockHttpClient,
+      mockAppConfig
     ) {
       override val serviceUrl: String = ""
       override val authToken: String = "auth"
       override val desEnvironment: String = "env"
-      override val http: HttpGet = mock[HttpGet]
       override val liabilitiesRepository: CachingService[DesLiabilitiesCache, DesLiabilities] = mockLiabilitiesRepo()
       override val nirecordRepository: CachingService[DesNIRecordCache, DesNIRecord] = mockNIRecordRepo()
     }
@@ -262,7 +278,7 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
       reset(mockMetrics)
       when(mockMetrics.startTimer(APITypes.Summary)).thenReturn(mockTimerContext)
       when(mockSummaryRepo().findByNino(Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.successful(None))
-      when(connector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any()))
+      when(mockHttpGet.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(HttpResponse(
               200,
               Some(Json.parse(
@@ -295,7 +311,7 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
       reset(mockMetrics)
       when(mockMetrics.startTimer(APITypes.NIRecord)).thenReturn(mock[Timer.Context])
       when(mockNIRecordRepo().findByNino(Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.successful(None))
-      when(connector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any()))
+      when(mockHttpGet.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any()))
         .thenReturn(
           Future.successful(
             HttpResponse(
@@ -338,7 +354,7 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
     }
 
     "return a failed NIRecord when there is an http error and pass on the exception" in {
-      when(connector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any()))
+      when(mockHttpGet.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any()))
         .thenReturn(Future.failed(new BadRequestException("Bad Request exception")))
       ScalaFutures.whenReady(connector.getNationalInsuranceRecord(generateNino()).failed) { ex =>
         ex shouldBe a[BadRequestException]
@@ -349,7 +365,7 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
       reset(mockMetrics)
       when(mockMetrics.startTimer(APITypes.Liabilities)).thenReturn(mock[Timer.Context])
       when(mockLiabilitiesRepo().findByNino(Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.successful(None))
-      when(connector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any()))
+      when(mockHttpGet.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any()))
         .thenReturn(
           Future.successful(
             HttpResponse(
@@ -366,7 +382,7 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
       reset(mockMetrics)
       when(mockMetrics.startTimer(APITypes.NIRecord)).thenReturn(mock[Timer.Context])
       when(mockNIRecordRepo().findByNino(Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.successful(None))
-      when(connector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any()))
+      when(mockHttpGet.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any()))
         .thenReturn(
           Future.successful(
             HttpResponse(
@@ -382,7 +398,7 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
       reset(mockMetrics)
       when(mockMetrics.startTimer(APITypes.Liabilities)).thenReturn(mock[Timer.Context])
       when(mockLiabilitiesRepo().findByNino(Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.successful(None))
-      when(connector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any()))
+      when(mockHttpGet.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any()))
         .thenReturn(
           Future.successful(
             HttpResponse(
@@ -401,7 +417,7 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
     }
 
     "return a failed Liabilities when there is an http error and pass on the exception" in {
-      when(connector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any()))
+      when(mockHttpGet.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any()))
         .thenReturn(Future.failed(new BadRequestException("Bad Request exception")))
       ScalaFutures.whenReady(connector.getLiabilities(generateNino()).failed) { ex =>
         ex shouldBe a[BadRequestException]
@@ -431,7 +447,7 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
 
       reset(mockMetrics)
       when(mockMetrics.startTimer(APITypes.NIRecord)).thenReturn(mock[Timer.Context])
-      when(connector.http.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any()))
+      when(mockHttpGet.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any()))
       .thenReturn(
         Future.successful(
           HttpResponse(
@@ -452,17 +468,15 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
     val appConfig = app.injector.instanceOf[StubApplicationConfig]
 
     val connector: DesConnector = new DesConnector(
-      app.injector.instanceOf[Environment],
-      app.configuration,
       mockSummaryRepo,
       mockNIRecordRepo,
       mockLiabilitiesRepo,
       mockMetrics,
-      appConfig) {
+      mockHttpClient,
+      mockAppConfig) {
       override val serviceUrl: String = ""
       override val authToken: String = "auth"
       override val desEnvironment: String = "env"
-      override val http: HttpGet = mock[HttpGet]
       override val liabilitiesRepository: CachingService[DesLiabilitiesCache, DesLiabilities] = mockLiabilitiesRepo()
       override val nirecordRepository: CachingService[DesNIRecordCache, DesNIRecord] = mockNIRecordRepo()
     }
@@ -484,7 +498,7 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
     "return valid Summary from cache" in {
       val desSummaryF = connector.getSummary(generateNino())(HeaderCarrier())
       await(desSummaryF) shouldBe testSummaryModel
-      verify(connector.http, never()).GET(Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any())
+      verify(mockHttpGet, never()).GET(Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any())
     }
 
     "return valid NIRecord response" in {
@@ -496,7 +510,7 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
     "return valid NIRecord from cache" in {
       val desNIRecordF = connector.getNationalInsuranceRecord(generateNino())(HeaderCarrier())
       await(desNIRecordF) shouldBe niRecord
-      verify(connector.http, never()).GET(Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any())
+      verify(mockHttpGet, never()).GET(Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any())
     }
 
     "return valid Liabilities response" in {
@@ -508,7 +522,7 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
     "return valid Liabilities from cache" in {
       val desLiabilitiesF = connector.getLiabilities(generateNino())(HeaderCarrier())
       await(desLiabilitiesF) shouldBe liabilities
-      verify(connector.http, never()).GET(Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any())
+      verify(mockHttpGet, never()).GET(Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any())
     }
 
   }

@@ -16,21 +16,37 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.controllers
 
+import controllers.Assets
 import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.OneAppPerSuite
-import play.api.Configuration
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.{Application, Configuration}
 import play.api.http.LazyHttpErrorHandler
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsArray, JsDefined, JsString, JsUndefined}
-import play.api.mvc.Result
+import play.api.mvc.{ControllerComponents, Result}
 import play.api.test.FakeRequest
+import play.api.inject.bind
 import play.api.test.Helpers._
 import uk.gov.hmrc.nationalinsurancerecord.config.AppContext
-import uk.gov.hmrc.nationalinsurancerecord.controllers.auth.{AuthAction, FakeAuthAction}
 import uk.gov.hmrc.nationalinsurancerecord.controllers.documentation.DocumentationController
 import uk.gov.hmrc.play.test.UnitSpec
 
 
-class DocumentationControllerSpec extends UnitSpec with OneAppPerSuite with MockitoSugar {
+class DocumentationControllerSpec extends UnitSpec with GuiceOneAppPerSuite with MockitoSugar {
+
+  val mockAppContext: AppContext = mock[AppContext]
+  val mockAssets: Assets = mock[Assets]
+  val mockCc: ControllerComponents = mock[ControllerComponents]
+
+  override def fakeApplication(): Application = GuiceApplicationBuilder()
+    .overrides(
+      bind[AppContext].toInstance(mockAppContext),
+      bind[Assets].toInstance(mockAssets),
+      bind[ControllerComponents].toInstance(mockCc)
+    )
+    .build()
+
+  val AppContext: AppContext = app.injector.instanceOf[AppContext]
   "respond to GET /api/definition" in {
     val result = route(app, FakeRequest(GET, "/api/definition"))
     status(result.get) shouldNot be(NOT_FOUND)
@@ -38,7 +54,7 @@ class DocumentationControllerSpec extends UnitSpec with OneAppPerSuite with Mock
 
   def getDefinitionResultFromConfig(apiConfig: Option[Configuration] = None, apiStatus: Option[String] = None): Result = {
 
-    val appContext = new AppContext(app.configuration) {
+    val appContext = AppContext {
       override lazy val appName: String = ""
 
       override lazy val apiGatewayContext: String = ""
