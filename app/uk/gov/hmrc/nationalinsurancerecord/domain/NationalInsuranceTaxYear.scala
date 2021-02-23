@@ -16,9 +16,11 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.domain
 
+import play.api.libs.json.JodaWrites.jodaLocalDateWrites
+import play.api.libs.json.JodaReads.jodaLocalDateReads
 import org.joda.time.LocalDate
 import play.api.libs.functional.syntax._
-import play.api.libs.json._
+import play.api.libs.json.{Json, Writes, Reads, _}
 
 case class NationalInsuranceTaxYear(
                     taxYear: String,
@@ -36,8 +38,9 @@ case class NationalInsuranceTaxYear(
 }
 
 object NationalInsuranceTaxYear {
+  implicit val jodaWrites: Writes[LocalDate] = jodaLocalDateWrites("yyyy-MM-dd")
+  implicit val jodaReads: Reads[LocalDate] = jodaLocalDateReads("yyyy-MM-dd")
   implicit val reads: Reads[NationalInsuranceTaxYear] = Json.reads[NationalInsuranceTaxYear]
-  implicit val write: OWrites[Option[LocalDate]] = Json.writes[Option[LocalDate]]
   implicit val writes: Writes[NationalInsuranceTaxYear] = (
     ( JsPath \ "taxYear").write[String] and
     ( JsPath \ "qualifying").write[Boolean] and

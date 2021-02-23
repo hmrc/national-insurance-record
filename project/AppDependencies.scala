@@ -1,6 +1,6 @@
 /*
  * Copyright 2015 HM Revenue & Customs
- *
+ *writes
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,7 +28,8 @@ object AppDependencies {
     "uk.gov.hmrc" %% "play-hal"                  % "2.1.0-play-26",
     "uk.gov.hmrc" %% "play-reactivemongo"        % "6.8.0",
     "uk.gov.hmrc" %% "simple-reactivemongo"      % "7.31.0-play-26",
-    "uk.gov.hmrc" %% "auth-client"               % "2.31.0-play-26"
+    "uk.gov.hmrc" %% "auth-client"               % "2.31.0-play-26",
+    "com.typesafe.play" %% "play-json-joda" % "2.6.10"
   )
 
   val test: Seq[ModuleID] = Seq(
