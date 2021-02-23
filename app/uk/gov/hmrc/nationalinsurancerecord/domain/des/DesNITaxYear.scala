@@ -18,6 +18,8 @@ package uk.gov.hmrc.nationalinsurancerecord.domain.des
 
 import org.joda.time.LocalDate
 import play.api.libs.functional.syntax._
+import play.api.libs.json.JodaReads.jodaLocalDateReads
+import play.api.libs.json.JodaWrites.jodaLocalDateWrites
 import play.api.libs.json._
 import uk.gov.hmrc.nationalinsurancerecord.domain.TaxYear
 
@@ -56,6 +58,10 @@ object DesNITaxYear {
     case true => 1
     case _ => 0
   }
+
+  implicit val jodaWrites: Writes[LocalDate] = jodaLocalDateWrites("yyyy-MM-dd")
+  implicit val jodaReads: Reads[LocalDate] = jodaLocalDateReads("yyyy-MM-dd")
+
 
   val readBooleanWithDefault: JsPath => Reads[Boolean] = jsPath => jsPath.readNullable[Boolean].map(_.getOrElse(false))
 

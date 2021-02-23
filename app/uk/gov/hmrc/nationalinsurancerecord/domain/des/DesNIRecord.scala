@@ -19,6 +19,8 @@ package uk.gov.hmrc.nationalinsurancerecord.domain.des
 import org.joda.time.LocalDate
 import play.Logger
 import play.api.libs.functional.syntax._
+import play.api.libs.json.JodaReads.jodaLocalDateReads
+import play.api.libs.json.JodaWrites.jodaLocalDateWrites
 import play.api.libs.json._
 
 case class DesNIRecord(
@@ -44,6 +46,9 @@ case class DesNIRecord(
 }
 
 object DesNIRecord {
+
+  implicit val jodaReads: Reads[LocalDate] = jodaLocalDateReads("yyyy-MM-dd")
+  implicit val jodaWrites: Writes[LocalDate] = jodaLocalDateWrites("yyyy-MM-dd")
 
   val readNullableInt: JsPath => Reads[Int] =
     jsPath => jsPath.readNullable[Int].map(_.getOrElse(0))

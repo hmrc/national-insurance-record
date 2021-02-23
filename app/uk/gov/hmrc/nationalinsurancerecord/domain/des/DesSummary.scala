@@ -18,6 +18,8 @@ package uk.gov.hmrc.nationalinsurancerecord.domain.des
 
 import org.joda.time.LocalDate
 import play.api.libs.functional.syntax._
+import play.api.libs.json.JodaReads.jodaLocalDateReads
+import play.api.libs.json.JodaWrites.jodaLocalDateWrites
 import play.api.libs.json._
 
 
@@ -30,6 +32,10 @@ case class DesSummary(
                      )
 
 object DesSummary {
+  
+  implicit val jodaReads: Reads[LocalDate] = jodaLocalDateReads("yyyy-MM-dd")
+  implicit val jodaWrites: Writes[LocalDate] = jodaLocalDateWrites("yyyy-MM-dd")
+
   val readBooleanFromInt: JsPath => Reads[Boolean] = jsPath => jsPath.read[Int].map(_.equals(1))
   val writeIntFromBoolean: JsPath => OWrites[Boolean] = jsPath => jsPath.write[Int].contramap[Boolean] {
     case true => 1
