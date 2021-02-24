@@ -17,13 +17,16 @@
 package uk.gov.hmrc.nationalinsurancerecord.controllers.auth
 
 import akka.util.Timeout
-import org.mockito.Matchers.{any, eq => MockitoEq}
+import org.mockito.ArgumentMatchers.{any, eq => MockitoEq}
 import org.mockito.Mockito.{verify, when}
 import org.scalatest.BeforeAndAfter
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.http.Status.{BAD_REQUEST, OK, UNAUTHORIZED, INTERNAL_SERVER_ERROR}
+import play.api.Application
+import play.api.http.Status.{BAD_REQUEST, INTERNAL_SERVER_ERROR, OK, UNAUTHORIZED}
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.{Action, AnyContent, Controller, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.status

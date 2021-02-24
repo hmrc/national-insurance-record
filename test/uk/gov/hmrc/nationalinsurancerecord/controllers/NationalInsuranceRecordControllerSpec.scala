@@ -17,7 +17,13 @@
 package uk.gov.hmrc.nationalinsurancerecord.controllers
 
 import org.joda.time.LocalDate
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
+import org.mockito.Mockito.when
+import org.mockito.ArgumentMatchers.any
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.Application
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.inject.bind
 import play.api.libs.json._
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsJson, _}
@@ -25,32 +31,35 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.config.AppContext
-import uk.gov.hmrc.nationalinsurancerecord.connectors.{CustomAuditConnector, DesConnector}
-import uk.gov.hmrc.nationalinsurancerecord.controllers.auth.{AuthAction, FakeAuthAction}
+import uk.gov.hmrc.nationalinsurancerecord.connectors.DesConnector
+import uk.gov.hmrc.nationalinsurancerecord.controllers.auth.FakeAuthAction
 import uk.gov.hmrc.nationalinsurancerecord.controllers.nationalInsurance.NationalInsuranceRecordController
 import uk.gov.hmrc.nationalinsurancerecord.domain._
 import uk.gov.hmrc.nationalinsurancerecord.services.{CitizenDetailsService, MetricsService, NationalInsuranceRecordService}
-import uk.gov.hmrc.play.audit.model.DataEvent
-import uk.gov.hmrc.play.test.WithFakeApplication
+
 
 import scala.concurrent.Future
 
-class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitSpec with WithFakeApplication with MockitoSugar {
+class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitSpec with GuiceOneAppPerSuite with MockitoSugar {
 
   val emptyRequest = FakeRequest()
   val emptyRequestWithHeader = FakeRequest().withHeaders("Accept" -> "application/vnd.hmrc.1.0+json")
+  val mockNationalInsuranceRecordService: NationalInsuranceRecordService = mock[NationalInsuranceRecordService]
+  val nino: Nino = generateNino()
+  override def fakeApplication(): Application = GuiceApplicationBuilder()
+    .overrides(
+      bind[NationalInsuranceRecordService].toInstance(mockNationalInsuranceRecordService)
+    )
+    .build()
 
-  val mockAuditConnector = new CustomAuditConnector {
-    override lazy val auditConnector = ???
+  val nationalInsuranceRecordController: NationalInsuranceRecordController = app.injector.instanceOf[NationalInsuranceRecordController]
 
-    override def sendEvent(event: DataEvent)(implicit hc: HeaderCarrier): Unit = {}
-  }
 
-  def testNationalInsuranceRecordController(niRecordService: NationalInsuranceRecordService): NationalInsuranceRecordController
-  = new NationalInsuranceRecordController(niRecordService, mockAuditConnector, mock[AppContext], FakeAuthAction) {
-    override val app: String = "Test National Insurance Record"
-    override val context: String = "test"
-  }
+//  def testNationalInsuranceRecordController(niRecordService: NationalInsuranceRecordService): NationalInsuranceRecordController
+//  = new NationalInsuranceRecordController(niRecordService, mockAuditConnector, mock[AppContext], FakeAuthAction) {
+//    override val app: String = "Test National Insurance Record"
+//    override val context: String = "test"
+//  }
 
   private val dummyTaxYearQualifying: NationalInsuranceTaxYear = NationalInsuranceTaxYear(
     taxYear = "2010-11",
@@ -145,32 +154,29 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
   )
 
   "getSummary" when {
-    val mockDesConnector =  mock[DesConnector]
-    val mockCitizenDetailsService = mock[CitizenDetailsService]
-    val mockMetricsService = mock[MetricsService]
 
-    def generateSummaryResponse(serviceResult: Either[ExclusionResponse, NationalInsuranceRecord], nino: Nino = generateNino()) =
-      testNationalInsuranceRecordController(new NationalInsuranceRecordService(mockDesConnector, mockCitizenDetailsService, mockMetricsService) {
-        override def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceRecord]] = Future.successful(serviceResult)
+//    when(mockNationalInsuranceRecordService.getNationalInsuranceRecord(any())(any())).thenReturn(Future.successful())
+//    def generateSummaryResponse(serviceResult: Either[ExclusionResponse, NationalInsuranceRecord], nino: Nino = generateNino()) =
+//      testNationalInsuranceRecordController(new NationalInsuranceRecordService(mockDesConnector, mockCitizenDetailsService, mockMetricsService) {
+//        override def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceRecord]] = Future.successful(serviceResult)
+//
+//        override def getTaxYear(nino: Nino, taxYear: TaxYear)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceTaxYear]] = ???
+//      }).getSummary(nino)(emptyRequestWithHeader)
 
-        override def getTaxYear(nino: Nino, taxYear: TaxYear)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceTaxYear]] = ???
-      }).getSummary(nino)(emptyRequestWithHeader)
 
     "the request headers are invalid" should {
       "return status code 406" in {
-        val response = testNationalInsuranceRecordController(new NationalInsuranceRecordService(mockDesConnector, mockCitizenDetailsService, mockMetricsService) {
-          override def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceRecord]] = ???
-
-          override def getTaxYear(nino: Nino, taxYear: TaxYear)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceTaxYear]] = ???
-        }).getSummary(generateNino())(emptyRequest)
+        val response = nationalInsuranceRecordController.getSummary(nino)(emptyRequest)
         status(response) shouldBe 406
         contentAsJson(response) shouldBe Json.parse("""{"code":"ACCEPT_HEADER_INVALID","message":"The accept header is missing or invalid"}""")
       }
     }
 
     "there is a dead exclusion" should {
+//TODO reset mocks once we get rid of the red
+      when(mockNationalInsuranceRecordService.getNationalInsuranceRecord(any())(any())).thenReturn(Left(ExclusionResponse(List(Exclusion.Dead))))
 
-      val response = generateSummaryResponse(Left(ExclusionResponse(List(Exclusion.Dead))))
+      val response = nationalInsuranceRecordController.getSummary(nino)(emptyRequestWithHeader)
 
       "return status 403" in {
         status(response) shouldBe 403
@@ -185,6 +191,7 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
     }
 
     "there is a manual correspondence exclusion" should {
+      when(mockNationalInsuranceRecordService.getNationalInsuranceRecord(any())(any())).thenReturn(Left(ExclusionResponse(List(Exclusion.ManualCorrespondenceIndicator))))
 
       val response = generateSummaryResponse(Left(ExclusionResponse(List(Exclusion.ManualCorrespondenceIndicator))))
 
