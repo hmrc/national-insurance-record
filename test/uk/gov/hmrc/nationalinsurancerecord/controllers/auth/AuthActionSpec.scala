@@ -35,7 +35,9 @@ import uk.gov.hmrc.auth.core.retrieve.v2.TrustedHelper
 import uk.gov.hmrc.auth.core.retrieve.{GGCredId, PAClientId, ~}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.domain.Generator
+import uk.gov.hmrc.http.HttpClient
 import uk.gov.hmrc.nationalinsurancerecord.controllers.auth.AuthActionSpec.retrievalsTestingSyntax
+import uk.gov.hmrc.nationalinsurancerecord.services.MetricsService
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -49,6 +51,15 @@ class AuthActionSpec
   private val ninoGenerator = new Generator()
   private val testNino = ninoGenerator.nextNino.nino
   private val goodUriWithNino = s"/ni/$testNino/"
+  val mockAuthConnector: AuthConnector = mock[AuthConnector]
+
+  override def fakeApplication(): Application = GuiceApplicationBuilder()
+    .overrides(
+      bind[AuthConnector].toInstance(mockAuthConnector)
+    )
+    .build()
+
+  val sut: AuthActionImpl = app.injector.instanceOf[AuthActionImpl]
 
   implicit val timeout: Timeout = 5 seconds
 
@@ -168,9 +179,8 @@ class AuthActionSpec
   private def testAuthActionWith[T](authResult: Future[T],
                                     uri: String = goodUriWithNino): (Future[Result], AuthConnector) = {
     val mockAuthConnector = newMockConnectorWithAuthResult(authResult)
-    val authAction = new AuthActionImpl(mockAuthConnector)
 
-    val testHarness = new AuthActionTestHarness(authAction)
+    val testHarness = new AuthActionTestHarness(sut)
 
     (testHarness.onPageLoad()(FakeRequest(method = "", path = uri)),
       mockAuthConnector)

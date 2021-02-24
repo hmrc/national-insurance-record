@@ -193,7 +193,7 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
     "there is a manual correspondence exclusion" should {
       when(mockNationalInsuranceRecordService.getNationalInsuranceRecord(any())(any())).thenReturn(Left(ExclusionResponse(List(Exclusion.ManualCorrespondenceIndicator))))
 
-      val response = generateSummaryResponse(Left(ExclusionResponse(List(Exclusion.ManualCorrespondenceIndicator))))
+      val response = nationalInsuranceRecordController.getSummary(nino)(emptyRequestWithHeader)
 
       "return status 403" in {
         status(response) shouldBe 403
@@ -371,7 +371,7 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
           ((json \ "_embedded" \ "taxYears") \ 0 \ "_links" \ "self" \ "href").as[String] shouldBe s"/test/ni/$testNino/taxyear/2015-16"
         }
       }
-      
+
       "the last tax year" should {
         "have a string called taxYear which is 1975-76" in {
           ((json \ "_embedded" \ "taxYears") \ 40 \ "taxYear").as[String] shouldBe "1975-76"
