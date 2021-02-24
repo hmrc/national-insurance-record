@@ -46,7 +46,8 @@ class DocumentationControllerSpec extends UnitSpec with GuiceOneAppPerSuite with
     )
     .build()
 
-  val AppContext: AppContext = app.injector.instanceOf[AppContext]
+  def sut: AppContext = injector.instanceOf[RepaymentCacheRepository]
+
   "respond to GET /api/definition" in {
     val result = route(app, FakeRequest(GET, "/api/definition"))
     status(result.get) shouldNot be(NOT_FOUND)
@@ -54,7 +55,7 @@ class DocumentationControllerSpec extends UnitSpec with GuiceOneAppPerSuite with
 
   def getDefinitionResultFromConfig(apiConfig: Option[Configuration] = None, apiStatus: Option[String] = None): Result = {
 
-    val appContext = AppContext {
+    val appContext = new AppContext(app.configuration) {
       override lazy val appName: String = ""
 
       override lazy val apiGatewayContext: String = ""
