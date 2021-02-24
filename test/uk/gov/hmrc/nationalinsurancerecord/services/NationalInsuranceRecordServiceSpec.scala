@@ -18,7 +18,8 @@ package uk.gov.hmrc.nationalinsurancerecord.services
 
 import org.joda.time.LocalDate
 import org.mockito.Mockito._
-import org.mockito.{Matchers, Mockito}
+import org.mockito.ArgumentMatchers.eq
+import org.mockito.{ArgumentMatchers, Matchers, Mockito}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
@@ -326,7 +327,7 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
 
       "log exclusion in metrics" in {
         whenReady(niRecordF) { niExclusion =>
-          verify(mockMetrics, Mockito.atLeastOnce()).exclusion(Matchers.eq(Exclusion.IsleOfMan))
+          verify(mockMetrics, Mockito.atLeastOnce()).exclusion(ArgumentMatchers.eq(Exclusion.IsleOfMan))
         }
       }
     }

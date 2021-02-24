@@ -15,10 +15,11 @@
  */
 
 package uk.gov.hmrc.nationalinsurancerecord.controllers.auth
-import play.api.mvc.{Request, Result}
+import com.google.inject.Inject
+import play.api.mvc.{BodyParsers, Request, Result}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-object FakeAuthAction extends AuthAction {
+class FakeAuthAction @Inject() (val parser: BodyParsers.Default) (implicit val executionContext: ExecutionContext)extends AuthAction {
   override protected def filter[A](request: Request[A]): Future[Option[Result]] = Future.successful(None)
 }

@@ -19,6 +19,7 @@ package uk.gov.hmrc.nationalinsurancerecord.connectors
 import com.codahale.metrics.Timer
 import org.joda.time.LocalDate
 import org.mockito.Mockito._
+import org.mockito.ArgumentMatchers.any
 import org.mockito.{Matchers, Mockito}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
@@ -277,8 +278,8 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
     "return valid Summary in HTTP response" in {
       reset(mockMetrics)
       when(mockMetrics.startTimer(APITypes.Summary)).thenReturn(mockTimerContext)
-      when(mockSummaryRepo().findByNino(Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.successful(None))
-      when(mockHttpGet.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any()))
+      when(mockSummaryRepo().findByNino(any())(any(), any())).thenReturn(Future.successful(None))
+      when(mockHttpGet.GET[HttpResponse](any())(any(), any(), any()))
         .thenReturn(Future.successful(HttpResponse(
               200,
               Some(Json.parse(
@@ -310,8 +311,8 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
     "return valid NIRecord response" in {
       reset(mockMetrics)
       when(mockMetrics.startTimer(APITypes.NIRecord)).thenReturn(mock[Timer.Context])
-      when(mockNIRecordRepo().findByNino(Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.successful(None))
-      when(mockHttpGet.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any()))
+      when(mockNIRecordRepo().findByNino(any())(any(), any())).thenReturn(Future.successful(None))
+      when(mockHttpGet.GET[HttpResponse](any())(any(), any(), any()))
         .thenReturn(
           Future.successful(
             HttpResponse(
@@ -354,7 +355,7 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
     }
 
     "return a failed NIRecord when there is an http error and pass on the exception" in {
-      when(mockHttpGet.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any()))
+      when(mockHttpGet.GET[HttpResponse](any())(any(), any(), any()))
         .thenReturn(Future.failed(new BadRequestException("Bad Request exception")))
       ScalaFutures.whenReady(connector.getNationalInsuranceRecord(generateNino()).failed) { ex =>
         ex shouldBe a[BadRequestException]
@@ -364,8 +365,8 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
     "return valid Liabilities response" in {
       reset(mockMetrics)
       when(mockMetrics.startTimer(APITypes.Liabilities)).thenReturn(mock[Timer.Context])
-      when(mockLiabilitiesRepo().findByNino(Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.successful(None))
-      when(mockHttpGet.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any()))
+      when(mockLiabilitiesRepo().findByNino(any())(any(), any())).thenReturn(Future.successful(None))
+      when(mockHttpGet.GET[HttpResponse](any())(any(), any(), any()))
         .thenReturn(
           Future.successful(
             HttpResponse(
@@ -381,8 +382,8 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
     "return valid NIRecord response when no tax years are present" in {
       reset(mockMetrics)
       when(mockMetrics.startTimer(APITypes.NIRecord)).thenReturn(mock[Timer.Context])
-      when(mockNIRecordRepo().findByNino(Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.successful(None))
-      when(mockHttpGet.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any()))
+      when(mockNIRecordRepo().findByNino(any())(any(), any())).thenReturn(Future.successful(None))
+      when(mockHttpGet.GET[HttpResponse](any())(any(), any(), any()))
         .thenReturn(
           Future.successful(
             HttpResponse(
@@ -397,8 +398,8 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
     "return an empty Liabilities list" in {
       reset(mockMetrics)
       when(mockMetrics.startTimer(APITypes.Liabilities)).thenReturn(mock[Timer.Context])
-      when(mockLiabilitiesRepo().findByNino(Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.successful(None))
-      when(mockHttpGet.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any()))
+      when(mockLiabilitiesRepo().findByNino(any())(any(), any())).thenReturn(Future.successful(None))
+      when(mockHttpGet.GET[HttpResponse](any())(any(), any(), any()))
         .thenReturn(
           Future.successful(
             HttpResponse(
@@ -417,7 +418,7 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
     }
 
     "return a failed Liabilities when there is an http error and pass on the exception" in {
-      when(mockHttpGet.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any()))
+      when(mockHttpGet.GET[HttpResponse](any())(any(), any(), any()))
         .thenReturn(Future.failed(new BadRequestException("Bad Request exception")))
       ScalaFutures.whenReady(connector.getLiabilities(generateNino()).failed) { ex =>
         ex shouldBe a[BadRequestException]
@@ -447,7 +448,7 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
 
       reset(mockMetrics)
       when(mockMetrics.startTimer(APITypes.NIRecord)).thenReturn(mock[Timer.Context])
-      when(mockHttpGet.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any()))
+      when(mockHttpGet.GET[HttpResponse](any())(any(), any(), any()))
       .thenReturn(
         Future.successful(
           HttpResponse(
@@ -486,7 +487,7 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
       dateOfBirth = Some(new LocalDate(1952, 11, 21)), finalRelevantYear = Some(2016))
 
     "return valid Summary response" in {
-      when(mockSummaryRepo().findByNino(Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.successful(Some(testSummaryModel)))
+      when(mockSummaryRepo().findByNino(any())(any(), any())).thenReturn(Future.successful(Some(testSummaryModel)))
       val desSummaryF = connector.getSummary(generateNino())(HeaderCarrier())
       desSummaryF.rreToConsider shouldBe false
       desSummaryF.finalRelevantYear shouldBe Some(2016)
@@ -498,11 +499,11 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
     "return valid Summary from cache" in {
       val desSummaryF = connector.getSummary(generateNino())(HeaderCarrier())
       await(desSummaryF) shouldBe testSummaryModel
-      verify(mockHttpGet, never()).GET(Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any())
+      verify(mockHttpGet, never()).GET(any())(any(), any(), any())
     }
 
     "return valid NIRecord response" in {
-      when(mockNIRecordRepo().findByNino(Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.successful(Some(niRecord)))
+      when(mockNIRecordRepo().findByNino(any())(any(), any())).thenReturn(Future.successful(Some(niRecord)))
       val desNIRecordF = connector.getNationalInsuranceRecord(generateNino())(HeaderCarrier())
       await(desNIRecordF) shouldBe niRecord
     }
@@ -510,11 +511,11 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
     "return valid NIRecord from cache" in {
       val desNIRecordF = connector.getNationalInsuranceRecord(generateNino())(HeaderCarrier())
       await(desNIRecordF) shouldBe niRecord
-      verify(mockHttpGet, never()).GET(Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any())
+      verify(mockHttpGet, never()).GET(any())(any(), any(), any())
     }
 
     "return valid Liabilities response" in {
-      when(mockLiabilitiesRepo().findByNino(Matchers.any())(Matchers.any(), Matchers.any())).thenReturn(Future.successful(Some(liabilities)))
+      when(mockLiabilitiesRepo().findByNino(any())(any(), any())).thenReturn(Future.successful(Some(liabilities)))
       val desLiabilitiesF = connector.getLiabilities(generateNino())(HeaderCarrier())
       await(desLiabilitiesF) shouldBe liabilities
     }
@@ -522,7 +523,7 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
     "return valid Liabilities from cache" in {
       val desLiabilitiesF = connector.getLiabilities(generateNino())(HeaderCarrier())
       await(desLiabilitiesF) shouldBe liabilities
-      verify(mockHttpGet, never()).GET(Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any())
+      verify(mockHttpGet, never()).GET(any())(any(), any(), any())
     }
 
   }

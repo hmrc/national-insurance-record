@@ -18,6 +18,7 @@ package uk.gov.hmrc.nationalinsurancerecord.connectors
 
 import com.codahale.metrics.Timer
 import org.mockito.Mockito._
+import org.mockito.ArgumentMatchers.any
 import org.mockito.{Matchers, Mockito}
 import org.scalatest.BeforeAndAfter
 import org.scalatest.concurrent.ScalaFutures
@@ -55,27 +56,27 @@ class CitizenDetailsConnectorSpec extends NationalInsuranceRecordUnitSpec with M
   "CitizenDetailsConnector" should {
     "return OK status when successful" in {
       when(mockMetrics.startCitizenDetailsTimer()).thenReturn(mockTimerContext)
-      when(mockHttp.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any())) thenReturn Future.successful(HttpResponse(200))
+      when(mockHttp.GET[HttpResponse](any())(any(), any(), any())) thenReturn Future.successful(HttpResponse(200))
       val resultF = citizenDetailsConnector.retrieveMCIStatus(nino)(hc)
       await(resultF) shouldBe 200
     }
 
     "return 423 status when the Upstream is 423" in {
-      when(mockHttp.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any())) thenReturn
+      when(mockHttp.GET[HttpResponse](any())(any(), any(), any())) thenReturn
         Future.failed(Upstream4xxResponse(":(", 423, 423, Map()))
       val resultF = citizenDetailsConnector.retrieveMCIStatus(nino)(hc)
       await(resultF) shouldBe 423
     }
 
     "return NotFoundException for invalid nino" in {
-      when(mockHttp.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any())) thenReturn
+      when(mockHttp.GET[HttpResponse](any())(any(), any(), any())) thenReturn
         Future.failed(new NotFoundException("Not Found"))
       val resultF = citizenDetailsConnector.retrieveMCIStatus(nino)(hc)
       await(resultF.failed) shouldBe a[NotFoundException]
     }
 
     "return 500 response code when there is Upstream is 4XX" in {
-      when(mockHttp.GET[HttpResponse](Matchers.any())(Matchers.any(), Matchers.any(), Matchers.any())) thenReturn
+      when(mockHttp.GET[HttpResponse](any())(any(), any(), any())) thenReturn
         Future.failed(new InternalServerException("InternalServerError"))
       val resultF = citizenDetailsConnector.retrieveMCIStatus(nino)(hc)
       await(resultF.failed) shouldBe a[InternalServerException]

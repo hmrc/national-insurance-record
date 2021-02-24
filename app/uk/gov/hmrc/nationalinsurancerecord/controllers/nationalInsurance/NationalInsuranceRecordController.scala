@@ -31,7 +31,6 @@ import uk.gov.hmrc.nationalinsurancerecord.events.{NationalInsuranceExclusion, N
 import uk.gov.hmrc.nationalinsurancerecord.services.NationalInsuranceRecordService
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
-
 import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -41,7 +40,7 @@ class NationalInsuranceRecordController @Inject()(nationalInsuranceRecordService
                                                   appContext: AppContext,
                                                   authAction: AuthAction,
                                                   cc: ControllerComponents
-                                                 )(implicit hc: HeaderCarrier) extends BackendController(cc)
+                                                 ) extends BackendController(cc)
                                                     with HeaderValidator
                                                     with ErrorHandling
                                                     with HalSupport

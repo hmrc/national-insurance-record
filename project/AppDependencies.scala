@@ -39,7 +39,7 @@ object AppDependencies {
     "org.scalatestplus.play"  %% "scalatestplus-play" % "3.1.3",
     "com.typesafe.play"       %% "play-test"          % PlayVersion.current,
     //TODO can we remove mockito-all now we have mockito-core
-    "org.mockito"             %  "mockito-all"        % "1.10.19",
+//    "org.mockito"             %  "mockito-all"        % "1.10.19",
     "org.mockito"             % "mockito-core"        % "2.24.5",
     "uk.gov.hmrc"             %% "reactivemongo-test" % "4.21.0-play-26"
   ).map(_ % "test")
