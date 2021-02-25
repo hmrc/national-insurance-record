@@ -18,6 +18,7 @@ package uk.gov.hmrc.nationalinsurancerecord.controllers
 
 import org.joda.time.LocalDate
 import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito
 import org.mockito.Mockito.when
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
@@ -147,8 +148,8 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
   )
 
 
-  //  override def beforeEach(): Unit =
-  //    Mockito.reset(mockNationalInsuranceRecordService)
+//    override def beforeEach(): Unit =
+//      Mockito.reset(mockNationalInsuranceRecordService)
 
   "getSummary" when {
 
@@ -182,7 +183,6 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
       "return the dead message" in {
         when(mockNationalInsuranceRecordService.getNationalInsuranceRecord(any())(any())).thenReturn(Left(ExclusionResponse(List(Exclusion.Dead))))
         val response = nationalInsuranceRecordController.getSummary(nino)(emptyRequestWithHeader)
-
         contentAsJson(response) shouldBe Json.parse(
           """{"code":"EXCLUSION_DEAD","message": "The customer needs to contact the National Insurance helpline"}"""
         )
@@ -505,108 +505,89 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
     }
 
       "there is a dead exclusion" should {
-        //        val response = generateTaxYearResponse(Left(ExclusionResponse(List(Exclusion.Dead))))
-
+        when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).thenReturn(Left(ExclusionResponse(List(Exclusion.Dead))))
+        val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear("0000-01"))(emptyRequestWithHeader)
         "return status 403" in {
-          when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).thenReturn(Left(ExclusionResponse(List(Exclusion.Dead))))
-          val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear("0000-01"))(emptyRequestWithHeader)
+
           status(response) shouldBe 403
         }
 
         "return the dead message" in {
-          when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).thenReturn(Left(ExclusionResponse(List(Exclusion.Dead))))
-          val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear("0000-01"))(emptyRequestWithHeader)
           contentAsJson(response) shouldBe Json.parse(
             """{"code":"EXCLUSION_DEAD","message": "The customer needs to contact the National Insurance helpline"}"""
           )
         }
       }
-  //
-  //    "there is a manual correspondence exclusion" should {
-  //
-  //      val response = generateTaxYearResponse(Left(ExclusionResponse(List(Exclusion.ManualCorrespondenceIndicator))))
-  //
-  //      "return status 403" in {
-  //        status(response) shouldBe 403
-  //      }
-  //
-  //      "return the mci message" in {
-  //        contentAsJson(response) shouldBe Json.parse(
-  //          """{"code":"EXCLUSION_MANUAL_CORRESPONDENCE","message": "The customer cannot access the service, they should contact HMRC"}"""
-  //        )
-  //      }
-  //
-  //    }
-  //
-  //    "there is an Isle of Man exclusion" should {
-  //
-  //      val response = generateTaxYearResponse(Left(ExclusionResponse(List(Exclusion.IsleOfMan))))
-  //
-  //      "return status 403" in {
-  //        status(response) shouldBe 403
-  //      }
-  //
-  //      "return the IoM message" in {
-  //        contentAsJson(response) shouldBe Json.parse(
-  //          """{"code":"EXCLUSION_ISLE_OF_MAN","message": "The customer needs to contact the National Insurance helpline"}"""
-  //        )
-  //      }
-  //    }
-  //
-  //    "there is a list of dead, MCI, IoM exclusions" should {
-  //
-  //      val response = generateTaxYearResponse(Left(ExclusionResponse(List(
-  //        Exclusion.IsleOfMan,
-  //        Exclusion.ManualCorrespondenceIndicator,
-  //        Exclusion.Dead
-  //      ))))
-  //
-  //      "return status 403" in {
-  //        status(response) shouldBe 403
-  //      }
-  //
-  //      "return the dead message" in {
-  //        contentAsJson(response) shouldBe Json.parse(
-  //          """{"code":"EXCLUSION_DEAD","message": "The customer needs to contact the National Insurance helpline"}"""
-  //        )
-  //      }
-  //    }
-  //
-  //    "there is a list of MCI, IoM exclusions" should {
-  //
-  //      val response = generateTaxYearResponse(Left(ExclusionResponse(List(
-  //        Exclusion.IsleOfMan,
-  //        Exclusion.ManualCorrespondenceIndicator
-  //      ))))
-  //
-  //      "return status 403" in {
-  //        status(response) shouldBe 403
-  //      }
-  //
-  //      "return the mci message" in {
-  //        contentAsJson(response) shouldBe Json.parse(
-  //          """{"code":"EXCLUSION_MANUAL_CORRESPONDENCE","message": "The customer cannot access the service, they should contact HMRC"}"""
-  //        )
-  //      }
-  //    }
-  //
-  //    "there is a list of IoM exclusion" should {
-  //
-  //      val response = generateTaxYearResponse(Left(ExclusionResponse(List(
-  //        Exclusion.IsleOfMan
-  //      ))))
-  //
-  //      "return status 403" in {
-  //        status(response) shouldBe 403
-  //      }
-  //
-  //      "return the IOM message" in {
-  //        contentAsJson(response) shouldBe Json.parse(
-  //          """{"code":"EXCLUSION_ISLE_OF_MAN","message": "The customer needs to contact the National Insurance helpline"}"""
-  //        )
-  //      }
-  //
-  //    }
+
+      "there is a manual correspondence exclusion" should {
+        when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).thenReturn(Left(ExclusionResponse(List(Exclusion.ManualCorrespondenceIndicator))))
+        val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear("0000-01"))(emptyRequestWithHeader)
+
+        "return status 403" in {
+          status(response) shouldBe 403
+        }
+
+        "return the mci message" in {
+          contentAsJson(response) shouldBe Json.parse(
+            """{"code":"EXCLUSION_MANUAL_CORRESPONDENCE","message": "The customer cannot access the service, they should contact HMRC"}"""
+          )
+        }
+
+      }
+
+      "there is an Isle of Man exclusion" should {
+        when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).thenReturn(Left(ExclusionResponse(List(Exclusion.IsleOfMan))))
+        val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear("0000-01"))(emptyRequestWithHeader)
+
+        "return status 403" in {
+          status(response) shouldBe 403
+        }
+
+        "return the IoM message" in {
+          contentAsJson(response) shouldBe Json.parse(
+            """{"code":"EXCLUSION_ISLE_OF_MAN","message": "The customer needs to contact the National Insurance helpline"}"""
+          )
+        }
+      }
+
+      "there is a list of dead, MCI, IoM exclusions" should {
+
+        when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).thenReturn(Left(ExclusionResponse(List(
+          Exclusion.IsleOfMan,
+          Exclusion.ManualCorrespondenceIndicator,
+          Exclusion.Dead
+        ))))
+        val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear("0000-01"))(emptyRequestWithHeader)
+
+        "return status 403" in {
+          status(response) shouldBe 403
+        }
+
+        "return the dead message" in {
+          contentAsJson(response) shouldBe Json.parse(
+            """{"code":"EXCLUSION_DEAD","message": "The customer needs to contact the National Insurance helpline"}"""
+          )
+        }
+      }
+
+      "there is a list of MCI, IoM exclusions" should {
+        when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).thenReturn(Left(ExclusionResponse(List(
+          Exclusion.IsleOfMan,
+          Exclusion.ManualCorrespondenceIndicator
+        ))))
+        val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear("0000-01"))(emptyRequestWithHeader)
+
+        "return status 403" in {
+          status(response) shouldBe 403
+        }
+
+        "return the mci message" in {
+          contentAsJson(response) shouldBe Json.parse(
+            """{"code":"EXCLUSION_MANUAL_CORRESPONDENCE","message": "The customer cannot access the service, they should contact HMRC"}"""
+          )
+        }
+      }
+  
   //
   //    "there is a valid Qualifying Tax Year" should {
   //      lazy val testNino = generateNino()
