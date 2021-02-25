@@ -153,14 +153,6 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
 
   "getSummary" when {
 
-    //    def generateSummaryResponse(serviceResult: Either[ExclusionResponse, NationalInsuranceRecord], nino: Nino = generateNino()) =
-    //      testNationalInsuranceRecordController(new NationalInsuranceRecordService(mockDesConnector, mockCitizenDetailsService, mockMetricsService) {
-    //        override def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceRecord]] = Future.successful(serviceResult)
-    //
-    //        override def getTaxYear(nino: Nino, taxYear: TaxYear)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceTaxYear]] = ???
-    //      }).getSummary(nino)(emptyRequestWithHeader)
-
-
     "the request headers are invalid" must {
       "return status code 406" in {
 
@@ -587,65 +579,69 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
           )
         }
       }
-  
-  //
-  //    "there is a valid Qualifying Tax Year" should {
-  //      lazy val testNino = generateNino()
-  //      lazy val response = generateTaxYearResponse(Right(dummyTaxYearQualifying), testNino, TaxYear(dummyTaxYearQualifying.taxYear))
-  //      lazy val json = contentAsJson(response)
-  //
-  //      "return 200" in {
-  //        status(response) shouldBe 200
-  //      }
-  //
-  //      "have a string called taxYear that is 2010-11" in {
-  //        (json \ "taxYear").as[String] shouldBe "2010-11"
-  //      }
-  //
-  //      "have a boolean called qualifying that is true" in {
-  //        (json \ "qualifying").as[Boolean] shouldBe true
-  //      }
-  //
-  //      "have a big decimal called classOneContributions that is 1149.98" in {
-  //        (json \ "classOneContributions").as[BigDecimal] shouldBe 1149.98
-  //      }
-  //
-  //      "have an Int called classTwoCredits that is 0" in {
-  //        (json \ "classTwoCredits").as[Int] shouldBe 0
-  //      }
-  //
-  //      "have an Int called classThreeCredits that is 0" in {
-  //        (json \ "classThreeCredits").as[Int] shouldBe 0
-  //      }
-  //
-  //      "have an Int called otherCredits that is 0" in {
-  //        (json \ "otherCredits").as[Int] shouldBe 0
-  //      }
-  //
-  //      "have an Int called classThreePayable that is 0" in {
-  //        (json \ "classThreePayable").as[BigDecimal] shouldBe 0
-  //      }
-  //
-  //      "have a nullable local date called classThreePayableBy that is null" in {
-  //        (json \ "classThreePayableBy") shouldBe JsDefined(JsNull)
-  //      }
-  //
-  //      "have a nullable local date called classThreePayableByPenalty that is null" in {
-  //        (json \ "classThreePayableByPenalty") shouldBe JsDefined(JsNull)
-  //      }
-  //
-  //      "have a Boolean called payable that is false" in {
-  //        (json \ "payable").as[Boolean] shouldBe false
-  //      }
-  //
-  //      "have a Boolean called underInvestigation that is false" in {
-  //        (json \ "underInvestigation").as[Boolean] shouldBe false
-  //      }
-  //
-  //      "have a link to itself" in {
-  //        ((json \ "_links" \ "self") \ "href" ).as[String] shouldBe s"/test/ni/$testNino/taxyear/2010-11"
-  //      }
-  //    }
+
+
+      "there is a valid Qualifying Tax Year" should {
+        when(mockNationalInsuranceRecordService.getTaxYear(any(),any())(any())).thenReturn(Right(dummyTaxYearQualifying))
+        val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear(dummyTaxYearQualifying.taxYear))(emptyRequestWithHeader)
+
+
+//        lazy val testNino = generateNino()
+//        lazy val response = generateTaxYearResponse(Right(dummyTaxYearQualifying), testNino, TaxYear(dummyTaxYearQualifying.taxYear))
+        lazy val json = contentAsJson(response)
+
+        "return 200" in {
+          status(response) shouldBe 200
+        }
+
+        "have a string called taxYear that is 2010-11" in {
+          (json \ "taxYear").as[String] shouldBe "2010-11"
+        }
+
+        "have a boolean called qualifying that is true" in {
+          (json \ "qualifying").as[Boolean] shouldBe true
+        }
+
+        "have a big decimal called classOneContributions that is 1149.98" in {
+          (json \ "classOneContributions").as[BigDecimal] shouldBe 1149.98
+        }
+
+        "have an Int called classTwoCredits that is 0" in {
+          (json \ "classTwoCredits").as[Int] shouldBe 0
+        }
+
+        "have an Int called classThreeCredits that is 0" in {
+          (json \ "classThreeCredits").as[Int] shouldBe 0
+        }
+
+        "have an Int called otherCredits that is 0" in {
+          (json \ "otherCredits").as[Int] shouldBe 0
+        }
+
+        "have an Int called classThreePayable that is 0" in {
+          (json \ "classThreePayable").as[BigDecimal] shouldBe 0
+        }
+
+        "have a nullable local date called classThreePayableBy that is null" in {
+          (json \ "classThreePayableBy") shouldBe JsDefined(JsNull)
+        }
+
+        "have a nullable local date called classThreePayableByPenalty that is null" in {
+          (json \ "classThreePayableByPenalty") shouldBe JsDefined(JsNull)
+        }
+
+        "have a Boolean called payable that is false" in {
+          (json \ "payable").as[Boolean] shouldBe false
+        }
+
+        "have a Boolean called underInvestigation that is false" in {
+          (json \ "underInvestigation").as[Boolean] shouldBe false
+        }
+
+        "have a link to itself" in {
+          ((json \ "_links" \ "self") \ "href" ).as[String] shouldBe s"/national-insurance-record/ni/$nino/taxyear/2010-11"
+        }
+      }
   //
   //    "there is a valid Non-Qualifying Tax Year" should {
   //      lazy val testNino = generateNino()
