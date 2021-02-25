@@ -43,11 +43,13 @@ class CitizenDetailsConnectorSpec extends NationalInsuranceRecordUnitSpec with M
   val mockMetrics: MetricsService = mock[MetricsService]
   val mockTimerContext = mock[Timer.Context]
   val mockHttp: HttpClient = mock[HttpClient]
+  val mockDesConnector: DesConnector = mock[DesConnector]
 
   override def fakeApplication(): Application = GuiceApplicationBuilder()
     .overrides(
       bind[HttpClient].toInstance(mockHttp),
-      bind[MetricsService].toInstance(mockMetrics)
+      bind[MetricsService].toInstance(mockMetrics),
+      bind[DesConnector].toInstance(mockDesConnector)
     )
     .build()
 
