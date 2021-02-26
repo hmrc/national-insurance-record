@@ -26,6 +26,7 @@ lazy val microservice = Project(appName, file("."))
   .enablePlugins(plugins: _*)
   .settings(
     scoverageSettings,
+    scalaVersion := "2.12.12",
     scalaSettings,
     publishingSettings,
     defaultSettings(),

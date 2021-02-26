@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.cache
 
-import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneServerPerSuite
 import uk.gov.hmrc.mongo.MongoSpecSupport
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
