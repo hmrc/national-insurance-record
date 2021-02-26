@@ -26,7 +26,6 @@ lazy val microservice = Project(appName, file("."))
   .enablePlugins(plugins: _*)
   .settings(
     scoverageSettings,
-    scalaVersion := "2.12.12",
     scalaSettings,
     publishingSettings,
     defaultSettings(),
@@ -42,3 +41,5 @@ lazy val microservice = Project(appName, file("."))
       Resolver.jcenterRepo
     )
   )
+
+dependencyOverrides += "com.typesafe.akka" %% "akka-actor"    % "2.5.23"

@@ -40,7 +40,7 @@ object AppDependencies {
     //TODO can we remove mockito-all now we have mockito-core
 //    "org.mockito"             %  "mockito-all"        % "1.10.19",
     "org.mockito"             % "mockito-core"        % "2.24.5",
-    "uk.gov.hmrc"             %% "reactivemongo-test" % "4.21.0-play-26"
+    "uk.gov.hmrc"             %% "reactivemongo-test" % "4.22.0-play-26"
   ).map(_ % "test")
 
   val all: Seq[ModuleID] = compile ++ test
