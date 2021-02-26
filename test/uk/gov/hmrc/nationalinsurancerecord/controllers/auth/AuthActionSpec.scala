@@ -36,6 +36,7 @@ import uk.gov.hmrc.auth.core.retrieve.{GGCredId, PAClientId, ~}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.domain.Generator
 import uk.gov.hmrc.http.HttpClient
+import uk.gov.hmrc.nationalinsurancerecord.connectors.DesConnector
 import uk.gov.hmrc.nationalinsurancerecord.controllers.auth.AuthActionSpec.retrievalsTestingSyntax
 import uk.gov.hmrc.nationalinsurancerecord.services.MetricsService
 
@@ -52,10 +53,12 @@ class AuthActionSpec
   private val testNino = ninoGenerator.nextNino.nino
   private val goodUriWithNino = s"/ni/$testNino/"
   val mockAuthConnector: AuthConnector = mock[AuthConnector]
+  val mockDesConnector: DesConnector = mock[DesConnector]
 
   override def fakeApplication(): Application = GuiceApplicationBuilder()
     .overrides(
-      bind[AuthConnector].toInstance(mockAuthConnector)
+      bind[AuthConnector].toInstance(mockAuthConnector),
+      bind[DesConnector].toInstance(mockDesConnector)
     )
     .build()
 
@@ -65,6 +68,7 @@ class AuthActionSpec
 
   "Auth Action" when {
     "the user is not logged in" must {
+      when(mock)
       "return UNAUTHORIZED" in {
         val (result, _) =
           testAuthActionWith(Future.failed(new MissingBearerToken))
