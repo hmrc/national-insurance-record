@@ -31,14 +31,12 @@ object AppDependencies {
     "com.typesafe.play" %% "play-json-joda" % "2.6.10"
   )
 
-  val test: Seq[ModuleID] = Seq(
+  val test: Seq[ModuleID]
     "uk.gov.hmrc"             %% "hmrctest"           % "3.9.0-play-26",
     "org.pegdown"             %  "pegdown"            % "1.6.0",
     "org.scalatest"           %% "scalatest"          % "3.0.7",
     "org.scalatestplus.play"  %% "scalatestplus-play" % "3.1.3",
     "com.typesafe.play"       %% "play-test"          % PlayVersion.current,
-    //TODO can we remove mockito-all now we have mockito-core
-//    "org.mockito"             %  "mockito-all"        % "1.10.19",
     "com.github.tomakehurst" % "wiremock-jre8" % "2.26.1",
     "org.mockito"             % "mockito-core"        % "2.24.5",
     "uk.gov.hmrc"             %% "reactivemongo-test" % "4.22.0-play-26"

@@ -124,7 +124,6 @@ class NationalInsuranceRecordController @Inject()(nationalInsuranceRecordService
 
   }
 
-  //TODO: needed?
   override def parser: BodyParser[AnyContent] = cc.parsers.defaultBodyParser
   override implicit protected def executionContext: ExecutionContext = cc.executionContext
 

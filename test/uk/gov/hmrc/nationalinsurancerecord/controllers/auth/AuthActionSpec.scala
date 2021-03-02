@@ -17,17 +17,17 @@
 package uk.gov.hmrc.nationalinsurancerecord.controllers.auth
 
 import akka.util.Timeout
-import org.mockito.ArgumentMatchers.{any, eq => MockitoEq}
+import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.{eq => MockitoEq}
 import org.mockito.Mockito.{verify, when}
 import org.scalatest.BeforeAndAfter
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.Application
 import play.api.http.Status.{BAD_REQUEST, INTERNAL_SERVER_ERROR, OK, UNAUTHORIZED}
-import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.mvc.{Action, AnyContent, Controller, Result}
+import play.api.inject.bind
+import play.api.mvc.{Action, AnyContent, BodyParsers, Controller, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.status
 import uk.gov.hmrc.auth.core.AuthProvider.PrivilegedApplication
@@ -35,10 +35,7 @@ import uk.gov.hmrc.auth.core.retrieve.v2.TrustedHelper
 import uk.gov.hmrc.auth.core.retrieve.{GGCredId, PAClientId, ~}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.domain.Generator
-import uk.gov.hmrc.http.HttpClient
-import uk.gov.hmrc.nationalinsurancerecord.connectors.DesConnector
 import uk.gov.hmrc.nationalinsurancerecord.controllers.auth.AuthActionSpec.retrievalsTestingSyntax
-import uk.gov.hmrc.nationalinsurancerecord.services.MetricsService
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -52,23 +49,11 @@ class AuthActionSpec
   private val ninoGenerator = new Generator()
   private val testNino = ninoGenerator.nextNino.nino
   private val goodUriWithNino = s"/ni/$testNino/"
-  val mockAuthConnector: AuthConnector = mock[AuthConnector]
-  val mockDesConnector: DesConnector = mock[DesConnector]
-
-  override def fakeApplication(): Application = GuiceApplicationBuilder()
-    .overrides(
-      bind[AuthConnector].toInstance(mockAuthConnector),
-      bind[DesConnector].toInstance(mockDesConnector)
-    )
-    .build()
-
-  val sut: AuthActionImpl = app.injector.instanceOf[AuthActionImpl]
 
   implicit val timeout: Timeout = 5 seconds
 
   "Auth Action" when {
     "the user is not logged in" must {
-      when(mock)
       "return UNAUTHORIZED" in {
         val (result, _) =
           testAuthActionWith(Future.failed(new MissingBearerToken))
@@ -87,8 +72,8 @@ class AuthActionSpec
 
           verify(mockAuthConnector)
             .authorise[Unit](MockitoEq(
-              ConfidenceLevel.L200 or AuthProviders(PrivilegedApplication)
-            ), any())(any(), any())
+            ConfidenceLevel.L200 or AuthProviders(PrivilegedApplication)
+          ), any())(any(), any())
         }
         "the user is a trusted helper and requests with the nino of the helpee" in {
           val helperNino = ninoGenerator.nextNino.nino
@@ -99,8 +84,8 @@ class AuthActionSpec
 
           verify(mockAuthConnector)
             .authorise[Unit](MockitoEq(
-              ConfidenceLevel.L200 or AuthProviders(PrivilegedApplication)
-            ), any())(any(), any())
+            ConfidenceLevel.L200 or AuthProviders(PrivilegedApplication)
+          ), any())(any(), any())
         }
 
         "the request comes from a privileged application" in {
@@ -111,8 +96,8 @@ class AuthActionSpec
 
           verify(mockAuthConnector)
             .authorise[Unit](MockitoEq(
-              ConfidenceLevel.L200 or AuthProviders(PrivilegedApplication)
-            ), any())(any(), any())
+            ConfidenceLevel.L200 or AuthProviders(PrivilegedApplication)
+          ), any())(any(), any())
         }
       }
 
@@ -181,10 +166,18 @@ class AuthActionSpec
   }
 
   private def testAuthActionWith[T](authResult: Future[T],
-                                    uri: String = goodUriWithNino): (Future[Result], AuthConnector) = {
+  uri: String = goodUriWithNino): (Future[Result], AuthConnector) = {
+
     val mockAuthConnector = newMockConnectorWithAuthResult(authResult)
 
-    val testHarness = new AuthActionTestHarness(sut)
+    val injector = GuiceApplicationBuilder()
+      .overrides(bind[AuthConnector].toInstance(mockAuthConnector))
+      .injector()
+
+
+    val authAction = injector.instanceOf[AuthAction]
+
+    val testHarness = new AuthActionTestHarness(authAction)
 
     (testHarness.onPageLoad()(FakeRequest(method = "", path = uri)),
       mockAuthConnector)
@@ -198,4 +191,3 @@ object AuthActionSpec {
   }
 
 }
-
