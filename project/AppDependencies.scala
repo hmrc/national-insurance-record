@@ -39,6 +39,7 @@ object AppDependencies {
     "com.typesafe.play"       %% "play-test"          % PlayVersion.current,
     //TODO can we remove mockito-all now we have mockito-core
 //    "org.mockito"             %  "mockito-all"        % "1.10.19",
+    "com.github.tomakehurst" % "wiremock-jre8" % "2.26.1",
     "org.mockito"             % "mockito-core"        % "2.24.5",
     "uk.gov.hmrc"             %% "reactivemongo-test" % "4.22.0-play-26"
   ).map(_ % "test")
