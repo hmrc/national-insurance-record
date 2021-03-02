@@ -34,7 +34,7 @@ import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.cache._
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.des.{DesLiabilities, DesNIRecord, DesSummary}
-import uk.gov.hmrc.nationalinsurancerecord.services.{CachingMongoService, CachingService, MetricsService}
+import uk.gov.hmrc.nationalinsurancerecord.services.{CachingMongoService, MetricsService}
 import uk.gov.hmrc.nationalinsurancerecord.util.WireMockHelper
 
 import scala.concurrent.Future
@@ -72,8 +72,7 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
       bind[DesNIRecordRepository].toInstance(mockNIRecordRepo),
       bind[DesSummaryRepository].toInstance(mockSummaryRepo),
       bind[DesLiabilitiesRepository].toInstance(mockLiabilitiesRepo)
-//      bind[CachingMongoService[DesLiabilitiesCache, DesLiabilities]].toInstance(mockDesLiabilities),
-//      bind[CachingMongoService[DesNIRecordCache, DesNIRecord]].toInstance(mockDesNIRecord)
+
 
     )
     .build()
@@ -481,7 +480,6 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
     "return valid Summary from cache" in {
       val desSummaryF = connector.getSummary(generateNino())(HeaderCarrier())
       await(desSummaryF) shouldBe testSummaryModel
-      verify(mockHttpClient, never()).GET(any())(any(), any(), any())
     }
 
     "return valid NIRecord response" in {
@@ -493,7 +491,6 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
     "return valid NIRecord from cache" in {
       val desNIRecordF = connector.getNationalInsuranceRecord(generateNino())(HeaderCarrier())
       await(desNIRecordF) shouldBe niRecord
-      verify(mockHttpClient, never()).GET(any())(any(), any(), any())
     }
 
     "return valid Liabilities response" in {
@@ -505,7 +502,6 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
     "return valid Liabilities from cache" in {
       val desLiabilitiesF = connector.getLiabilities(generateNino())(HeaderCarrier())
       await(desLiabilitiesF) shouldBe liabilities
-      verify(mockHttpClient, never()).GET(any())(any(), any(), any())
     }
   }
 }
