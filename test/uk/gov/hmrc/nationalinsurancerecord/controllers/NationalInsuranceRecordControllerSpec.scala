@@ -18,9 +18,7 @@ package uk.gov.hmrc.nationalinsurancerecord.controllers
 
 import org.joda.time.LocalDate
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito
 import org.mockito.Mockito.when
-import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
@@ -37,7 +35,7 @@ import uk.gov.hmrc.nationalinsurancerecord.controllers.nationalInsurance.Nationa
 import uk.gov.hmrc.nationalinsurancerecord.domain._
 import uk.gov.hmrc.nationalinsurancerecord.services.NationalInsuranceRecordService
 
-class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitSpec with GuiceOneAppPerSuite with MockitoSugar with BeforeAndAfterEach {
+class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitSpec with GuiceOneAppPerSuite with MockitoSugar {
 
   val emptyRequest = FakeRequest()
   val emptyRequestWithHeader = FakeRequest().withHeaders("Accept" -> "application/vnd.hmrc.1.0+json")
@@ -146,10 +144,6 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
     ),
     reducedRateElection = false
   )
-
-
-//    override def beforeEach(): Unit =
-//      Mockito.reset(mockNationalInsuranceRecordService)
 
   "getSummary" when {
 
@@ -585,9 +579,6 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
         when(mockNationalInsuranceRecordService.getTaxYear(any(),any())(any())).thenReturn(Right(dummyTaxYearQualifying))
         val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear(dummyTaxYearQualifying.taxYear))(emptyRequestWithHeader)
 
-
-//        lazy val testNino = generateNino()
-//        lazy val response = generateTaxYearResponse(Right(dummyTaxYearQualifying), testNino, TaxYear(dummyTaxYearQualifying.taxYear))
         lazy val json = contentAsJson(response)
 
         "return 200" in {
@@ -642,65 +633,62 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
           ((json \ "_links" \ "self") \ "href" ).as[String] shouldBe s"/national-insurance-record/ni/$nino/taxyear/2010-11"
         }
       }
-  //
-  //    "there is a valid Non-Qualifying Tax Year" should {
-  //      lazy val testNino = generateNino()
-  //      lazy val response = generateTaxYearResponse(Right(dummyTaxYearNonQualifying), testNino, TaxYear(dummyTaxYearNonQualifying.taxYear))
-  //      lazy val json = contentAsJson(response)
-  //
-  //      "return 200" in {
-  //        status(response) shouldBe 200
-  //      }
-  //
-  //      "have a string called taxYear that is 2009-10" in {
-  //        (json \ "taxYear").as[String] shouldBe "2009-10"
-  //      }
-  //
-  //      "have a boolean called qualifying that is false" in {
-  //        (json \ "qualifying").as[Boolean] shouldBe false
-  //      }
-  //
-  //      "have a big decimal called classOneContributions that is 0" in {
-  //        (json \ "classOneContributions").as[BigDecimal] shouldBe 0
-  //      }
-  //
-  //      "have an Int called classTwoCredits that is 12" in {
-  //        (json \ "classTwoCredits").as[Int] shouldBe 12
-  //      }
-  //
-  //      "have an Int called classThreeCredits that is 0" in {
-  //        (json \ "classThreeCredits").as[Int] shouldBe 0
-  //      }
-  //
-  //      "have an Int called otherCredits that is 10" in {
-  //        (json \ "otherCredits").as[Int] shouldBe 10
-  //      }
-  //
-  //      "have an Int called classThreePayable that is 325.14" in {
-  //        (json \ "classThreePayable").as[BigDecimal] shouldBe 325.14
-  //      }
-  //
-  //      "have a nullable local date called classThreePayableBy that is 5/4/2019" in {
-  //        (json \ "classThreePayableBy").as[LocalDate] shouldBe new LocalDate(2019, 4, 5)
-  //      }
-  //
-  //      "have a nullable local date called classThreePayableByPenalty that is 5/4/2023" in {
-  //        (json \ "classThreePayableByPenalty").as[LocalDate] shouldBe new LocalDate(2023, 4, 5)
-  //      }
-  //
-  //      "have a Boolean called payable that is true" in {
-  //        (json \ "payable").as[Boolean] shouldBe true
-  //      }
-  //
-  //      "have a Boolean called underInvestigation that is false" in {
-  //        (json \ "underInvestigation").as[Boolean] shouldBe false
-  //      }
-  //
-  //      "have a link to itself" in {
-  //        ((json \ "_links" \ "self") \ "href" ).as[String] shouldBe s"/test/ni/$testNino/taxyear/2009-10"
-  //      }
-  //    }
-  //
-  //  }
 
+    "there is a valid Non-Qualifying Tax Year" should {
+      when(mockNationalInsuranceRecordService.getTaxYear(any(),any())(any())).thenReturn(Right(dummyTaxYearNonQualifying))
+      val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear(dummyTaxYearNonQualifying.taxYear))(emptyRequestWithHeader)
+      lazy val json = contentAsJson(response)
+
+      "return 200" in {
+        status(response) shouldBe 200
+      }
+
+      "have a string called taxYear that is 2009-10" in {
+        (json \ "taxYear").as[String] shouldBe "2009-10"
+      }
+
+      "have a boolean called qualifying that is false" in {
+        (json \ "qualifying").as[Boolean] shouldBe false
+      }
+
+      "have a big decimal called classOneContributions that is 0" in {
+        (json \ "classOneContributions").as[BigDecimal] shouldBe 0
+      }
+
+      "have an Int called classTwoCredits that is 12" in {
+        (json \ "classTwoCredits").as[Int] shouldBe 12
+      }
+
+      "have an Int called classThreeCredits that is 0" in {
+        (json \ "classThreeCredits").as[Int] shouldBe 0
+      }
+
+      "have an Int called otherCredits that is 10" in {
+        (json \ "otherCredits").as[Int] shouldBe 10
+      }
+
+      "have an Int called classThreePayable that is 325.14" in {
+        (json \ "classThreePayable").as[BigDecimal] shouldBe 325.14
+      }
+
+      "have a nullable local date called classThreePayableBy that is 5/4/2019" in {
+        (json \ "classThreePayableBy").as[LocalDate] shouldBe new LocalDate(2019, 4, 5)
+      }
+
+      "have a nullable local date called classThreePayableByPenalty that is 5/4/2023" in {
+        (json \ "classThreePayableByPenalty").as[LocalDate] shouldBe new LocalDate(2023, 4, 5)
+      }
+
+      "have a Boolean called payable that is true" in {
+        (json \ "payable").as[Boolean] shouldBe true
+      }
+
+      "have a Boolean called underInvestigation that is false" in {
+        (json \ "underInvestigation").as[Boolean] shouldBe false
+      }
+
+      "have a link to itself" in {
+        ((json \ "_links" \ "self") \ "href" ).as[String] shouldBe s"/national-insurance-record/ni/$nino/taxyear/2009-10"
+      }
+    }
 }

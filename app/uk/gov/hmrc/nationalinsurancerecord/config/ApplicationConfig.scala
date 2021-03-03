@@ -29,7 +29,7 @@ class ApplicationConfig @Inject()(configuration: Configuration, servicesConfig: 
 
   val responseCacheTTL = configuration.get[Option[Int]]("mongodb.responseTTL").getOrElse(throw new RuntimeException("MongoDB TTL is not configured"))
 
-  lazy val authorization: String = s"Bearer ${configuration.get[Option[String]]("microservice.services.des-hod.authorizationToken").getOrElse("Local")}"
+  val authorization: String = s"Bearer ${configuration.get[Option[String]]("microservice.services.des-hod.authorizationToken").getOrElse("Local")}"
 
-  lazy val desEnvironment: String = configuration.get[Option[String]]("microservice.services.des-hod.environment").getOrElse("Local")
+  val desEnvironment: String = configuration.get[Option[String]]("microservice.services.des-hod.environment").getOrElse("Local")
 }
