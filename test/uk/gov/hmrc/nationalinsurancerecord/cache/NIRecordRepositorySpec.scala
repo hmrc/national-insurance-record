@@ -109,7 +109,7 @@ class NIRecordRepositorySpec extends NationalInsuranceRecordUnitSpec with OneSer
   val nino: Nino = generateNino()
   val excludedNino: Nino = generateNino()
 
-  "NationalInsuranceRepository" should {
+  "NationalInsuranceRepository" must{
     val stubApplicationConfig = app.injector.instanceOf[StubApplicationConfig]
 
     val service = new CachingMongoService[DesNIRecordCache, DesNIRecord](DesNIRecordCache.formats, DesNIRecordCache.apply,

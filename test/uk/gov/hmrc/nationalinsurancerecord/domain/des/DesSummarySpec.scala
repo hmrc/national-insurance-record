@@ -26,7 +26,7 @@ class DesSummarySpec extends UnitSpec {
   val testCompletedRecord: String = Source.fromInputStream(getClass.getResourceAsStream("/json/nisummaryDesTest.json")).mkString
   val testEmptyRecord: String = Source.fromInputStream(getClass.getResourceAsStream("/json/nisummaryEmptyDesTest.json")).mkString
 
-  "reading DesSummary" should {
+  "reading DesSummary" must{
 
     "parse empty DesSummary correctly" in {
       val niSummary = Json.parse(testEmptyRecord).as[DesSummary]

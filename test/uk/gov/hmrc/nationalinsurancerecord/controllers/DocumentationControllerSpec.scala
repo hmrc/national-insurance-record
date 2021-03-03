@@ -58,7 +58,7 @@ class DocumentationControllerSpec extends UnitSpec with GuiceOneAppPerSuite with
 
   }
 
-  "/definition access" should {
+  "/definition access" must{
 
     "return PRIVATE and no Whitelist IDs if there is no application config" in {
 
@@ -105,7 +105,7 @@ class DocumentationControllerSpec extends UnitSpec with GuiceOneAppPerSuite with
     }
   }
 
-  "/definition status" should {
+  "/definition status" must{
 
 
     "return BETA if there is no application config" in {

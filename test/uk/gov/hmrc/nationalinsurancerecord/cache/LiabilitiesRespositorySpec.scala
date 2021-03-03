@@ -32,7 +32,7 @@ class LiabilitiesRespositorySpec extends NationalInsuranceRecordUnitSpec with On
   val stubApplicationConfig = app.injector.instanceOf[StubApplicationConfig]
   val testLiablitiesModel = DesLiabilities(List(DesLiability(Some(15)), DesLiability(Some(100))))
 
-  "LiabilitiesRepository" should {
+  "LiabilitiesRepository" must{
 
     val nino = generateNino()
     val excluedNino = generateNino()

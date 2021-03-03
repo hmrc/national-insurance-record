@@ -411,7 +411,7 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
           ((json \ "_embedded" \ "taxYears") \ 40 \ "_links" \ "self" \ "href").as[String] shouldBe s"/national-insurance-record/ni/$nino/taxyear/1975-76"
         }
       }
-      "a non qualifying year like 2012" should {
+      "a non qualifying year like 2012" must{
         "have a string called taxYear which is 2012-13" in {
           ((json \ "_embedded" \ "taxYears") \ 3 \ "taxYear").as[String] shouldBe "2012-13"
         }
@@ -478,10 +478,10 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
         }
   }
 
-    "getTaxYear" should {
+    "getTaxYear" must{
 
 
-      "the request headers are invalid" should {
+      "the request headers are invalid" must{
         "return status code 406" in {
           val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear("0000-01"))(emptyRequest)
           status(response) shouldBe 406
@@ -490,7 +490,7 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
       }
     }
 
-      "there is a dead exclusion" should {
+      "there is a dead exclusion" must{
         when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).thenReturn(Left(ExclusionResponse(List(Exclusion.Dead))))
         val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear("0000-01"))(emptyRequestWithHeader)
         "return status 403" in {
@@ -505,7 +505,7 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
         }
       }
 
-      "there is a manual correspondence exclusion" should {
+      "there is a manual correspondence exclusion" must{
         when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).thenReturn(Left(ExclusionResponse(List(Exclusion.ManualCorrespondenceIndicator))))
         val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear("0000-01"))(emptyRequestWithHeader)
 
@@ -521,7 +521,7 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
 
       }
 
-      "there is an Isle of Man exclusion" should {
+      "there is an Isle of Man exclusion" must{
         when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).thenReturn(Left(ExclusionResponse(List(Exclusion.IsleOfMan))))
         val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear("0000-01"))(emptyRequestWithHeader)
 
@@ -536,7 +536,7 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
         }
       }
 
-      "there is a list of dead, MCI, IoM exclusions" should {
+      "there is a list of dead, MCI, IoM exclusions" must{
 
         when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).thenReturn(Left(ExclusionResponse(List(
           Exclusion.IsleOfMan,
@@ -556,7 +556,7 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
         }
       }
 
-      "there is a list of MCI, IoM exclusions" should {
+      "there is a list of MCI, IoM exclusions" must{
         when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).thenReturn(Left(ExclusionResponse(List(
           Exclusion.IsleOfMan,
           Exclusion.ManualCorrespondenceIndicator
@@ -575,7 +575,7 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
       }
 
 
-      "there is a valid Qualifying Tax Year" should {
+      "there is a valid Qualifying Tax Year" must{
         when(mockNationalInsuranceRecordService.getTaxYear(any(),any())(any())).thenReturn(Right(dummyTaxYearQualifying))
         val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear(dummyTaxYearQualifying.taxYear))(emptyRequestWithHeader)
 
@@ -634,7 +634,7 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
         }
       }
 
-    "there is a valid Non-Qualifying Tax Year" should {
+    "there is a valid Non-Qualifying Tax Year" must {
       when(mockNationalInsuranceRecordService.getTaxYear(any(),any())(any())).thenReturn(Right(dummyTaxYearNonQualifying))
       val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear(dummyTaxYearNonQualifying.taxYear))(emptyRequestWithHeader)
       lazy val json = contentAsJson(response)

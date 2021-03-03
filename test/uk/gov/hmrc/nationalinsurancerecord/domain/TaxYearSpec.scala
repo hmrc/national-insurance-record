@@ -27,7 +27,7 @@ class TaxYearSpec extends UnitSpec with Matchers {
 
   val invalidTaxYears = Seq("2014", "201314", "2016-1X", "A2014-15", "2015-17", "2013-18")
 
-  "isValid" should {
+  "isValid" must{
     validTaxYears.foreach {
       ty => s"return true for tax year $ty" in {
         TaxYear.isValid(ty) shouldBe true
@@ -41,7 +41,7 @@ class TaxYearSpec extends UnitSpec with Matchers {
     }
   }
 
-  "TaxYear from starTaxYear" should {
+  "TaxYear from starTaxYear" must{
     "return TaxYear(2014-15) for 2014" in {
       TaxYear.getTaxYear(2014) shouldBe TaxYear("2014-15")
     }
@@ -53,7 +53,7 @@ class TaxYearSpec extends UnitSpec with Matchers {
     }
   }
 
-  "TaxYear constructor" should {
+  "TaxYear constructor" must{
     validTaxYears.foreach {
       ty => s"create a taxYear for a valid argument '$ty'" in {
         TaxYear("2014-15").taxYear == ty
@@ -66,13 +66,13 @@ class TaxYearSpec extends UnitSpec with Matchers {
       }
     }
 
-    "a valid TaxYear" should {
+    "a valid TaxYear" must{
       "be transformed and startYr should be 2014" in {
         TaxYear("2014-15").startYear shouldBe "2014"
       }
     }
 
-    "a valid TaxYear" should {
+    "a valid TaxYear" must{
       "be transformed and startYear should be 2015" in {
         TaxYear("2015-16").startYear shouldBe "2015"
       }

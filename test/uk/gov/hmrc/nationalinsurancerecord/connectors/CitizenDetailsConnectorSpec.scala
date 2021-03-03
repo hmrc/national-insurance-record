@@ -55,7 +55,7 @@ class CitizenDetailsConnectorSpec extends NationalInsuranceRecordUnitSpec with M
 
   val citizenDetailsConnector: CitizenDetailsConnector = app.injector.instanceOf[CitizenDetailsConnector]
 
-  "CitizenDetailsConnector" should {
+  "CitizenDetailsConnector" must{
     "return OK status when successful" in {
       when(mockMetrics.startCitizenDetailsTimer()).thenReturn(mockTimerContext)
       when(mockHttp.GET[HttpResponse](any())(any(), any(), any())) thenReturn Future.successful(HttpResponse(200))

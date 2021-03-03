@@ -40,7 +40,7 @@ class SummaryRepositorySpec extends NationalInsuranceRecordUnitSpec with OneAppP
     finalRelevantYear = Some(2016)
   )
 
-  "SummaryMongoService" should {
+  "SummaryMongoService" must{
     val stubApplicationConfig = app.injector.instanceOf[StubApplicationConfig]
     val mockMetrics = mock[MetricsService]
     val nino = generateNino()

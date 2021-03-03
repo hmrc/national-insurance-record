@@ -21,7 +21,7 @@ import uk.gov.hmrc.play.test.UnitSpec
 
 class DesLiabilitySpec extends UnitSpec {
 
-  "DesLiability" should {
+  "DesLiability" must{
     "deserialise correctly" in {
       val jsonPayload =
         """

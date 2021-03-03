@@ -109,7 +109,7 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
     }
 
 
-    "regular ni record" should {
+    "regular ni record" must{
 
       val desLiabilities = DesLiabilities(List(DesLiability(Some(14))))
       val nino = generateNino()
