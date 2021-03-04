@@ -17,10 +17,8 @@
 package uk.gov.hmrc.nationalinsurancerecord.connectors
 
 import com.codahale.metrics.Timer
-import org.mockito.Mockito._
 import org.mockito.ArgumentMatchers.any
-import org.mockito.{Matchers, Mockito}
-import org.scalatest.BeforeAndAfter
+import org.mockito.Mockito.{when, verify, atLeastOnce}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
@@ -34,7 +32,7 @@ import uk.gov.hmrc.nationalinsurancerecord.services.MetricsService
 
 import scala.concurrent.Future
 
-class CitizenDetailsConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar with BeforeAndAfter with ScalaFutures with GuiceOneAppPerSuite {
+class CitizenDetailsConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar with ScalaFutures with GuiceOneAppPerSuite {
   // scalastyle:off magic.number
 
   val nino = generateNino()
@@ -85,8 +83,8 @@ class CitizenDetailsConnectorSpec extends NationalInsuranceRecordUnitSpec with M
     }
 
     "log correct CitizenDetailsConnector metrics" in {
-      verify(mockMetrics, Mockito.atLeastOnce()).startCitizenDetailsTimer()
-      verify(mockTimerContext, Mockito.atLeastOnce()).stop()
+      verify(mockMetrics, atLeastOnce()).startCitizenDetailsTimer()
+      verify(mockTimerContext, atLeastOnce()).stop()
     }
   }
 }

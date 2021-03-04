@@ -25,8 +25,7 @@ import uk.gov.hmrc.auth.core.AuthProvider.PrivilegedApplication
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.{authProviderId, nino, trustedHelper}
 import uk.gov.hmrc.auth.core.retrieve.{PAClientId, ~}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
-import uk.gov.hmrc.nationalinsurancerecord.config.ApplicationConfig
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 
 import scala.concurrent.Future.successful
@@ -77,10 +76,3 @@ class AuthActionImpl @Inject()(val authConnector: AuthConnector, val parser: Bod
 @ImplementedBy(classOf[AuthActionImpl])
 trait AuthAction extends ActionBuilder[Request, AnyContent] with ActionFilter[Request]
 
-class AuthConnector @Inject()(val http: HttpClient,
-                              applicationConfig: ApplicationConfig
-                             ) extends PlayAuthConnector {
-
-  override val serviceUrl: String = applicationConfig.authUrl
-
-}

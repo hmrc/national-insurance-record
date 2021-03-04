@@ -21,6 +21,6 @@ import play.api.Configuration
 import uk.gov.hmrc.nationalinsurancerecord.config.ApplicationConfig
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
-class StubApplicationConfig @Inject()(configuration: Configuration, servicesConfig: ServicesConfig) extends ApplicationConfig(configuration, servicesConfig) {
+class StubApplicationConfig @Inject()(configuration: Configuration, servicesConfig: ServicesConfig) extends ApplicationConfig(servicesConfig) {
   override val responseCacheTTL: Int = 60
 }

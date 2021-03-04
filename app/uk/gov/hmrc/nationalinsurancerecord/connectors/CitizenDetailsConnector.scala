@@ -21,6 +21,7 @@ import play.api.mvc.ControllerComponents
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, Upstream4xxResponse}
 import uk.gov.hmrc.http.HttpClient
+import play.api.http.Status.LOCKED
 import uk.gov.hmrc.nationalinsurancerecord.config.ApplicationConfig
 import uk.gov.hmrc.nationalinsurancerecord.services.MetricsService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
@@ -31,10 +32,10 @@ import scala.util.{Failure, Success, Try}
 
 class CitizenDetailsConnector @Inject()(appConfig: ApplicationConfig,
                                         http: HttpClient,
-                                        metrics: MetricsService,
-                                        cc: ControllerComponents) extends BackendController(cc) {
+                                        metrics: MetricsService
+                                        ) {
 
-  val serviceUrl: String = appConfig.serviceUrl
+  val serviceUrl: String = appConfig.citizenDetailsUrl
   private def url(nino: Nino) = s"$serviceUrl/citizen-details/$nino/designatory-details/"
 
   def retrieveMCIStatus(nino: Nino)(implicit hc: HeaderCarrier): Future[Int] = {

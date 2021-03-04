@@ -19,8 +19,8 @@ package uk.gov.hmrc.nationalinsurancerecord.cache
 import org.joda.time.LocalDate
 import org.mockito.Mockito
 import org.mockito.Mockito._
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.OneAppPerSuite
+import org.scalatestplus.mockito.MockitoSugar
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import uk.gov.hmrc.mongo.MongoSpecSupport
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
@@ -29,7 +29,7 @@ import uk.gov.hmrc.nationalinsurancerecord.services.{CachingMongoService, Metric
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class SummaryRepositorySpec extends NationalInsuranceRecordUnitSpec with OneAppPerSuite with MongoSpecSupport with MockitoSugar {
+  class SummaryRepositorySpec extends NationalInsuranceRecordUnitSpec with GuiceOneAppPerSuite with MongoSpecSupport with MockitoSugar {
   // scalastyle:off magic.number
 
   val testSummaryModel = DesSummary(

@@ -17,19 +17,18 @@
 package uk.gov.hmrc.nationalinsurancerecord.config
 
 import com.google.inject.{Inject, Singleton}
-import play.api.Configuration
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 @Singleton
-class ApplicationConfig @Inject()(configuration: Configuration, servicesConfig: ServicesConfig) {
+class ApplicationConfig @Inject()(servicesConfig: ServicesConfig) {
 
-  val serviceUrl = servicesConfig.baseUrl("citizen-details")
+  val citizenDetailsUrl = servicesConfig.baseUrl("citizen-details")
   val desUrl = servicesConfig.baseUrl("des-hod")
   val authUrl = servicesConfig.baseUrl("auth")
 
-  val responseCacheTTL = configuration.get[Option[Int]]("mongodb.responseTTL").getOrElse(throw new RuntimeException("MongoDB TTL is not configured"))
+  val responseCacheTTL = servicesConfig.getInt("mongodb.responseTTL")
 
-  val authorization: String = s"Bearer ${configuration.get[Option[String]]("microservice.services.des-hod.authorizationToken").getOrElse("Local")}"
+  val authorization: String = s"Bearer ${servicesConfig.getConfString("microservice.services.des-hod.authorizationToken", "local")}"
 
-  val desEnvironment: String = configuration.get[Option[String]]("microservice.services.des-hod.environment").getOrElse("Local")
+  val desEnvironment: String = servicesConfig.getConfString("microservice.services.des-hod.environment", "local")
 }

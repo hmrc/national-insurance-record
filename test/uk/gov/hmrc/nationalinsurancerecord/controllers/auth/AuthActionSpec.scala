@@ -171,7 +171,9 @@ class AuthActionSpec
     val mockAuthConnector = newMockConnectorWithAuthResult(authResult)
 
     val injector = GuiceApplicationBuilder()
-      .overrides(bind[AuthConnector].toInstance(mockAuthConnector))
+      .overrides(
+        bind[AuthConnector].toInstance(mockAuthConnector)
+      )
       .injector()
 
 
