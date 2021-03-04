@@ -18,7 +18,9 @@ package uk.gov.hmrc.nationalinsurancerecord.connectors
 
 import com.codahale.metrics.Timer
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{when, verify, atLeastOnce}
+import org.mockito.Mockito
+import org.mockito.Mockito.{atLeastOnce, verify, when}
+import org.scalatest.BeforeAndAfter
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
@@ -32,7 +34,7 @@ import uk.gov.hmrc.nationalinsurancerecord.services.MetricsService
 
 import scala.concurrent.Future
 
-class CitizenDetailsConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar with ScalaFutures with GuiceOneAppPerSuite {
+class CitizenDetailsConnectorSpec extends NationalInsuranceRecordUnitSpec with BeforeAndAfter with MockitoSugar with ScalaFutures with GuiceOneAppPerSuite {
   // scalastyle:off magic.number
 
   val nino = generateNino()
@@ -53,7 +55,13 @@ class CitizenDetailsConnectorSpec extends NationalInsuranceRecordUnitSpec with M
 
   val citizenDetailsConnector: CitizenDetailsConnector = app.injector.instanceOf[CitizenDetailsConnector]
 
+  def beforeEach: Unit = {
+    Mockito.reset(mockHttp)
+    Mockito.reset(mockMetrics)
+  }
+
   "CitizenDetailsConnector" must{
+
     "return OK status when successful" in {
       when(mockMetrics.startCitizenDetailsTimer()).thenReturn(mockTimerContext)
       when(mockHttp.GET[HttpResponse](any())(any(), any(), any())) thenReturn Future.successful(HttpResponse(200))

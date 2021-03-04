@@ -20,7 +20,6 @@ import akka.util.Timeout
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.{eq => MockitoEq}
 import org.mockito.Mockito.{verify, when}
-import org.scalatest.BeforeAndAfter
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
@@ -44,7 +43,6 @@ import scala.concurrent.duration._
 class AuthActionSpec
   extends PlaySpec
     with GuiceOneAppPerSuite
-    with BeforeAndAfter
     with MockitoSugar {
   private val ninoGenerator = new Generator()
   private val testNino = ninoGenerator.nextNino.nino
