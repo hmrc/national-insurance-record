@@ -18,23 +18,22 @@ package uk.gov.hmrc.nationalinsurancerecord.connectors
 
 import com.codahale.metrics.Timer
 import org.joda.time.LocalDate
-import org.mockito.Mockito._
-import org.mockito.Mockito
 import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito
+import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
+import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.http.HttpClient
-import play.api.inject.bind
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpClient, HttpResponse}
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.cache._
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.des.{DesLiabilities, DesNIRecord, DesSummary}
-import uk.gov.hmrc.nationalinsurancerecord.services.{CachingMongoService, MetricsService}
+import uk.gov.hmrc.nationalinsurancerecord.services.MetricsService
 import uk.gov.hmrc.nationalinsurancerecord.util.WireMockHelper
 
 import scala.concurrent.Future
@@ -42,17 +41,11 @@ import scala.concurrent.Future
 class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar with GuiceOneAppPerSuite with WireMockHelper with ScalaFutures {
   // scalastyle:off magic.number
 
-  val mockSummaryRepo: DesSummaryRepository = mock[DesSummaryRepository]
-  val mockDesSummary = mock[CachingMongoService[DesSummaryCache, DesSummary]]
-  when(mockSummaryRepo()).thenReturn(mockDesSummary)
+  val mockSummaryRepo: DesSummaryRepository = mock[DesSummaryRepository](Mockito.RETURNS_DEEP_STUBS)
 
-  val mockLiabilitiesRepo: DesLiabilitiesRepository = mock[DesLiabilitiesRepository]
-  val mockDesLiabilities: CachingMongoService[DesLiabilitiesCache, DesLiabilities] = mock[CachingMongoService[DesLiabilitiesCache, DesLiabilities]]
-  when(mockLiabilitiesRepo()).thenReturn(mockDesLiabilities)
+  val mockLiabilitiesRepo: DesLiabilitiesRepository = mock[DesLiabilitiesRepository](Mockito.RETURNS_DEEP_STUBS)
 
-  val mockNIRecordRepo: DesNIRecordRepository = mock[DesNIRecordRepository]
-  val mockDesNIRecord: CachingMongoService[DesNIRecordCache, DesNIRecord] = mock[CachingMongoService[DesNIRecordCache, DesNIRecord]]
-  when(mockNIRecordRepo()).thenReturn(mockDesNIRecord)
+  val mockNIRecordRepo: DesNIRecordRepository = mock[DesNIRecordRepository](Mockito.RETURNS_DEEP_STUBS)
 
   val mockHttpClient: HttpClient = mock[HttpClient]
 
@@ -66,14 +59,11 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
     )
     .overrides(
       bind[HttpClient].toInstance(mockHttpClient),
-      bind[CachingMongoService[DesSummaryCache, DesSummary]].toInstance(mockDesSummary),
       bind[MetricsService].toInstance(mockMetrics),
       bind[Timer.Context].toInstance(mockTimerContext),
       bind[DesNIRecordRepository].toInstance(mockNIRecordRepo),
       bind[DesSummaryRepository].toInstance(mockSummaryRepo),
       bind[DesLiabilitiesRepository].toInstance(mockLiabilitiesRepo)
-
-
     )
     .build()
 
@@ -463,7 +453,6 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
 
   "DesConnector - Caching" should {
 
-    val nino = generateNino()
     val testSummaryModel = DesSummary(rreToConsider = false, dateOfDeath = None, earningsIncludedUpTo = Some(new LocalDate(2014, 4, 5)),
       dateOfBirth = Some(new LocalDate(1952, 11, 21)), finalRelevantYear = Some(2016))
 
