@@ -28,7 +28,7 @@ class ApplicationConfig @Inject()(servicesConfig: ServicesConfig) {
 
   val responseCacheTTL = servicesConfig.getInt("mongodb.responseTTL")
 
-  val authorization: String = s"Bearer ${servicesConfig.getConfString("microservice.services.des-hod.authorizationToken", "local")}"
+  val authorization: String = s"Bearer ${servicesConfig.getConfString("des-hod.authorizationToken", "local")}"
 
-  val desEnvironment: String = servicesConfig.getConfString("microservice.services.des-hod.environment", "local")
+  val desEnvironment: String = servicesConfig.getConfString("des-hod.environment", "local")
 }
