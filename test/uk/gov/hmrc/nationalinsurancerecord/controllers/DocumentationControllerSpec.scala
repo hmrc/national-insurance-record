@@ -50,7 +50,7 @@ class DocumentationControllerSpec extends UnitSpec with GuiceOneAppPerSuite with
       override lazy val access: Option[Configuration] = apiConfig
 
       override lazy val status: Option[String] = apiStatus
-      
+
     }
 
     new DocumentationController(appContext, assets, controllerComponents).definition()(FakeRequest())
