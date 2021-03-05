@@ -24,7 +24,7 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.JodaReads.jodaLocalDateReads
+import play.api.libs.json.JodaReads._
 import play.api.libs.json._
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsJson, _}
@@ -41,8 +41,6 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
   val emptyRequestWithHeader = FakeRequest().withHeaders("Accept" -> "application/vnd.hmrc.1.0+json")
   val mockNationalInsuranceRecordService: NationalInsuranceRecordService = mock[NationalInsuranceRecordService]
   val nino: Nino = generateNino()
-  implicit val jodaReads: Reads[LocalDate] = jodaLocalDateReads("yyyy-MM-dd")
-
 
   override def fakeApplication(): Application = GuiceApplicationBuilder()
     .overrides(
