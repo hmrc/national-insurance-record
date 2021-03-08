@@ -19,10 +19,9 @@ package uk.gov.hmrc.nationalinsurancerecord.controllers.nationalInsurance
 import com.google.inject.{Inject, Singleton}
 import play.api.hal.HalResource
 import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.{Action, AnyContent, BodyParser, ControllerComponents}
+import play.api.mvc.{Action, AnyContent, BodyParsers, ControllerComponents}
 import uk.gov.hmrc.api.controllers.HeaderValidator
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.nationalinsurancerecord.config.AppContext
 import uk.gov.hmrc.nationalinsurancerecord.controllers.auth.AuthAction
 import uk.gov.hmrc.nationalinsurancerecord.controllers.{ErrorHandling, ErrorResponses, HalSupport, Links}
@@ -31,6 +30,7 @@ import uk.gov.hmrc.nationalinsurancerecord.events.{NationalInsuranceExclusion, N
 import uk.gov.hmrc.nationalinsurancerecord.services.NationalInsuranceRecordService
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
+
 import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -39,8 +39,10 @@ class NationalInsuranceRecordController @Inject()(nationalInsuranceRecordService
                                                   auditConnector: AuditConnector,
                                                   appContext: AppContext,
                                                   authAction: AuthAction,
-                                                  cc: ControllerComponents
-                                                 ) extends BackendController(cc)
+                                                  cc: ControllerComponents,
+                                                  val parser: BodyParsers.Default
+                                                 )(implicit val executionContext: ExecutionContext)
+                                                  extends BackendController(cc)
                                                     with HeaderValidator
                                                     with ErrorHandling
                                                     with HalSupport
@@ -123,8 +125,4 @@ class NationalInsuranceRecordController @Inject()(nationalInsuranceRecordService
       })
 
   }
-
-  override def parser: BodyParser[AnyContent] = cc.parsers.defaultBodyParser
-  override implicit protected def executionContext: ExecutionContext = cc.executionContext
-
 }
