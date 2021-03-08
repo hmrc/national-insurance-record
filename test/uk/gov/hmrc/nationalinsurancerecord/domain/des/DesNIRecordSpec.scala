@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ class DesNIRecordSpec extends UnitSpec {
 
   val testRecord: String = Source.fromInputStream(getClass.getResourceAsStream("/json/nirecordDesTest.json")).mkString
 
-  "reading DesNIRecord " should {
+  "reading DesNIRecord " must{
     val niRecord = Json.parse(testRecord).as[DesNIRecord]
 
     "parse number of Qualifying year correctly" in {
@@ -85,7 +85,7 @@ class DesNIRecordSpec extends UnitSpec {
   def taxYear(year: Int, qualifying: Boolean, payable: Boolean): DesNITaxYear =
     DesNITaxYear(year, qualifying, underInvestigation = false, payable = payable, 0, None, None, 0, 0, 0, List())
 
-  "purge" should {
+  "purge" must{
     "return an nirecord with no tax years after 2014 when the FRY 2014" in {
       val niRecord = DesNIRecord(5, 2, 2, pre75ContributionCount = 0, Some(new LocalDate(2010, 4, 6)), List(
         taxYear(2010, true, false),

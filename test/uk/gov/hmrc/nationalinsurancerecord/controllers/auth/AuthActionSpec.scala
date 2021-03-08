@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,16 @@
 package uk.gov.hmrc.nationalinsurancerecord.controllers.auth
 
 import akka.util.Timeout
-import org.mockito.Matchers.{any, eq => MockitoEq}
+import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.{eq => MockitoEq}
 import org.mockito.Mockito.{verify, when}
-import org.scalatest.BeforeAndAfter
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.http.Status.{BAD_REQUEST, OK, UNAUTHORIZED, INTERNAL_SERVER_ERROR}
-import play.api.mvc.{Action, AnyContent, Controller, Result}
+import play.api.http.Status.{BAD_REQUEST, INTERNAL_SERVER_ERROR, OK, UNAUTHORIZED}
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.inject.bind
+import play.api.mvc.{Action, AnyContent, BodyParsers, Controller, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.status
 import uk.gov.hmrc.auth.core.AuthProvider.PrivilegedApplication
@@ -41,7 +43,6 @@ import scala.concurrent.duration._
 class AuthActionSpec
   extends PlaySpec
     with GuiceOneAppPerSuite
-    with BeforeAndAfter
     with MockitoSugar {
   private val ninoGenerator = new Generator()
   private val testNino = ninoGenerator.nextNino.nino
@@ -69,8 +70,8 @@ class AuthActionSpec
 
           verify(mockAuthConnector)
             .authorise[Unit](MockitoEq(
-              ConfidenceLevel.L200 or AuthProviders(PrivilegedApplication)
-            ), any())(any(), any())
+            ConfidenceLevel.L200 or AuthProviders(PrivilegedApplication)
+          ), any())(any(), any())
         }
         "the user is a trusted helper and requests with the nino of the helpee" in {
           val helperNino = ninoGenerator.nextNino.nino
@@ -81,8 +82,8 @@ class AuthActionSpec
 
           verify(mockAuthConnector)
             .authorise[Unit](MockitoEq(
-              ConfidenceLevel.L200 or AuthProviders(PrivilegedApplication)
-            ), any())(any(), any())
+            ConfidenceLevel.L200 or AuthProviders(PrivilegedApplication)
+          ), any())(any(), any())
         }
 
         "the request comes from a privileged application" in {
@@ -93,8 +94,8 @@ class AuthActionSpec
 
           verify(mockAuthConnector)
             .authorise[Unit](MockitoEq(
-              ConfidenceLevel.L200 or AuthProviders(PrivilegedApplication)
-            ), any())(any(), any())
+            ConfidenceLevel.L200 or AuthProviders(PrivilegedApplication)
+          ), any())(any(), any())
         }
       }
 
@@ -163,9 +164,18 @@ class AuthActionSpec
   }
 
   private def testAuthActionWith[T](authResult: Future[T],
-                                    uri: String = goodUriWithNino): (Future[Result], AuthConnector) = {
+  uri: String = goodUriWithNino): (Future[Result], AuthConnector) = {
+
     val mockAuthConnector = newMockConnectorWithAuthResult(authResult)
-    val authAction = new AuthActionImpl(mockAuthConnector)
+
+    val injector = GuiceApplicationBuilder()
+      .overrides(
+        bind[AuthConnector].toInstance(mockAuthConnector)
+      )
+      .injector()
+
+
+    val authAction = injector.instanceOf[AuthAction]
 
     val testHarness = new AuthActionTestHarness(authAction)
 
@@ -181,4 +191,3 @@ object AuthActionSpec {
   }
 
 }
-

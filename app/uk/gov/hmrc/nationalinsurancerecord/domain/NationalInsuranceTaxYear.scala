@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,9 @@ package uk.gov.hmrc.nationalinsurancerecord.domain
 
 import org.joda.time.LocalDate
 import play.api.libs.functional.syntax._
-import play.api.libs.json._
+import play.api.libs.json.JodaWrites._
+import play.api.libs.json.JodaReads._
+import play.api.libs.json.{Json, Writes, Reads, _}
 
 case class NationalInsuranceTaxYear(
                     taxYear: String,
@@ -36,7 +38,8 @@ case class NationalInsuranceTaxYear(
 }
 
 object NationalInsuranceTaxYear {
-  implicit val reads = Json.reads[NationalInsuranceTaxYear]
+
+  implicit val reads: Reads[NationalInsuranceTaxYear] = Json.reads[NationalInsuranceTaxYear]
   implicit val writes: Writes[NationalInsuranceTaxYear] = (
     ( JsPath \ "taxYear").write[String] and
     ( JsPath \ "qualifying").write[Boolean] and
@@ -50,5 +53,4 @@ object NationalInsuranceTaxYear {
     ( JsPath \ "payable").write[Boolean] and
     ( JsPath \ "underInvestigation").write[Boolean]
     )(unlift(NationalInsuranceTaxYear.unapply))
-  implicit val formats = Format(reads, writes)
 }

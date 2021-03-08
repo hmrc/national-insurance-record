@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,40 +17,39 @@
 package uk.gov.hmrc.nationalinsurancerecord.controllers
 
 import org.joda.time.LocalDate
-import org.scalatest.mockito.MockitoSugar
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.when
+import org.scalatestplus.mockito.MockitoSugar
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.Application
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.json.JodaReads._
 import play.api.libs.json._
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsJson, _}
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
-import uk.gov.hmrc.nationalinsurancerecord.config.AppContext
-import uk.gov.hmrc.nationalinsurancerecord.connectors.{CustomAuditConnector, DesConnector}
 import uk.gov.hmrc.nationalinsurancerecord.controllers.auth.{AuthAction, FakeAuthAction}
 import uk.gov.hmrc.nationalinsurancerecord.controllers.nationalInsurance.NationalInsuranceRecordController
 import uk.gov.hmrc.nationalinsurancerecord.domain._
-import uk.gov.hmrc.nationalinsurancerecord.services.{CitizenDetailsService, MetricsService, NationalInsuranceRecordService}
-import uk.gov.hmrc.play.audit.model.DataEvent
-import uk.gov.hmrc.play.test.WithFakeApplication
+import uk.gov.hmrc.nationalinsurancerecord.services.NationalInsuranceRecordService
 
-import scala.concurrent.Future
-
-class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitSpec with WithFakeApplication with MockitoSugar {
+class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitSpec with GuiceOneAppPerSuite with MockitoSugar {
 
   val emptyRequest = FakeRequest()
   val emptyRequestWithHeader = FakeRequest().withHeaders("Accept" -> "application/vnd.hmrc.1.0+json")
+  val mockNationalInsuranceRecordService: NationalInsuranceRecordService = mock[NationalInsuranceRecordService]
+  val nino: Nino = generateNino()
 
-  val mockAuditConnector = new CustomAuditConnector {
-    override lazy val auditConnector = ???
+  override def fakeApplication(): Application = GuiceApplicationBuilder()
+    .overrides(
+      bind[NationalInsuranceRecordService].toInstance(mockNationalInsuranceRecordService),
+      bind[AuthAction].to[FakeAuthAction]
+    )
+    .build()
 
-    override def sendEvent(event: DataEvent)(implicit hc: HeaderCarrier): Unit = {}
-  }
-
-  def testNationalInsuranceRecordController(niRecordService: NationalInsuranceRecordService): NationalInsuranceRecordController
-  = new NationalInsuranceRecordController(niRecordService, mockAuditConnector, mock[AppContext], FakeAuthAction) {
-    override val app: String = "Test National Insurance Record"
-    override val context: String = "test"
-  }
+  val nationalInsuranceRecordController: NationalInsuranceRecordController = app.injector.instanceOf[NationalInsuranceRecordController]
 
   private val dummyTaxYearQualifying: NationalInsuranceTaxYear = NationalInsuranceTaxYear(
     taxYear = "2010-11",
@@ -82,7 +81,7 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
 
 
   private def generateTaxYear(taxYear: String, qualifying: Boolean): NationalInsuranceTaxYear = {
-    if(qualifying) {
+    if (qualifying) {
       dummyTaxYearQualifying.copy(taxYear = taxYear)
     } else {
       dummyTaxYearNonQualifying.copy(taxYear = taxYear)
@@ -145,38 +144,29 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
   )
 
   "getSummary" when {
-    val mockDesConnector =  mock[DesConnector]
-    val mockCitizenDetailsService = mock[CitizenDetailsService]
-    val mockMetricsService = mock[MetricsService]
 
-    def generateSummaryResponse(serviceResult: Either[ExclusionResponse, NationalInsuranceRecord], nino: Nino = generateNino()) =
-      testNationalInsuranceRecordController(new NationalInsuranceRecordService(mockDesConnector, mockCitizenDetailsService, mockMetricsService) {
-        override def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceRecord]] = Future.successful(serviceResult)
-
-        override def getTaxYear(nino: Nino, taxYear: TaxYear)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceTaxYear]] = ???
-      }).getSummary(nino)(emptyRequestWithHeader)
-
-    "the request headers are invalid" should {
+    "the request headers are invalid" must {
       "return status code 406" in {
-        val response = testNationalInsuranceRecordController(new NationalInsuranceRecordService(mockDesConnector, mockCitizenDetailsService, mockMetricsService) {
-          override def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceRecord]] = ???
 
-          override def getTaxYear(nino: Nino, taxYear: TaxYear)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceTaxYear]] = ???
-        }).getSummary(generateNino())(emptyRequest)
+        val response = nationalInsuranceRecordController.getSummary(nino)(emptyRequest)
         status(response) shouldBe 406
+
         contentAsJson(response) shouldBe Json.parse("""{"code":"ACCEPT_HEADER_INVALID","message":"The accept header is missing or invalid"}""")
       }
     }
 
-    "there is a dead exclusion" should {
+    "there is a dead exclusion" must {
 
-      val response = generateSummaryResponse(Left(ExclusionResponse(List(Exclusion.Dead))))
 
       "return status 403" in {
+        when(mockNationalInsuranceRecordService.getNationalInsuranceRecord(any())(any())).thenReturn(Left(ExclusionResponse(List(Exclusion.Dead))))
+        val response = nationalInsuranceRecordController.getSummary(nino)(emptyRequestWithHeader)
         status(response) shouldBe 403
       }
 
       "return the dead message" in {
+        when(mockNationalInsuranceRecordService.getNationalInsuranceRecord(any())(any())).thenReturn(Left(ExclusionResponse(List(Exclusion.Dead))))
+        val response = nationalInsuranceRecordController.getSummary(nino)(emptyRequestWithHeader)
         contentAsJson(response) shouldBe Json.parse(
           """{"code":"EXCLUSION_DEAD","message": "The customer needs to contact the National Insurance helpline"}"""
         )
@@ -184,15 +174,19 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
 
     }
 
-    "there is a manual correspondence exclusion" should {
-
-      val response = generateSummaryResponse(Left(ExclusionResponse(List(Exclusion.ManualCorrespondenceIndicator))))
+    "there is a manual correspondence exclusion" must {
 
       "return status 403" in {
+        when(mockNationalInsuranceRecordService.getNationalInsuranceRecord(any())(any())).thenReturn(Left(ExclusionResponse(List(Exclusion.ManualCorrespondenceIndicator))))
+        val response = nationalInsuranceRecordController.getSummary(nino)(emptyRequestWithHeader)
         status(response) shouldBe 403
+
       }
 
       "return the mci message" in {
+        when(mockNationalInsuranceRecordService.getNationalInsuranceRecord(any())(any())).thenReturn(Left(ExclusionResponse(List(Exclusion.ManualCorrespondenceIndicator))))
+        val response = nationalInsuranceRecordController.getSummary(nino)(emptyRequestWithHeader)
+
         contentAsJson(response) shouldBe Json.parse(
           """{"code":"EXCLUSION_MANUAL_CORRESPONDENCE","message": "The customer cannot access the service, they should contact HMRC"}"""
         )
@@ -200,84 +194,85 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
 
     }
 
-    "there is an Isle of Man exclusion" should {
+    "there is an Isle of Man exclusion" must {
 
-      val response = generateSummaryResponse(Left(ExclusionResponse(List(Exclusion.IsleOfMan))))
 
       "return status 403" in {
+        when(mockNationalInsuranceRecordService.getNationalInsuranceRecord(any())(any())).thenReturn(Left(ExclusionResponse(List(Exclusion.IsleOfMan))))
+        val response = nationalInsuranceRecordController.getSummary(nino)(emptyRequestWithHeader)
         status(response) shouldBe 403
       }
 
       "return the IoM message" in {
+        when(mockNationalInsuranceRecordService.getNationalInsuranceRecord(any())(any())).thenReturn(Left(ExclusionResponse(List(Exclusion.IsleOfMan))))
+        val response = nationalInsuranceRecordController.getSummary(nino)(emptyRequestWithHeader)
+
         contentAsJson(response) shouldBe Json.parse(
           """{"code":"EXCLUSION_ISLE_OF_MAN","message": "The customer needs to contact the National Insurance helpline"}"""
         )
       }
     }
 
-    "there is a list of dead, MCI, IoM exclusions" should {
-
-      val response = generateSummaryResponse(Left(ExclusionResponse(List(
-        Exclusion.IsleOfMan,
-        Exclusion.ManualCorrespondenceIndicator,
-        Exclusion.Dead
-      ))))
+    "there is a list of dead, MCI, IoM exclusions" must {
 
       "return status 403" in {
+        when(mockNationalInsuranceRecordService.getNationalInsuranceRecord(any())(any())).thenReturn(Left(ExclusionResponse(List(
+          Exclusion.IsleOfMan,
+          Exclusion.ManualCorrespondenceIndicator,
+          Exclusion.Dead
+        ))))
+        val response = nationalInsuranceRecordController.getSummary(nino)(emptyRequestWithHeader)
         status(response) shouldBe 403
       }
 
       "return the dead message" in {
+        when(mockNationalInsuranceRecordService.getNationalInsuranceRecord(any())(any())).thenReturn(Left(ExclusionResponse(List(
+          Exclusion.IsleOfMan,
+          Exclusion.ManualCorrespondenceIndicator,
+          Exclusion.Dead
+        ))))
+        val response = nationalInsuranceRecordController.getSummary(nino)(emptyRequestWithHeader)
+
         contentAsJson(response) shouldBe Json.parse(
           """{"code":"EXCLUSION_DEAD","message": "The customer needs to contact the National Insurance helpline"}"""
         )
       }
     }
 
-    "there is a list of MCI, IoM exclusions" should {
-
-      val response = generateSummaryResponse(Left(ExclusionResponse(List(
-        Exclusion.IsleOfMan,
-        Exclusion.ManualCorrespondenceIndicator
-      ))))
+    "there is a list of MCI, IoM exclusions" must {
 
       "return status 403" in {
+        when(mockNationalInsuranceRecordService.getNationalInsuranceRecord(any())(any())).thenReturn(Left(ExclusionResponse(List(
+          Exclusion.IsleOfMan,
+          Exclusion.ManualCorrespondenceIndicator
+        ))))
+        val response = nationalInsuranceRecordController.getSummary(nino)(emptyRequestWithHeader)
         status(response) shouldBe 403
       }
 
       "return the mci message" in {
+
+        when(mockNationalInsuranceRecordService.getNationalInsuranceRecord(any())(any())).thenReturn(Left(ExclusionResponse(List(
+          Exclusion.IsleOfMan,
+          Exclusion.ManualCorrespondenceIndicator
+        ))))
+        val response = nationalInsuranceRecordController.getSummary(nino)(emptyRequestWithHeader)
+
         contentAsJson(response) shouldBe Json.parse(
           """{"code":"EXCLUSION_MANUAL_CORRESPONDENCE","message": "The customer cannot access the service, they should contact HMRC"}"""
         )
       }
     }
 
-    "there is a list of IoM exclusion" should {
 
-      val response = generateSummaryResponse(Left(ExclusionResponse(List(
-        Exclusion.IsleOfMan
-      ))))
+    "there is a valid National Insurance Record" must {
 
-      "return status 403" in {
-        status(response) shouldBe 403
-      }
-
-      "return the IOM message" in {
-        contentAsJson(response) shouldBe Json.parse(
-          """{"code":"EXCLUSION_ISLE_OF_MAN","message": "The customer needs to contact the National Insurance helpline"}"""
-        )
-      }
-
-    }
-
-    "there is a valid National Insurance Record" should {
-
-      lazy val testNino = generateNino()
-      lazy val responseSummary = generateSummaryResponse(Right(dummyRecord), testNino)
-      lazy val json = contentAsJson(responseSummary)
+      when(mockNationalInsuranceRecordService.getNationalInsuranceRecord(any())(any())).thenReturn(Right(dummyRecord))
+      val response = nationalInsuranceRecordController.getSummary(nino)(emptyRequestWithHeader)
+      val json = contentAsJson(response)
 
       "return 200" in {
-        status(responseSummary) shouldBe 200
+        status(response) shouldBe 200
       }
 
       "have an Int called qualifyingYears which is 36" in {
@@ -295,15 +290,15 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
         (json \ "numberOfGapsPayable").as[Int] shouldBe 4
       }
       "have a LocalDate called dateOfEntry which is 1/8/1969" in {
-        (json \ "dateOfEntry").as[LocalDate] shouldBe  new LocalDate(1969, 8, 1)
+        (json \ "dateOfEntry").as[LocalDate] shouldBe new LocalDate(1969, 8, 1)
       }
 
       "have a Boolean called homeResponsibilitiesProtection which is false" in {
-        (json \ "homeResponsibilitiesProtection").as[Boolean] shouldBe  false
+        (json \ "homeResponsibilitiesProtection").as[Boolean] shouldBe false
       }
 
       "have a Boolean called reducedRateElection which is false" in {
-        (json \ "reducedRateElection").as[Boolean] shouldBe  false
+        (json \ "reducedRateElection").as[Boolean] shouldBe false
       }
 
       "have a LocalDate called earningsIncludedUpTo which is 5/4/2016" in {
@@ -314,7 +309,7 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
         (json \ "_embedded" \ "taxYears").as[JsArray].value.length shouldBe 41
       }
 
-      "the first tax year" should {
+      "the first tax year" must {
 
         "have a string called taxYear which is 2015-16" in {
           ((json \ "_embedded" \ "taxYears") \ 0 \ "taxYear").as[String] shouldBe "2015-16"
@@ -325,47 +320,47 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
         }
 
         "have a big decimal called classOneContributions that is 1149.98" in {
-           ((json \ "_embedded" \ "taxYears") \ 0 \ "classOneContributions").as[BigDecimal] shouldBe 1149.98
+          ((json \ "_embedded" \ "taxYears") \ 0 \ "classOneContributions").as[BigDecimal] shouldBe 1149.98
         }
 
         "have an Int called classTwoCredits that is 0" in {
-           ((json \ "_embedded" \ "taxYears") \ 0 \ "classTwoCredits").as[Int] shouldBe 0
+          ((json \ "_embedded" \ "taxYears") \ 0 \ "classTwoCredits").as[Int] shouldBe 0
         }
 
         "have an Int called classThreeCredits that is 0" in {
-           ((json \ "_embedded" \ "taxYears") \ 0 \ "classThreeCredits").as[Int] shouldBe 0
+          ((json \ "_embedded" \ "taxYears") \ 0 \ "classThreeCredits").as[Int] shouldBe 0
         }
 
         "have an Int called otherCredits that is 0" in {
-           ((json \ "_embedded" \ "taxYears") \ 0 \ "otherCredits").as[Int] shouldBe 0
+          ((json \ "_embedded" \ "taxYears") \ 0 \ "otherCredits").as[Int] shouldBe 0
         }
 
         "have an Int called classThreePayable that is 0" in {
-           ((json \ "_embedded" \ "taxYears") \ 0 \ "classThreePayable").as[BigDecimal] shouldBe 0
+          ((json \ "_embedded" \ "taxYears") \ 0 \ "classThreePayable").as[BigDecimal] shouldBe 0
         }
 
         "have a nullable local date called classThreePayableBy that is null" in {
-           ((json \ "_embedded" \ "taxYears") \ 0 \ "classThreePayableBy") shouldBe JsDefined(JsNull)
+          ((json \ "_embedded" \ "taxYears") \ 0 \ "classThreePayableBy") shouldBe JsDefined(JsNull)
         }
 
         "have a nullable local date called classThreePayableByPenalty that is null" in {
-           ((json \ "_embedded" \ "taxYears") \ 0 \ "classThreePayableByPenalty") shouldBe JsDefined(JsNull)
+          ((json \ "_embedded" \ "taxYears") \ 0 \ "classThreePayableByPenalty") shouldBe JsDefined(JsNull)
         }
 
         "have a Boolean called payable that is false" in {
-           ((json \ "_embedded" \ "taxYears") \ 0 \ "payable").as[Boolean] shouldBe false
+          ((json \ "_embedded" \ "taxYears") \ 0 \ "payable").as[Boolean] shouldBe false
         }
 
         "have a Boolean called underInvestigation that is false" in {
-           ((json \ "_embedded" \ "taxYears") \ 0 \ "underInvestigation").as[Boolean] shouldBe false
+          ((json \ "_embedded" \ "taxYears") \ 0 \ "underInvestigation").as[Boolean] shouldBe false
         }
 
         "have a link to it's resource" in {
-          ((json \ "_embedded" \ "taxYears") \ 0 \ "_links" \ "self" \ "href").as[String] shouldBe s"/test/ni/$testNino/taxyear/2015-16"
+          ((json \ "_embedded" \ "taxYears") \ 0 \ "_links" \ "self" \ "href").as[String] shouldBe s"/national-insurance-record/ni/$nino/taxyear/2015-16"
         }
       }
-      
-      "the last tax year" should {
+
+      "the last tax year" must {
         "have a string called taxYear which is 1975-76" in {
           ((json \ "_embedded" \ "taxYears") \ 40 \ "taxYear").as[String] shouldBe "1975-76"
         }
@@ -411,11 +406,10 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
         }
 
         "have a link to it's resource" in {
-          ((json \ "_embedded" \ "taxYears") \ 40 \ "_links" \ "self" \ "href").as[String] shouldBe s"/test/ni/$testNino/taxyear/1975-76"
+          ((json \ "_embedded" \ "taxYears") \ 40 \ "_links" \ "self" \ "href").as[String] shouldBe s"/national-insurance-record/ni/$nino/taxyear/1975-76"
         }
       }
-
-      "a non qualifying year like 2012" should {
+      "a non qualifying year like 2012" must{
         "have a string called taxYear which is 2012-13" in {
           ((json \ "_embedded" \ "taxYears") \ 3 \ "taxYear").as[String] shouldBe "2012-13"
         }
@@ -461,214 +455,186 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
         }
 
         "have a link to it's resource" in {
-          ((json \ "_embedded" \ "taxYears") \ 3 \ "_links" \ "self" \ "href").as[String] shouldBe s"/test/ni/$testNino/taxyear/2012-13"
+          ((json \ "_embedded" \ "taxYears") \ 3 \ "_links" \ "self" \ "href").as[String] shouldBe s"/national-insurance-record/ni/$nino/taxyear/2012-13"
         }
       }
 
       "have a link to itself" in {
-        ((json \ "_links" \ "self") \ "href" ).as[String] shouldBe s"/test/ni/$testNino"
-      }
-
-    }
-
-    "the date of entry is nullable" should {
-      "not return the date of entry field" in {
-        val testNino = generateNino()
-        val responseSummary = generateSummaryResponse(Right(dummyRecord.copy(dateOfEntry = None)), testNino)
-        val json = contentAsJson(responseSummary)
-
-        (json \ "dateOfEntry") shouldBe an[JsUndefined]
+        ((json \ "_links" \ "self") \ "href" ).as[String] shouldBe s"/national-insurance-record/ni/$nino"
       }
     }
+
+        "the date of entry is nullable" must {
+          "not return the date of entry field" in {
+
+            when(mockNationalInsuranceRecordService.getNationalInsuranceRecord(any())(any())).thenReturn(Right(dummyRecord.copy(dateOfEntry = None)))
+            val response = nationalInsuranceRecordController.getSummary(nino)(emptyRequestWithHeader)
+            val json = contentAsJson(response)
+
+            (json \ "dateOfEntry") shouldBe an[JsUndefined]
+          }
+        }
   }
 
-  "getTaxYear" should {
-    val mockDesConnector =  mock[DesConnector]
-    val mockCitizenDetailsService = mock[CitizenDetailsService]
-    val mockMetricsService = mock[MetricsService]
+    "getTaxYear" must{
 
-    def generateTaxYearResponse(serviceResult: Either[ExclusionResponse, NationalInsuranceTaxYear], nino: Nino = generateNino(), taxYear: TaxYear = TaxYear("0000-01")) =
-      testNationalInsuranceRecordController(new NationalInsuranceRecordService(mockDesConnector, mockCitizenDetailsService, mockMetricsService) {
-        override def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceRecord]] = ???
 
-        override def getTaxYear(nino: Nino, taxYear: TaxYear)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceTaxYear]] = Future.successful(serviceResult)
-      }).getTaxYear(nino, taxYear)(emptyRequestWithHeader)
-
-    "the request headers are invalid" should {
-      "return status code 406" in {
-        val response = testNationalInsuranceRecordController(new NationalInsuranceRecordService(mockDesConnector, mockCitizenDetailsService, mockMetricsService) {
-          override def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceRecord]] = ???
-
-          override def getTaxYear(nino: Nino, taxYear: TaxYear)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceTaxYear]] = ???
-        }).getTaxYear(generateNino(), TaxYear("0000-01"))(emptyRequest)
-        status(response) shouldBe 406
-        contentAsJson(response) shouldBe Json.parse("""{"code":"ACCEPT_HEADER_INVALID","message":"The accept header is missing or invalid"}""")
+      "the request headers are invalid" must{
+        "return status code 406" in {
+          val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear("0000-01"))(emptyRequest)
+          status(response) shouldBe 406
+          contentAsJson(response) shouldBe Json.parse("""{"code":"ACCEPT_HEADER_INVALID","message":"The accept header is missing or invalid"}""")
+        }
       }
     }
 
-    "there is a dead exclusion" should {
+      "there is a dead exclusion" must{
+        when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).thenReturn(Left(ExclusionResponse(List(Exclusion.Dead))))
+        val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear("0000-01"))(emptyRequestWithHeader)
+        "return status 403" in {
 
-      val response = generateTaxYearResponse(Left(ExclusionResponse(List(Exclusion.Dead))))
+          status(response) shouldBe 403
+        }
 
-      "return status 403" in {
-        status(response) shouldBe 403
+        "return the dead message" in {
+          contentAsJson(response) shouldBe Json.parse(
+            """{"code":"EXCLUSION_DEAD","message": "The customer needs to contact the National Insurance helpline"}"""
+          )
+        }
       }
 
-      "return the dead message" in {
-        contentAsJson(response) shouldBe Json.parse(
-          """{"code":"EXCLUSION_DEAD","message": "The customer needs to contact the National Insurance helpline"}"""
-        )
+      "there is a manual correspondence exclusion" must{
+        when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).thenReturn(Left(ExclusionResponse(List(Exclusion.ManualCorrespondenceIndicator))))
+        val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear("0000-01"))(emptyRequestWithHeader)
+
+        "return status 403" in {
+          status(response) shouldBe 403
+        }
+
+        "return the mci message" in {
+          contentAsJson(response) shouldBe Json.parse(
+            """{"code":"EXCLUSION_MANUAL_CORRESPONDENCE","message": "The customer cannot access the service, they should contact HMRC"}"""
+          )
+        }
+
       }
 
-    }
+      "there is an Isle of Man exclusion" must{
+        when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).thenReturn(Left(ExclusionResponse(List(Exclusion.IsleOfMan))))
+        val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear("0000-01"))(emptyRequestWithHeader)
 
-    "there is a manual correspondence exclusion" should {
+        "return status 403" in {
+          status(response) shouldBe 403
+        }
 
-      val response = generateTaxYearResponse(Left(ExclusionResponse(List(Exclusion.ManualCorrespondenceIndicator))))
-
-      "return status 403" in {
-        status(response) shouldBe 403
+        "return the IoM message" in {
+          contentAsJson(response) shouldBe Json.parse(
+            """{"code":"EXCLUSION_ISLE_OF_MAN","message": "The customer needs to contact the National Insurance helpline"}"""
+          )
+        }
       }
 
-      "return the mci message" in {
-        contentAsJson(response) shouldBe Json.parse(
-          """{"code":"EXCLUSION_MANUAL_CORRESPONDENCE","message": "The customer cannot access the service, they should contact HMRC"}"""
-        )
+      "there is a list of dead, MCI, IoM exclusions" must{
+
+        when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).thenReturn(Left(ExclusionResponse(List(
+          Exclusion.IsleOfMan,
+          Exclusion.ManualCorrespondenceIndicator,
+          Exclusion.Dead
+        ))))
+        val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear("0000-01"))(emptyRequestWithHeader)
+
+        "return status 403" in {
+          status(response) shouldBe 403
+        }
+
+        "return the dead message" in {
+          contentAsJson(response) shouldBe Json.parse(
+            """{"code":"EXCLUSION_DEAD","message": "The customer needs to contact the National Insurance helpline"}"""
+          )
+        }
       }
 
-    }
+      "there is a list of MCI, IoM exclusions" must{
+        when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).thenReturn(Left(ExclusionResponse(List(
+          Exclusion.IsleOfMan,
+          Exclusion.ManualCorrespondenceIndicator
+        ))))
+        val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear("0000-01"))(emptyRequestWithHeader)
 
-    "there is an Isle of Man exclusion" should {
+        "return status 403" in {
+          status(response) shouldBe 403
+        }
 
-      val response = generateTaxYearResponse(Left(ExclusionResponse(List(Exclusion.IsleOfMan))))
-
-      "return status 403" in {
-        status(response) shouldBe 403
+        "return the mci message" in {
+          contentAsJson(response) shouldBe Json.parse(
+            """{"code":"EXCLUSION_MANUAL_CORRESPONDENCE","message": "The customer cannot access the service, they should contact HMRC"}"""
+          )
+        }
       }
 
-      "return the IoM message" in {
-        contentAsJson(response) shouldBe Json.parse(
-          """{"code":"EXCLUSION_ISLE_OF_MAN","message": "The customer needs to contact the National Insurance helpline"}"""
-        )
-      }
-    }
 
-    "there is a list of dead, MCI, IoM exclusions" should {
+      "there is a valid Qualifying Tax Year" must{
+        when(mockNationalInsuranceRecordService.getTaxYear(any(),any())(any())).thenReturn(Right(dummyTaxYearQualifying))
+        val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear(dummyTaxYearQualifying.taxYear))(emptyRequestWithHeader)
 
-      val response = generateTaxYearResponse(Left(ExclusionResponse(List(
-        Exclusion.IsleOfMan,
-        Exclusion.ManualCorrespondenceIndicator,
-        Exclusion.Dead
-      ))))
+        lazy val json = contentAsJson(response)
 
-      "return status 403" in {
-        status(response) shouldBe 403
-      }
+        "return 200" in {
+          status(response) shouldBe 200
+        }
 
-      "return the dead message" in {
-        contentAsJson(response) shouldBe Json.parse(
-          """{"code":"EXCLUSION_DEAD","message": "The customer needs to contact the National Insurance helpline"}"""
-        )
-      }
-    }
+        "have a string called taxYear that is 2010-11" in {
+          (json \ "taxYear").as[String] shouldBe "2010-11"
+        }
 
-    "there is a list of MCI, IoM exclusions" should {
+        "have a boolean called qualifying that is true" in {
+          (json \ "qualifying").as[Boolean] shouldBe true
+        }
 
-      val response = generateTaxYearResponse(Left(ExclusionResponse(List(
-        Exclusion.IsleOfMan,
-        Exclusion.ManualCorrespondenceIndicator
-      ))))
+        "have a big decimal called classOneContributions that is 1149.98" in {
+          (json \ "classOneContributions").as[BigDecimal] shouldBe 1149.98
+        }
 
-      "return status 403" in {
-        status(response) shouldBe 403
-      }
+        "have an Int called classTwoCredits that is 0" in {
+          (json \ "classTwoCredits").as[Int] shouldBe 0
+        }
 
-      "return the mci message" in {
-        contentAsJson(response) shouldBe Json.parse(
-          """{"code":"EXCLUSION_MANUAL_CORRESPONDENCE","message": "The customer cannot access the service, they should contact HMRC"}"""
-        )
-      }
-    }
+        "have an Int called classThreeCredits that is 0" in {
+          (json \ "classThreeCredits").as[Int] shouldBe 0
+        }
 
-    "there is a list of IoM exclusion" should {
+        "have an Int called otherCredits that is 0" in {
+          (json \ "otherCredits").as[Int] shouldBe 0
+        }
 
-      val response = generateTaxYearResponse(Left(ExclusionResponse(List(
-        Exclusion.IsleOfMan
-      ))))
+        "have an Int called classThreePayable that is 0" in {
+          (json \ "classThreePayable").as[BigDecimal] shouldBe 0
+        }
 
-      "return status 403" in {
-        status(response) shouldBe 403
-      }
+        "have a nullable local date called classThreePayableBy that is null" in {
+          (json \ "classThreePayableBy") shouldBe JsDefined(JsNull)
+        }
 
-      "return the IOM message" in {
-        contentAsJson(response) shouldBe Json.parse(
-          """{"code":"EXCLUSION_ISLE_OF_MAN","message": "The customer needs to contact the National Insurance helpline"}"""
-        )
-      }
+        "have a nullable local date called classThreePayableByPenalty that is null" in {
+          (json \ "classThreePayableByPenalty") shouldBe JsDefined(JsNull)
+        }
 
-    }
+        "have a Boolean called payable that is false" in {
+          (json \ "payable").as[Boolean] shouldBe false
+        }
 
-    "there is a valid Qualifying Tax Year" should {
-      lazy val testNino = generateNino()
-      lazy val response = generateTaxYearResponse(Right(dummyTaxYearQualifying), testNino, TaxYear(dummyTaxYearQualifying.taxYear))
-      lazy val json = contentAsJson(response)
+        "have a Boolean called underInvestigation that is false" in {
+          (json \ "underInvestigation").as[Boolean] shouldBe false
+        }
 
-      "return 200" in {
-        status(response) shouldBe 200
+        "have a link to itself" in {
+          ((json \ "_links" \ "self") \ "href" ).as[String] shouldBe s"/national-insurance-record/ni/$nino/taxyear/2010-11"
+        }
       }
 
-      "have a string called taxYear that is 2010-11" in {
-        (json \ "taxYear").as[String] shouldBe "2010-11"
-      }
-
-      "have a boolean called qualifying that is true" in {
-        (json \ "qualifying").as[Boolean] shouldBe true
-      }
-
-      "have a big decimal called classOneContributions that is 1149.98" in {
-        (json \ "classOneContributions").as[BigDecimal] shouldBe 1149.98
-      }
-
-      "have an Int called classTwoCredits that is 0" in {
-        (json \ "classTwoCredits").as[Int] shouldBe 0
-      }
-
-      "have an Int called classThreeCredits that is 0" in {
-        (json \ "classThreeCredits").as[Int] shouldBe 0
-      }
-
-      "have an Int called otherCredits that is 0" in {
-        (json \ "otherCredits").as[Int] shouldBe 0
-      }
-
-      "have an Int called classThreePayable that is 0" in {
-        (json \ "classThreePayable").as[BigDecimal] shouldBe 0
-      }
-
-      "have a nullable local date called classThreePayableBy that is null" in {
-        (json \ "classThreePayableBy") shouldBe JsDefined(JsNull)
-      }
-
-      "have a nullable local date called classThreePayableByPenalty that is null" in {
-        (json \ "classThreePayableByPenalty") shouldBe JsDefined(JsNull)
-      }
-
-      "have a Boolean called payable that is false" in {
-        (json \ "payable").as[Boolean] shouldBe false
-      }
-
-      "have a Boolean called underInvestigation that is false" in {
-        (json \ "underInvestigation").as[Boolean] shouldBe false
-      }
-
-      "have a link to itself" in {
-        ((json \ "_links" \ "self") \ "href" ).as[String] shouldBe s"/test/ni/$testNino/taxyear/2010-11"
-      }
-    }
-
-    "there is a valid Non-Qualifying Tax Year" should {
-      lazy val testNino = generateNino()
-      lazy val response = generateTaxYearResponse(Right(dummyTaxYearNonQualifying), testNino, TaxYear(dummyTaxYearNonQualifying.taxYear))
+    "there is a valid Non-Qualifying Tax Year" must {
+      when(mockNationalInsuranceRecordService.getTaxYear(any(),any())(any())).thenReturn(Right(dummyTaxYearNonQualifying))
+      val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear(dummyTaxYearNonQualifying.taxYear))(emptyRequestWithHeader)
       lazy val json = contentAsJson(response)
 
       "return 200" in {
@@ -720,10 +686,7 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
       }
 
       "have a link to itself" in {
-        ((json \ "_links" \ "self") \ "href" ).as[String] shouldBe s"/test/ni/$testNino/taxyear/2009-10"
+        ((json \ "_links" \ "self") \ "href" ).as[String] shouldBe s"/national-insurance-record/ni/$nino/taxyear/2009-10"
       }
     }
-
-  }
-
 }

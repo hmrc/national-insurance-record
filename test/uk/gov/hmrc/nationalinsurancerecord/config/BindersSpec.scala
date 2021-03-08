@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import uk.gov.hmrc.nationalinsurancerecord.domain.TaxYear
 
 class BindersSpec extends NationalInsuranceRecordUnitSpec {
 
-  "nino.bind" should {
+  "nino.bind" must{
 
     "return Right with a NINO instance for a valid NINO string" in {
       val nino = generateNino()
@@ -41,7 +41,7 @@ class BindersSpec extends NationalInsuranceRecordUnitSpec {
     }
   }
 
-  "taxYear.bind" should {
+  "taxYear.bind" must{
 
     "return Right with a TaxYear instance for a valid TaxYear string" in {
       val taxYear = "1979-80"

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,8 @@ package uk.gov.hmrc.nationalinsurancerecord.services
 
 import org.joda.time.LocalDate
 import org.mockito.Mockito._
-import org.mockito.{Matchers, Mockito}
+import org.mockito.ArgumentMatchers.eq
+import org.mockito.{ArgumentMatchers, Matchers, Mockito}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
@@ -108,7 +109,7 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
     }
 
 
-    "regular ni record" should {
+    "regular ni record" must{
 
       val desLiabilities = DesLiabilities(List(DesLiability(Some(14))))
       val nino = generateNino()
@@ -326,7 +327,7 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
 
       "log exclusion in metrics" in {
         whenReady(niRecordF) { niExclusion =>
-          verify(mockMetrics, Mockito.atLeastOnce()).exclusion(Matchers.eq(Exclusion.IsleOfMan))
+          verify(mockMetrics, Mockito.atLeastOnce()).exclusion(ArgumentMatchers.eq(Exclusion.IsleOfMan))
         }
       }
     }

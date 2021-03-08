@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,11 @@
  */
 
 package uk.gov.hmrc.nationalinsurancerecord.controllers.auth
-import play.api.mvc.{Request, Result}
+import com.google.inject.Inject
+import play.api.mvc.{BodyParsers, Request, Result}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-object FakeAuthAction extends AuthAction {
+class FakeAuthAction @Inject() (val parser: BodyParsers.Default) (implicit val executionContext: ExecutionContext)extends AuthAction {
   override protected def filter[A](request: Request[A]): Future[Option[Result]] = Future.successful(None)
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,29 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.controllers
 
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.OneAppPerSuite
+import controllers.Assets
+import org.scalatestplus.mockito.MockitoSugar
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Configuration
-import play.api.http.LazyHttpErrorHandler
 import play.api.libs.json.{JsArray, JsDefined, JsString, JsUndefined}
-import play.api.mvc.Result
+import play.api.mvc.{ControllerComponents, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import play.api.test.Injecting
 import uk.gov.hmrc.nationalinsurancerecord.config.AppContext
-import uk.gov.hmrc.nationalinsurancerecord.controllers.auth.{AuthAction, FakeAuthAction}
 import uk.gov.hmrc.nationalinsurancerecord.controllers.documentation.DocumentationController
 import uk.gov.hmrc.play.test.UnitSpec
 
 
-class DocumentationControllerSpec extends UnitSpec with OneAppPerSuite with MockitoSugar {
+class DocumentationControllerSpec extends UnitSpec with GuiceOneAppPerSuite with MockitoSugar with Injecting {
+
   "respond to GET /api/definition" in {
     val result = route(app, FakeRequest(GET, "/api/definition"))
     status(result.get) shouldNot be(NOT_FOUND)
   }
+
+  val controllerComponents: ControllerComponents = stubControllerComponents()
+  val assets: Assets = inject[Assets]
 
   def getDefinitionResultFromConfig(apiConfig: Option[Configuration] = None, apiStatus: Option[String] = None): Result = {
 
@@ -47,14 +51,13 @@ class DocumentationControllerSpec extends UnitSpec with OneAppPerSuite with Mock
 
       override lazy val status: Option[String] = apiStatus
 
-      override lazy val connectToHOD: Boolean = false
     }
 
-    new DocumentationController(LazyHttpErrorHandler, appContext).definition()(FakeRequest())
+    new DocumentationController(appContext, assets, controllerComponents).definition()(FakeRequest())
 
   }
 
-  "/definition access" should {
+  "/definition access" must{
 
     "return PRIVATE and no Whitelist IDs if there is no application config" in {
 
@@ -101,7 +104,7 @@ class DocumentationControllerSpec extends UnitSpec with OneAppPerSuite with Mock
     }
   }
 
-  "/definition status" should {
+  "/definition status" must{
 
 
     "return BETA if there is no application config" in {

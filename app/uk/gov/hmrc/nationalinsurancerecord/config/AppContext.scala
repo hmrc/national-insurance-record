@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,5 +26,4 @@ class AppContext @Inject()(configuration: Configuration) {
     .getOrElse(throw new RuntimeException("api.gateway.context is not configured"))
   lazy val access = configuration.getConfig("api.access")
   lazy val status = configuration.getString("api.status")
-  lazy val connectToHOD = configuration.getBoolean("feature.connectToHOD").getOrElse(false)
 }

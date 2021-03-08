@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package uk.gov.hmrc.nationalinsurancerecord.domain
 
 import org.joda.time.LocalDate
 import play.api.libs.functional.syntax._
+import play.api.libs.json.JodaWrites._
+import play.api.libs.json.JodaReads._
 import play.api.libs.json.{Json, Writes, _}
 
 case class NationalInsuranceRecord(
@@ -53,6 +55,4 @@ object NationalInsuranceRecord {
       ni.earningsIncludedUpTo,
       ni.reducedRateElection
     ))
-  implicit val formats: Format[NationalInsuranceRecord] = Format(reads, writes)
-
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,19 +17,25 @@
 package uk.gov.hmrc.nationalinsurancerecord.controllers.documentation
 
 import com.google.inject.{Inject, Singleton}
-import play.api.http.HttpErrorHandler
-import play.api.mvc.{Action, AnyContent}
+import controllers.Assets
+import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.nationalinsurancerecord.config.{APIAccessConfig, AppContext}
 import uk.gov.hmrc.nationalinsurancerecord.domain.APIAccess
 import uk.gov.hmrc.nationalinsurancerecord.views._
+import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 @Singleton
-class DocumentationController @Inject()(errorHandler: HttpErrorHandler,
-                                        appContext: AppContext)
-  extends uk.gov.hmrc.api.controllers.DocumentationController(errorHandler = errorHandler) {
+class DocumentationController @Inject()(appContext: AppContext,
+                                        assets: Assets,
+                                        cc: ControllerComponents)
+  extends BackendController(cc) {
 
-  override def definition(): Action[AnyContent] = Action {
+  def definition(): Action[AnyContent] = Action {
     Ok(txt.definition(buildAccess(), buildStatus())).as("application/json")
+  }
+
+  def conf(version: String, file: String): Action[AnyContent] = {
+    assets.at(s"/public/api/conf/$version", file)
   }
 
   private def buildAccess(): APIAccess = {

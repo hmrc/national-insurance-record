@@ -15,19 +15,28 @@
  */
 
 package uk.gov.hmrc.nationalinsurancerecord.util
+import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, Suite}
 
+trait WireMockHelper extends BeforeAndAfterAll with BeforeAndAfterEach {
+  this: Suite =>
 
-import play.api.libs.json.{JsError, JsSuccess, Reads}
+  protected val server: WireMockServer = new WireMockServer(wireMockConfig().dynamicPort())
 
-object EitherReads {
-  implicit def eitherReads[A, B](implicit A: Reads[A], B: Reads[B]): Reads[Either[A, B]] =
-    Reads[Either[A, B]] { json =>
-      A.reads(json) match {
-        case JsSuccess(value, path) => JsSuccess(Left(value), path)
-        case JsError(e1) => B.reads(json) match {
-          case JsSuccess(value, path) => JsSuccess(Right(value), path)
-          case JsError(e2) => JsError(JsError.merge(e1, e2))
-        }
-      }
-    }
+  override def beforeAll(): Unit = {
+    server.start()
+    super.beforeAll()
+  }
+
+  override def beforeEach(): Unit = {
+    server.resetAll()
+    super.beforeEach()
+  }
+
+  override def afterAll(): Unit = {
+    super.afterAll()
+    server.stop()
+  }
+
 }

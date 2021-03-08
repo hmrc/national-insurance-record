@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ class LiabilitiesRespositorySpec extends NationalInsuranceRecordUnitSpec with On
   val stubApplicationConfig = app.injector.instanceOf[StubApplicationConfig]
   val testLiablitiesModel = DesLiabilities(List(DesLiability(Some(15)), DesLiability(Some(100))))
 
-  "LiabilitiesRepository" should {
+  "LiabilitiesRepository" must{
 
     val nino = generateNino()
     val excluedNino = generateNino()

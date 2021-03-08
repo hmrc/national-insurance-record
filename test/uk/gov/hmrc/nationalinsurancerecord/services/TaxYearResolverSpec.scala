@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ class TaxYearResolverSpec extends WordSpecLike with Matchers {
     }
   }
 
-  "Requesting the tax year for a date" should {
+  "Requesting the tax year for a date" must{
 
     "Return 2012 when the date is 2013/4/5" in {
       Resolver().taxYearFor(new LocalDate(2013, 4, 5)) shouldBe 2012
@@ -60,7 +60,7 @@ class TaxYearResolverSpec extends WordSpecLike with Matchers {
     }
   }
 
-  "Requesting the currentTaxYear" should {
+  "Requesting the currentTaxYear" must{
 
     "Return 2012 when the current UK time is 23:59:59.999 on 2013/4/5" in {
       val currentTime = new DateTime(2013, 4, 5, 23, 59, 59, 999, DateTimeZone.forID("Europe/London"))
@@ -93,7 +93,7 @@ class TaxYearResolverSpec extends WordSpecLike with Matchers {
     }
   }
 
-  "Requesting the start of the current tax year" should {
+  "Requesting the start of the current tax year" must{
 
     "Return 2012/4/6 when the current UK time is 23:59:59.999 on 2013/4/5" in {
       val currentTime = new DateTime(2013, 4, 5, 23, 59, 59, 999, DateTimeZone.forID("Europe/London"))
@@ -126,7 +126,7 @@ class TaxYearResolverSpec extends WordSpecLike with Matchers {
     }
   }
 
-  "Requesting the start of a given tax year" should {
+  "Requesting the start of a given tax year" must{
 
     "Return 2012/4/6 for 2012" in {
       Resolver().startOfTaxYear(2012) shouldBe new LocalDate(2012, 4, 6)
@@ -134,7 +134,7 @@ class TaxYearResolverSpec extends WordSpecLike with Matchers {
 
   }
 
-  "Requesting the end of the current tax year" should {
+  "Requesting the end of the current tax year" must{
 
     "Return 2013/4/5 when the current UK time is 23:59:59.999 on 2013/4/5" in {
       val currentTime = new DateTime(2013, 4, 5, 23, 59, 59, 999, DateTimeZone.forID("Europe/London"))
@@ -167,7 +167,7 @@ class TaxYearResolverSpec extends WordSpecLike with Matchers {
     }
   }
 
-  "Requesting the start of the next tax year" should {
+  "Requesting the start of the next tax year" must{
 
     "Return 2013/4/6 when the current UK time is 23:59:59.999 on 2013/4/5" in {
       val currentTime = new DateTime(2013, 4, 5, 23, 59, 59, 999, DateTimeZone.forID("Europe/London"))
@@ -200,7 +200,7 @@ class TaxYearResolverSpec extends WordSpecLike with Matchers {
     }
   }
 
-  "local date falling in this tax year" should {
+  "local date falling in this tax year" must{
 
     object TaxYearResolverForTest extends TaxYearResolver {
       override lazy val now: () => DateTime = () => new DateTime(2015, 3, 31, 0, 0, 0, 0, DateTimeZone.forID("Europe/London"))
@@ -229,7 +229,7 @@ class TaxYearResolverSpec extends WordSpecLike with Matchers {
     }
   }
 
-  "Requesting end of the last tax year" should {
+  "Requesting end of the last tax year" must{
     "Return 2012/4/5 when the current UK time is 23:59:59.999 on 2013/4/5" in {
       val currentTime = new DateTime(2013, 4, 5, 23, 59, 59, 999, DateTimeZone.forID("Europe/London"))
       Resolver(currentTime).endOfLastTaxYear shouldBe new LocalDate(2012, 4, 5)
@@ -261,7 +261,7 @@ class TaxYearResolverSpec extends WordSpecLike with Matchers {
     }
   }
 
-  "Requesting the end of a given tax year" should {
+  "Requesting the end of a given tax year" must{
     "return 2016/4/5 for the tax year 2015" in {
       Resolver().endOfTaxYear(2015) shouldBe new LocalDate(2016, 4, 5)
     }

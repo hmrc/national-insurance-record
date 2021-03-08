@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,18 @@
 package uk.gov.hmrc.nationalinsurancerecord.config
 
 import com.google.inject.{Inject, Singleton}
-import play.api.Configuration
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 @Singleton
-class ApplicationConfig @Inject()(configuration: Configuration) {
-  val responseCacheTTL = configuration.getInt("mongodb.responseTTL").getOrElse(throw new RuntimeException("MongoDB TTL is not configured"))
+class ApplicationConfig @Inject()(servicesConfig: ServicesConfig) {
 
-  lazy val authorization: String = s"Bearer ${configuration.getString("microservice.services.des-hod.authorizationToken").getOrElse("Local")}"
+  val citizenDetailsUrl = servicesConfig.baseUrl("citizen-details")
+  val desUrl = servicesConfig.baseUrl("des-hod")
+  val authUrl = servicesConfig.baseUrl("auth")
 
-  lazy val desEnvironment: String = configuration.getString("microservice.services.des-hod.environment").getOrElse("Local")
+  val responseCacheTTL = servicesConfig.getInt("mongodb.responseTTL")
+
+  val authorization: String = s"Bearer ${servicesConfig.getConfString("des-hod.authorizationToken", "local")}"
+
+  val desEnvironment: String = servicesConfig.getConfString("des-hod.environment", "local")
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ class DesSummarySpec extends UnitSpec {
   val testCompletedRecord: String = Source.fromInputStream(getClass.getResourceAsStream("/json/nisummaryDesTest.json")).mkString
   val testEmptyRecord: String = Source.fromInputStream(getClass.getResourceAsStream("/json/nisummaryEmptyDesTest.json")).mkString
 
-  "reading DesSummary" should {
+  "reading DesSummary" must{
 
     "parse empty DesSummary correctly" in {
       val niSummary = Json.parse(testEmptyRecord).as[DesSummary]
