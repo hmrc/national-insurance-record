@@ -1,0 +1,101 @@
+/*
+ * Copyright 2021 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package uk.gov.hmrc.nationalinsurancerecord.connectors
+
+import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.stubbing.StubMapping
+import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.time.{Millis, Seconds, Span}
+import org.scalatestplus.mockito.MockitoSugar
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.Application
+import play.api.http.Status._
+import play.api.inject.guice.GuiceApplicationBuilder
+import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.http.UpstreamErrorResponse
+import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
+import uk.gov.hmrc.nationalinsurancerecord.util.WireMockHelper
+
+class StatePensionConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar with GuiceOneAppPerSuite with WireMockHelper with ScalaFutures {
+
+  implicit val defaultPatience =
+    PatienceConfig(timeout = Span(2, Seconds), interval = Span(5, Millis))
+
+  override def fakeApplication(): Application = GuiceApplicationBuilder()
+    .configure(
+      "microservice.services.state-pension.port" -> server.port()
+    )
+    .build()
+
+  lazy val connector: StatePensionConnector = app.injector.instanceOf[StatePensionConnector]
+
+  val nino = Nino("LG002001A")
+
+  def stubEndpoint(rtnStatus: Int, body: String): StubMapping = {
+    server.stubFor(get(urlEqualTo(s"/ni/$nino"))
+      .withHeader("accept", equalTo("application/vnd.hmrc.1.0+json"))
+      .willReturn(
+        aResponse()
+          .withStatus(rtnStatus)
+          .withHeader("Content-Type", "application/json")
+          .withBody(body)
+      )
+    )
+  }
+
+  "StatePensionConnector" should {
+    "return None for 200" in {
+      stubEndpoint(OK, "{}")
+
+      connector.getCopeCase(nino).futureValue shouldBe None
+    }
+
+    "return None for 403 (not cope)" in {
+      stubEndpoint(FORBIDDEN, "{}")
+      connector.getCopeCase(nino).futureValue shouldBe None
+    }
+
+    "return Some(response) for 403 (cope processing)" in {
+      val json = """{
+                   |    "errorCode": "EXCLUSION_COPE_PROCESSING",
+                   |    "copeDataAvailableDate": "2021-07-16"
+                   |}""".stripMargin
+
+      stubEndpoint(FORBIDDEN, json)
+
+      connector.getCopeCase(nino).futureValue.map(_.status) shouldBe Some(FORBIDDEN)
+      connector.getCopeCase(nino).futureValue.map(_.body) shouldBe Some(json)
+    }
+
+    "return Some(response) for 403 (cope failed)" in {
+      val json = """{
+                   |    "errorCode": "EXCLUSION_COPE_PROCESSING_FAILED"
+                   |}""".stripMargin
+
+      stubEndpoint(FORBIDDEN, json)
+
+      connector.getCopeCase(nino).futureValue.map(_.status) shouldBe Some(FORBIDDEN)
+      connector.getCopeCase(nino).futureValue.map(_.body) shouldBe Some(json)
+    }
+
+    "return failed future for other response types" in {
+      stubEndpoint(NOT_FOUND, "NOT_FOUND")
+
+      connector.getCopeCase(nino).failed.futureValue shouldBe UpstreamErrorResponse("NOT_FOUND", NOT_FOUND)
+    }
+  }
+}

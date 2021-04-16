@@ -19,7 +19,7 @@ package uk.gov.hmrc.nationalinsurancerecord.connectors
 import com.google.inject.Inject
 import play.api.http.Status.FORBIDDEN
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpReads, HttpResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpReads, HttpResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.nationalinsurancerecord.config.ApplicationConfig
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -33,7 +33,8 @@ class StatePensionConnector @Inject()(httpClient: HttpClient, applicationConfig:
   private val copeReads = new HttpReads[HttpResponse] {
     override def read(method: String, url: String, response: HttpResponse): HttpResponse = {
       if(response.status == FORBIDDEN && response.body.contains("COPE")) response
-      else throw new NotCopeException
+      else if(response.status.toString.startsWith("2") || response.status == FORBIDDEN) throw new NotCopeException
+      else throw UpstreamErrorResponse(response.body, response.status)
     }
   }
 
