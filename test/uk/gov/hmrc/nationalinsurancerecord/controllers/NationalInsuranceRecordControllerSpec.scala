@@ -236,7 +236,7 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
 
         when(mockStatePensionConnector.getCopeCase(any())(any())).thenReturn(Future.successful(Some(copeResponse)))
         val response = nationalInsuranceRecordController.getSummary(nino)(emptyRequestWithHeader)
-        
+
         status(response) shouldBe FORBIDDEN
       }
 
