@@ -23,6 +23,7 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 class ApplicationConfig @Inject()(servicesConfig: ServicesConfig) {
 
   val citizenDetailsUrl = servicesConfig.baseUrl("citizen-details")
+  val statePensionUrl = servicesConfig.baseUrl("state-pension")
   val desUrl = servicesConfig.baseUrl("des-hod")
   val authUrl = servicesConfig.baseUrl("auth")
 

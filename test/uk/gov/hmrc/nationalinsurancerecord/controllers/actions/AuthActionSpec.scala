@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nationalinsurancerecord.controllers.auth
+package uk.gov.hmrc.nationalinsurancerecord.controllers.actions
 
 import akka.util.Timeout
 import org.mockito.ArgumentMatchers.any
@@ -34,7 +34,7 @@ import uk.gov.hmrc.auth.core.retrieve.v2.TrustedHelper
 import uk.gov.hmrc.auth.core.retrieve.{GGCredId, PAClientId, ~}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.domain.Generator
-import uk.gov.hmrc.nationalinsurancerecord.controllers.auth.AuthActionSpec.retrievalsTestingSyntax
+import uk.gov.hmrc.nationalinsurancerecord.controllers.actions.AuthActionSpec.retrievalsTestingSyntax
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
