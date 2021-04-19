@@ -25,7 +25,6 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.http.Status._
 import play.api.inject.guice.GuiceApplicationBuilder
-import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.util.WireMockHelper
@@ -43,7 +42,7 @@ class StatePensionConnectorSpec extends NationalInsuranceRecordUnitSpec with Moc
 
   lazy val connector: StatePensionConnector = app.injector.instanceOf[StatePensionConnector]
 
-  val nino = Nino("LG002001A")
+  val nino = generateNino()
 
   def stubEndpoint(rtnStatus: Int, body: String): StubMapping = {
     server.stubFor(get(urlEqualTo(s"/ni/$nino"))

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nationalinsurancerecord.controllers.auth
+package uk.gov.hmrc.nationalinsurancerecord.controllers.actions
 
 import com.google.inject.ImplementedBy
 import javax.inject.Inject

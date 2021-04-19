@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nationalinsurancerecord.controllers.auth
+package uk.gov.hmrc.nationalinsurancerecord.controllers.actions
 
 import com.google.inject.Inject
 import play.api.libs.json.Json
@@ -37,9 +37,13 @@ class CopeExclusionAction @Inject()(
       override protected def executionContext: ExecutionContext = ec
 
       override protected def filter[A](request: Request[A]): Future[Option[Result]] = {
-        statePensionConnector.getCopeCase(nino)(hc(request)).map(_.map { copeCase =>
-          Forbidden(Json.parse(copeCase.body))
-        })
+        statePensionConnector
+          .getCopeCase(nino)(hc(request))
+          .map {
+            _.map { copeCase =>
+              Forbidden(Json.parse(copeCase.body))
+            }
+          }
       }
     }
 }
