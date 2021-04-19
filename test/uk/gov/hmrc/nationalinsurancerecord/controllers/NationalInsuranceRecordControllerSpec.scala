@@ -525,14 +525,18 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
   }
 
   "there is a dead exclusion" must {
-    when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).thenReturn(Left(ExclusionResponse(List(Exclusion.Dead))))
-    val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear("0000-01"))(emptyRequestWithHeader)
+
     "return status 403" in {
+      when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).thenReturn(Left(ExclusionResponse(List(Exclusion.Dead))))
+      val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear("0000-01"))(emptyRequestWithHeader)
 
       status(response) shouldBe 403
     }
 
     "return the dead message" in {
+      when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).thenReturn(Left(ExclusionResponse(List(Exclusion.Dead))))
+      val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear("0000-01"))(emptyRequestWithHeader)
+
       contentAsJson(response) shouldBe Json.parse(
         """{"code":"EXCLUSION_DEAD","message": "The customer needs to contact the National Insurance helpline"}"""
       )
@@ -540,14 +544,18 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
   }
 
   "there is a manual correspondence exclusion" must {
-    when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).thenReturn(Left(ExclusionResponse(List(Exclusion.ManualCorrespondenceIndicator))))
-    val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear("0000-01"))(emptyRequestWithHeader)
 
     "return status 403" in {
+      when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).thenReturn(Left(ExclusionResponse(List(Exclusion.ManualCorrespondenceIndicator))))
+      val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear("0000-01"))(emptyRequestWithHeader)
+
       status(response) shouldBe 403
     }
 
     "return the mci message" in {
+      when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).thenReturn(Left(ExclusionResponse(List(Exclusion.ManualCorrespondenceIndicator))))
+      val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear("0000-01"))(emptyRequestWithHeader)
+
       contentAsJson(response) shouldBe Json.parse(
         """{"code":"EXCLUSION_MANUAL_CORRESPONDENCE","message": "The customer cannot access the service, they should contact HMRC"}"""
       )
