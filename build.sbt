@@ -36,10 +36,7 @@ lazy val microservice = Project(appName, file("."))
     evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
     routesImport += "uk.gov.hmrc.nationalinsurancerecord.config.Binders._",
     routesGenerator := InjectedRoutesGenerator,
-    resolvers ++= Seq(
-      Resolver.bintrayRepo("hmrc", "releases"),
-      Resolver.jcenterRepo
-    )
+    resolvers += Resolver.jcenterRepo
   )
 val akkaVersion     = "2.5.23"
 
