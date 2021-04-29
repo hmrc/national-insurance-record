@@ -35,8 +35,7 @@ lazy val microservice = Project(appName, file("."))
     PlayKeys.playDefaultPort := 9312,
     evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
     routesImport += "uk.gov.hmrc.nationalinsurancerecord.config.Binders._",
-    routesGenerator := InjectedRoutesGenerator,
-    resolvers += Resolver.jcenterRepo
+    routesGenerator := InjectedRoutesGenerator
   )
 val akkaVersion     = "2.5.23"
 
