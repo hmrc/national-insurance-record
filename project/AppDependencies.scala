@@ -24,7 +24,7 @@ object AppDependencies {
     ws,
     "uk.gov.hmrc" %% "bootstrap-backend-play-26" % "3.4.0",
     "uk.gov.hmrc" %% "domain"                    % "5.10.0-play-26",
-    "uk.gov.hmrc" %% "play-hmrc-api"             % "3.4.0-play-26",
+    "uk.gov.hmrc" %% "play-hmrc-api"             % "6.4.0-play-26",
     "uk.gov.hmrc" %% "play-hal"                  % "2.1.0-play-26",
     "uk.gov.hmrc" %% "simple-reactivemongo"      % "7.22.0-play-26",
     "uk.gov.hmrc" %% "auth-client"               % "2.31.0-play-26",

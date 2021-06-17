@@ -17,16 +17,12 @@
 package uk.gov.hmrc.nationalinsurancerecord.connectors
 
 import com.google.inject.Inject
-import play.api.Mode.Mode
-import play.api.data.validation.ValidationError
-import play.api.libs.json.{Format, JsPath, JsonValidationError, OFormat, Reads}
-import play.api.{Configuration, Environment, Logger}
+import play.api.Logger
+import play.api.libs.json._
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.logging.Authorization
-import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, HttpResponse}
+import uk.gov.hmrc.http.{Authorization, HeaderCarrier, HttpClient, HttpReads, HttpResponse}
 import uk.gov.hmrc.nationalinsurancerecord.cache._
 import uk.gov.hmrc.nationalinsurancerecord.config.ApplicationConfig
-import uk.gov.hmrc.http.HttpClient
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.des.{DesLiabilities, DesNIRecord, DesSummary}

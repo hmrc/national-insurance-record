@@ -23,5 +23,5 @@ import uk.gov.hmrc.play.audit.model.DataEvent
 abstract class BusinessEvent(auditType: String, nino: Nino, detail: Map[String, String])(implicit hc: HeaderCarrier)
   extends DataEvent(auditSource = "national-insurance-record", auditType = auditType, detail = detail + ("nino" -> nino.value), tags = Map(
     "X-Request-ID" -> hc.requestId.map(_.value).getOrElse(""),
-    "X-Client-ID" -> hc.headers.find(_._1 == "X-Client-ID").map(_._2).getOrElse("")
+    "X-Client-ID" -> hc.headers(Seq("X-Client-ID")).headOption.map(_._2).getOrElse("")
   ))

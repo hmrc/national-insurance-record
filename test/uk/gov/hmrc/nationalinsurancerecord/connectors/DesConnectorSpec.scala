@@ -265,7 +265,7 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
       reset(mockMetrics)
       when(mockMetrics.startTimer(APITypes.Summary)).thenReturn(mockTimerContext)
       when(mockSummaryRepo().findByNino(any())(any(), any())).thenReturn(Future.successful(None))
-      when(mockHttpClient.GET[HttpResponse](any())(any(), any(), any()))
+      when(mockHttpClient.GET[HttpResponse](any(), any(), any())(any(), any(), any()))
         .thenReturn(Future.successful(HttpResponse(
           200,
           Some(Json.parse(
@@ -298,7 +298,7 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
       reset(mockMetrics)
       when(mockMetrics.startTimer(APITypes.NIRecord)).thenReturn(mock[Timer.Context])
       when(mockNIRecordRepo().findByNino(any())(any(), any())).thenReturn(Future.successful(None))
-      when(mockHttpClient.GET[HttpResponse](any())(any(), any(), any()))
+      when(mockHttpClient.GET[HttpResponse](any(), any(), any())(any(), any(), any()))
         .thenReturn(
           Future.successful(
             HttpResponse(
@@ -341,7 +341,7 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
     }
 
     "return a failed NIRecord when there is an http error and pass on the exception" in {
-      when(mockHttpClient.GET[HttpResponse](any())(any(), any(), any()))
+      when(mockHttpClient.GET[HttpResponse](any(), any(), any())(any(), any(), any()))
         .thenReturn(Future.failed(new BadRequestException("Bad Request exception")))
       ScalaFutures.whenReady(connector.getNationalInsuranceRecord(generateNino()).failed) { ex =>
         ex shouldBe a[BadRequestException]
@@ -352,7 +352,7 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
       reset(mockMetrics)
       when(mockMetrics.startTimer(APITypes.Liabilities)).thenReturn(mock[Timer.Context])
       when(mockLiabilitiesRepo().findByNino(any())(any(), any())).thenReturn(Future.successful(None))
-      when(mockHttpClient.GET[HttpResponse](any())(any(), any(), any()))
+      when(mockHttpClient.GET[HttpResponse](any(), any(), any())(any(), any(), any()))
         .thenReturn(
           Future.successful(
             HttpResponse(
@@ -369,7 +369,7 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
       reset(mockMetrics)
       when(mockMetrics.startTimer(APITypes.NIRecord)).thenReturn(mock[Timer.Context])
       when(mockNIRecordRepo().findByNino(any())(any(), any())).thenReturn(Future.successful(None))
-      when(mockHttpClient.GET[HttpResponse](any())(any(), any(), any()))
+      when(mockHttpClient.GET[HttpResponse](any(), any(), any())(any(), any(), any()))
         .thenReturn(
           Future.successful(
             HttpResponse(
@@ -385,7 +385,7 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
       reset(mockMetrics)
       when(mockMetrics.startTimer(APITypes.Liabilities)).thenReturn(mock[Timer.Context])
       when(mockLiabilitiesRepo().findByNino(any())(any(), any())).thenReturn(Future.successful(None))
-      when(mockHttpClient.GET[HttpResponse](any())(any(), any(), any()))
+      when(mockHttpClient.GET[HttpResponse](any(), any(), any())(any(), any(), any()))
         .thenReturn(
           Future.successful(
             HttpResponse(
@@ -404,7 +404,7 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
     }
 
     "return a failed Liabilities when there is an http error and pass on the exception" in {
-      when(mockHttpClient.GET[HttpResponse](any())(any(), any(), any()))
+      when(mockHttpClient.GET[HttpResponse](any(), any(), any())(any(), any(), any()))
         .thenReturn(Future.failed(new BadRequestException("Bad Request exception")))
       ScalaFutures.whenReady(connector.getLiabilities(generateNino()).failed) { ex =>
         ex shouldBe a[BadRequestException]
@@ -434,7 +434,7 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
 
       reset(mockMetrics)
       when(mockMetrics.startTimer(APITypes.NIRecord)).thenReturn(mock[Timer.Context])
-      when(mockHttpClient.GET[HttpResponse](any())(any(), any(), any()))
+      when(mockHttpClient.GET[HttpResponse](any(), any(), any())(any(), any(), any()))
         .thenReturn(
           Future.successful(
             HttpResponse(
