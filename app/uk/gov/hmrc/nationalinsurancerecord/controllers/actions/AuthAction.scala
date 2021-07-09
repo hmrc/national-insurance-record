@@ -52,9 +52,6 @@ class AuthActionImpl @Inject()(val authConnector: AuthConnector, val parser: Bod
       }
     }
 
-    println("*" * 1000)
-    println(request.headers.get("Accept"))
-
     if (matches.isEmpty) {
       successful(Some(BadRequest))
     } else {
