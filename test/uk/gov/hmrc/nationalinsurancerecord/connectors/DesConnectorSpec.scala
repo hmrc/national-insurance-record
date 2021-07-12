@@ -29,7 +29,7 @@ import play.api.Application
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
-import uk.gov.hmrc.http.{Authorization, BadRequestException, HeaderCarrier}
+import uk.gov.hmrc.http.{Authorization, BadRequestException, HeaderCarrier, HeaderNames, RequestId}
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.cache._
 import uk.gov.hmrc.nationalinsurancerecord.config.{AppContext, ApplicationConfig}
@@ -486,7 +486,7 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
 
     val nino = generateNino()
     val authValue = Random.alphanumeric.take(20).mkString
-    val headerCarrier = HeaderCarrier(authorization = Some(Authorization(authValue)))
+    val headerCarrier = HeaderCarrier(authorization = Some(Authorization(authValue)), requestId = Some(RequestId("requestId")))
 
     "be present for summary" in {
 
@@ -498,10 +498,11 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
       await(connector.getSummary(nino)(headerCarrier))
 
       server.verify(getRequestedFor(urlEqualTo(s"/individuals/${nino.withoutSuffix}/pensions/summary"))
-        .withHeader("Authorization", equalTo(appConfig.authorization))
+        .withHeader(HeaderNames.authorisation, equalTo(appConfig.authorization))
         .withHeader("Originator-Id", equalTo("DA_PF"))
         .withHeader("Environment", equalTo(appConfig.desEnvironment))
         .withHeader("CorrelationId", matching("[a-z00-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}"))
+        .withHeader(HeaderNames.xRequestId, equalTo("requestId"))
       )
 
     }
@@ -516,10 +517,11 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
       await(connector.getNationalInsuranceRecord(nino)(headerCarrier))
 
       server.verify(getRequestedFor(urlEqualTo(s"/individuals/${nino.withoutSuffix}/pensions/ni"))
-        .withHeader("Authorization", equalTo(appConfig.authorization))
+        .withHeader(HeaderNames.authorisation, equalTo(appConfig.authorization))
         .withHeader("Originator-Id", equalTo("DA_PF"))
         .withHeader("Environment", equalTo(appConfig.desEnvironment))
-        .withHeader("CorrelationId", matching("[a-z00-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}"))
+        .withHeader("CorrelationId", matching("[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}"))
+        .withHeader(HeaderNames.xRequestId, equalTo("requestId"))
       )
     }
 
@@ -533,10 +535,11 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
       await(connector.getLiabilities(nino)(headerCarrier))
 
       server.verify(getRequestedFor(urlEqualTo(s"/individuals/${nino.withoutSuffix}/pensions/liabilities"))
-        .withHeader("Authorization", equalTo(appConfig.authorization))
+        .withHeader(HeaderNames.authorisation, equalTo(appConfig.authorization))
         .withHeader("Originator-Id", equalTo("DA_PF"))
         .withHeader("Environment", equalTo(appConfig.desEnvironment))
-        .withHeader("CorrelationId", matching("[a-z00-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}"))
+        .withHeader("CorrelationId", matching("[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}"))
+        .withHeader(HeaderNames.xRequestId, equalTo("requestId"))
       )
     }
 

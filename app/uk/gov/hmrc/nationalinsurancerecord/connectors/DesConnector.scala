@@ -19,9 +19,8 @@ package uk.gov.hmrc.nationalinsurancerecord.connectors
 import com.google.inject.Inject
 import play.api.Logger
 import play.api.libs.json._
-import play.mvc.Http.HeaderNames
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.{Authorization, HeaderCarrier, HttpClient, HttpReads, HttpResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HeaderNames, HttpClient, HttpReads, HttpResponse}
 import uk.gov.hmrc.nationalinsurancerecord.cache._
 import uk.gov.hmrc.nationalinsurancerecord.config.ApplicationConfig
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
@@ -102,10 +101,11 @@ class DesConnector @Inject()(desSummaryRepository: DesSummaryRepository,
   private def connectToDes[A](url: String, api: APITypes)(implicit hc: HeaderCarrier, reads: Reads[A]): Future[A] = {
     val timerContext = metrics.startTimer(api)
     val headers = Seq(
-      HeaderNames.AUTHORIZATION -> authToken,
+      HeaderNames.authorisation -> authToken,
       "Originator-Id" -> "DA_PF",
       "Environment" -> desEnvironment,
-      "CorrelationId" -> UUID.randomUUID().toString
+      "CorrelationId" -> UUID.randomUUID().toString,
+      HeaderNames.xRequestId -> hc.requestId.fold("-")(_.value)
     )
 
     val futureResponse = http.GET[HttpResponse](url, headers = headers)(hc = hc, rds = HttpReads.readRaw, ec = global)
