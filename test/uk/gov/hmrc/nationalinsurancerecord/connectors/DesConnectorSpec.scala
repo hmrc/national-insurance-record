@@ -501,7 +501,7 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar
         .withHeader(HeaderNames.authorisation, equalTo(appConfig.authorization))
         .withHeader("Originator-Id", equalTo("DA_PF"))
         .withHeader("Environment", equalTo(appConfig.desEnvironment))
-        .withHeader("CorrelationId", matching("[a-z00-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}"))
+        .withHeader("CorrelationId", matching("[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}"))
         .withHeader(HeaderNames.xRequestId, equalTo("requestId"))
       )
 
