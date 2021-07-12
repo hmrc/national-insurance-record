@@ -20,6 +20,7 @@ import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.{BaseController, Result}
 import uk.gov.hmrc.api.controllers.{ErrorGenericBadRequest, ErrorInternalServerError, ErrorNotFound}
+import uk.gov.hmrc.http.UpstreamErrorResponse.WithStatusCode
 import uk.gov.hmrc.http._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -33,11 +34,11 @@ trait ErrorHandling {
   def errorWrapper(func: => Future[Result])(implicit hc: HeaderCarrier): Future[Result] = {
     func.recover {
       case _: NotFoundException => NotFound(Json.toJson(ErrorNotFound))
-      case e: GatewayTimeoutException => Logger.error(s"$app Gateway Timeout: ${e.getMessage}", e); GatewayTimeout
+      case WithStatusCode(GATEWAY_TIMEOUT, e) => Logger.error(s"$app Gateway Timeout: ${e.getMessage}", e); GatewayTimeout
       case e: BadGatewayException => Logger.error(s"$app Bad Gateway: ${e.getMessage}", e); BadGateway
       case _: BadRequestException => BadRequest(Json.toJson(ErrorGenericBadRequest("Upstream Bad Request. Is this customer below State Pension Age?")))
-      case e: Upstream4xxResponse => Logger.error(s"$app Upstream4XX: ${e.getMessage}", e); BadGateway
-      case e: Upstream5xxResponse => Logger.error(s"$app Upstream5XX: ${e.getMessage}", e); BadGateway
+      case e@UpstreamErrorResponse.Upstream4xxResponse(_) => Logger.error(s"$app Upstream4XX: ${e.getMessage}", e); BadGateway
+      case e@UpstreamErrorResponse.Upstream5xxResponse(_) => Logger.error(s"$app Upstream5XX: ${e.getMessage}", e); BadGateway
 
       case e  : Throwable =>
         Logger.error(s"$app Internal server error: ${e.getMessage}", e)

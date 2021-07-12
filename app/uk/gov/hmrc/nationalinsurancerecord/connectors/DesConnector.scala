@@ -17,22 +17,19 @@
 package uk.gov.hmrc.nationalinsurancerecord.connectors
 
 import com.google.inject.Inject
-import play.api.Mode.Mode
-import play.api.data.validation.ValidationError
-import play.api.libs.json.{Format, JsPath, JsonValidationError, OFormat, Reads}
-import play.api.{Configuration, Environment, Logger}
+import play.api.Logger
+import play.api.libs.json._
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.logging.Authorization
-import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, HttpResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HeaderNames, HttpClient, HttpReads, HttpResponse}
 import uk.gov.hmrc.nationalinsurancerecord.cache._
 import uk.gov.hmrc.nationalinsurancerecord.config.ApplicationConfig
-import uk.gov.hmrc.http.HttpClient
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.des.{DesLiabilities, DesNIRecord, DesSummary}
 import uk.gov.hmrc.nationalinsurancerecord.services.{CachingService, MetricsService}
 import uk.gov.hmrc.nationalinsurancerecord.util.{JsonDepersonaliser, NIRecordConstants}
 
+import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
@@ -54,9 +51,7 @@ class DesConnector @Inject()(desSummaryRepository: DesSummaryRepository,
   class JsonValidationException(message: String) extends Exception(message)
 
   def url(path: String): String = s"$serviceUrl$path"
-  def requestHeaderCarrier(implicit hc: HeaderCarrier): HeaderCarrier = {
-    HeaderCarrier.apply(Some(Authorization(authToken))).withExtraHeaders("Originator-Id" -> "DA_PF", "Environment" -> desEnvironment)
-  }
+
   private def ninoWithoutSuffix(nino: Nino): String = nino.value.substring(0, NIRecordConstants.ninoLengthWithoutSuffix)
 
   def getLiabilities(nino: Nino)(implicit hc: HeaderCarrier): Future[DesLiabilities] = {
@@ -94,7 +89,7 @@ class DesConnector @Inject()(desSummaryRepository: DesSummaryRepository,
     repository.findByNino(nino).flatMap {
       case Some(responseModel) => Future.successful(responseModel)
       case None =>
-        connectToDes(url, api, requestHeaderCarrier)(hc, formatA) map {
+        connectToDes(url, api)(hc, formatA) map {
           response =>
             Logger.debug("*~* - writing nino to cache:" + nino)
             repository.insertByNino(nino, response)
@@ -103,9 +98,17 @@ class DesConnector @Inject()(desSummaryRepository: DesSummaryRepository,
     }
   }
 
-  private def connectToDes[A](url: String, api: APITypes, requestHc: HeaderCarrier)(implicit hc: HeaderCarrier, reads: Reads[A]): Future[A] = {
+  private def connectToDes[A](url: String, api: APITypes)(implicit hc: HeaderCarrier, reads: Reads[A]): Future[A] = {
     val timerContext = metrics.startTimer(api)
-    val futureResponse = http.GET[HttpResponse](url)(hc = requestHc, rds = HttpReads.readRaw, ec = global)
+    val headers = Seq(
+      HeaderNames.authorisation -> authToken,
+      "Originator-Id" -> "DA_PF",
+      "Environment" -> desEnvironment,
+      "CorrelationId" -> UUID.randomUUID().toString,
+      HeaderNames.xRequestId -> hc.requestId.fold("-")(_.value)
+    )
+
+    val futureResponse = http.GET[HttpResponse](url, headers = headers)(hc = hc, rds = HttpReads.readRaw, ec = global)
 
     futureResponse.map { httpResponse =>
       timerContext.stop()

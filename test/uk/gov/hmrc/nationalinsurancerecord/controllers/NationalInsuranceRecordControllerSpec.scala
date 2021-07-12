@@ -580,18 +580,16 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
 
   "there is a list of dead, MCI, IoM exclusions" must {
 
-    when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).thenReturn(Left(ExclusionResponse(List(
-      Exclusion.IsleOfMan,
-      Exclusion.ManualCorrespondenceIndicator,
-      Exclusion.Dead
-    ))))
-    val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear("0000-01"))(emptyRequestWithHeader)
-
-    "return status 403" in {
-      status(response) shouldBe 403
-    }
-
     "return the dead message" in {
+
+      when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).thenReturn(Left(ExclusionResponse(List(
+        Exclusion.IsleOfMan,
+        Exclusion.ManualCorrespondenceIndicator,
+        Exclusion.Dead
+      ))))
+      val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear("0000-01"))(emptyRequestWithHeader)
+
+      status(response) shouldBe 403
       contentAsJson(response) shouldBe Json.parse(
         """{"code":"EXCLUSION_DEAD","message": "The customer needs to contact the National Insurance helpline"}"""
       )

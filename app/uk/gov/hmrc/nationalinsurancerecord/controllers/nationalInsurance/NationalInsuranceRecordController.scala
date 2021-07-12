@@ -32,7 +32,6 @@ import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import scala.concurrent.ExecutionContext
-import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
 class NationalInsuranceRecordController @Inject()(nationalInsuranceRecordService: NationalInsuranceRecordService,

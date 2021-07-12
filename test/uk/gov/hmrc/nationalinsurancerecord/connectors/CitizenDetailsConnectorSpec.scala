@@ -64,27 +64,27 @@ class CitizenDetailsConnectorSpec extends NationalInsuranceRecordUnitSpec with B
 
     "return OK status when successful" in {
       when(mockMetrics.startCitizenDetailsTimer()).thenReturn(mockTimerContext)
-      when(mockHttp.GET[HttpResponse](any())(any(), any(), any())) thenReturn Future.successful(HttpResponse(200))
+      when(mockHttp.GET[HttpResponse](any(), any(), any())(any(), any(), any())) thenReturn Future.successful(HttpResponse(200))
       val resultF = citizenDetailsConnector.retrieveMCIStatus(nino)(hc)
       await(resultF) shouldBe 200
     }
 
     "return 423 status when the Upstream is 423" in {
-      when(mockHttp.GET[HttpResponse](any())(any(), any(), any())) thenReturn
+      when(mockHttp.GET[HttpResponse](any(), any(), any())(any(), any(), any())) thenReturn
         Future.failed(Upstream4xxResponse(":(", 423, 423, Map()))
       val resultF = citizenDetailsConnector.retrieveMCIStatus(nino)(hc)
       await(resultF) shouldBe 423
     }
 
     "return NotFoundException for invalid nino" in {
-      when(mockHttp.GET[HttpResponse](any())(any(), any(), any())) thenReturn
+      when(mockHttp.GET[HttpResponse](any(), any(), any())(any(), any(), any())) thenReturn
         Future.failed(new NotFoundException("Not Found"))
       val resultF = citizenDetailsConnector.retrieveMCIStatus(nino)(hc)
       await(resultF.failed) shouldBe a[NotFoundException]
     }
 
     "return 500 response code when there is Upstream is 4XX" in {
-      when(mockHttp.GET[HttpResponse](any())(any(), any(), any())) thenReturn
+      when(mockHttp.GET[HttpResponse](any(), any(), any())(any(), any(), any())) thenReturn
         Future.failed(new InternalServerException("InternalServerError"))
       val resultF = citizenDetailsConnector.retrieveMCIStatus(nino)(hc)
       await(resultF.failed) shouldBe a[InternalServerException]

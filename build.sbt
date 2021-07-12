@@ -1,7 +1,7 @@
 
 import play.sbt.routes.RoutesKeys._
 import scoverage.ScoverageKeys
-import uk.gov.hmrc.DefaultBuildSettings.{defaultSettings, scalaSettings}
+import uk.gov.hmrc.DefaultBuildSettings.{addTestReportOption, defaultSettings, scalaSettings}
 import uk.gov.hmrc.SbtAutoBuildPlugin
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 
@@ -30,6 +30,7 @@ lazy val microservice = Project(appName, file("."))
     publishingSettings,
     defaultSettings(),
     majorVersion := 0,
+    scalaVersion := "2.12.12",
     libraryDependencies ++= AppDependencies.all,
     retrieveManaged := true,
     PlayKeys.playDefaultPort := 9312,
@@ -37,6 +38,14 @@ lazy val microservice = Project(appName, file("."))
     routesImport += "uk.gov.hmrc.nationalinsurancerecord.config.Binders._",
     routesGenerator := InjectedRoutesGenerator
   )
+  .configs(IntegrationTest)
+  .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
+  .settings(
+    unmanagedSourceDirectories in IntegrationTest := (baseDirectory in IntegrationTest)(base => Seq(base / "it")).value,
+    addTestReportOption(IntegrationTest, "int-test-reports"),
+    parallelExecution in IntegrationTest := false
+  )
+
 val akkaVersion     = "2.5.23"
 
 dependencyOverrides += "com.typesafe.akka" %% "akka-actor"     % akkaVersion
