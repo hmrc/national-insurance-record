@@ -26,7 +26,7 @@ object AppDependencies {
     "uk.gov.hmrc" %% "domain"                    % "5.10.0-play-26",
     "uk.gov.hmrc" %% "play-hmrc-api"             % "6.4.0-play-26",
     "uk.gov.hmrc" %% "play-hal"                  % "2.1.0-play-26",
-    "uk.gov.hmrc" %% "simple-reactivemongo"      % "7.22.0-play-26",
+    "uk.gov.hmrc" %% "simple-reactivemongo"      % "8.0.0-play-26",
     "com.typesafe.play" %% "play-json-joda" % "2.6.10"
   )
 
