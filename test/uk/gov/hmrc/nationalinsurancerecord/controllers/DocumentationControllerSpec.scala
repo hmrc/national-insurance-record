@@ -27,8 +27,7 @@ import play.api.test.Helpers._
 import play.api.test.Injecting
 import uk.gov.hmrc.nationalinsurancerecord.config.AppContext
 import uk.gov.hmrc.nationalinsurancerecord.controllers.documentation.DocumentationController
-import uk.gov.hmrc.play.test.UnitSpec
-
+import uk.gov.hmrc.nationalinsurancerecord.util.UnitSpec
 
 class DocumentationControllerSpec extends UnitSpec with GuiceOneAppPerSuite with MockitoSugar with Injecting {
 

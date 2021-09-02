@@ -18,7 +18,7 @@ package uk.gov.hmrc.nationalinsurancerecord.domain
 
 
 import org.scalatest.Matchers
-import uk.gov.hmrc.play.test.UnitSpec
+import uk.gov.hmrc.nationalinsurancerecord.util.UnitSpec
 
 class TaxYearSpec extends UnitSpec with Matchers {
   // scalastyle:off magic.number

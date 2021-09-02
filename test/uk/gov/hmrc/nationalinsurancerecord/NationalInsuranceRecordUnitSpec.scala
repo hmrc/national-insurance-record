@@ -18,10 +18,11 @@ package uk.gov.hmrc.nationalinsurancerecord
 
 import uk.gov.hmrc.domain.{Generator, Nino}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.nationalinsurancerecord.util.UnitSpec
 
 import scala.util.Random
 
-trait NationalInsuranceRecordUnitSpec extends uk.gov.hmrc.play.test.UnitSpec {
+trait NationalInsuranceRecordUnitSpec extends UnitSpec {
   private val ninoGenerator = new Generator(new Random())
   def generateNino(): Nino = ninoGenerator.nextNino
   def generateNinoWithPrefix(prefix: String): Nino = {

@@ -26,9 +26,11 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status.{BAD_REQUEST, INTERNAL_SERVER_ERROR, OK, UNAUTHORIZED}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.inject.bind
-import play.api.mvc.{Action, AnyContent, BodyParsers, Controller, Result}
+import play.api.mvc.Results.Ok
+import play.api.mvc.{Action, AnyContent, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.status
+import play.mvc.Controller
 import uk.gov.hmrc.auth.core.AuthProvider.PrivilegedApplication
 import uk.gov.hmrc.auth.core.retrieve.v2.TrustedHelper
 import uk.gov.hmrc.auth.core.retrieve.{GGCredId, PAClientId, ~}
@@ -36,7 +38,6 @@ import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.domain.Generator
 import uk.gov.hmrc.nationalinsurancerecord.controllers.actions.AuthActionSpec.retrievalsTestingSyntax
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
