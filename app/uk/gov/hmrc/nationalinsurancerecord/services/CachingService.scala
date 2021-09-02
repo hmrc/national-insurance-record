@@ -56,7 +56,7 @@ class CachingMongoService[A <: CachingModel[A, B], B]
   val expireAfterSeconds = "expireAfterSeconds"
   override val timeToLive = appConfig.responseCacheTTL
 
-  Logger.info(s"Document expiresAt will be set to $timeToLive")
+  logger.info(s"Document expiresAt will be set to $timeToLive")
   createIndex(ttlfieldName, ttlIndexName, Some(0), uniqueField = false)
 
   val uniqueFieldName = "key"
@@ -73,14 +73,14 @@ class CachingMongoService[A <: CachingModel[A, B], B]
       options = options)) map {
       result => {
         // $COVERAGE-OFF$
-        Logger.debug(s"set [$indexName] with ttl $ttl and unique $uniqueField -> result : $result")
-        if(result) Logger.info(s"Successfully created $indexName")
+        logger.debug(s"set [$indexName] with ttl $ttl and unique $uniqueField -> result : $result")
+        if(result) logger.info(s"Successfully created $indexName")
         // $COVERAGE-ON$
         result
       }
     } recover {
       // $COVERAGE-OFF$
-      case ex => Logger.error(s"Failed to set $indexName index", ex)
+      case ex => logger.error(s"Failed to set $indexName index", ex)
         false
       // $COVERAGE-ON$
     }
@@ -98,7 +98,7 @@ class CachingMongoService[A <: CachingModel[A, B], B]
     tryResult match {
       case Success(success) => {
         success.map { results =>
-          Logger.debug(s"[$apiType][findByNino] : { cacheKey : ${cacheKey(nino, apiType)}, result: $results }")
+          logger.debug(s"[$apiType][findByNino] : { cacheKey : ${cacheKey(nino, apiType)}, result: $results }")
           val response = results.headOption.map(_.response)
           response match {
             case Some(data) =>
@@ -109,11 +109,11 @@ class CachingMongoService[A <: CachingModel[A, B], B]
               None
           }
         } recover {
-          case e: Throwable => Logger.warn(s"[$apiType][findByNino] : { cacheKey : ${cacheKey(nino, apiType)}, exception: ${e.getMessage} }", e); None
+          case e: Throwable => logger.warn(s"[$apiType][findByNino] : { cacheKey : ${cacheKey(nino, apiType)}, exception: ${e.getMessage} }", e); None
         }
       }
       case Failure(f) =>
-        Logger.debug(s"[$apiType][findByNino] : { cacheKey : ${cacheKey(nino, apiType)}, exception: ${f.getMessage} }")
+        logger.debug(s"[$apiType][findByNino] : { cacheKey : ${cacheKey(nino, apiType)}, exception: ${f.getMessage} }")
         metrics.cacheReadNotFound()
         Future.successful(None)
     }
@@ -125,13 +125,13 @@ class CachingMongoService[A <: CachingModel[A, B], B]
     val doc = apply(cacheKey(nino, apiType), response, DateTime.now(DateTimeZone.UTC).plusSeconds(timeToLive))
 
     collection.update(query, doc, upsert = true).map { result =>
-      Logger.debug(s"[$apiType][insertByNino] : { cacheKey : ${cacheKey(nino, apiType)}, " +
+      logger.debug(s"[$apiType][insertByNino] : { cacheKey : ${cacheKey(nino, apiType)}, " +
         s"request: $response, result: ${result.ok}, errors: ${result.errmsg} }")
       metrics.cacheWritten()
-      result.errmsg.foreach(msg => Logger.warn(s"[$apiType][insertByNino] : { cacheKey : ${cacheKey(nino, apiType)}, results: $msg }"))
+      result.errmsg.foreach(msg => logger.warn(s"[$apiType][insertByNino] : { cacheKey : ${cacheKey(nino, apiType)}, results: $msg }"))
       result.ok
     } recover {
-      case e: Throwable => Logger.warn(s"[$apiType][insertByNino] : cacheKey : ${cacheKey(nino, apiType)}, exception: ${e.getMessage} }", e); false
+      case e: Throwable => logger.warn(s"[$apiType][insertByNino] : cacheKey : ${cacheKey(nino, apiType)}, exception: ${e.getMessage} }", e); false
     }
   }
 

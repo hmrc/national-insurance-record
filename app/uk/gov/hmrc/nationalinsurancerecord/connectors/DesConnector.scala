@@ -18,6 +18,7 @@ package uk.gov.hmrc.nationalinsurancerecord.connectors
 
 import com.google.inject.Inject
 import play.api.Logger
+import play.api.Logging
 import play.api.libs.json._
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{HeaderCarrier, HeaderNames, HttpClient, HttpReads, HttpResponse}
@@ -39,7 +40,7 @@ class DesConnector @Inject()(desSummaryRepository: DesSummaryRepository,
                              desLiabilitiesRepository: DesLiabilitiesRepository,
                              metrics: MetricsService,
                              http: HttpClient,
-                             appConfig: ApplicationConfig)  {
+                             appConfig: ApplicationConfig) extends Logging {
 
   val serviceUrl: String = appConfig.desUrl
   val authToken: String = appConfig.authorization
@@ -91,7 +92,7 @@ class DesConnector @Inject()(desSummaryRepository: DesSummaryRepository,
       case None =>
         connectToDes(url, api)(hc, formatA) map {
           response =>
-            Logger.debug("*~* - writing nino to cache:" + nino)
+            logger.debug("*~* - writing nino to cache:" + nino)
             repository.insertByNino(nino, response)
             response
         }

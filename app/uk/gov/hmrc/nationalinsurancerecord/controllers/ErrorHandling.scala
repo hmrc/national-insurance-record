@@ -17,32 +17,32 @@
 package uk.gov.hmrc.nationalinsurancerecord.controllers
 
 import play.api.Logger
+import play.api.Logging
 import play.api.libs.json.Json
 import play.api.mvc.{BaseController, Result}
-import uk.gov.hmrc.api.controllers.{ErrorGenericBadRequest, ErrorInternalServerError, ErrorNotFound}
+import uk.gov.hmrc.api.controllers.{ErrorGenericBadRequest, ErrorInternalServerError, ErrorNotFound, ErrorResponse}
 import uk.gov.hmrc.http.UpstreamErrorResponse.WithStatusCode
 import uk.gov.hmrc.http._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-trait ErrorHandling {
+trait ErrorHandling extends Logging {
   self: BaseController =>
-
   val app: String
 
   def errorWrapper(func: => Future[Result])(implicit hc: HeaderCarrier): Future[Result] = {
     func.recover {
-      case _: NotFoundException => NotFound(Json.toJson(ErrorNotFound))
-      case WithStatusCode(GATEWAY_TIMEOUT, e) => Logger.error(s"$app Gateway Timeout: ${e.getMessage}", e); GatewayTimeout
-      case e: BadGatewayException => Logger.error(s"$app Bad Gateway: ${e.getMessage}", e); BadGateway
-      case _: BadRequestException => BadRequest(Json.toJson(ErrorGenericBadRequest("Upstream Bad Request. Is this customer below State Pension Age?")))
-      case e@UpstreamErrorResponse.Upstream4xxResponse(_) => Logger.error(s"$app Upstream4XX: ${e.getMessage}", e); BadGateway
-      case e@UpstreamErrorResponse.Upstream5xxResponse(_) => Logger.error(s"$app Upstream5XX: ${e.getMessage}", e); BadGateway
+      case _: NotFoundException => NotFound(Json.toJson[ErrorResponse](ErrorNotFound))
+      case e@WithStatusCode(GATEWAY_TIMEOUT) => logger.error(s"$app Gateway Timeout: ${e.getMessage}", e); GatewayTimeout
+      case e: BadGatewayException => logger.error(s"$app Bad Gateway: ${e.getMessage}", e); BadGateway
+      case _: BadRequestException => BadRequest(Json.toJson[ErrorResponse](ErrorGenericBadRequest("Upstream Bad Request. Is this customer below State Pension Age?")))
+      case e@UpstreamErrorResponse.Upstream4xxResponse(_) => logger.error(s"$app Upstream4XX: ${e.getMessage}", e); BadGateway
+      case e@UpstreamErrorResponse.Upstream5xxResponse(_) => logger.error(s"$app Upstream5XX: ${e.getMessage}", e); BadGateway
 
       case e  : Throwable =>
-        Logger.error(s"$app Internal server error: ${e.getMessage}", e)
-        InternalServerError(Json.toJson(ErrorInternalServerError))
+        logger.error(s"$app Internal server error: ${e.getMessage}", e)
+        InternalServerError(Json.toJson[ErrorResponse](ErrorInternalServerError))
     }
   }
 }
