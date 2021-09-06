@@ -27,7 +27,7 @@ object AppDependencies {
     "uk.gov.hmrc" %% "play-hmrc-api"             % "6.4.0-play-28",
     "uk.gov.hmrc" %% "play-hal"                  % "3.0.0-play-28-SNAPSHOT",
     "uk.gov.hmrc" %% "simple-reactivemongo"      % "8.0.0-play-28",
-    "com.typesafe.play" %% "play-json-joda" % "2.6.10"
+    "com.typesafe.play" %% "play-json-joda" % "2.9.2"
   )
 
   val test: Seq[ModuleID] = Seq(

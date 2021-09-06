@@ -1,17 +1,18 @@
 package uk.gov.hmrc.nationalinsurancerecord.test_utils
 
-import java.util.UUID
-import org.scalatest.mockito.MockitoSugar
+import org.mockito.Mockito
+import org.mockito.stubbing.Answer
 import org.scalatest.{MustMatchers, WordSpec}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import uk.gov.hmrc.domain.{Generator, Nino}
 
+import java.util.UUID
 import scala.concurrent.ExecutionContext
+import scala.reflect.ClassTag
 import scala.util.Random
 
 trait IntegrationBaseSpec extends WordSpec
   with MustMatchers
-  with MockitoSugar
   with GuiceOneAppPerSuite
   with WireMockHelper {
 
@@ -20,4 +21,10 @@ trait IntegrationBaseSpec extends WordSpec
   def generateNino: Nino = new Generator(new Random).nextNino
 
   def generateUUId: UUID = UUID.randomUUID()
+
+  def mock[T](implicit ev: ClassTag[T]): T =
+    Mockito.mock(ev.runtimeClass.asInstanceOf[Class[T]])
+
+  def mock[T](answer: Answer[Object])(implicit ev: ClassTag[T]): T =
+    Mockito.mock(ev.runtimeClass.asInstanceOf[Class[T]], answer)
 }
