@@ -17,15 +17,17 @@
 package uk.gov.hmrc.nationalinsurancerecord.util
 
 import java.nio.charset.Charset
-
 import akka.stream.Materializer
 import akka.util.ByteString
+import org.mockito.Mockito
+import org.mockito.stubbing.Answer
 import org.scalatest.{Matchers, OptionValues, WordSpecLike}
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Result
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.language.implicitConversions
+import scala.reflect.ClassTag
 
 trait UnitSpec extends WordSpecLike with Matchers with OptionValues {
 
@@ -66,4 +68,10 @@ trait UnitSpec extends WordSpecLike with Matchers with OptionValues {
   def bodyOf(resultF: Future[Result])(implicit mat: Materializer): Future[String] = {
     resultF.map(bodyOf)
   }
+
+  def mock[T](implicit ev: ClassTag[T]): T =
+    Mockito.mock(ev.runtimeClass.asInstanceOf[Class[T]])
+
+  def mock[T](answer: Answer[Object])(implicit ev: ClassTag[T]): T =
+    Mockito.mock(ev.runtimeClass.asInstanceOf[Class[T]], answer)
 }

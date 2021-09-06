@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.cache
 
-import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneServerPerSuite
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.domain.Nino
@@ -28,7 +27,7 @@ import uk.gov.hmrc.nationalinsurancerecord.services.{CachingMongoService, Metric
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class NIRecordRepositorySpec extends NationalInsuranceRecordUnitSpec with OneServerPerSuite with MongoSpecSupport with MockitoSugar {
+class NIRecordRepositorySpec extends NationalInsuranceRecordUnitSpec with OneServerPerSuite with MongoSpecSupport {
 
   val niRecordJson: JsValue = Json.parse(
     """

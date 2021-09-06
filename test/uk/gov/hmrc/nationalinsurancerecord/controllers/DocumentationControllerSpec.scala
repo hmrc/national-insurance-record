@@ -17,19 +17,17 @@
 package uk.gov.hmrc.nationalinsurancerecord.controllers
 
 import controllers.Assets
-import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Configuration
 import play.api.libs.json.{JsArray, JsDefined, JsString, JsUndefined}
 import play.api.mvc.{ControllerComponents, Result}
-import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import play.api.test.Injecting
+import play.api.test.{FakeRequest, Injecting}
 import uk.gov.hmrc.nationalinsurancerecord.config.AppContext
 import uk.gov.hmrc.nationalinsurancerecord.controllers.documentation.DocumentationController
 import uk.gov.hmrc.nationalinsurancerecord.util.UnitSpec
 
-class DocumentationControllerSpec extends UnitSpec with GuiceOneAppPerSuite with MockitoSugar with Injecting {
+class DocumentationControllerSpec extends UnitSpec with GuiceOneAppPerSuite with Injecting {
 
   "respond to GET /api/definition" in {
     val result = route(app, FakeRequest(GET, "/api/definition"))
