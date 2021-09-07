@@ -25,7 +25,7 @@ object AppDependencies {
     "uk.gov.hmrc" %% "bootstrap-backend-play-28" % "5.12.0",
     "uk.gov.hmrc" %% "domain"                    % "6.2.0-play-28",
     "uk.gov.hmrc" %% "play-hmrc-api"             % "6.4.0-play-28",
-    "uk.gov.hmrc" %% "play-hal"                  % "3.0.0-play-28-SNAPSHOT",
+    "uk.gov.hmrc" %% "play-hal"                  % "3.1.0-play-28",
     "uk.gov.hmrc" %% "simple-reactivemongo"      % "8.0.0-play-28",
     "com.typesafe.play" %% "play-json-joda" % "2.9.2"
   )
