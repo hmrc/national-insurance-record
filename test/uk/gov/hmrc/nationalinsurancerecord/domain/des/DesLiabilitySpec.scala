@@ -17,7 +17,7 @@
 package uk.gov.hmrc.nationalinsurancerecord.domain.des
 
 import play.api.libs.json.Json
-import uk.gov.hmrc.play.test.UnitSpec
+import uk.gov.hmrc.nationalinsurancerecord.util.UnitSpec
 
 class DesLiabilitySpec extends UnitSpec {
 

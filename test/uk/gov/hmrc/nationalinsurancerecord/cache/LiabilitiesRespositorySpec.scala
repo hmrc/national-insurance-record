@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.cache
 
-import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneServerPerSuite
 import uk.gov.hmrc.mongo.MongoSpecSupport
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
@@ -26,7 +25,7 @@ import uk.gov.hmrc.nationalinsurancerecord.services.{CachingMongoService, Metric
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class LiabilitiesRespositorySpec extends NationalInsuranceRecordUnitSpec with OneServerPerSuite with MongoSpecSupport with MockitoSugar {
+class LiabilitiesRespositorySpec extends NationalInsuranceRecordUnitSpec with OneServerPerSuite with MongoSpecSupport {
   // scalastyle:off magic.number
 
   val stubApplicationConfig = app.injector.instanceOf[StubApplicationConfig]

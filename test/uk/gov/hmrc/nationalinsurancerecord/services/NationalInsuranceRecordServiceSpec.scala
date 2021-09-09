@@ -18,20 +18,18 @@ package uk.gov.hmrc.nationalinsurancerecord.services
 
 import org.joda.time.LocalDate
 import org.mockito.Mockito._
-import org.mockito.ArgumentMatchers.eq
-import org.mockito.{ArgumentMatchers, Matchers, Mockito}
+import org.mockito.{ArgumentMatchers, Mockito}
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.connectors.DesConnector
 import uk.gov.hmrc.nationalinsurancerecord.domain.des._
-import uk.gov.hmrc.nationalinsurancerecord.domain.{NationalInsuranceTaxYear, _}
+import uk.gov.hmrc.nationalinsurancerecord.domain._
 
 import scala.concurrent.Future
 
 
-class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec with OneAppPerSuite with ScalaFutures with MockitoSugar {
+class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec with OneAppPerSuite with ScalaFutures {
   // scalastyle:off magic.number
 
   private val niRecordDES = DesNIRecord(

@@ -20,7 +20,6 @@ import org.mockito.ArgumentMatchers.{any, eq => meq}
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.inject.bind
@@ -40,7 +39,6 @@ import scala.util.Random
 
 class CopeExclusionActionSpec extends NationalInsuranceRecordUnitSpec
   with GuiceOneAppPerSuite
-  with MockitoSugar
   with BeforeAndAfterEach
   with ScalaFutures {
 

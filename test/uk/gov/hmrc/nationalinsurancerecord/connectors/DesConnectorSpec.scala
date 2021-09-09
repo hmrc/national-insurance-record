@@ -19,11 +19,10 @@ package uk.gov.hmrc.nationalinsurancerecord.connectors
 import com.codahale.metrics.Timer
 import com.github.tomakehurst.wiremock.client.WireMock.{reset => _, verify => _, _}
 import org.joda.time.LocalDate
-import org.mockito.ArgumentMatchers.{any, eq => meq}
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.inject.bind
@@ -32,7 +31,7 @@ import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http.{Authorization, BadRequestException, HeaderCarrier, HeaderNames, RequestId}
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.cache._
-import uk.gov.hmrc.nationalinsurancerecord.config.{AppContext, ApplicationConfig}
+import uk.gov.hmrc.nationalinsurancerecord.config.ApplicationConfig
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.des.{DesLiabilities, DesNIRecord, DesSummary}
 import uk.gov.hmrc.nationalinsurancerecord.services.MetricsService
@@ -41,7 +40,7 @@ import uk.gov.hmrc.nationalinsurancerecord.util.WireMockHelper
 import scala.concurrent.Future
 import scala.util.Random
 
-class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with MockitoSugar with GuiceOneAppPerSuite with WireMockHelper with ScalaFutures {
+class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with GuiceOneAppPerSuite with WireMockHelper with ScalaFutures {
   // scalastyle:off magic.number
 
   val mockSummaryRepo: DesSummaryRepository = mock[DesSummaryRepository](Mockito.RETURNS_DEEP_STUBS)

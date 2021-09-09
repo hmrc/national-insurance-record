@@ -20,7 +20,7 @@ import com.google.inject.{Inject, Singleton}
 import play.api.hal.HalResource
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, BodyParsers, ControllerComponents}
-import uk.gov.hmrc.api.controllers.HeaderValidator
+import uk.gov.hmrc.api.controllers.{ErrorResponse, HeaderValidator}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nationalinsurancerecord.config.AppContext
 import uk.gov.hmrc.nationalinsurancerecord.controllers.actions.{AuthAction, CopeExclusionAction}
@@ -68,13 +68,13 @@ class NationalInsuranceRecordController @Inject()(nationalInsuranceRecordService
           case Left(exclusion) => {
             if (exclusion.exclusionReasons.contains(Exclusion.Dead)) {
               auditConnector.sendEvent(NationalInsuranceExclusion(nino, List(Exclusion.Dead)))
-              Forbidden(Json.toJson(ErrorResponses.ExclusionDead))
+              Forbidden(Json.toJson[ErrorResponse](ErrorResponses.ExclusionDead))
             } else if (exclusion.exclusionReasons.contains(Exclusion.ManualCorrespondenceIndicator)) {
               auditConnector.sendEvent(NationalInsuranceExclusion(nino, List(Exclusion.ManualCorrespondenceIndicator)))
-              Forbidden(Json.toJson(ErrorResponses.ExclusionManualCorrespondence))
+              Forbidden(Json.toJson[ErrorResponse](ErrorResponses.ExclusionManualCorrespondence))
             } else if (exclusion.exclusionReasons.contains(Exclusion.IsleOfMan)) {
               auditConnector.sendEvent(NationalInsuranceExclusion(nino, List(Exclusion.IsleOfMan)))
-              Forbidden(Json.toJson(ErrorResponses.ExclusionIsleOfMan))
+              Forbidden(Json.toJson[ErrorResponse](ErrorResponses.ExclusionIsleOfMan))
             } else {
               auditConnector.sendEvent(NationalInsuranceExclusion(nino, exclusion.exclusionReasons))
               Ok(halResourceSelfLink(Json.toJson(exclusion), nationalInsuranceRecordHref(nino)))
@@ -102,13 +102,13 @@ class NationalInsuranceRecordController @Inject()(nationalInsuranceRecordService
           case Left(exclusion) =>
             if (exclusion.exclusionReasons.contains(Exclusion.Dead)) {
               auditConnector.sendEvent(NationalInsuranceExclusion(nino, List(Exclusion.Dead)))
-              Forbidden(Json.toJson(ErrorResponses.ExclusionDead))
+              Forbidden(Json.toJson[ErrorResponse](ErrorResponses.ExclusionDead))
             } else if (exclusion.exclusionReasons.contains(Exclusion.ManualCorrespondenceIndicator)) {
               auditConnector.sendEvent(NationalInsuranceExclusion(nino, List(Exclusion.ManualCorrespondenceIndicator)))
-              Forbidden(Json.toJson(ErrorResponses.ExclusionManualCorrespondence))
+              Forbidden(Json.toJson[ErrorResponse](ErrorResponses.ExclusionManualCorrespondence))
             } else if (exclusion.exclusionReasons.contains(Exclusion.IsleOfMan)) {
               auditConnector.sendEvent(NationalInsuranceExclusion(nino, List(Exclusion.IsleOfMan)))
-              Forbidden(Json.toJson(ErrorResponses.ExclusionIsleOfMan))
+              Forbidden(Json.toJson[ErrorResponse](ErrorResponses.ExclusionIsleOfMan))
             } else {
               auditConnector.sendEvent(NationalInsuranceExclusion(nino, exclusion.exclusionReasons))
               Ok(halResourceSelfLink(Json.toJson(exclusion), nationalInsuranceTaxYearHref(nino, taxYear)))

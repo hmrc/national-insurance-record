@@ -17,8 +17,6 @@
 package uk.gov.hmrc.nationalinsurancerecord.util
 
 import play.api.libs.json._
-import uk.gov.hmrc.play.test.UnitSpec
-
 import scala.util.{Failure, Success}
 
 class JsonDepersonaliserSpec extends UnitSpec {

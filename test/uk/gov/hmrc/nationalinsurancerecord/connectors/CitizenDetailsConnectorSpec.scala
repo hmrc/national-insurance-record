@@ -22,11 +22,10 @@ import org.mockito.Mockito
 import org.mockito.Mockito.{atLeastOnce, verify, when}
 import org.scalatest.BeforeAndAfter
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.inject.bind
 import play.api.Application
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
@@ -34,7 +33,7 @@ import uk.gov.hmrc.nationalinsurancerecord.services.MetricsService
 
 import scala.concurrent.Future
 
-class CitizenDetailsConnectorSpec extends NationalInsuranceRecordUnitSpec with BeforeAndAfter with MockitoSugar with ScalaFutures with GuiceOneAppPerSuite {
+class CitizenDetailsConnectorSpec extends NationalInsuranceRecordUnitSpec with BeforeAndAfter with ScalaFutures with GuiceOneAppPerSuite {
   // scalastyle:off magic.number
 
   val nino = generateNino()

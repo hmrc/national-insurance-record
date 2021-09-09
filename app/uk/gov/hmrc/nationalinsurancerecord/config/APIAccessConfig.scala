@@ -24,7 +24,7 @@ case class APIAccessConfig(value: Option[Configuration]) {
 
   def accessType: String = {
     value match {
-      case Some(config) => config.getString("type").getOrElse(PRIVATE)
+      case Some(config) => config.getOptional[String]("type").getOrElse(PRIVATE)
       case None => PRIVATE
     }
   }
@@ -32,7 +32,7 @@ case class APIAccessConfig(value: Option[Configuration]) {
   def whiteListedApplicationIds: Option[Seq[String]] = {
     if(accessType == PRIVATE) {
       value match {
-        case Some(config) => Some(config.getStringSeq("whitelist.applicationIds").getOrElse(Seq()))
+        case Some(config) => Some(config.getOptional[Seq[String]]("whitelist.applicationIds").getOrElse(Seq()))
         case None => Some(Seq())
       }
     } else {
