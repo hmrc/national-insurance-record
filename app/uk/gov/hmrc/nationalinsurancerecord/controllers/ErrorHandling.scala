@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.controllers
 
-import play.api.Logger
 import play.api.Logging
 import play.api.libs.json.Json
 import play.api.mvc.{BaseController, Result}
