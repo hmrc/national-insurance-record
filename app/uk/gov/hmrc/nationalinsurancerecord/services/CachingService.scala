@@ -123,7 +123,7 @@ class CachingMongoService[A <: CachingModel[A, B], B]
     val query = Json.obj("key" -> cacheKey(nino, apiType))
     val doc = apply(cacheKey(nino, apiType), response, DateTime.now(DateTimeZone.UTC).plusSeconds(timeToLive))
 
-    collection.update(query, doc, upsert = true).map { result =>
+    collection.update(false).one(query, doc, upsert = true).map { result =>
       logger.debug(s"[$apiType][insertByNino] : { cacheKey : ${cacheKey(nino, apiType)}, " +
         s"request: $response, result: ${result.ok}, errors: ${result.errmsg} }")
       metrics.cacheWritten()

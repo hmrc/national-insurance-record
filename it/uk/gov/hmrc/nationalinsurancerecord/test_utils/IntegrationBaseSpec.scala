@@ -2,7 +2,8 @@ package uk.gov.hmrc.nationalinsurancerecord.test_utils
 
 import org.mockito.Mockito
 import org.mockito.stubbing.Answer
-import org.scalatest.{MustMatchers, WordSpec}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import uk.gov.hmrc.domain.{Generator, Nino}
 
@@ -11,8 +12,8 @@ import scala.concurrent.ExecutionContext
 import scala.reflect.ClassTag
 import scala.util.Random
 
-trait IntegrationBaseSpec extends WordSpec
-  with MustMatchers
+trait IntegrationBaseSpec extends AnyWordSpec
+  with Matchers
   with GuiceOneAppPerSuite
   with WireMockHelper {
 

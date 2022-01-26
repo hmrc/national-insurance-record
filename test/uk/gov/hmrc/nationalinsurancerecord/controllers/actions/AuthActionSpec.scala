@@ -30,7 +30,7 @@ import play.mvc.Controller
 import uk.gov.hmrc.auth.core.AuthProvider.PrivilegedApplication
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.v2.TrustedHelper
-import uk.gov.hmrc.auth.core.retrieve.{GGCredId, PAClientId, ~}
+import uk.gov.hmrc.auth.core.retrieve.{Credentials, ~}
 import uk.gov.hmrc.domain.Generator
 import uk.gov.hmrc.nationalinsurancerecord.controllers.actions.AuthActionSpec.retrievalsTestingSyntax
 import uk.gov.hmrc.nationalinsurancerecord.util.UnitSpec
@@ -61,7 +61,7 @@ class AuthActionSpec
         "the user is authorised and Nino matches the Nino in the uri" in {
 
           val (result, mockAuthConnector) =
-            testAuthActionWith(Future.successful(Some(testNino) ~ None  ~ GGCredId("")))
+            testAuthActionWith(Future.successful(Some(testNino) ~ None ~ Some(Credentials("", "GovernmentGateway"))))
 
           status(result) shouldBe OK
 
@@ -73,7 +73,7 @@ class AuthActionSpec
         "the user is a trusted helper and requests with the nino of the helpee" in {
           val helperNino = ninoGenerator.nextNino.nino
           val (result, mockAuthConnector) =
-            testAuthActionWith(Future.successful(Some(helperNino) ~ Some(TrustedHelper("", "", "", testNino)) ~ GGCredId("")))
+            testAuthActionWith(Future.successful(Some(helperNino) ~ Some(TrustedHelper("", "", "", testNino)) ~ Some(Credentials("", "GovernmentGateway"))))
 
           status(result) shouldBe OK
 
@@ -85,7 +85,7 @@ class AuthActionSpec
 
         "the request comes from a privileged application" in {
           val (result, mockAuthConnector) =
-            testAuthActionWith(Future.successful(None ~ None ~ PAClientId("")))
+            testAuthActionWith(Future.successful(None ~ None ~ Some(Credentials("", "PrivilegedApplication"))))
 
           status(result) shouldBe OK
 
@@ -118,7 +118,7 @@ class AuthActionSpec
         "the trusted helpee nino does not match the uri Nino" in {
           val notTestNino = testNino.take(testNino.length-1) + "X"
           val helperNino = ninoGenerator.nextNino.nino
-          val (result, _) = testAuthActionWith(Future.successful(Some(helperNino) ~ Some(TrustedHelper("", "", "", notTestNino)) ~ GGCredId("")))
+          val (result, _) = testAuthActionWith(Future.successful(Some(helperNino) ~ Some(TrustedHelper("", "", "", notTestNino)) ~ Some(Credentials("", "GovernmentGateway"))))
           status(result) shouldBe UNAUTHORIZED
         }
       }

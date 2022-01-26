@@ -22,8 +22,8 @@ import play.api.mvc.Results._
 import play.api.mvc._
 import uk.gov.hmrc.auth.core.AuthProvider.PrivilegedApplication
 import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.{nino, trustedHelper}
-import uk.gov.hmrc.auth.core.retrieve.{Credentials, PAClientId, ~}
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.{credentials, nino, trustedHelper}
+import uk.gov.hmrc.auth.core.retrieve.{Credentials, ~}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
@@ -57,10 +57,11 @@ class AuthActionImpl @Inject()(val authConnector: AuthConnector, val parser: Bod
     } else {
       authorised(
         ConfidenceLevel.L200 or AuthProviders(PrivilegedApplication)
-      ).retrieve(nino and trustedHelper and Credentials) {
-        case _ ~ _ ~ PAClientId(_) => successful(None)
+      ).retrieve(nino and trustedHelper and credentials) {
+        case _ ~ _ ~ Some(Credentials(_, "PrivilegedApplication")) => successful(None)
         case _ ~ Some(trusted) ~ _ => check(trusted.principalNino)
         case Some(nino) ~ None ~ _ => check(nino)
+        case _ => successful(Some(Unauthorized))
       } recover {
         case e: AuthorisationException =>
           logger.debug("Debug info - " + e.getMessage, e)

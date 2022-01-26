@@ -1,5 +1,6 @@
-@import uk.gov.hmrc.nationalinsurancerecord.domain.APIAccess
+
 @import play.api.libs.json.Json
+@import uk.gov.hmrc.nationalinsurancerecord.domain.APIAccess
 
 
 @(access: APIAccess, status: String)

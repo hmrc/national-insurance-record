@@ -17,7 +17,7 @@
 package uk.gov.hmrc.nationalinsurancerecord.domain
 
 
-import org.scalatest.Matchers
+import org.scalatest.matchers.should.Matchers
 import uk.gov.hmrc.nationalinsurancerecord.util.UnitSpec
 
 class TaxYearSpec extends UnitSpec with Matchers {

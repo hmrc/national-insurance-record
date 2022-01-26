@@ -17,10 +17,11 @@
 package uk.gov.hmrc.nationalinsurancerecord.services
 
 import org.joda.time.{DateTime, DateTimeZone, LocalDate}
-import org.scalatest.{Matchers, WordSpecLike}
+import org.scalatest.wordspec.AnyWordSpecLike
+import org.scalatest.matchers.should.Matchers
 import services.TaxYearResolver
 
-class TaxYearResolverSpec extends WordSpecLike with Matchers {
+class TaxYearResolverSpec extends AnyWordSpecLike with Matchers {
 
   object Resolver {
 

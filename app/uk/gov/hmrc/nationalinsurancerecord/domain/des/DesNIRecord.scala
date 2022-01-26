@@ -17,7 +17,7 @@
 package uk.gov.hmrc.nationalinsurancerecord.domain.des
 
 import org.joda.time.LocalDate
-import play.Logger
+import play.api.Logging
 import play.api.libs.functional.syntax._
 import play.api.libs.json.JodaReads.jodaLocalDateReads
 import play.api.libs.json.JodaWrites.jodaLocalDateWrites
@@ -30,12 +30,12 @@ case class DesNIRecord(
                        pre75ContributionCount: Int = 0,
                        dateOfEntry: Option[LocalDate],
                        niTaxYears: List[DesNITaxYear]
-                      ) {
+                      ) extends Logging {
 
   def purge(finalRelevantStartYear: Int): DesNIRecord = {
     val taxYears = niTaxYears.filter(_.startTaxYear <= finalRelevantStartYear)
     val purgedYears = niTaxYears.filter(_.startTaxYear > finalRelevantStartYear)
-    if(purgedYears.nonEmpty) Logger.info(s"Purged years (FRY $finalRelevantStartYear): ${purgedYears.map(_.startTaxYear).mkString(",")}")
+    if(purgedYears.nonEmpty) logger.info(s"Purged years (FRY $finalRelevantStartYear): ${purgedYears.map(_.startTaxYear).mkString(",")}")
 
     this.copy(
       nonQualifyingYears = taxYears.count(!_.qualifying),
