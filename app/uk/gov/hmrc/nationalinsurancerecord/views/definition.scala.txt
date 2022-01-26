@@ -1,4 +1,3 @@
-
 @import play.api.libs.json.Json
 @import uk.gov.hmrc.nationalinsurancerecord.domain.APIAccess
 
