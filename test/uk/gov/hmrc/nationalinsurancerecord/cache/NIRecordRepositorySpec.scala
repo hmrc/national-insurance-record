@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.cache
 
-import org.scalatestplus.play.guice.GuiceOneServerPerSuite
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.mongo.MongoSpecSupport
@@ -27,7 +27,7 @@ import uk.gov.hmrc.nationalinsurancerecord.services.{CachingMongoService, Metric
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class NIRecordRepositorySpec extends NationalInsuranceRecordUnitSpec with GuiceOneServerPerSuite with MongoSpecSupport {
+class NIRecordRepositorySpec extends NationalInsuranceRecordUnitSpec with GuiceOneAppPerSuite with MongoSpecSupport {
 
   val niRecordJson: JsValue = Json.parse(
     """

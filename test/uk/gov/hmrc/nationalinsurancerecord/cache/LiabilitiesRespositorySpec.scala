@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.cache
 
-import org.scalatestplus.play.guice.GuiceOneServerPerSuite
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import uk.gov.hmrc.mongo.MongoSpecSupport
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
@@ -25,7 +25,7 @@ import uk.gov.hmrc.nationalinsurancerecord.services.{CachingMongoService, Metric
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class LiabilitiesRespositorySpec extends NationalInsuranceRecordUnitSpec with GuiceOneServerPerSuite with MongoSpecSupport {
+class LiabilitiesRespositorySpec extends NationalInsuranceRecordUnitSpec with GuiceOneAppPerSuite with MongoSpecSupport {
   // scalastyle:off magic.number
 
   val stubApplicationConfig = app.injector.instanceOf[StubApplicationConfig]
