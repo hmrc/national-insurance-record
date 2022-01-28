@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package uk.gov.hmrc.nationalinsurancerecord.services
 
 import org.joda.time.{DateTime, DateTimeZone}
-import play.api.Logger
 import play.api.libs.json.{Format, Json, OFormat, Reads}
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.api.{Cursor, DefaultDB, ReadPreference}
@@ -47,7 +46,7 @@ trait CachingService[A, B] {
 
 class CachingMongoService[A <: CachingModel[A, B], B]
 (formats: Format[A], apply: (String, B, DateTime) => A, apiType: APITypes, appConfig: ApplicationConfig, metricsX: MetricsService)
-(implicit mongo: () => DefaultDB, m: Manifest[A], e: ExecutionContext)
+(implicit mongo: () => DefaultDB, e: ExecutionContext)
   extends ReactiveRepository[A, BSONObjectID]("responses", mongo, formats)
     with CachingService[A, B] {
 
@@ -124,7 +123,7 @@ class CachingMongoService[A <: CachingModel[A, B], B]
     val query = Json.obj("key" -> cacheKey(nino, apiType))
     val doc = apply(cacheKey(nino, apiType), response, DateTime.now(DateTimeZone.UTC).plusSeconds(timeToLive))
 
-    collection.update(query, doc, upsert = true).map { result =>
+    collection.update(false).one(query, doc, upsert = true).map { result =>
       logger.debug(s"[$apiType][insertByNino] : { cacheKey : ${cacheKey(nino, apiType)}, " +
         s"request: $response, result: ${result.ok}, errors: ${result.errmsg} }")
       metrics.cacheWritten()

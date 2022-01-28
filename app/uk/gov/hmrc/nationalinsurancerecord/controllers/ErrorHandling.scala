@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ trait ErrorHandling extends Logging {
   self: BaseController =>
   val app: String
 
-  def errorWrapper(func: => Future[Result])(implicit hc: HeaderCarrier): Future[Result] = {
+  def errorWrapper(func: => Future[Result]): Future[Result] = {
     func.recover {
       case _: NotFoundException => NotFound(Json.toJson[ErrorResponse](ErrorNotFound))
       case e@WithStatusCode(GATEWAY_TIMEOUT) => logger.error(s"$app Gateway Timeout: ${e.getMessage}", e); GatewayTimeout

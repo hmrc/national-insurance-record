@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,16 +20,16 @@ import org.joda.time.LocalDate
 import org.mockito.Mockito._
 import org.mockito.{ArgumentMatchers, Mockito}
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatestplus.play.OneAppPerSuite
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.connectors.DesConnector
-import uk.gov.hmrc.nationalinsurancerecord.domain.des._
 import uk.gov.hmrc.nationalinsurancerecord.domain._
+import uk.gov.hmrc.nationalinsurancerecord.domain.des._
 
 import scala.concurrent.Future
 
 
-class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec with OneAppPerSuite with ScalaFutures {
+class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec with GuiceOneAppPerSuite with ScalaFutures {
   // scalastyle:off magic.number
 
   private val niRecordDES = DesNIRecord(

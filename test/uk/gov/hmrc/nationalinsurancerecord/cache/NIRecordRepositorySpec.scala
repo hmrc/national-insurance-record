@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.cache
 
-import org.scalatestplus.play.OneServerPerSuite
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.mongo.MongoSpecSupport
@@ -27,7 +27,7 @@ import uk.gov.hmrc.nationalinsurancerecord.services.{CachingMongoService, Metric
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class NIRecordRepositorySpec extends NationalInsuranceRecordUnitSpec with OneServerPerSuite with MongoSpecSupport {
+class NIRecordRepositorySpec extends NationalInsuranceRecordUnitSpec with GuiceOneAppPerSuite with MongoSpecSupport {
 
   val niRecordJson: JsValue = Json.parse(
     """

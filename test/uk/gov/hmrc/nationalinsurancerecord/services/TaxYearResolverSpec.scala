@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,11 @@
 package uk.gov.hmrc.nationalinsurancerecord.services
 
 import org.joda.time.{DateTime, DateTimeZone, LocalDate}
-import org.scalatest.{Matchers, WordSpecLike}
+import org.scalatest.wordspec.AnyWordSpecLike
+import org.scalatest.matchers.should.Matchers
 import services.TaxYearResolver
 
-class TaxYearResolverSpec extends WordSpecLike with Matchers {
+class TaxYearResolverSpec extends AnyWordSpecLike with Matchers {
 
   object Resolver {
 
