@@ -61,7 +61,7 @@ class AuthActionSpec
         "the user is authorised and Nino matches the Nino in the uri" in {
 
           val (result, mockAuthConnector) =
-            testAuthActionWith(Future.successful(Some(testNino) ~ None ~ Some(Credentials("", "GovernmentGateway"))))
+            testAuthActionWith(Future.successful(Some(testNino) ~ None ~ None))
 
           status(result) shouldBe OK
 
@@ -73,7 +73,7 @@ class AuthActionSpec
         "the user is a trusted helper and requests with the nino of the helpee" in {
           val helperNino = ninoGenerator.nextNino.nino
           val (result, mockAuthConnector) =
-            testAuthActionWith(Future.successful(Some(helperNino) ~ Some(TrustedHelper("", "", "", testNino)) ~ Some(Credentials("", "GovernmentGateway"))))
+            testAuthActionWith(Future.successful(Some(helperNino) ~ Some(TrustedHelper("", "", "", testNino)) ~ None))
 
           status(result) shouldBe OK
 
@@ -85,7 +85,7 @@ class AuthActionSpec
 
         "the request comes from a privileged application" in {
           val (result, mockAuthConnector) =
-            testAuthActionWith(Future.successful(None ~ None ~ Some(Credentials("", "PrivilegedApplication"))))
+            testAuthActionWith(Future.successful(None ~ None ~ Some("clientId")))
 
           status(result) shouldBe OK
 
@@ -118,7 +118,7 @@ class AuthActionSpec
         "the trusted helpee nino does not match the uri Nino" in {
           val notTestNino = testNino.take(testNino.length-1) + "X"
           val helperNino = ninoGenerator.nextNino.nino
-          val (result, _) = testAuthActionWith(Future.successful(Some(helperNino) ~ Some(TrustedHelper("", "", "", notTestNino)) ~ Some(Credentials("", "GovernmentGateway"))))
+          val (result, _) = testAuthActionWith(Future.successful(Some(helperNino) ~ Some(TrustedHelper("", "", "", notTestNino)) ~ None))
           status(result) shouldBe UNAUTHORIZED
         }
       }
