@@ -22,22 +22,22 @@ object AppDependencies {
 
   val compile: Seq[ModuleID] = Seq(
     ws,
-    "uk.gov.hmrc" %% "bootstrap-backend-play-28" % "5.12.0",
-    "uk.gov.hmrc" %% "domain"                    % "6.2.0-play-28",
-    "uk.gov.hmrc" %% "play-hmrc-api"             % "6.4.0-play-28",
-    "uk.gov.hmrc" %% "play-hal"                  % "3.1.0-play-28",
-    "uk.gov.hmrc" %% "simple-reactivemongo"      % "8.0.0-play-28",
-    "com.typesafe.play" %% "play-json-joda" % "2.9.2"
+    "uk.gov.hmrc"       %% "bootstrap-backend-play-28" % "5.12.0",
+    "uk.gov.hmrc"       %% "domain"                    % "6.2.0-play-28",
+    "uk.gov.hmrc"       %% "play-hmrc-api"             % "6.4.0-play-28",
+    "uk.gov.hmrc"       %% "play-hal"                  % "3.1.0-play-28",
+    "com.typesafe.play" %% "play-json-joda"            % "2.9.2",
+    "uk.gov.hmrc.mongo" %% "hmrc-mongo-play-28"        % "0.59.0"
   )
 
   val test: Seq[ModuleID] = Seq(
-    "org.pegdown"             %  "pegdown"            % "1.6.0",
-    "org.scalatestplus.play"  %% "scalatestplus-play" % "5.1.0",
-    "com.typesafe.play"       %% "play-test"          % PlayVersion.current,
-    "com.github.tomakehurst"  % "wiremock-jre8"      % "2.27.0",
-    "org.mockito"             % "mockito-core"        % "2.24.5",
-    "uk.gov.hmrc"             %% "reactivemongo-test" % "5.0.0-play-28",
-    "com.vladsch.flexmark" % "flexmark-all" % "0.35.10"
+    "org.pegdown"             %  "pegdown"                 % "1.6.0",
+    "org.scalatestplus.play"  %% "scalatestplus-play"      % "5.1.0",
+    "com.typesafe.play"       %% "play-test"               % PlayVersion.current,
+    "com.github.tomakehurst"  % "wiremock-jre8"            % "2.27.0",
+    "org.mockito"             % "mockito-core"             % "2.24.5",
+    "com.vladsch.flexmark"    % "flexmark-all"             % "0.35.10",
+    "uk.gov.hmrc.mongo"       %% "hmrc-mongo-test-play-28" % "0.59.0"
   ).map(_ % "test,it")
 
   private val silencerDependencies: Seq[ModuleID] = Seq(
