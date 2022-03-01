@@ -31,7 +31,7 @@ val suppressedImports = Seq("-P:silencer:lineContentFilters=import _root_.play.t
   "-P:silencer:lineContentFilters=import models._",
   "-P:silencer:lineContentFilters=import controllers._",
   "-P:silencer:lineContentFilters=import play.api.i18n._",
-  "-P:silencer:lineContentFilters=import views.html._",
+  "-P:silencer:lineContentFilters=import views.txt._",
   "-P:silencer:lineContentFilters=import play.api.templates.PlayMagic._",
   "-P:silencer:lineContentFilters=import play.api.mvc._",
   "-P:silencer:lineContentFilters=import play.api.data._",

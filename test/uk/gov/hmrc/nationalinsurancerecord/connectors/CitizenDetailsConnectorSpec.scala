@@ -54,7 +54,7 @@ class CitizenDetailsConnectorSpec extends NationalInsuranceRecordUnitSpec with B
 
   val citizenDetailsConnector: CitizenDetailsConnector = app.injector.instanceOf[CitizenDetailsConnector]
 
-  def beforeEach: Unit = {
+  def beforeEach(): Unit = {
     Mockito.reset(mockHttp)
     Mockito.reset(mockMetrics)
   }
@@ -63,14 +63,14 @@ class CitizenDetailsConnectorSpec extends NationalInsuranceRecordUnitSpec with B
 
     "return OK status when successful" in {
       when(mockMetrics.startCitizenDetailsTimer()).thenReturn(mockTimerContext)
-      when(mockHttp.GET[HttpResponse](any(), any(), any())(any(), any(), any())) thenReturn Future.successful(HttpResponse(200))
+      when(mockHttp.GET[HttpResponse](any(), any(), any())(any(), any(), any())) thenReturn Future.successful(HttpResponse(200, ""))
       val resultF = citizenDetailsConnector.retrieveMCIStatus(nino)(hc)
       await(resultF) shouldBe 200
     }
 
     "return 423 status when the Upstream is 423" in {
       when(mockHttp.GET[HttpResponse](any(), any(), any())(any(), any(), any())) thenReturn
-        Future.failed(Upstream4xxResponse(":(", 423, 423, Map()))
+        Future.failed(UpstreamErrorResponse(":(", 423, 423, Map()))
       val resultF = citizenDetailsConnector.retrieveMCIStatus(nino)(hc)
       await(resultF) shouldBe 423
     }
