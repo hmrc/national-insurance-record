@@ -54,6 +54,7 @@ class CachingMongoService[A <: CachingModel[A, B], B]
     mongoComponent = mongo,
     collectionName = appConfig.responseCacheCollectionName,
     domainFormat = formats,
+    replaceIndexes = true,
     indexes = Seq(
       IndexModel(Indexes.ascending("expiresAt"), IndexOptions().name("responseExpiry").unique(false).expireAfter(60, TimeUnit.MINUTES)),
       IndexModel(Indexes.ascending("key"), IndexOptions().name("responseUniqueKey").unique(true).expireAfter(60, TimeUnit.MINUTES))
