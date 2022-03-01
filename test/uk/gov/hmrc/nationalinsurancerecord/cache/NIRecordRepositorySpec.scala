@@ -19,7 +19,8 @@ package uk.gov.hmrc.nationalinsurancerecord.cache
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.mongo.MongoSpecSupport
+import uk.gov.hmrc.mongo.MongoComponent
+import uk.gov.hmrc.mongo.test.MongoSupport
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.des.DesNIRecord
@@ -27,7 +28,7 @@ import uk.gov.hmrc.nationalinsurancerecord.services.{CachingMongoService, Metric
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class NIRecordRepositorySpec extends NationalInsuranceRecordUnitSpec with GuiceOneAppPerSuite with MongoSpecSupport {
+class NIRecordRepositorySpec extends NationalInsuranceRecordUnitSpec with MongoSupport with GuiceOneAppPerSuite {
 
   val niRecordJson: JsValue = Json.parse(
     """
@@ -111,7 +112,7 @@ class NIRecordRepositorySpec extends NationalInsuranceRecordUnitSpec with GuiceO
   "NationalInsuranceRepository" must{
     val stubApplicationConfig = app.injector.instanceOf[StubApplicationConfig]
 
-    val service = new CachingMongoService[DesNIRecordCache, DesNIRecord](DesNIRecordCache.formats, DesNIRecordCache.apply,
+    val service = new CachingMongoService[DesNIRecordCache, DesNIRecord](mongoComponent, DesNIRecordCache.formats, DesNIRecordCache.apply,
       APITypes.NIRecord, stubApplicationConfig, mock[MetricsService])
 
     "persist a NIRecord in the repo" in {

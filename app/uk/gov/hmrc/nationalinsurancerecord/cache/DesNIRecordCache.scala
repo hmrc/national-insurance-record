@@ -43,8 +43,6 @@ class DesNIRecordRepository @Inject()(mongoComponent: MongoComponent,
                                       metricsService: MetricsService,
                                       applicationConfig: ApplicationConfig) {
 
-//  implicit val db: () => DefaultDB = reactiveMongoComponent.mongoConnector.db
-
   private lazy val cacheService = new CachingMongoService[DesNIRecordCache, DesNIRecord](
     mongoComponent, DesNIRecordCache.formats, DesNIRecordCache.apply, APITypes.NIRecord, applicationConfig, metricsService
   )

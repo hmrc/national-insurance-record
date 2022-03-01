@@ -43,8 +43,6 @@ class DesSummaryRepository @Inject()(mongoComponent: MongoComponent,
                                      metricsService: MetricsService,
                                      applicationConfig: ApplicationConfig) {
 
-//  implicit val db: () => DefaultDB = reactiveMongoComponent.mongoConnector.db
-
   private lazy val cacheService = new CachingMongoService[DesSummaryCache, DesSummary](
     mongoComponent: MongoComponent, DesSummaryCache.formats, DesSummaryCache.apply, APITypes.Summary, applicationConfig, metricsService
   )

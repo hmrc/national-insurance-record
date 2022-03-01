@@ -42,8 +42,6 @@ class DesLiabilitiesRepository @Inject()( mongoComponent: MongoComponent,
                                           metricsService: MetricsService,
                                          applicationConfig: ApplicationConfig) {
 
-//  implicit val db: () => DefaultDB = reactiveMongoComponent.mongoConnector.db
-
   private lazy val cacheService = new CachingMongoService[DesLiabilitiesCache, DesLiabilities](
     mongoComponent, DesLiabilitiesCache.formats, DesLiabilitiesCache.apply, APITypes.Liabilities, applicationConfig, metricsService
   )

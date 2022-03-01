@@ -16,11 +16,10 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.services
 
-import com.mongodb.client.model.Updates
 import org.joda.time.{DateTime, DateTimeZone}
 import org.mongodb.scala.ReadPreference
 import org.mongodb.scala.model.Filters.equal
-import org.mongodb.scala.model.{FindOneAndUpdateOptions, IndexModel, IndexOptions, Indexes}
+import org.mongodb.scala.model.{FindOneAndReplaceOptions, IndexModel, IndexOptions, Indexes}
 import play.api.Logging
 import play.api.libs.json.{Format, OFormat, Reads}
 import uk.gov.hmrc.domain.Nino
@@ -29,6 +28,7 @@ import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import uk.gov.hmrc.nationalinsurancerecord.config.ApplicationConfig
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes.APITypes
 
+import java.util.concurrent.TimeUnit
 import scala.concurrent.{ExecutionContext, Future}
 import scala.reflect.ClassTag
 import scala.util.{Failure, Success, Try}
@@ -41,7 +41,7 @@ trait CachingModel[A, B] {
 
 trait CachingService[A, B] {
   def findByNino(nino: Nino)(implicit formats: Reads[A], e: ExecutionContext): Future[Option[B]]
-  def insertByNino(nino: Nino, response: B)(implicit formats: OFormat[A], e: ExecutionContext): Future[Boolean]
+  def insertByNino(nino: Nino, response: B)(implicit formatA: OFormat[A], e: ExecutionContext): Future[Boolean]
   val timeToLive: Int
 
   def metrics: MetricsService
@@ -55,8 +55,8 @@ class CachingMongoService[A <: CachingModel[A, B], B]
     collectionName = appConfig.responseCacheCollectionName,
     domainFormat = formats,
     indexes = Seq(
-      IndexModel(Indexes.ascending("expiresAt"), IndexOptions().name("responseExpiry").unique(false)),
-      IndexModel(Indexes.ascending("key"), IndexOptions().name("responseUniqueKey").unique(true))
+      IndexModel(Indexes.ascending("expiresAt"), IndexOptions().name("responseExpiry").unique(false).expireAfter(60, TimeUnit.MINUTES)),
+      IndexModel(Indexes.ascending("key"), IndexOptions().name("responseUniqueKey").unique(true).expireAfter(60, TimeUnit.MINUTES))
     )
   ) with CachingService[A, B] with Logging {
 
@@ -94,15 +94,12 @@ class CachingMongoService[A <: CachingModel[A, B], B]
   }
 
   override def insertByNino(nino: Nino, response: B)
-                           (implicit formats: OFormat[A], e: ExecutionContext): Future[Boolean] = {
+                           (implicit formatA: OFormat[A], e: ExecutionContext): Future[Boolean] = {
     val query = equal("key", cacheKey(nino, apiType))
-    val doc = Updates.combine(
-      Updates.set("key", cacheKey(nino, apiType)),
-      Updates.set("response", response),
-      Updates.set("expiresAt", DateTime.now(DateTimeZone.UTC).plusSeconds(timeToLive))
-    )
 
-    collection.findOneAndUpdate(query, doc, FindOneAndUpdateOptions().upsert(true)).toFuture().map { result =>
+    val doc = apply(cacheKey(nino, apiType), response, DateTime.now(DateTimeZone.UTC).plusSeconds(timeToLive))
+
+    collection.findOneAndReplace(query, doc, FindOneAndReplaceOptions().upsert(true)).toFuture().map { result =>
 //      logger.debug(s"[$apiType][insertByNino] : { cacheKey : ${cacheKey(nino, apiType)}, " +
 //        s"request: $response, result: ${result.ok}, errors: ${result.errmsg} }")
       metrics.cacheWritten()
