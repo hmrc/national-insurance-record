@@ -20,7 +20,7 @@ import org.joda.time.LocalDate
 import org.mockito.Mockito
 import org.mockito.Mockito._
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import uk.gov.hmrc.mongo.MongoSpecSupport
+import uk.gov.hmrc.mongo.test.MongoSupport
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.des.DesSummary
@@ -28,7 +28,7 @@ import uk.gov.hmrc.nationalinsurancerecord.services.{CachingMongoService, Metric
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-  class SummaryRepositorySpec extends NationalInsuranceRecordUnitSpec with GuiceOneAppPerSuite with MongoSpecSupport {
+  class SummaryRepositorySpec extends NationalInsuranceRecordUnitSpec with MongoSupport with GuiceOneAppPerSuite {
   // scalastyle:off magic.number
 
   val testSummaryModel = DesSummary(
@@ -43,7 +43,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
     val stubApplicationConfig = app.injector.instanceOf[StubApplicationConfig]
     val mockMetrics = mock[MetricsService]
     val nino = generateNino()
-    val service = new CachingMongoService[DesSummaryCache, DesSummary](DesSummaryCache.formats, DesSummaryCache.apply,
+    val service = new CachingMongoService[DesSummaryCache, DesSummary](mongoComponent, DesSummaryCache.formats, DesSummaryCache.apply,
       APITypes.Summary, stubApplicationConfig, mockMetrics) {
       override val timeToLive = 30
     }

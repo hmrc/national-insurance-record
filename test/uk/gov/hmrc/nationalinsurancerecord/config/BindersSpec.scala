@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.config
 
-import play.api.mvc.PathBindable
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.domain.TaxYear
 
@@ -26,7 +25,6 @@ class BindersSpec extends NationalInsuranceRecordUnitSpec {
 
     "return Right with a NINO instance for a valid NINO string" in {
       val nino = generateNino()
-      implicit val pathBindable = PathBindable.bindableString
 
       val result = Binders.ninoBinder.bind("nino", nino.nino)
       result shouldEqual Right(nino)
@@ -34,7 +32,6 @@ class BindersSpec extends NationalInsuranceRecordUnitSpec {
 
     "return Left for an invalid NINO string" in {
       val nino = "invalid"
-      implicit val pathBindable = PathBindable.bindableString
 
       val result = Binders.ninoBinder.bind("nino", nino)
       result shouldEqual Left("ERROR_NINO_INVALID")
@@ -45,7 +42,6 @@ class BindersSpec extends NationalInsuranceRecordUnitSpec {
 
     "return Right with a TaxYear instance for a valid TaxYear string" in {
       val taxYear = "1979-80"
-      implicit val pathBindable = PathBindable.bindableString
 
       val result = Binders.taxYearBinder.bind("taxYear", taxYear)
       result shouldEqual Right(TaxYear(taxYear))
@@ -53,7 +49,6 @@ class BindersSpec extends NationalInsuranceRecordUnitSpec {
 
     "return Left for an invalid TaxYear string" in {
       val taxYear = "1979"
-      implicit val pathBindable = PathBindable.bindableString
 
       val result = Binders.taxYearBinder.bind("taxYear", taxYear)
       result shouldEqual Left("CODE_TAXYEAR_INVALID")

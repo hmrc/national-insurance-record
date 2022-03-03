@@ -28,6 +28,7 @@ class ApplicationConfig @Inject()(servicesConfig: ServicesConfig) {
   val authUrl = servicesConfig.baseUrl("auth")
 
   val responseCacheTTL = servicesConfig.getInt("mongodb.responseTTL")
+  val responseCacheCollectionName = servicesConfig.getString("mongodb.collectionName")
 
   val authorization: String = s"Bearer ${servicesConfig.getConfString("des-hod.authorizationToken", "local")}"
 

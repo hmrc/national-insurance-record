@@ -17,7 +17,7 @@
 package uk.gov.hmrc.nationalinsurancerecord.cache
 
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import uk.gov.hmrc.mongo.MongoSpecSupport
+import uk.gov.hmrc.mongo.test.MongoSupport
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.des.{DesLiabilities, DesLiability}
@@ -25,7 +25,7 @@ import uk.gov.hmrc.nationalinsurancerecord.services.{CachingMongoService, Metric
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class LiabilitiesRespositorySpec extends NationalInsuranceRecordUnitSpec with GuiceOneAppPerSuite with MongoSpecSupport {
+class LiabilitiesRespositorySpec extends NationalInsuranceRecordUnitSpec with MongoSupport with GuiceOneAppPerSuite {
   // scalastyle:off magic.number
 
   val stubApplicationConfig = app.injector.instanceOf[StubApplicationConfig]
@@ -35,7 +35,7 @@ class LiabilitiesRespositorySpec extends NationalInsuranceRecordUnitSpec with Gu
 
     val nino = generateNino()
     val excluedNino = generateNino()
-    val service = new CachingMongoService[DesLiabilitiesCache, DesLiabilities](DesLiabilitiesCache.formats,
+    val service = new CachingMongoService[DesLiabilitiesCache, DesLiabilities](mongoComponent, DesLiabilitiesCache.formats,
       DesLiabilitiesCache.apply, APITypes.Liabilities, stubApplicationConfig, mock[MetricsService])
 
     "persist a Liabilities in the repo" in {

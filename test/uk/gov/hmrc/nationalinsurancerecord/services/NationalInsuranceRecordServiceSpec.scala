@@ -81,21 +81,6 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
     )
   )
 
-  private val dummyTaxYearDefault: NationalInsuranceTaxYear = NationalInsuranceTaxYear(
-    taxYear =  "2010-11",
-    qualifying = false,
-    classOneContributions =  1149.98,
-    classTwoCredits =  0,
-    classThreeCredits =  0,
-    otherCredits =  0,
-    classThreePayable = 0,
-    classThreePayableBy = None,
-    classThreePayableByPenalty = Some(new LocalDate(2023,4,5)),
-    payable = false,
-    underInvestigation =  false
-  )
-
-
   "NationalInsuranceRecordService with a HOD Connection" when {
 
     val mockMetrics = mock[MetricsService]

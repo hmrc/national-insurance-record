@@ -17,17 +17,20 @@
 package uk.gov.hmrc.nationalinsurancerecord.services
 
 import org.joda.time.{DateTime, DateTimeZone}
-import play.api.libs.json.{Format, Json, OFormat, Reads}
-import reactivemongo.api.indexes.{Index, IndexType}
-import reactivemongo.api.{Cursor, DefaultDB, ReadPreference}
-import reactivemongo.bson.{BSONDocument, BSONObjectID}
-import reactivemongo.play.json.ImplicitBSONHandlers._
+import org.mongodb.scala.ReadPreference
+import org.mongodb.scala.model.Filters.equal
+import org.mongodb.scala.model.{FindOneAndReplaceOptions, IndexModel, IndexOptions, Indexes}
+import play.api.Logging
+import play.api.libs.json.{Format, OFormat, Reads}
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.mongo.ReactiveRepository
+import uk.gov.hmrc.mongo.MongoComponent
+import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import uk.gov.hmrc.nationalinsurancerecord.config.ApplicationConfig
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes.APITypes
 
+import java.util.concurrent.TimeUnit
 import scala.concurrent.{ExecutionContext, Future}
+import scala.reflect.ClassTag
 import scala.util.{Failure, Success, Try}
 
 trait CachingModel[A, B] {
@@ -38,60 +41,33 @@ trait CachingModel[A, B] {
 
 trait CachingService[A, B] {
   def findByNino(nino: Nino)(implicit formats: Reads[A], e: ExecutionContext): Future[Option[B]]
-  def insertByNino(nino: Nino, response: B)(implicit formats: OFormat[A], e: ExecutionContext): Future[Boolean]
+  def insertByNino(nino: Nino, response: B)(implicit formatA: OFormat[A], e: ExecutionContext): Future[Boolean]
   val timeToLive: Int
 
   def metrics: MetricsService
 }
 
 class CachingMongoService[A <: CachingModel[A, B], B]
-(formats: Format[A], apply: (String, B, DateTime) => A, apiType: APITypes, appConfig: ApplicationConfig, metricsX: MetricsService)
-(implicit mongo: () => DefaultDB, e: ExecutionContext)
-  extends ReactiveRepository[A, BSONObjectID]("responses", mongo, formats)
-    with CachingService[A, B] {
-
-  val ttlfieldName = "expiresAt"
-  val ttlIndexName = "responseExpiry"
-  val expireAfterSeconds = "expireAfterSeconds"
-  override val timeToLive = appConfig.responseCacheTTL
-
-  logger.info(s"Document expiresAt will be set to $timeToLive")
-  createIndex(ttlfieldName, ttlIndexName, Some(0), uniqueField = false)
-
-  val uniqueFieldName = "key"
-  val uniqueIndexName = "responseUniqueKey"
-  val unique = "unique"
-  createIndex(uniqueFieldName, uniqueIndexName, None, uniqueField = true)
-
-  private def createIndex(field: String, indexName: String, ttl: Option[Int], uniqueField: Boolean)(implicit e: ExecutionContext): Future[Boolean] = {
-
-    val ttlOption: BSONDocument = ttl.fold(BSONDocument())(time => BSONDocument(expireAfterSeconds -> time))
-    val options: BSONDocument = if(uniqueField) ttlOption.merge(unique -> true) else ttlOption
-
-    collection.indexesManager.ensure(Index(Seq((field, IndexType.Ascending)), Some(indexName),
-      options = options)) map {
-      result => {
-        // $COVERAGE-OFF$
-        logger.debug(s"set [$indexName] with ttl $ttl and unique $uniqueField -> result : $result")
-        if(result) logger.info(s"Successfully created $indexName")
-        // $COVERAGE-ON$
-        result
-      }
-    } recover {
-      // $COVERAGE-OFF$
-      case ex => logger.error(s"Failed to set $indexName index", ex)
-        false
-      // $COVERAGE-ON$
-    }
-  }
+(mongo: MongoComponent, formats: Format[A], apply: (String, B, DateTime) => A, apiType: APITypes, appConfig: ApplicationConfig, metricsX: MetricsService)
+(implicit e: ExecutionContext, ct: ClassTag[A])
+  extends PlayMongoRepository[A](
+    mongoComponent = mongo,
+    collectionName = appConfig.responseCacheCollectionName,
+    domainFormat = formats,
+    replaceIndexes = true,
+    indexes = Seq(
+      IndexModel(Indexes.ascending("expiresAt"), IndexOptions().name("responseExpiry").unique(false).expireAfter(60, TimeUnit.MINUTES)),
+      IndexModel(Indexes.ascending("key"), IndexOptions().name("responseUniqueKey").unique(true).expireAfter(60, TimeUnit.MINUTES))
+    )
+  ) with CachingService[A, B] with Logging {
 
   private def cacheKey(nino: Nino, api: APITypes) = s"$nino-$api"
-
+  override val timeToLive = appConfig.responseCacheTTL
 
   override def findByNino(nino: Nino)(implicit formats: Reads[A], e: ExecutionContext): Future[Option[B]] = {
     val tryResult = Try {
       metrics.cacheRead()
-      collection.find(Json.obj("key" -> cacheKey(nino, apiType))).cursor[A](ReadPreference.primary).collect[List](maxDocs = -1, Cursor.FailOnError())
+      collection.withReadPreference(ReadPreference.primaryPreferred()).find(equal("key", cacheKey(nino, apiType))).toFuture()
     }
 
     tryResult match {
@@ -119,16 +95,14 @@ class CachingMongoService[A <: CachingModel[A, B], B]
   }
 
   override def insertByNino(nino: Nino, response: B)
-                           (implicit formats: OFormat[A], e: ExecutionContext): Future[Boolean] = {
-    val query = Json.obj("key" -> cacheKey(nino, apiType))
+                           (implicit formatA: OFormat[A], e: ExecutionContext): Future[Boolean] = {
+    val query = equal("key", cacheKey(nino, apiType))
+
     val doc = apply(cacheKey(nino, apiType), response, DateTime.now(DateTimeZone.UTC).plusSeconds(timeToLive))
 
-    collection.update(false).one(query, doc, upsert = true).map { result =>
-      logger.debug(s"[$apiType][insertByNino] : { cacheKey : ${cacheKey(nino, apiType)}, " +
-        s"request: $response, result: ${result.ok}, errors: ${result.errmsg} }")
+    collection.findOneAndReplace(query, doc, FindOneAndReplaceOptions().upsert(true)).toFuture().map { result =>
       metrics.cacheWritten()
-      result.errmsg.foreach(msg => logger.warn(s"[$apiType][insertByNino] : { cacheKey : ${cacheKey(nino, apiType)}, results: $msg }"))
-      result.ok
+      true
     } recover {
       case e: Throwable => logger.warn(s"[$apiType][insertByNino] : cacheKey : ${cacheKey(nino, apiType)}, exception: ${e.getMessage} }", e); false
     }
