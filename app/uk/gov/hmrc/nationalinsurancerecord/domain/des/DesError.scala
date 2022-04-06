@@ -18,7 +18,7 @@ package uk.gov.hmrc.nationalinsurancerecord.domain.des
 
 import uk.gov.hmrc.http.UpstreamErrorResponse
 
-sealed trait DesError
+sealed trait DesError extends Exception
 
 object DesError {
   case class JsonValidationError(message: String) extends DesError

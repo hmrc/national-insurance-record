@@ -39,7 +39,7 @@ import uk.gov.hmrc.nationalinsurancerecord.util.{JsonDepersonaliser, NIRecordCon
 import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.util.{Failure, Success, Try}
+import scala.util.{Failure, Success}
 
 class DesConnector @Inject()(desSummaryRepository: DesSummaryRepository,
                              desNIRecordRepository: DesNIRecordRepository,
@@ -62,7 +62,7 @@ class DesConnector @Inject()(desSummaryRepository: DesSummaryRepository,
   private def ninoWithoutSuffix(nino: Nino): String = nino.value.substring(0, NIRecordConstants.ninoLengthWithoutSuffix)
 
   def getLiabilities(nino: Nino)(
-    implicit hc: HeaderCarrier): Future[Either[DesError, DesLiabilities]] = {
+    implicit hc: HeaderCarrier): Future[DesLiabilities] = {
     val urlToRead = url(s"/individuals/${ninoWithoutSuffix(nino)}/pensions/liabilities")
     metrics.incrementCounter(APITypes.Liabilities)
     connectToCache[DesLiabilities, DesLiabilitiesCache](
@@ -73,7 +73,7 @@ class DesConnector @Inject()(desSummaryRepository: DesSummaryRepository,
   }
 
   def getNationalInsuranceRecord(nino: Nino)(
-    implicit hc: HeaderCarrier): Future[Either[DesError, DesNIRecord]] = {
+    implicit hc: HeaderCarrier): Future[DesNIRecord] = {
     val urlToRead = url(s"/individuals/${ninoWithoutSuffix(nino)}/pensions/ni")
     metrics.incrementCounter(APITypes.NIRecord)
     connectToCache[DesNIRecord, DesNIRecordCache](
@@ -84,7 +84,7 @@ class DesConnector @Inject()(desSummaryRepository: DesSummaryRepository,
   }
 
   def getSummary(nino: Nino)(
-    implicit hc: HeaderCarrier): Future[Either[DesError, DesSummary]] = {
+    implicit hc: HeaderCarrier): Future[DesSummary] = {
     val urlToRead = url(s"/individuals/${ninoWithoutSuffix(nino)}/pensions/summary")
     metrics.incrementCounter(APITypes.Summary)
     connectToCache[DesSummary, DesSummaryCache](
@@ -97,15 +97,15 @@ class DesConnector @Inject()(desSummaryRepository: DesSummaryRepository,
   private def connectToCache[A, B](
     nino: Nino, url: String, api: APITypes, repository: CachingService[B, A])(
     implicit hc: HeaderCarrier, formatA: Format[A], formatB: OFormat[B])
-  : Future[Either[DesError, A]] =
+  : Future[A] =
     repository.findByNino(nino).flatMap {
-      case Some(responseModel) => Future.successful(Right(responseModel))
-      case None => connectToDes(url, api)(hc, formatA).map {
+      case Some(responseModel) => Future.successful(responseModel)
+      case None => connectToDes(url, api)(hc, formatA).flatMap {
         case Right(response) =>
           logger.debug("*~* - writing nino to cache:" + nino)
           repository.insertByNino(nino, response)
-          Right(response)
-        case Left(error) => Left(error)
+          Future.successful(response)
+        case Left(error) => Future.failed(error)
       }
     }
 
