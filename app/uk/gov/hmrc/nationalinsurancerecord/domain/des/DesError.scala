@@ -21,9 +21,15 @@ import uk.gov.hmrc.http.UpstreamErrorResponse
 sealed trait DesError extends Exception
 
 object DesError {
-  case class JsonValidationError(message: String) extends DesError
+  case class JsonValidationError(message: String) extends DesError {
+    override def getMessage: String = message
+  }
 
-  case class HttpError(error: UpstreamErrorResponse) extends DesError
+  case class HttpError(error: UpstreamErrorResponse) extends DesError {
+    override def getMessage: String = error.message
+  }
 
-  case class OtherError(error: Throwable) extends DesError
+  case class OtherError(error: Throwable) extends DesError {
+    override def getMessage: String = error.getMessage
+  }
 }
