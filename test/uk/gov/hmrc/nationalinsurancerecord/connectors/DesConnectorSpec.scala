@@ -28,12 +28,14 @@ import play.api.Application
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
-import uk.gov.hmrc.http.{Authorization, BadRequestException, HeaderCarrier, HeaderNames, RequestId}
+import uk.gov.hmrc.http.{Authorization, HeaderCarrier, HeaderNames, RequestId}
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.cache._
 import uk.gov.hmrc.nationalinsurancerecord.config.ApplicationConfig
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
-import uk.gov.hmrc.nationalinsurancerecord.domain.des.{DesLiabilities, DesNIRecord, DesSummary}
+import uk.gov.hmrc.nationalinsurancerecord.domain.des.{
+  DesLiabilities, DesNIRecord, DesSummary, DesError
+}
 import uk.gov.hmrc.nationalinsurancerecord.services.MetricsService
 import uk.gov.hmrc.nationalinsurancerecord.util.WireMockHelper
 
@@ -343,7 +345,7 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with GuiceOneAppP
       when(mockNIRecordRepo().findByNino(any())(any(), any())).thenReturn(Future.successful(None))
 
       ScalaFutures.whenReady(connector.getNationalInsuranceRecord(nino).failed) { ex =>
-        ex shouldBe a[BadRequestException]
+        ex shouldBe a[DesError.HttpError]
       }
     }
 
@@ -396,7 +398,7 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with GuiceOneAppP
       server.stubFor(get(urlEqualTo(s"/individuals/${nino.withoutSuffix}/pensions/liabilities"))
         .willReturn(badRequest()))
       ScalaFutures.whenReady(connector.getLiabilities(nino).failed) { ex =>
-        ex shouldBe a[BadRequestException]
+        ex shouldBe a[DesError.HttpError]
       }
     }
 
@@ -428,7 +430,7 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with GuiceOneAppP
         .willReturn(ok(invalidJson)))
 
       ScalaFutures.whenReady(connector.getNationalInsuranceRecord(nino)(HeaderCarrier()).failed) { ex =>
-        ex shouldBe a[connector.JsonValidationException]
+        ex shouldBe a[DesError.JsonValidationError]
         ex.getMessage.contains("1973-10-01") shouldBe false
         ex.getMessage.contains("1111-11-11") shouldBe true
       }
