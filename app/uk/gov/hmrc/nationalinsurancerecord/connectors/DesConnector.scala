@@ -19,13 +19,20 @@ package uk.gov.hmrc.nationalinsurancerecord.connectors
 import com.google.inject.Inject
 import play.api.Logging
 import play.api.libs.json._
+import play.api.http.Status.BAD_GATEWAY
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.{HeaderCarrier, HeaderNames, HttpClient, HttpReads, HttpResponse}
+import uk.gov.hmrc.http.{
+  HeaderCarrier, HeaderNames, HttpClient, HttpResponse, UpstreamErrorResponse, HttpException
+}
+import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.HttpReadsInstances.readEitherOf
 import uk.gov.hmrc.nationalinsurancerecord.cache._
 import uk.gov.hmrc.nationalinsurancerecord.config.ApplicationConfig
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes.APITypes
-import uk.gov.hmrc.nationalinsurancerecord.domain.des.{DesLiabilities, DesNIRecord, DesSummary}
+import uk.gov.hmrc.nationalinsurancerecord.domain.des.{
+  DesLiabilities, DesNIRecord, DesSummary, DesError
+}
 import uk.gov.hmrc.nationalinsurancerecord.services.{CachingService, MetricsService}
 import uk.gov.hmrc.nationalinsurancerecord.util.{JsonDepersonaliser, NIRecordConstants}
 
@@ -54,7 +61,8 @@ class DesConnector @Inject()(desSummaryRepository: DesSummaryRepository,
 
   private def ninoWithoutSuffix(nino: Nino): String = nino.value.substring(0, NIRecordConstants.ninoLengthWithoutSuffix)
 
-  def getLiabilities(nino: Nino)(implicit hc: HeaderCarrier): Future[DesLiabilities] = {
+  def getLiabilities(nino: Nino)(
+    implicit hc: HeaderCarrier): Future[Either[DesError, DesLiabilities]] = {
     val urlToRead = url(s"/individuals/${ninoWithoutSuffix(nino)}/pensions/liabilities")
     metrics.incrementCounter(APITypes.Liabilities)
     connectToCache[DesLiabilities, DesLiabilitiesCache](
@@ -64,7 +72,8 @@ class DesConnector @Inject()(desSummaryRepository: DesSummaryRepository,
       liabilitiesRepository)
   }
 
-  def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[DesNIRecord] = {
+  def getNationalInsuranceRecord(nino: Nino)(
+    implicit hc: HeaderCarrier): Future[Either[DesError, DesNIRecord]] = {
     val urlToRead = url(s"/individuals/${ninoWithoutSuffix(nino)}/pensions/ni")
     metrics.incrementCounter(APITypes.NIRecord)
     connectToCache[DesNIRecord, DesNIRecordCache](
@@ -74,7 +83,8 @@ class DesConnector @Inject()(desSummaryRepository: DesSummaryRepository,
       nirecordRepository)
   }
 
-  def getSummary(nino: Nino)(implicit hc: HeaderCarrier): Future[DesSummary] = {
+  def getSummary(nino: Nino)(
+    implicit hc: HeaderCarrier): Future[Either[DesError, DesSummary]] = {
     val urlToRead = url(s"/individuals/${ninoWithoutSuffix(nino)}/pensions/summary")
     metrics.incrementCounter(APITypes.Summary)
     connectToCache[DesSummary, DesSummaryCache](
@@ -84,21 +94,23 @@ class DesConnector @Inject()(desSummaryRepository: DesSummaryRepository,
       summaryRepository)
   }
 
-  private def connectToCache[A, B](nino: Nino, url: String, api: APITypes, repository: CachingService[B, A])
-                                  (implicit hc: HeaderCarrier, formatA: Format[A], formatB: OFormat[B]) = {
+  private def connectToCache[A, B](
+    nino: Nino, url: String, api: APITypes, repository: CachingService[B, A])(
+    implicit hc: HeaderCarrier, formatA: Format[A], formatB: OFormat[B])
+  : Future[Either[DesError, A]] =
     repository.findByNino(nino).flatMap {
-      case Some(responseModel) => Future.successful(responseModel)
-      case None =>
-        connectToDes(url, api)(hc, formatA) map {
-          response =>
-            logger.debug("*~* - writing nino to cache:" + nino)
-            repository.insertByNino(nino, response)
-            response
-        }
+      case Some(responseModel) => Future.successful(Right(responseModel))
+      case None => connectToDes(url, api)(hc, formatA).map {
+        case Right(response) =>
+          logger.debug("*~* - writing nino to cache:" + nino)
+          repository.insertByNino(nino, response)
+          Right(response)
+        case Left(error) => Left(error)
+      }
     }
-  }
 
-  private def connectToDes[A](url: String, api: APITypes)(implicit hc: HeaderCarrier, reads: Reads[A]): Future[A] = {
+  private def connectToDes[A](url: String, api: APITypes)(
+    implicit hc: HeaderCarrier, reads: Reads[A]): Future[Either[DesError, A]] = {
     val timerContext = metrics.startTimer(api)
     val headers = Seq(
       HeaderNames.authorisation -> authToken,
@@ -108,36 +120,53 @@ class DesConnector @Inject()(desSummaryRepository: DesSummaryRepository,
       HeaderNames.xRequestId -> hc.requestId.fold("-")(_.value)
     )
 
-    val futureResponse = http.GET[HttpResponse](url, headers = headers)(hc = hc, rds = HttpReads.readRaw, ec = global)
-
-    futureResponse.map { httpResponse =>
-      timerContext.stop()
-
-      httpResponse.json.validate[A].fold(
-        errs => {
-          val json = JsonDepersonaliser.depersonalise(httpResponse.json) match {
-            case Success(s) => s"Depersonalised JSON\n$s"
-            case Failure(e) => s"JSON could not be depersonalised\n${e.toString}"
-          }
-          throw new JsonValidationException(s"Unable to deserialise $api: ${formatJsonErrors(errs)}\n$json")
-        },
-        valid => Success(valid)
-      )
-    } recover {
-      // http-verbs throws exceptions, convert to Try
-      case ex => Failure(ex)
-    } flatMap (handleResult(api, url, _))
+    http
+      .GET[Either[UpstreamErrorResponse, HttpResponse]](url, headers = headers)
+      .transform {
+        result =>
+          timerContext.stop()
+          result
+      }
+      .map {
+        case Right(response) =>
+          response.json.validate[A].fold(
+            errs => {
+              val json = JsonDepersonaliser.depersonalise(response.json) match {
+                case Success(s) => s"Depersonalised JSON\n$s"
+                case Failure(e) => s"JSON could not be depersonalised\n${e.toString}"
+              }
+              Left(
+                DesError.JsonValidationError(
+                  s"Unable to deserialise $api: ${formatJsonErrors(errs)}\n$json"
+                )
+              )
+            },
+            valid => Right(valid)
+          )
+        case Left(error) => Left(DesError.HttpError(error))
+      }
+      .recover {
+        case error: HttpException =>
+          Left(
+            DesError.HttpError(UpstreamErrorResponse(error.message, BAD_GATEWAY))
+          )
+        case error =>
+          Left(
+            DesError.OtherError(error)
+          )
+      }
+      .map {
+        result =>
+          handleResult(api, url, result)
+          result
+      }
   }
 
-  private def handleResult[A](api: APITypes, url: String, tryResult: Try[A]): Future[A] = {
-    tryResult match {
-      case Failure(ex) =>
-        metrics.incrementFailedCounter(api)
-        Future.failed(ex)
-      case Success(value) =>
-        Future.successful(value)
+  private def handleResult[A](api: APITypes, url: String, result: Either[DesError, A]) =
+    result match {
+      case Left(_) => metrics.incrementFailedCounter(api)
+      case Right(_) => ()
     }
-  }
 
   private def formatJsonErrors(errors: Seq[(JsPath, Seq[JsonValidationError])]): String = {
     "JSON Validation Error: " + errors.map(p => p._1 + " - " + p._2.map(e => removeJson(e.message)).mkString(",")).mkString(" | ")
