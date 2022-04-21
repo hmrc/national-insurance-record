@@ -22,6 +22,7 @@ import play.api.mvc.{BaseController, Result}
 import uk.gov.hmrc.api.controllers.{ErrorGenericBadRequest, ErrorInternalServerError, ErrorNotFound, ErrorResponse}
 import uk.gov.hmrc.http.UpstreamErrorResponse.WithStatusCode
 import uk.gov.hmrc.http._
+import uk.gov.hmrc.nationalinsurancerecord.domain.des.DesError
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -30,18 +31,82 @@ trait ErrorHandling extends Logging {
   self: BaseController =>
   val app: String
 
-  def errorWrapper(func: => Future[Result]): Future[Result] = {
+  def errorWrapper(func: => Future[Result]): Future[Result] =
     func.recover {
-      case _: NotFoundException => NotFound(Json.toJson[ErrorResponse](ErrorNotFound))
-      case e@WithStatusCode(GATEWAY_TIMEOUT) => logger.error(s"$app Gateway Timeout: ${e.getMessage}", e); GatewayTimeout
-      case e: BadGatewayException => logger.error(s"$app Bad Gateway: ${e.getMessage}", e); BadGateway
-      case _: BadRequestException => BadRequest(Json.toJson[ErrorResponse](ErrorGenericBadRequest("Upstream Bad Request. Is this customer below State Pension Age?")))
-      case e@UpstreamErrorResponse.Upstream4xxResponse(_) => logger.error(s"$app Upstream4XX: ${e.getMessage}", e); BadGateway
-      case e@UpstreamErrorResponse.Upstream5xxResponse(_) => logger.error(s"$app Upstream5XX: ${e.getMessage}", e); BadGateway
-
-      case e  : Throwable =>
-        logger.error(s"$app Internal server error: ${e.getMessage}", e)
-        InternalServerError(Json.toJson[ErrorResponse](ErrorInternalServerError))
+      case error: DesError => handleDesError(error)
+      case error => handleLegacyError(error)
     }
+
+  private def handleDesError(error: DesError): Result =
+    error match {
+      case DesError.HttpError(error) if error.statusCode == NOT_FOUND =>
+        notFound
+      case DesError.HttpError(error) if error.statusCode == GATEWAY_TIMEOUT =>
+        gatewayTimeout(error)
+      case DesError.HttpError(error) if error.statusCode == BAD_REQUEST =>
+        badRequest
+      case DesError.HttpError(error) if error.statusCode == BAD_GATEWAY =>
+        badGateway(error)
+      case DesError.HttpError(UpstreamErrorResponse.Upstream4xxResponse(_)) =>
+        upstream4xx(error)
+      case DesError.HttpError(UpstreamErrorResponse.Upstream5xxResponse(_)) =>
+        upstream5xx(error)
+      case DesError.JsonValidationError(message) =>
+        internalServerError(error)
+      case DesError.OtherError(error) =>
+        internalServerError(error)
+    }
+
+  private def handleLegacyError(error: Throwable): Result =
+    error match {
+      case _: NotFoundException =>
+        notFound
+      case e@WithStatusCode(GATEWAY_TIMEOUT) =>
+        gatewayTimeout(error)
+      case e: BadGatewayException =>
+        badGateway(error)
+      case _: BadRequestException =>
+        badRequest
+      case e@UpstreamErrorResponse.Upstream4xxResponse(_) =>
+        upstream4xx(error)
+      case e@UpstreamErrorResponse.Upstream5xxResponse(_) =>
+        upstream5xx(error)
+      case e: Throwable =>
+        internalServerError(error)
+    }
+
+  private def notFound =
+    NotFound(Json.toJson[ErrorResponse](ErrorNotFound))
+
+  private def gatewayTimeout(error: Throwable) = {
+    logger.error(s"$app Gateway Timeout: ${error.getMessage}", error)
+    GatewayTimeout
+  }
+
+  private def badRequest =
+    BadRequest(
+      Json.toJson[ErrorResponse](
+        ErrorGenericBadRequest("Upstream Bad Request. Is this customer below State Pension Age?")
+      )
+    )
+
+  private def badGateway(error: Throwable) = {
+    logger.error(s"$app Bad Gateway: ${error.getMessage}", error)
+    BadGateway
+  }
+
+  private def internalServerError(error: Throwable) = {
+    logger.error(s"$app Internal server error: ${error.getMessage}", error)
+    InternalServerError(Json.toJson[ErrorResponse](ErrorInternalServerError))
+  }
+
+  private def upstream4xx(error: Throwable) = {
+    logger.error(s"$app Upstream4XX: ${error.getMessage}", error)
+    BadGateway
+  }
+
+  private def upstream5xx(error: Throwable) = {
+    logger.error(s"$app Upstream5XX: ${error.getMessage}", error)
+    BadGateway
   }
 }
