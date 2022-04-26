@@ -63,23 +63,25 @@ class CitizenDetailsConnectorSpec extends NationalInsuranceRecordUnitSpec with B
 
     "return OK status when successful" in {
       when(mockMetrics.startCitizenDetailsTimer()).thenReturn(mockTimerContext)
-      when(mockHttp.GET[HttpResponse](any(), any(), any())(any(), any(), any())) thenReturn Future.successful(HttpResponse(200, ""))
+      when(mockHttp.GET[Either[UpstreamErrorResponse, HttpResponse]](any(), any(), any())(any(), any(), any())).thenReturn(
+        Future.successful(Right(HttpResponse(200, "")))
+      )
       val resultF = citizenDetailsConnector.retrieveMCIStatus(nino)(hc)
-      await(resultF) shouldBe 200
+      await(resultF) shouldBe Right(200)
     }
 
     "return 423 status when the Upstream is 423" in {
-      when(mockHttp.GET[HttpResponse](any(), any(), any())(any(), any(), any())) thenReturn
-        Future.failed(UpstreamErrorResponse(":(", 423, 423, Map()))
+      when(mockHttp.GET[Either[UpstreamErrorResponse, HttpResponse]](any(), any(), any())(any(), any(), any())) thenReturn
+        Future.successful(Left(UpstreamErrorResponse(":(", 423, 423, Map())))
       val resultF = citizenDetailsConnector.retrieveMCIStatus(nino)(hc)
-      await(resultF) shouldBe 423
+      await(resultF) shouldBe Right(423)
     }
 
     "return NotFoundException for invalid nino" in {
-      when(mockHttp.GET[HttpResponse](any(), any(), any())(any(), any(), any())) thenReturn
-        Future.failed(new NotFoundException("Not Found"))
+      when(mockHttp.GET[Either[UpstreamErrorResponse, HttpResponse]](any(), any(), any())(any(), any(), any())) thenReturn
+        Future.successful(Left(UpstreamErrorResponse("NOT_FOUND", 404)))
       val resultF = citizenDetailsConnector.retrieveMCIStatus(nino)(hc)
-      await(resultF.failed) shouldBe a[NotFoundException]
+      await(resultF) shouldBe Left(UpstreamErrorResponse("NOT_FOUND", 404))
     }
 
     "return 500 response code when there is Upstream is 4XX" in {

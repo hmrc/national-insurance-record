@@ -19,13 +19,16 @@ package uk.gov.hmrc.nationalinsurancerecord.connectors
 import com.google.inject.Inject
 import play.api.http.Status.LOCKED
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, Upstream4xxResponse}
+import uk.gov.hmrc.http.{
+  HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorResponse
+}
+import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.HttpReadsInstances.readEitherOf
 import uk.gov.hmrc.nationalinsurancerecord.config.ApplicationConfig
 import uk.gov.hmrc.nationalinsurancerecord.services.MetricsService
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.util.{Failure, Success, Try}
 
 class CitizenDetailsConnector @Inject()(appConfig: ApplicationConfig,
                                         http: HttpClient,
@@ -35,24 +38,20 @@ class CitizenDetailsConnector @Inject()(appConfig: ApplicationConfig,
   val serviceUrl: String = appConfig.citizenDetailsUrl
   private def url(nino: Nino) = s"$serviceUrl/citizen-details/$nino/designatory-details/"
 
-  def retrieveMCIStatus(nino: Nino)(implicit hc: HeaderCarrier): Future[Int] = {
+  def retrieveMCIStatus(nino: Nino)(
+    implicit hc: HeaderCarrier): Future[Either[UpstreamErrorResponse, Int]] = {
     val timerContext = metrics.startCitizenDetailsTimer()
-    http.GET[HttpResponse](url(nino)) map {
-      personResponse =>
-        timerContext.stop()
-        Success(personResponse.status)
-    } recover {
-      case ex: Upstream4xxResponse if ex.upstreamResponseCode == LOCKED => Success(ex.upstreamResponseCode)
-      case ex: Throwable => timerContext.stop(); Failure(ex)
-    } flatMap (handleResult(url(nino), _))
-  }
-
-  private def handleResult[A](url: String, tryResult: Try[A]): Future[A] = {
-    tryResult match {
-      case Failure(ex) =>
-        Future.failed(ex)
-      case Success(value) =>
-        Future.successful(value)
-    }
+    http
+      .GET[Either[UpstreamErrorResponse, HttpResponse]](url(nino))
+      .transform {
+        result =>
+          timerContext.stop()
+          result
+      }
+      .map {
+        case Right(personResponse) => Right(personResponse.status)
+        case Left(error) if error.statusCode == LOCKED => Right(LOCKED)
+        case Left(error) => Left(error)
+      }
   }
 }

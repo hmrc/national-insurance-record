@@ -27,8 +27,11 @@ import scala.concurrent.Future
 
 class CitizenDetailsService @Inject()(citizenDetailsConnector: CitizenDetailsConnector) {
 
-  def checkManualCorrespondenceIndicator(nino: Nino)(implicit hc: HeaderCarrier): Future[Boolean] = {
-    citizenDetailsConnector.retrieveMCIStatus(nino).map(status => status == LOCKED)
-  }
-
+  def checkManualCorrespondenceIndicator(nino: Nino)(implicit hc: HeaderCarrier): Future[Boolean] =
+    citizenDetailsConnector
+      .retrieveMCIStatus(nino)
+      .flatMap {
+        case Right(status) => Future.successful(status == LOCKED)
+        case Left(error) => Future.failed(error)
+      }
 }
