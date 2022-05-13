@@ -3,7 +3,6 @@ package uk.gov.hmrc.nationalinsurancerecord.controllers.nationalInsurance
 import com.github.tomakehurst.wiremock.client.WireMock._
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
-import org.scalatest.Matchers.convertToAnyShouldWrapper
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.{AnyContent, Results}

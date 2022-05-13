@@ -45,7 +45,10 @@ lazy val microservice = Project(appName, file("."))
     publishingSettings,
     defaultSettings(),
     majorVersion := 0,
-    scalacOptions ++= Seq("-P:silencer:pathFilters=routes"),
+    scalacOptions ++= Seq(
+      "-Xfatal-warnings",
+      "-P:silencer:pathFilters=routes"
+    ),
     scalacOptions ++= suppressedImports,
     scalaVersion := "2.12.13",
     libraryDependencies ++= AppDependencies.all,
