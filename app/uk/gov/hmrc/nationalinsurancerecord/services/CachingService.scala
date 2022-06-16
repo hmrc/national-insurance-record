@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.services
 
-import org.joda.time.{DateTime, DateTimeZone}
 import org.mongodb.scala.ReadPreference
 import org.mongodb.scala.model.Filters.equal
 import org.mongodb.scala.model.{FindOneAndReplaceOptions, IndexModel, IndexOptions, Indexes}
@@ -28,6 +27,7 @@ import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import uk.gov.hmrc.nationalinsurancerecord.config.ApplicationConfig
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes.APITypes
 
+import java.time.{LocalDateTime, ZoneOffset}
 import java.util.concurrent.TimeUnit
 import scala.concurrent.{ExecutionContext, Future}
 import scala.reflect.ClassTag
@@ -36,7 +36,7 @@ import scala.util.{Failure, Success, Try}
 trait CachingModel[A, B] {
   val key: String
   val response: B
-  val expiresAt: DateTime
+  val expiresAt: LocalDateTime
 }
 
 trait CachingService[A, B] {
@@ -48,7 +48,7 @@ trait CachingService[A, B] {
 }
 
 class CachingMongoService[A <: CachingModel[A, B], B]
-(mongo: MongoComponent, formats: Format[A], apply: (String, B, DateTime) => A, apiType: APITypes, appConfig: ApplicationConfig, metricsX: MetricsService)
+(mongo: MongoComponent, formats: Format[A], apply: (String, B, LocalDateTime) => A, apiType: APITypes, appConfig: ApplicationConfig, metricsX: MetricsService)
 (implicit e: ExecutionContext, ct: ClassTag[A])
   extends PlayMongoRepository[A](
     mongoComponent = mongo,
@@ -98,7 +98,7 @@ class CachingMongoService[A <: CachingModel[A, B], B]
                            (implicit formatA: OFormat[A], e: ExecutionContext): Future[Boolean] = {
     val query = equal("key", cacheKey(nino, apiType))
 
-    val doc = apply(cacheKey(nino, apiType), response, DateTime.now(DateTimeZone.UTC).plusSeconds(timeToLive))
+    val doc = apply(cacheKey(nino, apiType), response, LocalDateTime.now(ZoneOffset.UTC).plusSeconds(timeToLive))
 
     collection.findOneAndReplace(query, doc, FindOneAndReplaceOptions().upsert(true)).toFuture().map { result =>
       metrics.cacheWritten()

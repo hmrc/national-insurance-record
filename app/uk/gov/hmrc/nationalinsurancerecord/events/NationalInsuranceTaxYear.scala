@@ -16,9 +16,10 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.events
 
-import org.joda.time.LocalDate
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
+
+import java.time.LocalDate
 
 object NationalInsuranceTaxYear{
   def apply(nino: Nino, taxYear: String,

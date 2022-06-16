@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.cache
 
-import org.joda.time.LocalDate
 import org.mockito.Mockito
 import org.mockito.Mockito._
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
@@ -26,6 +25,7 @@ import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.des.DesSummary
 import uk.gov.hmrc.nationalinsurancerecord.services.{CachingMongoService, MetricsService}
 
+import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
 
   class SummaryRepositorySpec extends NationalInsuranceRecordUnitSpec with MongoSupport with GuiceOneAppPerSuite {
@@ -34,8 +34,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
   val testSummaryModel = DesSummary(
     rreToConsider = false,
     dateOfDeath = None,
-    earningsIncludedUpTo = Some(new LocalDate(2014, 4, 5)),
-    dateOfBirth = Some(new LocalDate(1952, 11, 21)),
+    earningsIncludedUpTo = Some(LocalDate.of(2014, 4, 5)),
+    dateOfBirth = Some(LocalDate.of(1952, 11, 21)),
     finalRelevantYear = Some(2016)
   )
 

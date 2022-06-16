@@ -17,21 +17,22 @@
 package uk.gov.hmrc.nationalinsurancerecord.cache
 
 import com.google.inject.{Inject, Singleton}
-import org.joda.time.DateTime
 import play.api.libs.json.Json
 import uk.gov.hmrc.mongo.MongoComponent
-import uk.gov.hmrc.mongo.play.json.formats.{MongoFormats, MongoJodaFormats}
+import uk.gov.hmrc.mongo.play.json.formats.{MongoFormats, MongoJavatimeFormats}
 import uk.gov.hmrc.nationalinsurancerecord.config.ApplicationConfig
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.des.DesLiabilities
 import uk.gov.hmrc.nationalinsurancerecord.services.{CachingModel, CachingMongoService, MetricsService}
+
+import java.time.LocalDateTime
 import scala.concurrent.ExecutionContext.Implicits.global
 
-case class DesLiabilitiesCache(key: String, response: DesLiabilities, expiresAt: DateTime)
+case class DesLiabilitiesCache(key: String, response: DesLiabilities, expiresAt: LocalDateTime)
   extends CachingModel[DesLiabilitiesCache, DesLiabilities]
 
 object DesLiabilitiesCache {
-  implicit val dateFormat = MongoJodaFormats.dateTimeFormat
+  implicit val dateFormat = MongoJavatimeFormats.localDateFormat
   implicit val idFormat = MongoFormats.objectIdFormat
   implicit def formats = Json.format[DesLiabilitiesCache]
 }

@@ -16,15 +16,16 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.services
 
-import org.joda.time.LocalDate
 import uk.gov.hmrc.nationalinsurancerecord.domain.Exclusion
 import uk.gov.hmrc.nationalinsurancerecord.domain.des.DesLiability
+
+import java.time.LocalDate
 
 class ExclusionServiceSpec extends NationalInsuranceRecordServiceSpec {
   // scalastyle:off magic.number
 
-  val exampleNow = new LocalDate(2017, 2, 16)
-  val examplePensionDate = new LocalDate(2022, 2, 2)
+  val exampleNow = LocalDate.of(2017, 2, 16)
+  val examplePensionDate = LocalDate.of(2022, 2, 2)
 
   private def exclusionServiceBuilder(
                                 dateOfDeath: Option[LocalDate] = None,
@@ -41,7 +42,7 @@ class ExclusionServiceSpec extends NationalInsuranceRecordServiceSpec {
 
     "there is a date of death" must{
       "return a List(Dead)" in {
-        exclusionServiceBuilder(dateOfDeath = Some(new LocalDate(2000, 9, 13))).getExclusions shouldBe List(Exclusion.Dead)
+        exclusionServiceBuilder(dateOfDeath = Some(LocalDate.of(2000, 9, 13))).getExclusions shouldBe List(Exclusion.Dead)
       }
     }
 
@@ -76,7 +77,7 @@ class ExclusionServiceSpec extends NationalInsuranceRecordServiceSpec {
     "all the exclusion criteria are met" must{
       "return a sorted list of Dead, MCI, IoM exclusions" in {
         exclusionServiceBuilder(
-          dateOfDeath = Some(new LocalDate(1999, 12, 31)),
+          dateOfDeath = Some(LocalDate.of(1999, 12, 31)),
           liabilities = List(DesLiability(Some(5)), DesLiability(Some(15)), DesLiability(Some(1))),
           manualCorrespondenceOnly = true
         ).getExclusions shouldBe List(

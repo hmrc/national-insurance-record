@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.controllers
 
-import org.joda.time.LocalDate
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{reset, when}
 import org.scalatest.BeforeAndAfterEach
@@ -25,7 +24,7 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.JodaReads._
+import uk.gov.hmrc.nationalinsurancerecord.util.DateFormats.localDateFormat
 import play.api.libs.json._
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsJson, _}
@@ -38,6 +37,7 @@ import uk.gov.hmrc.nationalinsurancerecord.controllers.nationalInsurance.Nationa
 import uk.gov.hmrc.nationalinsurancerecord.domain._
 import uk.gov.hmrc.nationalinsurancerecord.services.NationalInsuranceRecordService
 
+import java.time.LocalDate
 import scala.concurrent.Future
 
 class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitSpec with GuiceOneAppPerSuite with BeforeAndAfterEach with ScalaFutures {
@@ -88,8 +88,8 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
     classThreeCredits = 0,
     otherCredits = 10,
     classThreePayable = 325.14,
-    classThreePayableBy = Some(new LocalDate(2019, 4, 5)),
-    classThreePayableByPenalty = Some(new LocalDate(2023, 4, 5)),
+    classThreePayableBy = Some(LocalDate.of(2019, 4, 5)),
+    classThreePayableByPenalty = Some(LocalDate.of(2023, 4, 5)),
     payable = true,
     underInvestigation = false
   )
@@ -109,9 +109,9 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
     qualifyingYearsPriorTo1975 = 5,
     numberOfGaps = 10,
     numberOfGapsPayable = 4,
-    dateOfEntry = Some(new LocalDate(1969, 8, 1)),
+    dateOfEntry = Some(LocalDate.of(1969, 8, 1)),
     homeResponsibilitiesProtection = false,
-    earningsIncludedUpTo = new LocalDate(2016, 4, 5),
+    earningsIncludedUpTo = LocalDate.of(2016, 4, 5),
     List(
       generateTaxYear("2015-16", true),
       generateTaxYear("2014-15", true),
@@ -326,7 +326,7 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
         (json \ "numberOfGapsPayable").as[Int] shouldBe 4
       }
       "have a LocalDate called dateOfEntry which is 1/8/1969" in {
-        (json \ "dateOfEntry").as[LocalDate] shouldBe new LocalDate(1969, 8, 1)
+        (json \ "dateOfEntry").as[LocalDate] shouldBe LocalDate.of(1969, 8, 1)
       }
 
       "have a Boolean called homeResponsibilitiesProtection which is false" in {
@@ -338,7 +338,7 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
       }
 
       "have a LocalDate called earningsIncludedUpTo which is 5/4/2016" in {
-        (json \ "earningsIncludedUpTo").as[LocalDate] shouldBe new LocalDate(2016, 4, 5)
+        (json \ "earningsIncludedUpTo").as[LocalDate] shouldBe LocalDate.of(2016, 4, 5)
       }
 
       "have a list of 41 tax years" in {
@@ -717,11 +717,11 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
     }
 
     "have a nullable local date called classThreePayableBy that is 5/4/2019" in {
-      (json \ "classThreePayableBy").as[LocalDate] shouldBe new LocalDate(2019, 4, 5)
+      (json \ "classThreePayableBy").as[LocalDate] shouldBe LocalDate.of(2019, 4, 5)
     }
 
     "have a nullable local date called classThreePayableByPenalty that is 5/4/2023" in {
-      (json \ "classThreePayableByPenalty").as[LocalDate] shouldBe new LocalDate(2023, 4, 5)
+      (json \ "classThreePayableByPenalty").as[LocalDate] shouldBe LocalDate.of(2023, 4, 5)
     }
 
     "have a Boolean called payable that is true" in {

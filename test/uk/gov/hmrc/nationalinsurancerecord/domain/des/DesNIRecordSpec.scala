@@ -16,9 +16,10 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.domain.des
 
-import org.joda.time.LocalDate
 import play.api.libs.json.Json
 import uk.gov.hmrc.nationalinsurancerecord.util.UnitSpec
+
+import java.time.LocalDate
 import scala.io.Source
 
 class DesNIRecordSpec extends UnitSpec {
@@ -41,7 +42,7 @@ class DesNIRecordSpec extends UnitSpec {
       niRecord.pre75ContributionCount shouldBe 0
     }
     "parse date of entry correctly" in {
-      niRecord.dateOfEntry shouldBe Some(new LocalDate(1986, 9, 8))
+      niRecord.dateOfEntry shouldBe Some(LocalDate.of(1986, 9, 8))
       niRecord.niTaxYears.head.qualifying shouldBe true
     }
     "parse qualifying status of tax year correctly" in {
@@ -60,11 +61,11 @@ class DesNIRecordSpec extends UnitSpec {
       niRecord.niTaxYears(30).classThreePayable shouldBe 733.20
     }
     "parse class three payable by date correctly" in {
-      niRecord.niTaxYears(30).classThreePayableBy shouldBe Some(new LocalDate(2019, 4, 5))
+      niRecord.niTaxYears(30).classThreePayableBy shouldBe Some(LocalDate.of(2019, 4, 5))
       niRecord.niTaxYears.head.classThreePayableByPenalty shouldBe None
     }
     "parse class three payable by penalty date correctly" in {
-      niRecord.niTaxYears(30).classThreePayableByPenalty shouldBe Some(new LocalDate(2023, 4, 5))
+      niRecord.niTaxYears(30).classThreePayableByPenalty shouldBe Some(LocalDate.of(2023, 4, 5))
     }
     "parse niEarningsEmployed (ClassOneContribution) correctly" in {
       niRecord.niTaxYears.head.classOneContribution shouldBe 416.99
@@ -86,7 +87,7 @@ class DesNIRecordSpec extends UnitSpec {
 
   "purge" must{
     "return an nirecord with no tax years after 2014 when the FRY 2014" in {
-      val niRecord = DesNIRecord(5, 2, 2, pre75ContributionCount = 0, Some(new LocalDate(2010, 4, 6)), List(
+      val niRecord = DesNIRecord(5, 2, 2, pre75ContributionCount = 0, Some(LocalDate.of(2010, 4, 6)), List(
         taxYear(2010, true, false),
         taxYear(2011, true, false),
         taxYear(2012, true, false),
@@ -102,7 +103,7 @@ class DesNIRecordSpec extends UnitSpec {
       purged.nonQualifyingYears shouldBe 0
       purged.nonQualifyingYearsPayable shouldBe 0
       purged.pre75ContributionCount shouldBe 0
-      purged.dateOfEntry shouldBe Some(new LocalDate(2010, 4, 6))
+      purged.dateOfEntry shouldBe Some(LocalDate.of(2010, 4, 6))
       purged.niTaxYears shouldBe List(
         taxYear(2010, true, false),
         taxYear(2011, true, false),
@@ -114,7 +115,7 @@ class DesNIRecordSpec extends UnitSpec {
   }
 
   "return an nirecord with no tax years after 2015 when the FRY 2015" in {
-    val niRecord = DesNIRecord(3, 4, 3, pre75ContributionCount = 0, Some(new LocalDate(2010, 4, 6)), List(
+    val niRecord = DesNIRecord(3, 4, 3, pre75ContributionCount = 0, Some(LocalDate.of(2010, 4, 6)), List(
       taxYear(2010, true, false),
       taxYear(2011, false, false),
       taxYear(2012, false, true),
@@ -130,7 +131,7 @@ class DesNIRecordSpec extends UnitSpec {
     purged.nonQualifyingYears shouldBe 3
     purged.nonQualifyingYearsPayable shouldBe 2
     purged.pre75ContributionCount shouldBe 0
-    purged.dateOfEntry shouldBe Some(new LocalDate(2010, 4, 6))
+    purged.dateOfEntry shouldBe Some(LocalDate.of(2010, 4, 6))
     purged.niTaxYears shouldBe List(
       taxYear(2010, true, false),
       taxYear(2011, false, false),

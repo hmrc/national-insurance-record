@@ -16,9 +16,10 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.domain.des
 
-import org.joda.time.LocalDate
 import play.api.libs.json.Json
 import uk.gov.hmrc.nationalinsurancerecord.util.UnitSpec
+
+import java.time.LocalDate
 import scala.io.Source
 
 class DesSummarySpec extends UnitSpec {
