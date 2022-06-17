@@ -22,27 +22,26 @@ object AppDependencies {
 
   val compile: Seq[ModuleID] = Seq(
     ws,
-    "uk.gov.hmrc"       %% "bootstrap-backend-play-28" % "5.12.0",
-    "uk.gov.hmrc"       %% "domain"                    % "6.2.0-play-28",
-    "uk.gov.hmrc"       %% "play-hmrc-api"             % "6.4.0-play-28",
+    "uk.gov.hmrc"       %% "bootstrap-backend-play-28" % "5.24.0",
+    "uk.gov.hmrc"       %% "domain"                    % "8.1.0-play-28",
+    "uk.gov.hmrc"       %% "play-hmrc-api"             % "7.0.0-play-28",
     "uk.gov.hmrc"       %% "play-hal"                  % "3.1.0-play-28",
-    "com.typesafe.play" %% "play-json-joda"            % "2.9.2",
-    "uk.gov.hmrc.mongo" %% "hmrc-mongo-play-28"        % "0.59.0"
+    "uk.gov.hmrc.mongo" %% "hmrc-mongo-play-28"        % "0.65.0"
   )
 
   val test: Seq[ModuleID] = Seq(
-    "org.pegdown"             %  "pegdown"                 % "1.6.0",
-    "org.scalatestplus.play"  %% "scalatestplus-play"      % "5.1.0",
-    "com.typesafe.play"       %% "play-test"               % PlayVersion.current,
-    "com.github.tomakehurst"  % "wiremock-jre8"            % "2.27.0",
-    "org.mockito"             % "mockito-core"             % "2.24.5",
-    "com.vladsch.flexmark"    % "flexmark-all"             % "0.35.10",
-    "uk.gov.hmrc.mongo"       %% "hmrc-mongo-test-play-28" % "0.59.0"
+    "uk.gov.hmrc"            %% "bootstrap-test-play-28"  % "5.24.0",
+    "org.pegdown"             % "pegdown"                 % "1.6.0",
+    "com.typesafe.play"      %% "play-test"               % PlayVersion.current,
+    "com.github.tomakehurst"  % "wiremock-jre8"           % "2.27.2",
+    "org.mockito"             % "mockito-core"            % "4.6.1",
+    "uk.gov.hmrc.mongo"      %% "hmrc-mongo-test-play-28" % "0.65.0"
   ).map(_ % "test,it")
 
   private val silencerDependencies: Seq[ModuleID] = Seq(
-    compilerPlugin("com.github.ghik" % "silencer-plugin" % "1.7.8" cross CrossVersion.full),
-    "com.github.ghik" % "silencer-lib" % "1.7.8" % Provided cross CrossVersion.full
+    compilerPlugin(
+      "com.github.ghik" % "silencer-plugin" % "1.7.9" cross CrossVersion.full),
+      "com.github.ghik" % "silencer-lib" % "1.7.9" % Provided cross CrossVersion.full
   )
 
   val all: Seq[ModuleID] = compile ++ test ++ silencerDependencies

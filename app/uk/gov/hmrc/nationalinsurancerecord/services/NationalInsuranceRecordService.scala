@@ -16,10 +16,7 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.services
 
-import java.util.TimeZone
-
 import com.google.inject.Inject
-import org.joda.time.{DateTimeZone, LocalDate}
 import services.TaxYearResolver
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
@@ -29,14 +26,13 @@ import uk.gov.hmrc.nationalinsurancerecord.domain._
 import uk.gov.hmrc.nationalinsurancerecord.domain.des.{DesLiability, DesNITaxYear}
 import uk.gov.hmrc.nationalinsurancerecord.util.NIRecordConstants
 
+import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class NationalInsuranceRecordService @Inject()(des: DesConnector,
                                                citizenDetailsService: CitizenDetailsService,
                                                metrics: MetricsService) {
-
-  val now: LocalDate = LocalDate.now(DateTimeZone.forTimeZone(TimeZone.getTimeZone("Europe/London")))
 
   def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceRecord]] = {
 
@@ -121,7 +117,7 @@ class NationalInsuranceRecordService @Inject()(des: DesConnector,
 
   def calcPre75QualifyingYears(pre75Contributions: Int, dateOfEntry: Option[LocalDate], dateOfBirth: LocalDate): Option[Int] = {
     val yearCalc: BigDecimal = BigDecimal(pre75Contributions)/50
-    val sixteenthBirthday: LocalDate = new LocalDate(dateOfBirth.plusYears(NIRecordConstants.niRecordMinAge))
+    val sixteenthBirthday: LocalDate = dateOfBirth.plusYears(NIRecordConstants.niRecordMinAge)
     val sixteenthBirthdayDiff: Int = NIRecordConstants.niRecordStart - TaxYearResolver.taxYearFor(sixteenthBirthday)
     val yearsPre75 = dateOfEntry match {
       case Some(doe) => (NIRecordConstants.niRecordStart - TaxYearResolver.taxYearFor(doe)).min(sixteenthBirthdayDiff)

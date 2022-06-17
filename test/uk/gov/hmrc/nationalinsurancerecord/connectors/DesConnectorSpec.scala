@@ -18,7 +18,6 @@ package uk.gov.hmrc.nationalinsurancerecord.connectors
 
 import com.codahale.metrics.Timer
 import com.github.tomakehurst.wiremock.client.WireMock.{reset => _, verify => _, _}
-import org.joda.time.LocalDate
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito
 import org.mockito.Mockito._
@@ -33,12 +32,11 @@ import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.cache._
 import uk.gov.hmrc.nationalinsurancerecord.config.ApplicationConfig
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
-import uk.gov.hmrc.nationalinsurancerecord.domain.des.{
-  DesLiabilities, DesNIRecord, DesSummary, DesError
-}
+import uk.gov.hmrc.nationalinsurancerecord.domain.des.{DesError, DesLiabilities, DesNIRecord, DesSummary}
 import uk.gov.hmrc.nationalinsurancerecord.services.MetricsService
 import uk.gov.hmrc.nationalinsurancerecord.util.WireMockHelper
 
+import java.time.LocalDate
 import scala.concurrent.Future
 import scala.util.Random
 
@@ -286,9 +284,9 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with GuiceOneAppP
       val desSummaryF = await(connector.getSummary(nino)(HeaderCarrier()))
       desSummaryF.rreToConsider shouldBe false
       desSummaryF.finalRelevantYear shouldBe Some(2016)
-      desSummaryF.dateOfBirth shouldBe Some(new LocalDate(1952,11,21))
+      desSummaryF.dateOfBirth shouldBe Some(LocalDate.of(1952,11,21))
       desSummaryF.dateOfDeath shouldBe None
-      desSummaryF.earningsIncludedUpTo shouldBe Some(new LocalDate(2014,4,5))
+      desSummaryF.earningsIncludedUpTo shouldBe Some(LocalDate.of(2014,4,5))
     }
 
     "log correct Summary metrics" in {
@@ -310,7 +308,7 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with GuiceOneAppP
       desNIRecordF.nonQualifyingYears shouldBe 13
       desNIRecordF.numberOfQualifyingYears shouldBe 27
       desNIRecordF.pre75ContributionCount shouldBe 51
-      desNIRecordF.dateOfEntry shouldBe Some(new LocalDate(1973,10,1))
+      desNIRecordF.dateOfEntry shouldBe Some(LocalDate.of(1973,10,1))
       desNIRecordF.niTaxYears.head.qualifying shouldBe true
       desNIRecordF.niTaxYears(1).qualifying shouldBe false
       desNIRecordF.niTaxYears.head.underInvestigation shouldBe false
@@ -320,9 +318,9 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with GuiceOneAppP
       desNIRecordF.niTaxYears.head.classThreePayable shouldBe 0
       desNIRecordF.niTaxYears(1).classThreePayable shouldBe 722.80
       desNIRecordF.niTaxYears.head.classThreePayableBy shouldBe None
-      desNIRecordF.niTaxYears(1).classThreePayableBy shouldBe Some(new LocalDate(2019, 4, 5))
+      desNIRecordF.niTaxYears(1).classThreePayableBy shouldBe Some(LocalDate.of(2019, 4, 5))
       desNIRecordF.niTaxYears.head.classThreePayableByPenalty shouldBe None
-      desNIRecordF.niTaxYears(1).classThreePayableByPenalty shouldBe Some(new LocalDate(2023, 4, 5))
+      desNIRecordF.niTaxYears(1).classThreePayableByPenalty shouldBe Some(LocalDate.of(2023, 4, 5))
       desNIRecordF.niTaxYears.head.classOneContribution shouldBe 1698.9600
       desNIRecordF.niTaxYears(1).classOneContribution shouldBe 0
       desNIRecordF.niTaxYears.head.classTwoCredits shouldBe 0
@@ -439,17 +437,17 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with GuiceOneAppP
 
   "DesConnector - Caching" should {
 
-    val testSummaryModel = DesSummary(rreToConsider = false, dateOfDeath = None, earningsIncludedUpTo = Some(new LocalDate(2014, 4, 5)),
-      dateOfBirth = Some(new LocalDate(1952, 11, 21)), finalRelevantYear = Some(2016))
+    val testSummaryModel = DesSummary(rreToConsider = false, dateOfDeath = None, earningsIncludedUpTo = Some(LocalDate.of(2014, 4, 5)),
+      dateOfBirth = Some(LocalDate.of(1952, 11, 21)), finalRelevantYear = Some(2016))
 
     "return valid Summary response" in {
       when(mockSummaryRepo().findByNino(any())(any(), any())).thenReturn(Future.successful(Some(testSummaryModel)))
       val desSummaryF = await(connector.getSummary(generateNino())(HeaderCarrier()))
       desSummaryF.rreToConsider shouldBe false
       desSummaryF.finalRelevantYear shouldBe Some(2016)
-      desSummaryF.dateOfBirth shouldBe Some(new LocalDate(1952, 11, 21))
+      desSummaryF.dateOfBirth shouldBe Some(LocalDate.of(1952, 11, 21))
       desSummaryF.dateOfDeath shouldBe None
-      desSummaryF.earningsIncludedUpTo shouldBe Some(new LocalDate(2014, 4, 5))
+      desSummaryF.earningsIncludedUpTo shouldBe Some(LocalDate.of(2014, 4, 5))
     }
 
     "return valid Summary from cache" in {

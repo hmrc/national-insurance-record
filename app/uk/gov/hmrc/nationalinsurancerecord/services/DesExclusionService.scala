@@ -16,11 +16,12 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.services
 
-import org.joda.time.LocalDate
 import uk.gov.hmrc.nationalinsurancerecord.domain.Exclusion
 import uk.gov.hmrc.nationalinsurancerecord.domain.Exclusion.Exclusion
 import uk.gov.hmrc.nationalinsurancerecord.domain.des.{DesLiability, LiabilityType}
 import uk.gov.hmrc.nationalinsurancerecord.util.FunctionHelper
+
+import java.time.LocalDate
 
 class DesExclusionService(dateOfDeath: Option[LocalDate],
                           liabilities: List[DesLiability],
