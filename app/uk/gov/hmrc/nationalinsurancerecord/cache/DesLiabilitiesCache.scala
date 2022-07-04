@@ -19,6 +19,7 @@ package uk.gov.hmrc.nationalinsurancerecord.cache
 import com.google.inject.{Inject, Singleton}
 import org.bson.types.ObjectId
 import org.joda.time.DateTime
+import play.api.i18n.Lang.logger
 import play.api.libs.json.{Format, Json, OFormat}
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.formats.{MongoFormats, MongoJodaFormats}
@@ -60,7 +61,11 @@ class DesLiabilitiesRepository @Inject()(
   )
 
   // TODO remove once https://jira.tools.tax.service.gov.uk/browse/DDCNL-6141 is marked as DONE
-  cacheService.collection.drop()
+  logger.warn("Dropping responses table")
+  cacheService.collection.drop().toFuture().map {
+    _ =>
+      logger.warn("Dropped responses table")
+  }
 
   def apply(): CachingMongoService[DesLiabilitiesCache, DesLiabilities] = cacheService
 }
