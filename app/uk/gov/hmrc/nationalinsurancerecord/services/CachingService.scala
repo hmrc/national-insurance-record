@@ -71,7 +71,7 @@ class CachingMongoService[A <: CachingModel[A, B], B]
     }
 
     tryResult match {
-      case Success(success) => {
+      case Success(success) =>
         success.map { results =>
           logger.debug(s"[$apiType][findByNino] : { cacheKey : ${cacheKey(nino, apiType)}, result: $results }")
           val response = results.headOption.map(_.response)
@@ -84,9 +84,10 @@ class CachingMongoService[A <: CachingModel[A, B], B]
               None
           }
         } recover {
-          case e: Throwable => logger.warn(s"[$apiType][findByNino] : { cacheKey : ${cacheKey(nino, apiType)}, exception: ${e.getMessage} }", e); None
+          case e: Throwable =>
+            logger.warn(s"[$apiType][findByNino] : { cacheKey : ${cacheKey(nino, apiType)}, exception: ${e.getMessage} }", e)
+            None
         }
-      }
       case Failure(f) =>
         logger.debug(s"[$apiType][findByNino] : { cacheKey : ${cacheKey(nino, apiType)}, exception: ${f.getMessage} }")
         metrics.cacheReadNotFound()
@@ -104,7 +105,9 @@ class CachingMongoService[A <: CachingModel[A, B], B]
       metrics.cacheWritten()
       true
     } recover {
-      case e: Throwable => logger.warn(s"[$apiType][insertByNino] : cacheKey : ${cacheKey(nino, apiType)}, exception: ${e.getMessage} }", e); false
+      case e: Throwable =>
+        logger.warn(s"[$apiType][insertByNino] : cacheKey : ${cacheKey(nino, apiType)}, exception: ${e.getMessage} }", e)
+        false
     }
   }
 

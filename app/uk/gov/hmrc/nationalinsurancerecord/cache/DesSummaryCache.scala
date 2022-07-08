@@ -17,7 +17,8 @@
 package uk.gov.hmrc.nationalinsurancerecord.cache
 
 import com.google.inject.{Inject, Singleton}
-import play.api.libs.json.Json
+import org.bson.types.ObjectId
+import play.api.libs.json.{Format, Json, OFormat}
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.formats.{MongoFormats, MongoJavatimeFormats}
 import uk.gov.hmrc.nationalinsurancerecord.config.ApplicationConfig
@@ -28,23 +29,34 @@ import uk.gov.hmrc.nationalinsurancerecord.services.{CachingModel, CachingMongoS
 import java.time.LocalDateTime
 import scala.concurrent.ExecutionContext.Implicits.global
 
-case class DesSummaryCache(key: String, response: DesSummary, expiresAt: LocalDateTime)
-  extends CachingModel[DesSummaryCache, DesSummary]
+case class DesSummaryCache(
+  key: String,
+  response: DesSummary,
+  expiresAt: LocalDateTime
+) extends CachingModel[DesSummaryCache, DesSummary]
 
 object DesSummaryCache {
-  implicit val dateFormat = MongoJavatimeFormats.localDateTimeFormat
-  implicit val idFormat = MongoFormats.objectIdFormat
-  implicit def formats = Json.format[DesSummaryCache]
+  implicit val dateFormat: Format[LocalDateTime] = MongoJavatimeFormats.localDateTimeFormat
+  implicit val idFormat: Format[ObjectId] = MongoFormats.objectIdFormat
+
+  implicit def formats: OFormat[DesSummaryCache] = Json.format[DesSummaryCache]
 }
 
 //TODO: look to extend CachingMongoService?
 @Singleton
-class DesSummaryRepository @Inject()(mongoComponent: MongoComponent,
-                                     metricsService: MetricsService,
-                                     applicationConfig: ApplicationConfig) {
+class DesSummaryRepository @Inject()(
+  mongoComponent: MongoComponent,
+  metricsService: MetricsService,
+  applicationConfig: ApplicationConfig
+) {
 
-  private lazy val cacheService = new CachingMongoService[DesSummaryCache, DesSummary](
-    mongoComponent: MongoComponent, DesSummaryCache.formats, DesSummaryCache.apply, APITypes.Summary, applicationConfig, metricsService
+  private val cacheService = new CachingMongoService[DesSummaryCache, DesSummary](
+    mongo = mongoComponent,
+    formats = DesSummaryCache.formats,
+    apply = DesSummaryCache.apply,
+    apiType = APITypes.Summary,
+    appConfig = applicationConfig,
+    metricsX = metricsService
   )
 
   def apply(): CachingMongoService[DesSummaryCache, DesSummary] = cacheService

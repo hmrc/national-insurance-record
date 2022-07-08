@@ -17,7 +17,8 @@
 package uk.gov.hmrc.nationalinsurancerecord.cache
 
 import com.google.inject.{Inject, Singleton}
-import play.api.libs.json.Json
+import org.bson.types.ObjectId
+import play.api.libs.json.{Format, Json, OFormat}
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.formats.{MongoFormats, MongoJavatimeFormats}
 import uk.gov.hmrc.nationalinsurancerecord.config.ApplicationConfig
@@ -28,23 +29,34 @@ import uk.gov.hmrc.nationalinsurancerecord.services.{CachingModel, CachingMongoS
 import java.time.LocalDateTime
 import scala.concurrent.ExecutionContext.Implicits.global
 
-case class DesNIRecordCache(key: String, response: DesNIRecord, expiresAt: LocalDateTime)
-  extends CachingModel[DesNIRecordCache, DesNIRecord]
+case class DesNIRecordCache(
+  key: String,
+  response: DesNIRecord,
+  expiresAt: LocalDateTime
+) extends CachingModel[DesNIRecordCache, DesNIRecord]
 
 object DesNIRecordCache {
-  implicit val dateFormat = MongoJavatimeFormats.localDateTimeFormat
-  implicit val idFormat = MongoFormats.objectIdFormat
-  implicit def formats = Json.format[DesNIRecordCache]
+  implicit val dateFormat: Format[LocalDateTime] = MongoJavatimeFormats.localDateTimeFormat
+  implicit val idFormat: Format[ObjectId] = MongoFormats.objectIdFormat
+
+  implicit def formats: OFormat[DesNIRecordCache] = Json.format[DesNIRecordCache]
 }
 
 //TODO: look to extend CachingMongoService?
 @Singleton
-class DesNIRecordRepository @Inject()(mongoComponent: MongoComponent,
-                                      metricsService: MetricsService,
-                                      applicationConfig: ApplicationConfig) {
+class DesNIRecordRepository @Inject()(
+  mongoComponent: MongoComponent,
+  metricsService: MetricsService,
+  applicationConfig: ApplicationConfig
+) {
 
-  private lazy val cacheService = new CachingMongoService[DesNIRecordCache, DesNIRecord](
-    mongoComponent, DesNIRecordCache.formats, DesNIRecordCache.apply, APITypes.NIRecord, applicationConfig, metricsService
+  private val cacheService = new CachingMongoService[DesNIRecordCache, DesNIRecord](
+    mongo = mongoComponent,
+    formats = DesNIRecordCache.formats,
+    apply = DesNIRecordCache.apply,
+    apiType = APITypes.NIRecord,
+    appConfig = applicationConfig,
+    metricsX = metricsService
   )
 
   def apply(): CachingMongoService[DesNIRecordCache, DesNIRecord] = cacheService
