@@ -23,10 +23,10 @@ object AppDependencies {
   val compile: Seq[ModuleID] = Seq(
     ws,
     "uk.gov.hmrc"       %% "bootstrap-backend-play-28" % "5.24.0",
-    "uk.gov.hmrc"       %% "domain"                    % "8.1.0-play-28",
+    "uk.gov.hmrc"       %% "domain"                    % "8.1.0-play-28"
     "uk.gov.hmrc"       %% "play-hmrc-api"             % "7.0.0-play-28",
     "uk.gov.hmrc"       %% "play-hal"                  % "3.1.0-play-28",
-    "uk.gov.hmrc.mongo" %% "hmrc-mongo-play-28"        % "0.65.0"
+    "uk.gov.hmrc.mongo" %% "hmrc-mongo-play-28"        % "0.68.0"
   )
 
   val test: Seq[ModuleID] = Seq(
@@ -35,7 +35,7 @@ object AppDependencies {
     "com.typesafe.play"      %% "play-test"               % PlayVersion.current,
     "com.github.tomakehurst"  % "wiremock-jre8"           % "2.27.2",
     "org.mockito"             % "mockito-core"            % "4.6.1",
-    "uk.gov.hmrc.mongo"      %% "hmrc-mongo-test-play-28" % "0.65.0"
+    "uk.gov.hmrc.mongo"      %% "hmrc-mongo-test-play-28" % "0.68.0"
   ).map(_ % "test,it")
 
   private val silencerDependencies: Seq[ModuleID] = Seq(
