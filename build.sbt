@@ -12,7 +12,7 @@ lazy val scoverageSettings: Seq[Def.Setting[_]] = {
     ScoverageKeys.coverageExcludedPackages := "<empty>;Reverse.*;models/.data/..*;views.*;config.*;models.*;" +
       ".*(AuthService|BuildInfo|Routes).*;" +
       "connectors.*",
-    ScoverageKeys.coverageMinimum := 80,
+    ScoverageKeys.coverageMinimum := 88.78,
     ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting := true
   )
