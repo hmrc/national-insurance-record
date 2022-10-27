@@ -625,7 +625,7 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
     val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear(dummyTaxYearQualifying.taxYear))(emptyRequestWithHeader)
 
     lazy val json = contentAsJson(response)
-
+    
     "return 200" in {
       status(response) shouldBe 200
     }
