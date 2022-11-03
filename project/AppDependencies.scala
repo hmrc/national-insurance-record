@@ -30,7 +30,7 @@ object AppDependencies {
   )
 
   val test: Seq[ModuleID] = Seq(
-    "uk.gov.hmrc"            %% "bootstrap-test-play-28"  % "6.4.0",
+    "uk.gov.hmrc"            %% "bootstrap-test-play-28"  % "7.8.0",
     "org.pegdown"             % "pegdown"                 % "1.6.0",
     "com.typesafe.play"      %% "play-test"               % PlayVersion.current,
     "com.github.tomakehurst"  % "wiremock-jre8"           % "2.27.2",

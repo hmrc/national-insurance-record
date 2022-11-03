@@ -24,7 +24,6 @@ import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.connectors.DesConnector
 import uk.gov.hmrc.nationalinsurancerecord.domain._
 import uk.gov.hmrc.nationalinsurancerecord.domain.des._
-
 import java.time.LocalDate
 import scala.concurrent.Future
 
