@@ -27,12 +27,12 @@ import uk.gov.hmrc.nationalinsurancerecord.domain.des.{DesLiability, DesNITaxYea
 import uk.gov.hmrc.nationalinsurancerecord.util.NIRecordConstants
 
 import java.time.LocalDate
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class NationalInsuranceRecordService @Inject()(des: DesConnector,
                                                citizenDetailsService: CitizenDetailsService,
-                                               metrics: MetricsService) {
+                                               metrics: MetricsService,
+                                               implicit val executionContext: ExecutionContext) {
 
   def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceRecord]] = {
 
