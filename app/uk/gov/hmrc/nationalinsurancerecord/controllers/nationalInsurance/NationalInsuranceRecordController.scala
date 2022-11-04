@@ -95,7 +95,7 @@ class NationalInsuranceRecordController @Inject()(nationalInsuranceRecordService
     }
 
   def getTaxYear(nino: Nino, taxYear: TaxYear): Action[AnyContent] =
-    (authAction andThen validateAccept(acceptHeaderValidationRules) andThen copeAction.filterCopeExclusions(nino)).async {
+    (authAction andThen validateAccept(acceptHeaderValidationRules)).async {
       implicit request =>
         errorWrapper(nationalInsuranceRecordService.getTaxYear(nino, taxYear).map {
 
