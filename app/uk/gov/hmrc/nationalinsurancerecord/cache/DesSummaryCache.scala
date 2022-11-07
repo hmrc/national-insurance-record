@@ -27,7 +27,7 @@ import uk.gov.hmrc.nationalinsurancerecord.domain.des.DesSummary
 import uk.gov.hmrc.nationalinsurancerecord.services.{CachingModel, CachingMongoService, MetricsService}
 
 import java.time.LocalDateTime
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext
 
 case class DesSummaryCache(
   key: String,
@@ -47,7 +47,8 @@ object DesSummaryCache {
 class DesSummaryRepository @Inject()(
   mongoComponent: MongoComponent,
   metricsService: MetricsService,
-  applicationConfig: ApplicationConfig
+  applicationConfig: ApplicationConfig,
+  implicit val executionContext: ExecutionContext
 ) {
 
   private val cacheService = new CachingMongoService[DesSummaryCache, DesSummary](
