@@ -38,7 +38,7 @@ import uk.gov.hmrc.nationalinsurancerecord.domain._
 import uk.gov.hmrc.nationalinsurancerecord.services.NationalInsuranceRecordService
 
 import java.time.LocalDate
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitSpec with GuiceOneAppPerSuite with BeforeAndAfterEach with ScalaFutures {
 
@@ -47,6 +47,7 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
   val mockNationalInsuranceRecordService: NationalInsuranceRecordService = mock[NationalInsuranceRecordService]
   val mockStatePensionConnector: StatePensionConnector = mock[StatePensionConnector]
   val nino: Nino = generateNino()
+  implicit val executionContext: ExecutionContext = app.injector.instanceOf[ExecutionContext]
 
   override def fakeApplication(): Application = GuiceApplicationBuilder()
     .overrides(

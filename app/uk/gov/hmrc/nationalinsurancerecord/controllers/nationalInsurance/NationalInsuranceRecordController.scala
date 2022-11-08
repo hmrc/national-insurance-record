@@ -40,8 +40,9 @@ class NationalInsuranceRecordController @Inject()(nationalInsuranceRecordService
                                                   authAction: AuthAction,
                                                   copeAction: CopeExclusionAction,
                                                   cc: ControllerComponents,
-                                                  val parser: BodyParsers.Default
-                                                 )(implicit val executionContext: ExecutionContext)
+                                                  val parser: BodyParsers.Default,
+                                                  implicit val executionContext: ExecutionContext
+                                                 )
                                                   extends BackendController(cc)
                                                     with HeaderValidator
                                                     with ErrorHandling

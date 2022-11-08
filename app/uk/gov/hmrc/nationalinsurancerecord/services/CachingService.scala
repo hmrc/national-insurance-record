@@ -29,6 +29,7 @@ import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes.APITypes
 
 import java.time.{LocalDateTime, ZoneOffset}
 import java.util.concurrent.TimeUnit
+import javax.inject.Singleton
 import scala.concurrent.{ExecutionContext, Future}
 import scala.reflect.ClassTag
 import scala.util.{Failure, Success, Try}
@@ -46,7 +47,7 @@ trait CachingService[A, B] {
 
   def metrics: MetricsService
 }
-
+@Singleton
 class CachingMongoService[A <: CachingModel[A, B], B]
 (mongo: MongoComponent, formats: Format[A], apply: (String, B, LocalDateTime) => A, apiType: APITypes, appConfig: ApplicationConfig, metricsX: MetricsService)
 (implicit e: ExecutionContext, ct: ClassTag[A])

@@ -26,11 +26,13 @@ import uk.gov.hmrc.nationalinsurancerecord.domain._
 import uk.gov.hmrc.nationalinsurancerecord.domain.des._
 
 import java.time.LocalDate
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 
 class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec with GuiceOneAppPerSuite with ScalaFutures {
   // scalastyle:off magic.number
+  implicit val executionContext = app.injector.instanceOf[ExecutionContext]
+
 
   private val niRecordDES = DesNIRecord(
     numberOfQualifyingYears = 36,
@@ -87,7 +89,7 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
     val mockDesConnector = mock[DesConnector]
     val mockCitizenDetailsService = mock[CitizenDetailsService]
 
-    val service: NationalInsuranceRecordService = new NationalInsuranceRecordService(mockDesConnector, mockCitizenDetailsService, mockMetrics)
+    val service: NationalInsuranceRecordService = new NationalInsuranceRecordService(mockDesConnector, mockCitizenDetailsService, mockMetrics, executionContext)
 
 
     "regular ni record" must{
@@ -274,7 +276,7 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
     val mockDesConnector = mock[DesConnector]
     val mockCitizenDetailsService = mock[CitizenDetailsService]
 
-    val service: NationalInsuranceRecordService = new NationalInsuranceRecordService(mockDesConnector, mockCitizenDetailsService, mockMetrics)
+    val service: NationalInsuranceRecordService = new NationalInsuranceRecordService(mockDesConnector, mockCitizenDetailsService, mockMetrics, executionContext)
 
     "NI Summary with exclusions" should {
 

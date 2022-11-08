@@ -19,7 +19,7 @@ lazy val scoverageSettings: Seq[Def.Setting[_]] = {
 }
 
 lazy val plugins: Seq[Plugins] = Seq(
-  play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory
+  play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin
 )
 
 val suppressedImports = Seq("-P:silencer:lineContentFilters=import _root_.play.twirl.api.TwirlFeatureImports._",

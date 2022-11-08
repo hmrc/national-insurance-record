@@ -21,24 +21,19 @@ import play.api.Logging
 import play.api.libs.json._
 import play.api.http.Status.BAD_GATEWAY
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.{
-  HeaderCarrier, HeaderNames, HttpClient, HttpResponse, UpstreamErrorResponse, HttpException
-}
+import uk.gov.hmrc.http.{HeaderCarrier, HeaderNames, HttpClient, HttpException, HttpResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.HttpReadsInstances.readEitherOf
 import uk.gov.hmrc.nationalinsurancerecord.cache._
 import uk.gov.hmrc.nationalinsurancerecord.config.ApplicationConfig
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes.APITypes
-import uk.gov.hmrc.nationalinsurancerecord.domain.des.{
-  DesLiabilities, DesNIRecord, DesSummary, DesError
-}
+import uk.gov.hmrc.nationalinsurancerecord.domain.des.{DesError, DesLiabilities, DesNIRecord, DesSummary}
 import uk.gov.hmrc.nationalinsurancerecord.services.{CachingService, MetricsService}
 import uk.gov.hmrc.nationalinsurancerecord.util.{JsonDepersonaliser, NIRecordConstants}
 
 import java.util.UUID
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 class DesConnector @Inject()(desSummaryRepository: DesSummaryRepository,
@@ -46,7 +41,9 @@ class DesConnector @Inject()(desSummaryRepository: DesSummaryRepository,
                              desLiabilitiesRepository: DesLiabilitiesRepository,
                              metrics: MetricsService,
                              http: HttpClient,
-                             appConfig: ApplicationConfig) extends Logging {
+                             appConfig: ApplicationConfig,
+                             implicit val executionContext: ExecutionContext
+                            ) extends Logging {
 
   val serviceUrl: String = appConfig.desUrl
   val authToken: String = appConfig.authorization

@@ -22,10 +22,9 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.nationalinsurancerecord.connectors.CitizenDetailsConnector
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-class CitizenDetailsService @Inject()(citizenDetailsConnector: CitizenDetailsConnector) {
+class CitizenDetailsService @Inject()(citizenDetailsConnector: CitizenDetailsConnector, implicit val ec: ExecutionContext) {
 
   def checkManualCorrespondenceIndicator(nino: Nino)(implicit hc: HeaderCarrier): Future[Boolean] =
     citizenDetailsConnector

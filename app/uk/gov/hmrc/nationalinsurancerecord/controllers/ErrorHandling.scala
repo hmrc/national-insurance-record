@@ -24,12 +24,12 @@ import uk.gov.hmrc.http.UpstreamErrorResponse.WithStatusCode
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.nationalinsurancerecord.domain.des.DesError
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 trait ErrorHandling extends Logging {
   self: BaseController =>
   val app: String
+  implicit val executionContext: ExecutionContext
 
   def errorWrapper(func: => Future[Result]): Future[Result] =
     func.recover {
