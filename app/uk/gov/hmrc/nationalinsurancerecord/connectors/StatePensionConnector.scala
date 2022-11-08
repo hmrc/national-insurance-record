@@ -32,10 +32,8 @@ class StatePensionConnector @Inject()(httpClient: HttpClient, applicationConfig:
 
   private val copeReads = new HttpReads[HttpResponse] {
     override def read(method: String, url: String, response: HttpResponse): HttpResponse = {
-      println("\n\n\n\nresponse body = " + response.body + "\n\n\n\n")
-      println("\n\n\n\nresponse status = " + response.status + "\n\n\n\n")
       if(response.status == FORBIDDEN) response
-      else if(response.status == NOT_FOUND) throw new NotCopeException
+      else if (response.status == NOT_FOUND) throw new NotCopeException
       else throw UpstreamErrorResponse(response.body, response.status)
     }
   }
