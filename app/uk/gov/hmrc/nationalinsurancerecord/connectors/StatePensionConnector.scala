@@ -32,7 +32,7 @@ class StatePensionConnector @Inject()(httpClient: HttpClient, applicationConfig:
 
   private val copeReads = new HttpReads[HttpResponse] {
     override def read(method: String, url: String, response: HttpResponse): HttpResponse = {
-      if(response.status == FORBIDDEN) response
+      if (response.status == FORBIDDEN) response
       else if (response.status == NOT_FOUND) throw new NotCopeException
       else throw UpstreamErrorResponse(response.body, response.status)
     }
