@@ -44,7 +44,7 @@ class StatePensionConnectorSpec extends NationalInsuranceRecordUnitSpec with Gui
   val nino = generateNino()
 
   def stubEndpoint(rtnStatus: Int, body: String): StubMapping = {
-    server.stubFor(get(urlEqualTo(s"/ni/$nino"))
+    server.stubFor(get(urlEqualTo(s"/cope/$nino"))
       .withHeader("accept", equalTo("application/vnd.hmrc.1.0+json"))
       .willReturn(
         aResponse()
@@ -56,14 +56,9 @@ class StatePensionConnectorSpec extends NationalInsuranceRecordUnitSpec with Gui
   }
 
   "StatePensionConnector" should {
-    "return None for 200" in {
-      stubEndpoint(OK, "{}")
+    "return None for 404" in {
+      stubEndpoint(NOT_FOUND, "{}")
 
-      connector.getCopeCase(nino).futureValue shouldBe None
-    }
-
-    "return None for 403 (not cope)" in {
-      stubEndpoint(FORBIDDEN, "{}")
       connector.getCopeCase(nino).futureValue shouldBe None
     }
 
@@ -91,9 +86,9 @@ class StatePensionConnectorSpec extends NationalInsuranceRecordUnitSpec with Gui
     }
 
     "return failed future for other response types" in {
-      stubEndpoint(NOT_FOUND, "NOT_FOUND")
+      stubEndpoint(INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR")
 
-      connector.getCopeCase(nino).failed.futureValue shouldBe UpstreamErrorResponse("NOT_FOUND", NOT_FOUND)
+      connector.getCopeCase(nino).failed.futureValue shouldBe UpstreamErrorResponse("INTERNAL_SERVER_ERROR", INTERNAL_SERVER_ERROR)
     }
   }
 }

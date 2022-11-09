@@ -31,6 +31,9 @@ class CopeExclusionAction @Inject()(
 )(implicit ec: ExecutionContext)
   extends Results with BackendHeaderCarrierProvider {
 
+
+  //Make a call to the Cope mongo repo. If data exists then we have a cope case. Means we always need to make the request to SP first in nispFE
+
   def filterCopeExclusions(nino: Nino) =
     new ActionBuilder[Request, AnyContent] with ActionFilter[Request] {
       override def parser: BodyParser[AnyContent] = defaultBodyParser
