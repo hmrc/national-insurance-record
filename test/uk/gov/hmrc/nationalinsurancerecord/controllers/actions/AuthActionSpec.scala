@@ -34,7 +34,7 @@ import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.domain.Generator
 import uk.gov.hmrc.nationalinsurancerecord.controllers.actions.AuthActionSpec.retrievalsTestingSyntax
 import uk.gov.hmrc.nationalinsurancerecord.util.UnitSpec
-
+import scala.language.postfixOps
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
