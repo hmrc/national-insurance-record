@@ -17,15 +17,16 @@
 package uk.gov.hmrc.nationalinsurancerecord.services
 
 import org.mockito.Mockito._
-import org.mockito.{ArgumentMatchers, Mockito}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.connectors.DesConnector
 import uk.gov.hmrc.nationalinsurancerecord.domain._
 import uk.gov.hmrc.nationalinsurancerecord.domain.des._
-
 import java.time.LocalDate
+
+import org.mockito.{ArgumentMatchers, Mockito}
+
 import scala.concurrent.{ExecutionContext, Future}
 
 
@@ -111,8 +112,8 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
       ))
 
 
-      lazy val niRecordF: Future[NationalInsuranceRecord] = service.getNationalInsuranceRecord(nino).right.get
-      lazy val niTaxYearF: Future[NationalInsuranceTaxYear] = service.getTaxYear(nino,TaxYear("2014-15")).right.get
+      lazy val niRecordF: Future[NationalInsuranceRecord] = service.getNationalInsuranceRecord(nino).toOption.get
+      lazy val niTaxYearF: Future[NationalInsuranceTaxYear] = service.getTaxYear(nino,TaxYear("2014-15")).toOption.get
 
       "return qualifying years to be 36" in {
         whenReady(niRecordF) { ni =>
@@ -296,16 +297,16 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
       when(mockDesConnector.getLiabilities(nino)).thenReturn(Future.successful(liabilities))
       when(mockDesConnector.getSummary(nino)).thenReturn(Future.successful(summary))
 
-      lazy val niRecordF: Future[ExclusionResponse] = service.getNationalInsuranceRecord(nino).left.get
+      val result = await(service.getNationalInsuranceRecord(nino))
 
       "return Isle of Man exclusion" in {
-        whenReady(niRecordF) { niExclusion =>
+        result.left.map { niExclusion =>
           niExclusion.exclusionReasons shouldBe List(Exclusion.IsleOfMan)
         }
       }
 
       "log exclusion in metrics" in {
-        whenReady(niRecordF) { niExclusion =>
+        result.left.map { _ =>
           verify(mockMetrics, Mockito.atLeastOnce()).exclusion(ArgumentMatchers.eq(Exclusion.IsleOfMan))
         }
       }

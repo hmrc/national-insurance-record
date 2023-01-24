@@ -58,7 +58,7 @@ class CopeExclusionActionSpec extends NationalInsuranceRecordUnitSpec
     )
     .build()
 
-  override def beforeEach = {
+  override def beforeEach(): Unit = {
     reset(mockStatePensionConnector)
   }
 

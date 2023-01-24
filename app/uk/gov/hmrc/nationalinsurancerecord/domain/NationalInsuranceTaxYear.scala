@@ -49,7 +49,7 @@ object NationalInsuranceTaxYear {
     ( JsPath \ "otherCredits").write[Int] and
     ( JsPath \ "classThreePayable").write[BigDecimal] and
     ( JsPath \ "classThreePayableBy").write[Option[LocalDate]] and
-    ( JsPath \ 'classThreePayableByPenalty).write[Option[LocalDate]] and
+    ( JsPath \ Symbol("classThreePayableByPenalty")).write[Option[LocalDate]] and
     ( JsPath \ "payable").write[Boolean] and
     ( JsPath \ "underInvestigation").write[Boolean]
     )(unlift(NationalInsuranceTaxYear.unapply))

@@ -35,6 +35,7 @@ import uk.gov.hmrc.nationalinsurancerecord.util.{JsonDepersonaliser, NIRecordCon
 import java.util.UUID
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
+import scala.collection.immutable
 
 class DesConnector @Inject()(desSummaryRepository: DesSummaryRepository,
                              desNIRecordRepository: DesNIRecordRepository,
@@ -134,7 +135,7 @@ class DesConnector @Inject()(desSummaryRepository: DesSummaryRepository,
               }
               Left(
                 DesError.JsonValidationError(
-                  s"Unable to deserialise $api: ${formatJsonErrors(errs)}\n$json"
+                  s"Unable to deserialise $api: ${formatJsonErrors(errs.asInstanceOf[immutable.Seq[(JsPath, immutable.Seq[JsonValidationError])]])}\n$json"
                 )
               )
             },
@@ -165,8 +166,8 @@ class DesConnector @Inject()(desSummaryRepository: DesSummaryRepository,
       case Right(_) => ()
     }
 
-  private def formatJsonErrors(errors: Seq[(JsPath, Seq[JsonValidationError])]): String = {
-    "JSON Validation Error: " + errors.map(p => p._1 + " - " + p._2.map(e => removeJson(e.message)).mkString(",")).mkString(" | ")
+  private def formatJsonErrors(errors: immutable.Seq[(JsPath, immutable.Seq[JsonValidationError])]): String = {
+    "JSON Validation Error: " + errors.map(p => p._1.toString() + " - " + p._2.map(e => removeJson(e.message)).mkString(",")).mkString(" | ")
   }
 
   private def removeJson(message: String): String = {

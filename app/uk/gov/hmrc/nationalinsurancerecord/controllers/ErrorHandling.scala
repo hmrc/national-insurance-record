@@ -55,6 +55,7 @@ trait ErrorHandling extends Logging {
         internalServerError(error)
       case DesError.OtherError(error) =>
         internalServerError(error)
+      case value => throw new NotImplementedError(s"Match not implemented for: $value")
     }
 
   private def handleLegacyError(error: Throwable): Result =
