@@ -27,11 +27,16 @@ import uk.gov.hmrc.nationalinsurancerecord.config.AppContext
 import uk.gov.hmrc.nationalinsurancerecord.controllers.documentation.DocumentationController
 import uk.gov.hmrc.nationalinsurancerecord.util.UnitSpec
 
+import scala.concurrent.duration.{DurationInt, FiniteDuration}
+import scala.language.postfixOps
+
 class DocumentationControllerSpec extends UnitSpec with GuiceOneAppPerSuite with Injecting {
+
+  val fixTimeoutOnM1Mac: FiniteDuration = 6 seconds
 
   "respond to GET /api/definition" in {
     val result = route(app, FakeRequest(GET, "/api/definition"))
-    status(result.get) shouldNot be(NOT_FOUND)
+    status(result.get)(timeout = fixTimeoutOnM1Mac) shouldNot be(NOT_FOUND)
   }
 
   val controllerComponents: ControllerComponents = stubControllerComponents()

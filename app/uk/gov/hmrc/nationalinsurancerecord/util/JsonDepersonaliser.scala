@@ -19,6 +19,7 @@ package uk.gov.hmrc.nationalinsurancerecord.util
 import play.api.libs.json._
 
 import scala.util.Try
+import scala.collection
 
 object JsonDepersonaliser {
 
@@ -41,7 +42,7 @@ object JsonDepersonaliser {
 
   def depersonaliseArray(array: JsArray): JsArray = {
 
-    val value: Seq[JsValue] = for {
+    val value: collection.IndexedSeq[JsValue] = for {
       value <- array.value
     }
     yield {
