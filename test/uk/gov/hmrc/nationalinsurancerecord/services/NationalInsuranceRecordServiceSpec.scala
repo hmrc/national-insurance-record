@@ -17,7 +17,6 @@
 package uk.gov.hmrc.nationalinsurancerecord.services
 
 import org.mockito.Mockito._
-import org.mockito.{ArgumentMatchers, Mockito}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
@@ -25,6 +24,9 @@ import uk.gov.hmrc.nationalinsurancerecord.connectors.DesConnector
 import uk.gov.hmrc.nationalinsurancerecord.domain._
 import uk.gov.hmrc.nationalinsurancerecord.domain.des._
 import java.time.LocalDate
+
+import org.mockito.{ArgumentMatchers, Mockito}
+
 import scala.concurrent.{ExecutionContext, Future}
 
 

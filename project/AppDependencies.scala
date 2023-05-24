@@ -42,6 +42,12 @@ object AppDependencies {
     "uk.gov.hmrc.mongo"            %% s"hmrc-mongo-test-$playVersion" % mongoVersion
   ).map(_ % "test,it")
 
-  val all: Seq[ModuleID] = compile ++ test
+  private val silencerDependencies: Seq[ModuleID] = Seq(
+    compilerPlugin(
+      "com.github.ghik" % "silencer-plugin" % "1.7.9" cross CrossVersion.full),
+      "com.github.ghik" % "silencer-lib" % "1.7.9" % Provided cross CrossVersion.full
+  )
+
+  val all: Seq[ModuleID] = compile ++ test ++ silencerDependencies
 
 }
