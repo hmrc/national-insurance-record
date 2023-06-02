@@ -21,26 +21,33 @@ import sbt._
 object AppDependencies {
   val bootstrapVersion = "7.12.0"
   val mongoVersion = "0.74.0"
+  val playVersion = "play-28"
 
   val compile: Seq[ModuleID] = Seq(
     ws,
     "uk.gov.hmrc"       %% "bootstrap-backend-play-28" % bootstrapVersion,
-    "uk.gov.hmrc"       %% "domain"                    % "8.1.0-play-28",
-    "uk.gov.hmrc"       %% "play-hmrc-api"             % "7.1.0-play-28",
-    "uk.gov.hmrc"       %% "play-hal"                  % "3.2.0-play-28",
-    "uk.gov.hmrc.mongo" %% "hmrc-mongo-play-28"        % mongoVersion
+    "uk.gov.hmrc"       %% "domain"                    % s"8.1.0-$playVersion",
+    "uk.gov.hmrc"       %% "play-hmrc-api"             % s"7.1.0-$playVersion",
+    "uk.gov.hmrc"       %% "play-hal"                  % s"3.2.0-$playVersion",
+    "uk.gov.hmrc.mongo" %% s"hmrc-mongo-$playVersion"  % mongoVersion
   )
 
   val test: Seq[ModuleID] = Seq(
-    "uk.gov.hmrc"            %% "bootstrap-test-play-28"  % bootstrapVersion,
-    "org.pegdown"             % "pegdown"                 % "1.6.0",
-    "com.typesafe.play"      %% "play-test"               % PlayVersion.current,
-    "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.14.1",
-    "com.github.tomakehurst"  % "wiremock-jre8"           % "2.35.0",
-    "org.mockito"             % "mockito-core"            % "4.11.0",
-    "uk.gov.hmrc.mongo"      %% "hmrc-mongo-test-play-28" % mongoVersion
+    "uk.gov.hmrc"                  %% s"bootstrap-test-$playVersion"  % bootstrapVersion,
+    "org.pegdown"                   % "pegdown"                       % "1.6.0",
+    "com.typesafe.play"            %% "play-test"                     % PlayVersion.current,
+    "com.fasterxml.jackson.module" %% "jackson-module-scala"          % "2.14.1",
+    "com.github.tomakehurst"        % "wiremock-jre8"                 % "2.35.0",
+    "org.mockito"                   % "mockito-core"                  % "4.11.0",
+    "uk.gov.hmrc.mongo"            %% s"hmrc-mongo-test-$playVersion" % mongoVersion
   ).map(_ % "test,it")
 
-  val all: Seq[ModuleID] = compile ++ test
+  private val silencerDependencies: Seq[ModuleID] = Seq(
+    compilerPlugin(
+      "com.github.ghik" % "silencer-plugin" % "1.7.9" cross CrossVersion.full),
+      "com.github.ghik" % "silencer-lib" % "1.7.9" % Provided cross CrossVersion.full
+  )
+
+  val all: Seq[ModuleID] = compile ++ test ++ silencerDependencies
 
 }
