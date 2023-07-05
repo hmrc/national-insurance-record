@@ -33,4 +33,6 @@ class ApplicationConfig @Inject()(servicesConfig: ServicesConfig) {
   val authorization: String = s"Bearer ${servicesConfig.getConfString("des-hod.authorizationToken", "local")}"
 
   val desEnvironment: String = servicesConfig.getConfString("des-hod.environment", "local")
+  lazy val internalAuthResourceType: String =
+    servicesConfig.getString("microservice.services.internal-auth.resource-type")
 }

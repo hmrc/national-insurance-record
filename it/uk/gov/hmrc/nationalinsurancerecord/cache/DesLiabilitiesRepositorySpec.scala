@@ -24,7 +24,7 @@ import play.api.test.Helpers.running
 import uk.gov.hmrc.nationalinsurancerecord.domain.des.{DesLiabilities, DesLiability}
 import uk.gov.hmrc.nationalinsurancerecord.test_utils.IntegrationBaseSpec
 
-import java.time.{LocalDate, LocalDateTime, LocalTime}
+import java.time.Instant
 
 class DesLiabilitiesRepositorySpec
   extends IntegrationBaseSpec {
@@ -42,9 +42,8 @@ class DesLiabilitiesRepositorySpec
     DesLiabilitiesCache(
       key = "blah",
       response = desLiabilities,
-      expiresAt = LocalDateTime.of(
-        LocalDate.of(2022, 1, 1),
-        LocalTime.of(1, 1)
+      expiresAt = Instant.ofEpochMilli(
+        1640998860000L
       ).plusSeconds(60)
     )
 

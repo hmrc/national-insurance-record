@@ -20,16 +20,18 @@ import sbt._
 
 object AppDependencies {
   val bootstrapVersion = "7.16.0"
-  val mongoVersion = "0.74.0"
+  val mongoVersion = "1.3.0"
   val playVersion = "play-28"
 
   val compile: Seq[ModuleID] = Seq(
     ws,
-    "uk.gov.hmrc"       %% "bootstrap-backend-play-28" % bootstrapVersion,
-    "uk.gov.hmrc"       %% "domain"                    % s"8.1.0-$playVersion",
-    "uk.gov.hmrc"       %% "play-hmrc-api"             % s"7.1.0-$playVersion",
-    "uk.gov.hmrc"       %% "play-hal"                  % s"3.2.0-$playVersion",
-    "uk.gov.hmrc.mongo" %% s"hmrc-mongo-$playVersion"  % mongoVersion
+    "uk.gov.hmrc"       %% "bootstrap-backend-play-28"    % bootstrapVersion,
+    "uk.gov.hmrc"       %% "domain"                       % s"8.1.0-$playVersion",
+    "uk.gov.hmrc"       %% "play-hmrc-api"                % s"7.1.0-$playVersion",
+    "uk.gov.hmrc"       %% "play-hal"                     % s"3.2.0-$playVersion",
+    "uk.gov.hmrc"       %% "internal-auth-client-play-28" % "1.6.0",
+    "uk.gov.hmrc"       %% "mongo-feature-toggles-client" % "0.1.0",
+    "uk.gov.hmrc.mongo" %% s"hmrc-mongo-$playVersion"     % mongoVersion
   )
 
   val test: Seq[ModuleID] = Seq(

@@ -27,7 +27,7 @@ import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import uk.gov.hmrc.nationalinsurancerecord.config.ApplicationConfig
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes.APITypes
 
-import java.time.{LocalDateTime, ZoneOffset}
+import java.time.Instant
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 import scala.concurrent.{ExecutionContext, Future}
@@ -37,7 +37,7 @@ import scala.util.{Failure, Success, Try}
 trait CachingModel[A, B] {
   val key: String
   val response: B
-  val expiresAt: LocalDateTime
+  val expiresAt: Instant
 }
 
 trait CachingService[A, B] {
@@ -48,24 +48,43 @@ trait CachingService[A, B] {
   def metrics: MetricsService
 }
 @Singleton
-class CachingMongoService[A <: CachingModel[A, B], B]
-(mongo: MongoComponent, formats: Format[A], apply: (String, B, LocalDateTime) => A, apiType: APITypes, appConfig: ApplicationConfig, metricsX: MetricsService)
-(implicit e: ExecutionContext, ct: ClassTag[A])
-  extends PlayMongoRepository[A](
-    mongoComponent = mongo,
-    collectionName = appConfig.responseCacheCollectionName,
-    domainFormat = formats,
-    replaceIndexes = true,
-    indexes = Seq(
-      IndexModel(Indexes.ascending("expiresAt"), IndexOptions().name("responseExpiry").unique(false).expireAfter(60, TimeUnit.MINUTES)),
-      IndexModel(Indexes.ascending("key"), IndexOptions().name("responseUniqueKey").unique(true).expireAfter(60, TimeUnit.MINUTES))
+class CachingMongoService[A <: CachingModel[A, B], B](
+  mongo: MongoComponent,
+  formats: Format[A],
+  apply: (String, B, Instant) => A,
+  apiType: APITypes,
+  appConfig: ApplicationConfig,
+  metricsX: MetricsService
+)(
+  implicit ec: ExecutionContext,
+  ct: ClassTag[A]
+) extends PlayMongoRepository[A](
+  mongoComponent = mongo,
+  collectionName = appConfig.responseCacheCollectionName,
+  domainFormat = formats,
+  replaceIndexes = true,
+  indexes = Seq(
+    IndexModel(
+      Indexes.ascending("expiresAt"),
+      IndexOptions()
+        .name("responseExpiry")
+        .unique(false)
+        .expireAfter(60, TimeUnit.MINUTES)
+    ),
+    IndexModel(
+      Indexes.ascending("key"),
+      IndexOptions()
+        .name("responseUniqueKey")
+        .unique(true)
+        .expireAfter(60, TimeUnit.MINUTES)
     )
-  ) with CachingService[A, B] with Logging {
+  )
+) with CachingService[A, B] with Logging {
 
   private def cacheKey(nino: Nino, api: APITypes) = s"$nino-$api"
   override val timeToLive = appConfig.responseCacheTTL
 
-  override def findByNino(nino: Nino)(implicit formats: Reads[A], e: ExecutionContext): Future[Option[B]] = {
+  override def findByNino(nino: Nino)(implicit formats: Reads[A], ec: ExecutionContext): Future[Option[B]] = {
     val tryResult = Try {
       metrics.cacheRead()
       collection.withReadPreference(ReadPreference.primaryPreferred()).find(equal("key", cacheKey(nino, apiType))).toFuture()
@@ -97,10 +116,10 @@ class CachingMongoService[A <: CachingModel[A, B], B]
   }
 
   override def insertByNino(nino: Nino, response: B)
-                           (implicit formatA: OFormat[A], e: ExecutionContext): Future[Boolean] = {
+                           (implicit formatA: OFormat[A], ec: ExecutionContext): Future[Boolean] = {
     val query = equal("key", cacheKey(nino, apiType))
 
-    val doc = apply(cacheKey(nino, apiType), response, LocalDateTime.now(ZoneOffset.UTC).plusSeconds(timeToLive))
+    val doc = apply(cacheKey(nino, apiType), response, Instant.now().plusSeconds(timeToLive))
 
     collection.findOneAndReplace(query, doc, FindOneAndReplaceOptions().upsert(true)).toFuture().map { result =>
       metrics.cacheWritten()

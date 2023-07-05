@@ -24,7 +24,7 @@ import play.api.test.Helpers.running
 import uk.gov.hmrc.nationalinsurancerecord.domain.des.DesSummary
 import uk.gov.hmrc.nationalinsurancerecord.test_utils.IntegrationBaseSpec
 
-import java.time.{LocalDate, LocalDateTime, LocalTime}
+import java.time.{Instant, LocalDate}
 
 class DesSummaryRepositorySpec
   extends IntegrationBaseSpec {
@@ -45,9 +45,8 @@ class DesSummaryRepositorySpec
     DesSummaryCache(
       key = "blah",
       response = desSummary,
-      expiresAt = LocalDateTime.of(
-        LocalDate.of(2022, 1, 1),
-        LocalTime.of(1, 1)
+      expiresAt = Instant.ofEpochMilli(
+        1640998860000L
       ).plusSeconds(60)
     )
 
