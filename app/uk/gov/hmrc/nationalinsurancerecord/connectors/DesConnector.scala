@@ -24,9 +24,10 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{HeaderCarrier, HeaderNames, HttpClient, HttpException, HttpResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.HttpReadsInstances.readEitherOf
+import uk.gov.hmrc.mongoFeatureToggles.services.FeatureFlagService
 import uk.gov.hmrc.nationalinsurancerecord.cache._
 import uk.gov.hmrc.nationalinsurancerecord.config.ApplicationConfig
-import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
+import uk.gov.hmrc.nationalinsurancerecord.domain.{APITypes, ProxyCacheToggle}
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.des.{DesError, DesLiabilities, DesNIRecord, DesSummary}
 import uk.gov.hmrc.nationalinsurancerecord.services.{CachingService, MetricsService}
@@ -37,78 +38,122 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 import scala.collection.immutable
 
-class DesConnector @Inject()(desSummaryRepository: DesSummaryRepository,
-                             desNIRecordRepository: DesNIRecordRepository,
-                             desLiabilitiesRepository: DesLiabilitiesRepository,
-                             metrics: MetricsService,
-                             http: HttpClient,
-                             appConfig: ApplicationConfig,
-                             implicit val executionContext: ExecutionContext
-                            ) extends Logging {
+class DesConnector @Inject()(
+  desSummaryRepository: DesSummaryRepository,
+  desNIRecordRepository: DesNIRecordRepository,
+  desLiabilitiesRepository: DesLiabilitiesRepository,
+  metrics: MetricsService,
+  http: HttpClient,
+  appConfig: ApplicationConfig,
+  implicit val executionContext: ExecutionContext,
+  featureFlagService: FeatureFlagService
+) extends Logging {
 
-  val serviceUrl: String = appConfig.desUrl
   val authToken: String = appConfig.authorization
   val desEnvironment: String = appConfig.desEnvironment
   val summaryRepository: CachingService[DesSummaryCache, DesSummary] = desSummaryRepository()
   val liabilitiesRepository: CachingService[DesLiabilitiesCache, DesLiabilities] = desLiabilitiesRepository()
   val nirecordRepository: CachingService[DesNIRecordCache, DesNIRecord] = desNIRecordRepository()
 
-  class JsonValidationException(message: String) extends Exception(message)
+  def url(path: String): String =
+    s"${appConfig.desUrl}$path"
 
-  def url(path: String): String = s"$serviceUrl$path"
+  private def ninoWithoutSuffix(nino: Nino): String =
+    nino.value.substring(0, NIRecordConstants.ninoLengthWithoutSuffix)
 
-  private def ninoWithoutSuffix(nino: Nino): String = nino.value.substring(0, NIRecordConstants.ninoLengthWithoutSuffix)
+  def getLiabilities(
+    nino: Nino
+  )(
+    implicit hc: HeaderCarrier
+  ): Future[DesLiabilities] =
+    get[DesLiabilities, DesLiabilitiesCache](
+      nino       = nino,
+      apiTypes   = APITypes.Liabilities,
+      path       = "liabilities",
+      repository = liabilitiesRepository
+    )
 
-  def getLiabilities(nino: Nino)(
-    implicit hc: HeaderCarrier): Future[DesLiabilities] = {
-    val urlToRead = url(s"/individuals/${ninoWithoutSuffix(nino)}/pensions/liabilities")
-    metrics.incrementCounter(APITypes.Liabilities)
-    connectToCache[DesLiabilities, DesLiabilitiesCache](
-      nino,
-      urlToRead,
-      APITypes.Liabilities,
-      liabilitiesRepository)
+  def getNationalInsuranceRecord(
+    nino: Nino
+  )(
+    implicit hc: HeaderCarrier
+  ): Future[DesNIRecord] =
+    get[DesNIRecord, DesNIRecordCache](
+      nino       = nino,
+      apiTypes   = APITypes.NIRecord,
+      path       = "ni",
+      repository = nirecordRepository
+    )
+
+  def getSummary(
+    nino: Nino
+  )(
+    implicit hc: HeaderCarrier
+  ): Future[DesSummary] =
+    get[DesSummary, DesSummaryCache](
+      nino       = nino,
+      apiTypes   = APITypes.Summary,
+      path       = "summary",
+      repository = summaryRepository
+    )
+
+
+  private def get[A, B](
+    nino: Nino,
+    apiTypes: APITypes.Value,
+    path: String,
+    repository: CachingService[B, A]
+  )(
+    implicit hc: HeaderCarrier,
+    formatA: Format[A],
+    formatB: OFormat[B]
+  ): Future[A] = {
+    metrics.incrementCounter(apiTypes)
+
+    featureFlagService.get(ProxyCacheToggle) flatMap {
+      proxyCache =>
+        val baseUrl =
+          if (proxyCache.isEnabled) appConfig.proxyCacheUrl else appConfig.desUrl
+
+        connectToCache[A, B](
+          nino       = nino,
+          url        = s"$baseUrl/individuals/${ninoWithoutSuffix(nino)}/pensions/$path",
+          api        = apiTypes,
+          repository = repository
+        )
+    }
   }
-
-  def getNationalInsuranceRecord(nino: Nino)(
-    implicit hc: HeaderCarrier): Future[DesNIRecord] = {
-    val urlToRead = url(s"/individuals/${ninoWithoutSuffix(nino)}/pensions/ni")
-    metrics.incrementCounter(APITypes.NIRecord)
-    connectToCache[DesNIRecord, DesNIRecordCache](
-      nino,
-      urlToRead,
-      APITypes.NIRecord,
-      nirecordRepository)
-  }
-
-  def getSummary(nino: Nino)(
-    implicit hc: HeaderCarrier): Future[DesSummary] = {
-    val urlToRead = url(s"/individuals/${ninoWithoutSuffix(nino)}/pensions/summary")
-    metrics.incrementCounter(APITypes.Summary)
-    connectToCache[DesSummary, DesSummaryCache](
-      nino,
-      urlToRead,
-      APITypes.Summary,
-      summaryRepository)
-  }
-
   private def connectToCache[A, B](
-    nino: Nino, url: String, api: APITypes, repository: CachingService[B, A])(
-    implicit hc: HeaderCarrier, formatA: Format[A], formatB: OFormat[B])
-  : Future[A] =
+    nino: Nino,
+    url: String,
+    api: APITypes,
+    repository: CachingService[B, A]
+  )(
+    implicit hc: HeaderCarrier,
+    formatA: Format[A],
+    formatB: OFormat[B]
+  ): Future[A] =
     repository.findByNino(nino).flatMap {
-      case Some(responseModel) => Future.successful(responseModel)
-      case None => connectToDes(url, api)(hc, formatA).flatMap {
-        case Right(response) =>
-          logger.debug("*~* - writing nino to cache:" + nino)
-          repository.insertByNino(nino, response)
-          Future.successful(response)
-        case Left(error) => Future.failed(error)
+      case Some(responseModel) =>
+        Future.successful(responseModel)
+      case None =>
+        connectToDes(url, api)(hc, formatA).flatMap {
+          case Right(response) =>
+            logger.debug("*~* - writing nino to cache:" + nino)
+            repository.insertByNino(nino, response)
+            Future.successful(response)
+          case Left(error) =>
+            Future.failed(error)
       }
     }
 
-  private def connectToDes[A](url: String, api: APITypes)(
-    implicit hc: HeaderCarrier, reads: Reads[A]): Future[Either[DesError, A]] = {
+  private def connectToDes[A](
+    url: String,
+    api: APITypes
+  )(
+    implicit hc: HeaderCarrier,
+    reads: Reads[A]
+  ): Future[Either[DesError, A]] = {
     val timerContext = metrics.startTimer(api)
     val headers = Seq(
       HeaderNames.authorisation -> authToken,
@@ -119,48 +164,43 @@ class DesConnector @Inject()(desSummaryRepository: DesSummaryRepository,
     )
 
     http
-      .GET[Either[UpstreamErrorResponse, HttpResponse]](url, headers = headers)
+      .GET[Either[UpstreamErrorResponse, HttpResponse]](url, headers)
       .transform {
         result =>
           timerContext.stop()
           result
-      }
-      .map {
+      }.map {
         case Right(response) =>
           response.json.validate[A].fold(
             errs => {
               val json = JsonDepersonaliser.depersonalise(response.json) match {
-                case Success(s) => s"Depersonalised JSON\n$s"
-                case Failure(e) => s"JSON could not be depersonalised\n${e.toString}"
+                case Success(s) =>
+                  s"Depersonalised JSON\n$s"
+                case Failure(e) =>
+                  s"JSON could not be depersonalised\n${e.toString}"
               }
-              Left(
-                DesError.JsonValidationError(
-                  s"Unable to deserialise $api: ${formatJsonErrors(errs.asInstanceOf[immutable.Seq[(JsPath, immutable.Seq[JsonValidationError])]])}\n$json"
-                )
-              )
+              Left(DesError.JsonValidationError(
+                s"Unable to deserialise $api: ${formatJsonErrors(errs.asInstanceOf[immutable.Seq[(JsPath, immutable.Seq[JsonValidationError])]])}\n$json"
+              ))
             },
-            valid => Right(valid)
+            valid =>
+              Right(valid)
           )
-        case Left(error) => Left(DesError.HttpError(error))
-      }
-      .recover {
+        case Left(error) =>
+          Left(DesError.HttpError(error))
+      } recover {
         case error: HttpException =>
-          Left(
-            DesError.HttpError(UpstreamErrorResponse(error.message, BAD_GATEWAY))
-          )
+          Left(DesError.HttpError(UpstreamErrorResponse(error.message, BAD_GATEWAY)))
         case error =>
-          Left(
-            DesError.OtherError(error)
-          )
-      }
-      .map {
+          Left(DesError.OtherError(error))
+      } map {
         result =>
-          handleResult(api, url, result)
+          handleResult(api, result)
           result
       }
   }
 
-  private def handleResult[A](api: APITypes, url: String, result: Either[DesError, A]) =
+  private def handleResult[A](api: APITypes, result: Either[DesError, A]): Unit =
     result match {
       case Left(_) => metrics.incrementFailedCounter(api)
       case Right(_) => ()
@@ -170,11 +210,9 @@ class DesConnector @Inject()(desSummaryRepository: DesSummaryRepository,
     "JSON Validation Error: " + errors.map(p => p._1.toString() + " - " + p._2.map(e => removeJson(e.message)).mkString(",")).mkString(" | ")
   }
 
-  private def removeJson(message: String): String = {
+  private def removeJson(message: String): String =
     message.indexOf("{") match {
       case i if i != -1  => message.substring(0, i - 1) + " [JSON removed]"
       case _ => message
     }
-  }
-
 }

@@ -25,6 +25,7 @@ class ApplicationConfig @Inject()(servicesConfig: ServicesConfig) {
   val citizenDetailsUrl = servicesConfig.baseUrl("citizen-details")
   val statePensionUrl = servicesConfig.baseUrl("state-pension")
   val desUrl = servicesConfig.baseUrl("des-hod")
+  val proxyCacheUrl = servicesConfig.baseUrl("ni-and-sp-proxy-cache")
   val authUrl = servicesConfig.baseUrl("auth")
 
   val responseCacheTTL = servicesConfig.getInt("mongodb.responseTTL")
@@ -33,6 +34,5 @@ class ApplicationConfig @Inject()(servicesConfig: ServicesConfig) {
   val authorization: String = s"Bearer ${servicesConfig.getConfString("des-hod.authorizationToken", "local")}"
 
   val desEnvironment: String = servicesConfig.getConfString("des-hod.environment", "local")
-  lazy val internalAuthResourceType: String =
-    servicesConfig.getString("microservice.services.internal-auth.resource-type")
+
 }
