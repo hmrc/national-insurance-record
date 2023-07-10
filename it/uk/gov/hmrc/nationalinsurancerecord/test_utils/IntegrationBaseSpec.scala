@@ -16,15 +16,18 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.test_utils
 
+import akka.Done
 import org.mockito.Mockito
 import org.mockito.stubbing.Answer
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.cache.AsyncCacheApi
 import uk.gov.hmrc.domain.{Generator, Nino}
 
 import java.util.UUID
-import scala.concurrent.ExecutionContext
+import scala.concurrent.duration.Duration
+import scala.concurrent.{ExecutionContext, Future}
 import scala.reflect.ClassTag
 import scala.util.Random
 
@@ -44,4 +47,18 @@ trait IntegrationBaseSpec extends AnyWordSpec
 
   def mock[T](answer: Answer[Object])(implicit ev: ClassTag[T]): T =
     Mockito.mock(ev.runtimeClass.asInstanceOf[Class[T]], answer)
+
+  // A cache that doesn't cache
+  val mockCacheApi: AsyncCacheApi = new AsyncCacheApi {
+    override def set(key: String, value: Any, expiration: Duration): Future[Done] = ???
+
+    override def remove(key: String): Future[Done] = Future.successful(Done)
+
+    override def getOrElseUpdate[A](key: String, expiration: Duration)(orElse: => Future[A])
+                                   (implicit evidence$1: ClassTag[A]): Future[A] = orElse
+
+    override def get[T](key: String)(implicit evidence$2: ClassTag[T]): Future[Option[T]] = ???
+
+    override def removeAll(): Future[Done] = ???
+  }
 }

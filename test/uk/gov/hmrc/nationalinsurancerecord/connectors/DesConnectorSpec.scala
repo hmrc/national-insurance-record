@@ -40,7 +40,11 @@ import java.time.LocalDate
 import scala.concurrent.Future
 import scala.util.Random
 
-class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with GuiceOneAppPerSuite with WireMockHelper with ScalaFutures {
+class DesConnectorSpec
+  extends NationalInsuranceRecordUnitSpec
+    with GuiceOneAppPerSuite
+    with WireMockHelper
+    with ScalaFutures {
   // scalastyle:off magic.number
 
   val mockSummaryRepo: DesSummaryRepository = mock[DesSummaryRepository](Mockito.RETURNS_DEEP_STUBS)
@@ -50,8 +54,8 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with GuiceOneAppP
   val mockNIRecordRepo: DesNIRecordRepository = mock[DesNIRecordRepository](Mockito.RETURNS_DEEP_STUBS)
 
   val mockMetrics: MetricsService = mock[MetricsService]
-  val mockTimerContext: Timer.Context = mock[Timer.Context]
 
+  val mockTimerContext: Timer.Context = mock[Timer.Context]
 
   override def fakeApplication(): Application = GuiceApplicationBuilder()
     .configure(
@@ -503,7 +507,6 @@ class DesConnectorSpec extends NationalInsuranceRecordUnitSpec with GuiceOneAppP
         .withHeader("CorrelationId", matching("[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}"))
         .withHeader(HeaderNames.xRequestId, equalTo("requestId"))
       )
-
     }
 
     "be present for ni" in {

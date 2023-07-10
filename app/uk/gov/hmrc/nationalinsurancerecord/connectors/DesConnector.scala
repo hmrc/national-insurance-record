@@ -49,14 +49,11 @@ class DesConnector @Inject()(
   featureFlagService: FeatureFlagService
 ) extends Logging {
 
-  val authToken: String = appConfig.authorization
-  val desEnvironment: String = appConfig.desEnvironment
-  val summaryRepository: CachingService[DesSummaryCache, DesSummary] = desSummaryRepository()
-  val liabilitiesRepository: CachingService[DesLiabilitiesCache, DesLiabilities] = desLiabilitiesRepository()
-  val nirecordRepository: CachingService[DesNIRecordCache, DesNIRecord] = desNIRecordRepository()
-
-  def url(path: String): String =
-    s"${appConfig.desUrl}$path"
+  private val authToken: String = appConfig.authorization
+  private val desEnvironment: String = appConfig.desEnvironment
+  private val summaryRepository: CachingService[DesSummaryCache, DesSummary] = desSummaryRepository()
+  private val liabilitiesRepository: CachingService[DesLiabilitiesCache, DesLiabilities] = desLiabilitiesRepository()
+  private val niRecordRepository: CachingService[DesNIRecordCache, DesNIRecord] = desNIRecordRepository()
 
   private def ninoWithoutSuffix(nino: Nino): String =
     nino.value.substring(0, NIRecordConstants.ninoLengthWithoutSuffix)
@@ -82,7 +79,7 @@ class DesConnector @Inject()(
       nino       = nino,
       apiTypes   = APITypes.NIRecord,
       path       = "ni",
-      repository = nirecordRepository
+      repository = niRecordRepository
     )
 
   def getSummary(
@@ -123,6 +120,7 @@ class DesConnector @Inject()(
         )
     }
   }
+
   private def connectToCache[A, B](
     nino: Nino,
     url: String,
@@ -164,7 +162,7 @@ class DesConnector @Inject()(
     )
 
     http
-      .GET[Either[UpstreamErrorResponse, HttpResponse]](url, headers)
+      .GET[Either[UpstreamErrorResponse, HttpResponse]](url, headers = headers)
       .transform {
         result =>
           timerContext.stop()

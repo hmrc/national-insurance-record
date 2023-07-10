@@ -18,6 +18,8 @@ package uk.gov.hmrc.nationalinsurancerecord.cache
 
 import org.scalatest.concurrent.ScalaFutures.whenReady
 import play.api.Application
+import play.api.cache.AsyncCacheApi
+import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsDefined, JsObject, JsString, Json}
 import play.api.test.Helpers.running
@@ -31,6 +33,7 @@ class DesNIRecordRepositorySpec
   // scalastyle:off magic.number
   override def fakeApplication(): Application =
     GuiceApplicationBuilder()
+      .overrides(bind[AsyncCacheApi].toInstance(mockCacheApi))
       .build()
 
   val desNIRecord: DesNIRecord =

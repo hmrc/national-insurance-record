@@ -20,6 +20,7 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import play.api.Application
+import play.api.cache.AsyncCacheApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.{AnyContent, Results}
@@ -35,7 +36,8 @@ class NationalInsuranceRecordControllerISpec extends IntegrationBaseSpec with Re
 
   override def fakeApplication(): Application = GuiceApplicationBuilder()
     .overrides(
-      bind[CopeExclusionAction].to(mockCopeExclusionAction)
+      bind[CopeExclusionAction].to(mockCopeExclusionAction),
+      bind[AsyncCacheApi].toInstance(mockCacheApi)
     )
     .configure(
     "microservice.services.auth.port" -> server.port(),
