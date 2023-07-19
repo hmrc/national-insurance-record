@@ -51,62 +51,63 @@ trait ErrorHandling extends Logging {
         upstream4xx(error)
       case DesError.HttpError(UpstreamErrorResponse.Upstream5xxResponse(_)) =>
         upstream5xx(error)
-      case DesError.JsonValidationError(message) =>
+      case DesError.JsonValidationError(_) =>
         internalServerError(error)
       case DesError.OtherError(error) =>
         internalServerError(error)
-      case value => throw new NotImplementedError(s"Match not implemented for: $value")
+      case value =>
+        throw new NotImplementedError(s"Match not implemented for: $value")
     }
 
   private def handleLegacyError(error: Throwable): Result =
     error match {
       case _: NotFoundException =>
         notFound
-      case e@WithStatusCode(GATEWAY_TIMEOUT) =>
+      case _@WithStatusCode(GATEWAY_TIMEOUT) =>
         gatewayTimeout(error)
-      case e: BadGatewayException =>
+      case _: BadGatewayException =>
         badGateway(error)
       case _: BadRequestException =>
         badRequest
-      case e@UpstreamErrorResponse.Upstream4xxResponse(_) =>
+      case _@UpstreamErrorResponse.Upstream4xxResponse(_) =>
         upstream4xx(error)
-      case e@UpstreamErrorResponse.Upstream5xxResponse(_) =>
+      case _@UpstreamErrorResponse.Upstream5xxResponse(_) =>
         upstream5xx(error)
-      case e: Throwable =>
+      case _: Throwable =>
         internalServerError(error)
     }
 
-  private def notFound =
+  private def notFound: Result =
     NotFound(Json.toJson[ErrorResponse](ErrorNotFound))
 
-  private def gatewayTimeout(error: Throwable) = {
+  private def gatewayTimeout(error: Throwable): Status = {
     logger.error(s"$app Gateway Timeout: ${error.getMessage}", error)
     GatewayTimeout
   }
 
-  private def badRequest =
+  private def badRequest: Result =
     BadRequest(
       Json.toJson[ErrorResponse](
         ErrorGenericBadRequest("Upstream Bad Request. Is this customer below State Pension Age?")
       )
     )
 
-  private def badGateway(error: Throwable) = {
+  private def badGateway(error: Throwable): Status = {
     logger.error(s"$app Bad Gateway: ${error.getMessage}", error)
     BadGateway
   }
 
-  private def internalServerError(error: Throwable) = {
+  private def internalServerError(error: Throwable): Result = {
     logger.error(s"$app Internal server error: ${error.getMessage}", error)
     InternalServerError(Json.toJson[ErrorResponse](ErrorInternalServerError))
   }
 
-  private def upstream4xx(error: Throwable) = {
+  private def upstream4xx(error: Throwable): Status = {
     logger.error(s"$app Upstream4XX: ${error.getMessage}", error)
     BadGateway
   }
 
-  private def upstream5xx(error: Throwable) = {
+  private def upstream5xx(error: Throwable): Status = {
     logger.error(s"$app Upstream5XX: ${error.getMessage}", error)
     BadGateway
   }

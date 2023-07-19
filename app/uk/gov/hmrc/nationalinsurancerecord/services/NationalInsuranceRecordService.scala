@@ -29,24 +29,21 @@ import uk.gov.hmrc.nationalinsurancerecord.util.NIRecordConstants
 import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
 
-class NationalInsuranceRecordService @Inject()(des: DesConnector,
-                                               citizenDetailsService: CitizenDetailsService,
-                                               metrics: MetricsService,
-                                               implicit val executionContext: ExecutionContext) {
+class NationalInsuranceRecordService @Inject()(
+  des: DesConnector,
+  citizenDetailsService: CitizenDetailsService,
+  metrics: MetricsService,
+  implicit val executionContext: ExecutionContext
+) {
 
-  def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceRecord]] = {
+  def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceRecord]] =
 
-    val desNIRecordF = des.getNationalInsuranceRecord(nino)
-    val desLiabilitiesF = des.getLiabilities(nino)
-    val desSummaryF = des.getSummary(nino)
-    val manualCorrespondenceF = citizenDetailsService.checkManualCorrespondenceIndicator(nino)
-
-    for (
-      desNIRecord <- desNIRecordF;
-      desLiabilities <- desLiabilitiesF;
-      desSummary <- desSummaryF;
-      manualCorrespondence <- manualCorrespondenceF
-    ) yield {
+    for {
+      desNIRecord          <- des.getNationalInsuranceRecord(nino)
+      desLiabilities       <- des.getLiabilities(nino)
+      desSummary           <- des.getSummary(nino)
+      manualCorrespondence <- citizenDetailsService.checkManualCorrespondenceIndicator(nino)
+    } yield {
 
       val purgedNIRecord = desNIRecord.purge(desSummary.finalRelevantYear.get)
 
@@ -76,52 +73,52 @@ class NationalInsuranceRecordService @Inject()(des: DesConnector,
       }
     }
 
-  }
 
-  def getTaxYear(nino: Nino, taxYear: TaxYear)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceTaxYear]] = {
+  def getTaxYear(nino: Nino, taxYear: TaxYear)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceTaxYear]] =
 
-    val desNIRecordF = des.getNationalInsuranceRecord(nino)
-    val desSummaryF = des.getSummary(nino)
-    val desLiabilitiesF = des.getLiabilities(nino)
-    val manualCorrespondenceIndicatorF = citizenDetailsService.checkManualCorrespondenceIndicator(nino)
-
-    for (
-      desNIRecord <- desNIRecordF;
-      desSummary <- desSummaryF;
-      desLiabilities <- desLiabilitiesF;
-      manualCorrespondenceIndicator <- manualCorrespondenceIndicatorF
-    ) yield {
+    for {
+      desNIRecord          <- des.getNationalInsuranceRecord(nino);
+      desSummary           <- des.getSummary(nino);
+      desLiabilities       <- des.getLiabilities(nino);
+      manualCorrespondence <- citizenDetailsService.checkManualCorrespondenceIndicator(nino)
+    } yield {
 
       val purgedNIRecord = desNIRecord.purge(desSummary.finalRelevantYear.get)
 
-      val exclusions = new DesExclusionService(
+      val exclusions: List[Exclusion] = new DesExclusionService(
         desSummary.dateOfDeath,
         desLiabilities.liabilities,
-        manualCorrespondenceIndicator
+        manualCorrespondence
       ).getExclusions
 
       if (exclusions.nonEmpty) {
         metrics.exclusion(exclusions.head)
         Left(ExclusionResponse(exclusions))
       } else {
-        purgedNIRecord.niTaxYears.map(desTaxYearToNIRecordTaxYear).find(x => x.taxYear == taxYear.taxYear) match {
-          case Some(nationalInsuranceRecordTaxYear) => Right(nationalInsuranceRecordTaxYear)
-          case _ => throw new NotFoundException(s"taxYear ${taxYear.taxYear} Not Found for $nino")
+        purgedNIRecord.niTaxYears.map(desTaxYearToNIRecordTaxYear).find(_.taxYear == taxYear.taxYear) match {
+          case Some(nationalInsuranceRecordTaxYear) =>
+            Right(nationalInsuranceRecordTaxYear)
+          case _ =>
+            throw new NotFoundException(s"taxYear ${taxYear.taxYear} Not Found for $nino")
         }
       }
     }
-  }
 
-  def desHomeResponsibilitiesProtection(liabilities: List[DesLiability]): Boolean =
-    liabilities.exists(liability => NIRecordConstants.homeResponsibilitiesProtectionTypes.contains(liability.liabilityType.get))
+  private def desHomeResponsibilitiesProtection(liabilities: List[DesLiability]): Boolean =
+    liabilities.exists(
+      liability =>
+        NIRecordConstants.homeResponsibilitiesProtectionTypes.contains(liability.liabilityType.get)
+    )
 
   def calcPre75QualifyingYears(pre75Contributions: Int, dateOfEntry: Option[LocalDate], dateOfBirth: LocalDate): Option[Int] = {
     val yearCalc: BigDecimal = BigDecimal(pre75Contributions)/50
     val sixteenthBirthday: LocalDate = dateOfBirth.plusYears(NIRecordConstants.niRecordMinAge)
     val sixteenthBirthdayDiff: Int = NIRecordConstants.niRecordStart - TaxYearResolver.taxYearFor(sixteenthBirthday)
     val yearsPre75 = dateOfEntry match {
-      case Some(doe) => (NIRecordConstants.niRecordStart - TaxYearResolver.taxYearFor(doe)).min(sixteenthBirthdayDiff)
-      case None => sixteenthBirthdayDiff
+      case Some(doe) =>
+        (NIRecordConstants.niRecordStart - TaxYearResolver.taxYearFor(doe)).min(sixteenthBirthdayDiff)
+      case None =>
+        sixteenthBirthdayDiff
     }
     if (yearsPre75 > 0) {
       Some(yearCalc.setScale(0, BigDecimal.RoundingMode.CEILING).min(yearsPre75).toInt)
@@ -130,7 +127,7 @@ class NationalInsuranceRecordService @Inject()(des: DesConnector,
     }
   }
 
-  def desTaxYearToNIRecordTaxYear(desNITaxYear: DesNITaxYear): NationalInsuranceTaxYear = {
+  private def desTaxYearToNIRecordTaxYear(desNITaxYear: DesNITaxYear): NationalInsuranceTaxYear = {
     NationalInsuranceTaxYear(
       desNITaxYear.taxYear,
       desNITaxYear.qualifying,

@@ -30,10 +30,13 @@ import org.mockito.{ArgumentMatchers, Mockito}
 import scala.concurrent.{ExecutionContext, Future}
 
 
-class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec with GuiceOneAppPerSuite with ScalaFutures {
+class NationalInsuranceRecordServiceSpec
+  extends NationalInsuranceRecordUnitSpec
+    with GuiceOneAppPerSuite
+    with ScalaFutures {
   // scalastyle:off magic.number
-  implicit val executionContext = app.injector.instanceOf[ExecutionContext]
-
+  implicit val executionContext: ExecutionContext =
+    app.injector.instanceOf[ExecutionContext]
 
   private val niRecordDES = DesNIRecord(
     numberOfQualifyingYears = 36,
@@ -45,38 +48,27 @@ class NationalInsuranceRecordServiceSpec extends NationalInsuranceRecordUnitSpec
       DesNITaxYear(
         startTaxYear = 2015,
         qualifying = true,
-        underInvestigation = false,
-        payable = false,
-        classThreePayable = 0,
         classThreePayableBy = None,
         classThreePayableByPenalty = None,
         classOneContribution = 2430.24,
-        classTwoCredits = 0,
-        classThreeCredits = 0,
         otherCredits = List()
       ),
       DesNITaxYear(
         startTaxYear = 2014,
-        qualifying = false,
-        underInvestigation = false,
         payable = true,
         classThreePayable = 9,
         classThreePayableBy = Some(LocalDate.of(2019, 4, 5)),
         classThreePayableByPenalty = None,
         classOneContribution = 430.4,
-        classTwoCredits = 0,
-        classThreeCredits = 0,
         otherCredits = List()
       ),
       DesNITaxYear(
         startTaxYear = 2013,
         qualifying = true,
-        underInvestigation = false,
         payable = true,
         classThreePayable = 720,
         classThreePayableBy = Some(LocalDate.of(2019, 4, 5)),
         classThreePayableByPenalty = Some(LocalDate.of(2023, 4, 5)),
-        classOneContribution = 0,
         classTwoCredits = 10,
         classThreeCredits = 3,
         otherCredits = List(DesOtherCredits(Some(1),Some(2),Some(7)))

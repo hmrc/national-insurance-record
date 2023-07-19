@@ -109,12 +109,16 @@ class DesConnector @Inject()(
 
     featureFlagService.get(ProxyCacheToggle) flatMap {
       proxyCache =>
-        val baseUrl =
-          if (proxyCache.isEnabled) appConfig.proxyCacheUrl else appConfig.desUrl
+        val url: String =
+          if (proxyCache.isEnabled) {
+            s"${appConfig.proxyCacheUrl}/ni-and-sp-proxy-cache/$nino/$path"
+          } else {
+            s"${appConfig.desUrl}/individuals/${ninoWithoutSuffix(nino)}/pensions/$path"
+          }
 
         connectToCache[A, B](
           nino       = nino,
-          url        = s"$baseUrl/individuals/${ninoWithoutSuffix(nino)}/pensions/$path",
+          url        = url,
           api        = apiTypes,
           repository = repository
         )
@@ -137,7 +141,7 @@ class DesConnector @Inject()(
       case None =>
         connectToDes(url, api)(hc, formatA).flatMap {
           case Right(response) =>
-            logger.debug("*~* - writing nino to cache:" + nino)
+            logger.debug(s"*~* - writing nino to cache: $nino")
             repository.insertByNino(nino, response)
             Future.successful(response)
           case Left(error) =>
@@ -155,10 +159,10 @@ class DesConnector @Inject()(
     val timerContext = metrics.startTimer(api)
     val headers = Seq(
       HeaderNames.authorisation -> authToken,
-      "Originator-Id" -> "DA_PF",
-      "Environment" -> desEnvironment,
-      "CorrelationId" -> UUID.randomUUID().toString,
-      HeaderNames.xRequestId -> hc.requestId.fold("-")(_.value)
+      "Originator-Id"           -> "DA_PF",
+      "Environment"             -> desEnvironment,
+      "CorrelationId"           -> UUID.randomUUID().toString,
+      HeaderNames.xRequestId    -> hc.requestId.fold("-")(_.value)
     )
 
     http
@@ -193,19 +197,22 @@ class DesConnector @Inject()(
           Left(DesError.OtherError(error))
       } map {
         result =>
-          handleResult(api, result)
+          result match {
+            case Left(_) =>
+              metrics.incrementFailedCounter(api)
+            case Right(_) =>
+              ()
+          }
           result
       }
   }
 
-  private def handleResult[A](api: APITypes, result: Either[DesError, A]): Unit =
-    result match {
-      case Left(_) => metrics.incrementFailedCounter(api)
-      case Right(_) => ()
-    }
-
   private def formatJsonErrors(errors: immutable.Seq[(JsPath, immutable.Seq[JsonValidationError])]): String = {
-    "JSON Validation Error: " + errors.map(p => p._1.toString() + " - " + p._2.map(e => removeJson(e.message)).mkString(",")).mkString(" | ")
+    s"JSON Validation Error: ${
+      errors
+        .map(p => s"${p._1.toString()} - ${p._2.map(e => removeJson(e.message)).mkString(",")}")
+        .mkString(" | ")
+    }"
   }
 
   private def removeJson(message: String): String =
