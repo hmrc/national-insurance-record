@@ -159,6 +159,21 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
     reducedRateElection = false
   )
 
+  private val dummyRecordSingle: NationalInsuranceRecord = NationalInsuranceRecord(
+    // scalastyle:off magic.number
+    qualifyingYears = 1,
+    qualifyingYearsPriorTo1975 = 0,
+    numberOfGaps = 0,
+    numberOfGapsPayable = 0,
+    dateOfEntry = Some(LocalDate.of(2021, 6, 24)),
+    homeResponsibilitiesProtection = false,
+    earningsIncludedUpTo = LocalDate.of(2022, 4, 5),
+    List(
+      generateTaxYear("2021-22", true)
+    ),
+    reducedRateElection = false
+  )
+
   "getSummary" when {
 
     "the request headers are invalid" must {
@@ -298,6 +313,17 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
         contentAsJson(response) shouldBe Json.parse(
           """{"code":"EXCLUSION_MANUAL_CORRESPONDENCE","message": "The customer cannot access the service, they should contact HMRC"}"""
         )
+      }
+    }
+
+    "there is a valid National Insurance Record with one item" must {
+
+      when(mockNationalInsuranceRecordService.getNationalInsuranceRecord(any())(any())).thenReturn(Right(dummyRecordSingle))
+      val response = nationalInsuranceRecordController.getSummary(nino)(emptyRequestWithHeader)
+      val json = contentAsJson(response)
+
+      "return an array of taxYears" in {
+        (json \ "_embedded").get shouldBe Json.parse(s"""{"taxYears":[{"_links":{"self":{"href":"/national-insurance-record/ni/$nino/taxyear/2021-22"}},"taxYear":"2021-22","qualifying":true,"classOneContributions":1149.98,"classTwoCredits":0,"classThreeCredits":0,"otherCredits":0,"classThreePayable":0,"classThreePayableBy":null,"classThreePayableByPenalty":null,"payable":false,"underInvestigation":false}]}""")
       }
     }
 
