@@ -17,41 +17,32 @@
 package uk.gov.hmrc.nationalinsurancerecord.domain.des
 
 import play.api.libs.functional.syntax._
-import uk.gov.hmrc.nationalinsurancerecord.util.DateFormats.localDateFormat
 import play.api.libs.json._
+import uk.gov.hmrc.nationalinsurancerecord.util.DateFormats.localDateFormat
 
 import java.time.LocalDate
 
 
 case class DesSummary(
-                     rreToConsider: Boolean = false,
-                     dateOfDeath: Option[LocalDate] = None,
-                     earningsIncludedUpTo: Option[LocalDate],
-                     dateOfBirth: Option[LocalDate],
-                     finalRelevantYear: Option[Int]
+                       rreToConsider: Boolean = false,
+                       dateOfDeath: Option[LocalDate] = None,
+                       earningsIncludedUpTo: Option[LocalDate],
+                       dateOfBirth: Option[LocalDate],
+                       finalRelevantYear: Option[Int]
                      )
 
 object DesSummary {
 
-  val readBooleanFromInt: JsPath => Reads[Boolean] = jsPath => jsPath.read[Int].map(_.equals(1))
-  val writeIntFromBoolean: JsPath => OWrites[Boolean] = jsPath => jsPath.write[Int].contramap[Boolean] {
-    case true => 1
-    case _ => 0
-  }
-
-  val readBooleanwithDefault: JsPath => Reads[Boolean] = jsPath => jsPath.readNullable[Boolean].map(_.getOrElse(false))
-
-
   val writes: Writes[DesSummary] = (
     (__ \ "reducedRateElectionToConsider").write[Boolean] and
-    (__ \ "dateOfDeath").write[Option[LocalDate]] and
-    (__ \ "earningsIncludedUpto").write[Option[LocalDate]] and
-    (__ \ "dateOfBirth").write[Option[LocalDate]] and
-    (__ \ "finalRelevantYear").write[Option[Int]]
+      (__ \ "dateOfDeath").write[Option[LocalDate]] and
+      (__ \ "earningsIncludedUpto").write[Option[LocalDate]] and
+      (__ \ "dateOfBirth").write[Option[LocalDate]] and
+      (__ \ "finalRelevantYear").write[Option[Int]]
     )(unlift(DesSummary.unapply))
 
   val reads: Reads[DesSummary] = (
-    readBooleanwithDefault(__ \ "reducedRateElectionToConsider") and
+    (__ \ "reducedRateElectionToConsider").readNullable[Boolean].map(_.getOrElse(false)) and
       (__ \ "dateOfDeath").readNullable[LocalDate] and
       (__ \ "earningsIncludedUpto").readNullable[LocalDate] and
       (__ \ "dateOfBirth").readNullable[LocalDate] and

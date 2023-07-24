@@ -18,19 +18,22 @@ package uk.gov.hmrc.nationalinsurancerecord.cache
 
 import org.scalatest.concurrent.ScalaFutures.whenReady
 import play.api.Application
+import play.api.cache.AsyncCacheApi
+import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsDefined, JsObject, JsString, Json}
 import play.api.test.Helpers.running
 import uk.gov.hmrc.nationalinsurancerecord.domain.des.DesNIRecord
 import uk.gov.hmrc.nationalinsurancerecord.test_utils.IntegrationBaseSpec
 
-import java.time.{LocalDate, LocalDateTime, LocalTime}
+import java.time.{Instant, LocalDate}
 
 class DesNIRecordRepositorySpec
   extends IntegrationBaseSpec {
   // scalastyle:off magic.number
   override def fakeApplication(): Application =
     GuiceApplicationBuilder()
+      .overrides(bind[AsyncCacheApi].toInstance(mockCacheApi))
       .build()
 
   val desNIRecord: DesNIRecord =
@@ -43,9 +46,8 @@ class DesNIRecordRepositorySpec
     DesNIRecordCache(
       key = "blah",
       response = desNIRecord,
-      expiresAt = LocalDateTime.of(
-        LocalDate.of(2022, 1, 1),
-        LocalTime.of(1, 1)
+      expiresAt = Instant.ofEpochMilli(
+        1640998860000L
       ).plusSeconds(60)
     )
 

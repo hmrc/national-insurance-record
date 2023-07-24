@@ -27,7 +27,6 @@ lazy val microservice = Project(appName, file("."))
   .settings(
     scoverageSettings,
     scalaSettings,
-    publishingSettings,
     defaultSettings(),
     majorVersion := 0,
     scalacOptions ++= Seq(
@@ -38,14 +37,17 @@ lazy val microservice = Project(appName, file("."))
     libraryDependencies ++= AppDependencies.all,
     retrieveManaged := true,
     PlayKeys.playDefaultPort := 9312,
-    evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
-    routesImport += "uk.gov.hmrc.nationalinsurancerecord.config.Binders._",
+    update / evictionWarningOptions := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
+    routesImport ++= Seq(
+      "uk.gov.hmrc.nationalinsurancerecord.config.Binders._",
+      "uk.gov.hmrc.mongoFeatureToggles.model.FeatureFlagName"
+    ),
     routesGenerator := InjectedRoutesGenerator
   )
   .configs(IntegrationTest)
   .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
   .settings(
-    unmanagedSourceDirectories in IntegrationTest := (baseDirectory in IntegrationTest)(base => Seq(base / "it")).value,
+    IntegrationTest / unmanagedSourceDirectories := (IntegrationTest / baseDirectory)(base => Seq(base / "it")).value,
     addTestReportOption(IntegrationTest, "int-test-reports"),
-    parallelExecution in IntegrationTest := false
+    IntegrationTest / parallelExecution := false
   )

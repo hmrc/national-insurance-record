@@ -34,20 +34,20 @@ import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class NationalInsuranceRecordController @Inject()(nationalInsuranceRecordService: NationalInsuranceRecordService,
-                                                  auditConnector: AuditConnector,
-                                                  appContext: AppContext,
-                                                  authAction: AuthAction,
-                                                  copeAction: CopeExclusionAction,
-                                                  cc: ControllerComponents,
-                                                  val parser: BodyParsers.Default,
-                                                  implicit val executionContext: ExecutionContext
-                                                 )
-                                                  extends BackendController(cc)
-                                                    with HeaderValidator
-                                                    with ErrorHandling
-                                                    with HalSupport
-                                                    with Links {
+class NationalInsuranceRecordController @Inject()(
+  nationalInsuranceRecordService: NationalInsuranceRecordService,
+  auditConnector: AuditConnector,
+  appContext: AppContext,
+  authAction: AuthAction,
+  copeAction: CopeExclusionAction,
+  cc: ControllerComponents,
+  val parser: BodyParsers.Default,
+  implicit val executionContext: ExecutionContext
+) extends BackendController(cc)
+    with HeaderValidator
+    with ErrorHandling
+    with HalSupport
+    with Links {
 
   override val app: String = appContext.appName
   override val context: String = appContext.apiGatewayContext
@@ -66,7 +66,7 @@ class NationalInsuranceRecordController @Inject()(nationalInsuranceRecordService
       implicit request =>
         errorWrapper(nationalInsuranceRecordService.getNationalInsuranceRecord(nino).map {
 
-          case Left(exclusion) => {
+          case Left(exclusion) =>
             if (exclusion.exclusionReasons.contains(Exclusion.Dead)) {
               auditConnector.sendEvent(NationalInsuranceExclusion(nino, List(Exclusion.Dead)))
               Forbidden(Json.toJson[ErrorResponse](ErrorResponses.ExclusionDead))
@@ -80,7 +80,6 @@ class NationalInsuranceRecordController @Inject()(nationalInsuranceRecordService
               auditConnector.sendEvent(NationalInsuranceExclusion(nino, exclusion.exclusionReasons))
               Ok(halResourceSelfLink(Json.toJson(exclusion), nationalInsuranceRecordHref(nino)))
             }
-          }
 
           case Right(nationalInsuranceRecord) =>
             auditConnector.sendEvent(NationalInsuranceRecord(nino, nationalInsuranceRecord.qualifyingYears,

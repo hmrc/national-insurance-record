@@ -26,17 +26,17 @@ import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.des.DesLiabilities
 import uk.gov.hmrc.nationalinsurancerecord.services.{CachingModel, CachingMongoService, MetricsService}
 
-import java.time.LocalDateTime
+import java.time.Instant
 import scala.concurrent.ExecutionContext
 
 case class DesLiabilitiesCache(
   key: String,
   response: DesLiabilities,
-  expiresAt: LocalDateTime
+  expiresAt: Instant
 ) extends CachingModel[DesLiabilitiesCache, DesLiabilities]
 
 object DesLiabilitiesCache {
-  implicit val dateTimeFormat: Format[LocalDateTime] = MongoJavatimeFormats.localDateTimeFormat
+  implicit val instantFormat: Format[Instant] = MongoJavatimeFormats.instantFormat
   implicit val idFormat: Format[ObjectId] = MongoFormats.objectIdFormat
 
   implicit def formats: OFormat[DesLiabilitiesCache] = Json.format[DesLiabilitiesCache]

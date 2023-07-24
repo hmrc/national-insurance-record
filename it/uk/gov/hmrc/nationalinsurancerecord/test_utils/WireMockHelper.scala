@@ -44,8 +44,8 @@ trait WireMockHelper extends BeforeAndAfterAll with BeforeAndAfterEach with Stat
     server.stop()
   }
 
-  def gatewayTimeout() = status(GATEWAY_TIMEOUT)
-  def badGateway() = status(BAD_GATEWAY)
+  def gatewayTimeout(): ResponseDefinitionBuilder = status(GATEWAY_TIMEOUT)
+  def badGateway(): ResponseDefinitionBuilder = status(BAD_GATEWAY)
 
   def stubPostServer(willReturn: ResponseDefinitionBuilder, url: String): StubMapping =
     server.stubFor(
