@@ -23,7 +23,8 @@ import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
 import uk.gov.hmrc.http.HttpReads.Implicits.readRaw
 import uk.gov.hmrc.nationalinsurancerecord.domain.Done
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration.DurationInt
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 abstract class InternalAuthTokenInitializer {
   val initializeToken: Future[Done]
@@ -43,11 +44,12 @@ class InternalAuthTokenInitializerImpl @Inject()(
   private val authToken = appContext.internalAuthToken
   private val internalAuthServiceUrl = appConfig.internalAuthUrl
 
-  override val initializeToken: Future[Done] = {
+  override val initializeToken: Future[Done] =
     validateToken(authToken).flatMap{ isValid =>
       if(isValid) Future.successful(Done) else reinitializeToken(authToken)
     }
-  }
+
+  Await.result(initializeToken, 30.seconds)
 
   private def validateToken(token: String): Future[Boolean] =
     httpClient.get(url"$internalAuthServiceUrl/test-only/token")(HeaderCarrier())
@@ -62,13 +64,13 @@ class InternalAuthTokenInitializerImpl @Inject()(
         "principal" -> appName,
         "permissions" -> Seq(
           Json.obj(
-            "resourceType" -> "tax-credits-submissions",
+            "resourceType" -> "ni-and-sp-proxy-cache",
             "resourceLocation" -> "*",
-            "actions" -> List("WRITE")
+            "actions" -> List("READ")
           )
         )
       ))
-      .execute.flatMap{ response =>
+      .execute.flatMap { response =>
       if (response.status == 201) {
         Future.successful(Done)
       }

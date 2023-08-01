@@ -21,7 +21,7 @@ import play.api.Logging
 import play.api.libs.json._
 import play.api.http.Status.BAD_GATEWAY
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.{HeaderCarrier, HeaderNames, HttpClient, HttpException, HttpResponse, UpstreamErrorResponse}
+import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.HttpReadsInstances.readEitherOf
 import uk.gov.hmrc.mongoFeatureToggles.services.FeatureFlagService
@@ -163,6 +163,8 @@ class DesConnector @Inject()(
         val token: String = if (proxyCache.isEnabled) appContext.internalAuthToken
           else authToken
 
+        val headerCarrier: HeaderCarrier = hc.copy(authorization = Some(Authorization(token)))
+
         val timerContext = metrics.startTimer(api)
         val headers = Seq(
           HeaderNames.authorisation -> token,
@@ -173,7 +175,7 @@ class DesConnector @Inject()(
         )
 
         http
-          .GET[Either[UpstreamErrorResponse, HttpResponse]](url, headers = headers)
+          .GET[Either[UpstreamErrorResponse, HttpResponse]](url, headers = headers)(readEitherOf, headerCarrier, executionContext)
           .transform {
             result =>
               timerContext.stop()
