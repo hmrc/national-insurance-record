@@ -1,11 +1,11 @@
 package uk.gov.hmrc.nationalinsurancerecord.config
 
+import akka.Done
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, get, getRequestedFor, post, postRequestedFor, urlMatching}
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import play.api.cache.AsyncCacheApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import uk.gov.hmrc.nationalinsurancerecord.domain.Done
 import uk.gov.hmrc.nationalinsurancerecord.test_utils.IntegrationBaseSpec
 
 class InternalAuthTokenInitializerISpec extends IntegrationBaseSpec {
