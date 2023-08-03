@@ -34,8 +34,7 @@ class InternalAuthTokenInitializerISpec extends IntegrationBaseSpec {
           .configure(
             "microservice.services.internal-auth.port" -> server.port(),
             "appName" -> appName,
-            "internal-auth.token" -> authToken,
-            "internal-auth.isTestOnlyEndpoint" -> false
+            "internal-auth.token" -> authToken
           )
           .build()
 
@@ -66,7 +65,8 @@ class InternalAuthTokenInitializerISpec extends IntegrationBaseSpec {
           .configure(
             "microservice.services.internal-auth.port" -> server.port(),
             "appName" -> appName,
-            "internal-auth.token" -> authToken
+            "internal-auth.token" -> authToken,
+            "internal-auth.isTestOnlyEndpoint" -> true
           )
           .build()
 
@@ -97,7 +97,8 @@ class InternalAuthTokenInitializerISpec extends IntegrationBaseSpec {
           .configure(
             "microservice.services.internal-auth.port" -> server.port(),
             "appName" -> appName,
-            "internal-auth.token" -> authToken
+            "internal-auth.token" -> authToken,
+            "internal-auth.isTestOnlyEndpoint" -> true
           )
           .build()
 

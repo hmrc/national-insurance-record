@@ -45,9 +45,15 @@ lazy val microservice = Project(appName, file("."))
     routesGenerator := InjectedRoutesGenerator
   )
   .configs(IntegrationTest)
-  .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
+  .settings(inConfig(IntegrationTest)(itSettings): _*)
   .settings(
-    IntegrationTest / unmanagedSourceDirectories := (IntegrationTest / baseDirectory)(base => Seq(base / "it")).value,
-    addTestReportOption(IntegrationTest, "int-test-reports"),
-    IntegrationTest / parallelExecution := false
+    Test / javaOptions += "-Dconfig.file=conf/test.application.conf"
   )
+
+val itSettings = Defaults.itSettings ++ Seq(
+  fork := true,
+  unmanagedSourceDirectories := (IntegrationTest / baseDirectory)(base => Seq(base / "it")).value,
+  addTestReportOption(IntegrationTest, "int-test-reports"),
+  parallelExecution := false,
+  javaOptions += "-Dconfig.file=conf/test.application.conf"
+)
