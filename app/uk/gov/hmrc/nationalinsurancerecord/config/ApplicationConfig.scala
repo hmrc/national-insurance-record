@@ -27,6 +27,7 @@ class ApplicationConfig @Inject()(servicesConfig: ServicesConfig) {
   val desUrl = servicesConfig.baseUrl("des-hod")
   val proxyCacheUrl = servicesConfig.baseUrl("ni-and-sp-proxy-cache")
   val authUrl = servicesConfig.baseUrl("auth")
+  val internalAuthUrl = servicesConfig.baseUrl("internal-auth")
 
   val responseCacheTTL = servicesConfig.getInt("mongodb.responseTTL")
   val responseCacheCollectionName = servicesConfig.getString("mongodb.collectionName")

@@ -26,4 +26,6 @@ class AppContext @Inject()(configuration: Configuration) {
     .getOrElse(throw new RuntimeException("api.gateway.context is not configured"))
   lazy val access = configuration.getOptional[Configuration]("api.access")
   lazy val status = configuration.getOptional[String]("api.status")
+  lazy val internalAuthToken = configuration.get[String]("internal-auth.token")
+  lazy val internalAuthTestOnlyEndpoint  = configuration.get[String]("internal-auth.isTestOnlyEndpoint")
 }

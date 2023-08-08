@@ -581,7 +581,7 @@ class DesConnectorSpec
       await(connector.getLiabilities(nino)(headerCarrier))
 
       server.verify(getRequestedFor(urlEqualTo(proxyCacheNiRecordUrl))
-        .withHeader(HeaderNames.authorisation, equalTo(appConfig.authorization))
+        .withHeader(HeaderNames.authorisation, equalTo("a46d4d21-8adf-4190-820b-d730d8b0042f"))
         .withHeader("Originator-Id", equalTo("DA_PF"))
         .withHeader("Environment", equalTo(appConfig.desEnvironment))
         .withHeader("CorrelationId", matching("[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}"))

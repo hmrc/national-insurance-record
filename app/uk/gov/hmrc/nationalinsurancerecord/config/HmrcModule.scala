@@ -21,7 +21,14 @@ import play.api.{Configuration, Environment}
 import uk.gov.hmrc.nationalinsurancerecord.module.ApplicationStartUp
 
 class HmrcModule extends Module {
-  override def bindings(environment: Environment, configuration: Configuration): collection.Seq[Binding[_]] = Seq(
-    bind[ApplicationStartUp].toSelf.eagerly()
-  )
+  override def bindings(environment: Environment, configuration: Configuration): collection.Seq[Binding[_]] = {
+    val internalAuthBinding =
+      if (configuration.get[Boolean]("internal-auth.isTestOnlyEndpoint"))
+        Seq(bind[InternalAuthTokenInitializer].to[InternalAuthTokenInitializerImpl].eagerly())
+      else Seq(bind[InternalAuthTokenInitializer].to[InternalAuthTokenInitializerNonLocal].eagerly())
+
+    Seq(
+      bind[ApplicationStartUp].toSelf.eagerly()
+    ) ++ internalAuthBinding
+  }
 }
