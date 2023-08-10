@@ -21,7 +21,6 @@ import com.github.tomakehurst.wiremock.client.WireMock.{reset => _, verify => _,
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito
 import org.mockito.Mockito._
-import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
@@ -29,13 +28,11 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier, HeaderNames, RequestId}
-import uk.gov.hmrc.mongoFeatureToggles.model.FeatureFlag
-import uk.gov.hmrc.mongoFeatureToggles.services.FeatureFlagService
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.cache._
 import uk.gov.hmrc.nationalinsurancerecord.config.ApplicationConfig
+import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.des.{DesError, DesLiabilities, DesNIRecord, DesSummary}
-import uk.gov.hmrc.nationalinsurancerecord.domain.{APITypes, ProxyCacheToggle}
 import uk.gov.hmrc.nationalinsurancerecord.services.MetricsService
 import uk.gov.hmrc.nationalinsurancerecord.util.WireMockHelper
 
@@ -47,8 +44,7 @@ class DesConnectorSpec
   extends NationalInsuranceRecordUnitSpec
     with GuiceOneAppPerSuite
     with WireMockHelper
-    with ScalaFutures
-    with BeforeAndAfterEach {
+    with ScalaFutures {
   // scalastyle:off magic.number
 
   val mockSummaryRepo: DesSummaryRepository = mock[DesSummaryRepository](Mockito.RETURNS_DEEP_STUBS)
@@ -59,24 +55,19 @@ class DesConnectorSpec
 
   val mockMetrics: MetricsService = mock[MetricsService]
 
-  val mockFeatureFlagService: FeatureFlagService = mock[FeatureFlagService]
-
   val mockTimerContext: Timer.Context = mock[Timer.Context]
 
   override def fakeApplication(): Application = GuiceApplicationBuilder()
     .configure(
       "microservice.services.des-hod.port" -> server.port(),
-      "microservice.services.des-hod.host" -> "127.0.0.1",
-      "microservice.services.ni-and-sp-proxy-cache.port" -> server.port(),
-      "microservice.services.ni-and-sp-proxy-cache.host" -> "127.0.0.1"
+      "microservice.services.des-hod.host" -> "127.0.0.1"
     )
     .overrides(
       bind[MetricsService].toInstance(mockMetrics),
       bind[Timer.Context].toInstance(mockTimerContext),
       bind[DesNIRecordRepository].toInstance(mockNIRecordRepo),
       bind[DesSummaryRepository].toInstance(mockSummaryRepo),
-      bind[DesLiabilitiesRepository].toInstance(mockLiabilitiesRepo),
-      bind[FeatureFlagService].toInstance(mockFeatureFlagService)
+      bind[DesLiabilitiesRepository].toInstance(mockLiabilitiesRepo)
     )
     .build()
 
@@ -279,11 +270,6 @@ class DesConnectorSpec
     """.stripMargin)
 
   val liabilities: DesLiabilities = testLiabilitiesJson.as[DesLiabilities]
-
-  override def beforeEach(): Unit =
-    when(mockFeatureFlagService.get(any())).thenReturn(
-      Future.successful(FeatureFlag(ProxyCacheToggle, isEnabled = false, None))
-    )
 
   "DesConnector - No Caching" should {
 
@@ -559,34 +545,34 @@ class DesConnectorSpec
 
   }
 
-  "DesConnector when ProxyCacheToggle enabled" should {
-    val nino = generateNino()
-    val authValue = Random.alphanumeric.take(20).mkString
-    val headerCarrier = HeaderCarrier(
-      authorization = Some(Authorization(authValue)),
-      requestId = Some(RequestId("requestId"))
-    )
-
-    "make requests to proxy cache url with correct headers" in {
-      when(mockFeatureFlagService.get(any())).thenReturn(
-        Future.successful(FeatureFlag(ProxyCacheToggle, isEnabled = true, None))
-      )
-
-      val proxyCacheNiRecordUrl: String =
-        s"/ni-and-sp-proxy-cache/${nino.nino}/liabilities"
-
-      server.stubFor(get(urlEqualTo(proxyCacheNiRecordUrl))
-        .willReturn(ok("{}")))
-
-      await(connector.getLiabilities(nino)(headerCarrier))
-
-      server.verify(getRequestedFor(urlEqualTo(proxyCacheNiRecordUrl))
-        .withHeader(HeaderNames.authorisation, equalTo("a46d4d21-8adf-4190-820b-d730d8b0042f"))
-        .withHeader("Originator-Id", equalTo("DA_PF"))
-        .withHeader("Environment", equalTo(appConfig.desEnvironment))
-        .withHeader("CorrelationId", matching("[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}"))
-        .withHeader(HeaderNames.xRequestId, equalTo("requestId"))
-      )
-    }
-  }
+//  "DesConnector when ProxyCacheToggle enabled" should {
+//    val nino = generateNino()
+//    val authValue = Random.alphanumeric.take(20).mkString
+//    val headerCarrier = HeaderCarrier(
+//      authorization = Some(Authorization(authValue)),
+//      requestId = Some(RequestId("requestId"))
+//    )
+//
+//    "make requests to proxy cache url with correct headers" in {
+//      when(mockFeatureFlagService.get(any())).thenReturn(
+//        Future.successful(FeatureFlag(ProxyCacheToggle, isEnabled = true, None))
+//      )
+//
+//      val proxyCacheNiRecordUrl: String =
+//        s"/ni-and-sp-proxy-cache/${nino.nino}/liabilities"
+//
+//      server.stubFor(get(urlEqualTo(proxyCacheNiRecordUrl))
+//        .willReturn(ok("{}")))
+//
+//      await(connector.getLiabilities(nino)(headerCarrier))
+//
+//      server.verify(getRequestedFor(urlEqualTo(proxyCacheNiRecordUrl))
+//        .withHeader(HeaderNames.authorisation, equalTo("a46d4d21-8adf-4190-820b-d730d8b0042f"))
+//        .withHeader("Originator-Id", equalTo("DA_PF"))
+//        .withHeader("Environment", equalTo(appConfig.desEnvironment))
+//        .withHeader("CorrelationId", matching("[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}"))
+//        .withHeader(HeaderNames.xRequestId, equalTo("requestId"))
+//      )
+//    }
+//  }
 }

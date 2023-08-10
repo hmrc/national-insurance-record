@@ -18,21 +18,24 @@ package uk.gov.hmrc.nationalinsurancerecord.util
 
 import play.api.libs.json._
 
-import scala.util.Try
-import scala.collection
+import scala.collection.immutable
+import scala.util.{Failure, Success, Try}
 
 object JsonDepersonaliser {
 
-  def depersonalise(json: JsValue): Try[String] = {
-    Try(Json.prettyPrint(depersonaliseValue(json)))
-  }
+  def depersonalise(json: JsValue): String =
+    Try(Json.prettyPrint(depersonaliseValue(json))) match {
+      case Success(s) =>
+        s"Depersonalised JSON\n$s"
+      case Failure(e) =>
+        s"JSON could not be depersonalised\n${e.toString}"
+    }
 
   def depersonaliseObject(obj: JsObject): JsObject = {
 
     val underlying: Map[String, JsValue] = (for {
       (key, value) <- obj.fields
-    }
-    yield {
+    } yield {
       (key, depersonaliseValue(value))
     }).toMap
 
@@ -44,8 +47,7 @@ object JsonDepersonaliser {
 
     val value: collection.IndexedSeq[JsValue] = for {
       value <- array.value
-    }
-    yield {
+    } yield {
       depersonaliseValue(value)
     }
 
@@ -53,8 +55,7 @@ object JsonDepersonaliser {
 
   }
 
-  def depersonaliseValue(value: JsValue): JsValue = {
-
+  def depersonaliseValue(value: JsValue): JsValue =
     value match {
       case v: JsArray   => depersonaliseArray(v)
       case _: JsBoolean => JsBoolean(false)
@@ -64,14 +65,25 @@ object JsonDepersonaliser {
       case JsNull       => JsNull
     }
 
-  }
 
-  def depersonaliseString(string: String): String = {
+  def depersonaliseString(string: String): String =
     string.replaceAll("[0-9]", "1").replaceAll("[a-zA-Z]", "a")
-  }
 
-  def depersonaliseNumber(number: BigDecimal): BigDecimal = {
+  def depersonaliseNumber(number: BigDecimal): BigDecimal =
     BigDecimal.apply(number.toString().replaceAll("[0-9]", "1"))
-  }
 
+  def formatJsonErrors(errors: immutable.Seq[(JsPath, immutable.Seq[JsonValidationError])]): String =
+    s"JSON Validation Error: ${
+      errors
+        .map(p => s"${p._1.toString()} - ${p._2.map(e => removeJson(e.message)).mkString(",")}")
+        .mkString(" | ")
+    }"
+
+  private def removeJson(message: String): String =
+    message.indexOf("{") match {
+      case i if i != -1 =>
+        s"${message.substring(0, i - 1)} [JSON removed]"
+      case _ =>
+        message
+    }
 }
