@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.domain.des
 
+import play.api.libs.json.Json
+
 import java.time.LocalDate
 import scala.io.Source
 
@@ -110,4 +112,11 @@ object ProxyCacheTestData {
       DesLiability(Some(45))
     )
   )
+
+  val proxyCacheData: ProxyCacheData =
+    ProxyCacheData(
+      summary = Json.parse(summary).as[DesSummary],
+      nIRecord = Json.parse(niRecord).as[DesNIRecord],
+      liabilities = Json.parse(desLiabilitiesJson).as[DesLiabilities]
+    )
 }

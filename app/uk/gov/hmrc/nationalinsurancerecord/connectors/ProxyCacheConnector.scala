@@ -79,15 +79,21 @@ class ProxyCacheConnector @Inject () (
                 val formattedErrors: String =
                   formatJsonErrors(errors.asInstanceOf[immutable.Seq[(JsPath, immutable.Seq[JsonValidationError])]])
 
+                val message: String =
+                  s"Unable to de-serialise proxy cache data: $formattedErrors\n${depersonalise(response.json)}"
+
+                logger.warn(s"$message")
+
                 Left(UpstreamErrorResponse.apply(
-                  message    = s"Unable to de-serialise proxy cache data: $formattedErrors\n${depersonalise(response.json)}",
-                  statusCode = response.status
+                  message    = message,
+                  statusCode = 500
                 ))
               },
               success =>
                 Right(success)
             )
         case Left(errorResponse) =>
+          logger.warn(s"${errorResponse.message}")
           Left(errorResponse)
       }
   }

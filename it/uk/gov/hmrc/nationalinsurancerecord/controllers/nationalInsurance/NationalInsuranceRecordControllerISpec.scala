@@ -38,7 +38,7 @@ import scala.concurrent.Future
 
 class NationalInsuranceRecordControllerISpec extends IntegrationBaseSpec with Results {
 
-  val mockCopeExclusionAction: CopeExclusionAction =
+  private val mockCopeExclusionAction: CopeExclusionAction =
     mock[CopeExclusionAction]
 
   private val mockFeatureFlagService: FeatureFlagService =
@@ -71,10 +71,11 @@ class NationalInsuranceRecordControllerISpec extends IntegrationBaseSpec with Re
         |""".stripMargin
 
     stubPostServer(ok(authResponse), "/auth/authorise")
-    when(mockCopeExclusionAction.filterCopeExclusions(any())).thenReturn(new FakeAction[AnyContent]())
+    when(mockCopeExclusionAction.filterCopeExclusions(any()))
+      .thenReturn(new FakeAction[AnyContent]())
   }
 
-  val nino: Nino = generateNino
+  private val nino: Nino = generateNino
 
   private val requests = List(
     notFound() -> "404" -> NOT_FOUND,
@@ -85,17 +86,21 @@ class NationalInsuranceRecordControllerISpec extends IntegrationBaseSpec with Re
     unauthorized() -> "401" -> BAD_GATEWAY
   )
 
+  private val controllerUrl: String = s"/ni/$nino"
+
+  private val desUrl: String = s"/individuals/${nino.withoutSuffix}/pensions/ni"
+
+  private val proxyCacheUrl: String = s"/ni-and-sp-proxy-cache/${nino.nino}"
+
   "NationalInsuranceRecordController" must {
-    val url = s"/individuals/${nino.withoutSuffix}/pensions/ni"
-    val controllerUrl = s"/ni/$nino"
 
     requests.foreach {
       case ((errorResponse, errorCode), statusCode) =>
         s"return status code $statusCode for $errorCode" in {
-          when(mockFeatureFlagService.get(ArgumentMatchers.any[FeatureFlagName]())).thenReturn(
-            Future.successful(FeatureFlag(ProxyCacheToggle, isEnabled = false))
-          )
-          stubGetServer(errorResponse, url)
+          when(mockFeatureFlagService.get(ArgumentMatchers.any[FeatureFlagName]()))
+            .thenReturn(Future.successful(FeatureFlag(ProxyCacheToggle, isEnabled = false)))
+
+          stubGetServer(errorResponse, desUrl)
 
           val request = FakeRequest(GET, controllerUrl)
             .withHeaders("Accept" -> "application/vnd.hmrc.1.0+json")
@@ -109,16 +114,14 @@ class NationalInsuranceRecordControllerISpec extends IntegrationBaseSpec with Re
   }
 
   "NationalInsuranceRecordController when ProxyCacheToggle is enabled" must {
-    val url = s"/ni-and-sp-proxy-cache/${nino.nino}/ni"
-    val controllerUrl = s"/ni/$nino"
 
     requests.foreach {
       case ((errorResponse, errorCode), statusCode) =>
         s"return status code $statusCode for $errorCode" in {
-          when(mockFeatureFlagService.get(ArgumentMatchers.any[FeatureFlagName]())).thenReturn(
-            Future.successful(FeatureFlag(ProxyCacheToggle, isEnabled = true))
-          )
-          stubGetServer(errorResponse, url)
+          when(mockFeatureFlagService.get(ArgumentMatchers.any[FeatureFlagName]()))
+            .thenReturn(Future.successful(FeatureFlag(ProxyCacheToggle, isEnabled = true)))
+
+          stubGetServer(errorResponse, proxyCacheUrl)
 
           val request = FakeRequest(GET, controllerUrl)
             .withHeaders("Accept" -> "application/vnd.hmrc.1.0+json")

@@ -458,22 +458,10 @@ class DesConnectorSpec
       await(desSummaryF) shouldBe testSummaryModel
     }
 
-    "return valid NIRecord response" in {
-      when(mockNIRecordRepo().findByNino(any())(any(), any())).thenReturn(Future.successful(Some(niRecord)))
-      val desNIRecordF = connector.getNationalInsuranceRecord(generateNino())(HeaderCarrier())
-      await(desNIRecordF) shouldBe niRecord
-    }
-
     "return valid NIRecord from cache" in {
       when(mockNIRecordRepo().findByNino(any())(any(), any())).thenReturn(Future.successful(Some(niRecord)))
       val desNIRecordF = connector.getNationalInsuranceRecord(generateNino())(HeaderCarrier())
       await(desNIRecordF) shouldBe niRecord
-    }
-
-    "return valid Liabilities response" in {
-      when(mockLiabilitiesRepo().findByNino(any())(any(), any())).thenReturn(Future.successful(Some(liabilities)))
-      val desLiabilitiesF = connector.getLiabilities(generateNino())(HeaderCarrier())
-      await(desLiabilitiesF) shouldBe liabilities
     }
 
     "return valid Liabilities from cache" in {

@@ -18,7 +18,6 @@ package uk.gov.hmrc.nationalinsurancerecord.domain.des
 
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
-import play.api.libs.json.Json
 import uk.gov.hmrc.nationalinsurancerecord.domain.des.ProxyCacheTestData._
 
 class ProxyCacheDataSpec
@@ -27,13 +26,6 @@ class ProxyCacheDataSpec
 
   "ProxyCacheData" must {
     "read correctly" in {
-      val proxyCacheData =
-        ProxyCacheData(
-          summary     = Json.parse(summary).as[DesSummary],
-          nIRecord    = Json.parse(niRecord).as[DesNIRecord],
-          liabilities = Json.parse(desLiabilitiesJson).as[DesLiabilities]
-        )
-
       proxyCacheData.summary shouldBe desSummary
       proxyCacheData.nIRecord shouldBe desNIRecord
       proxyCacheData.liabilities shouldBe desLiabilities
