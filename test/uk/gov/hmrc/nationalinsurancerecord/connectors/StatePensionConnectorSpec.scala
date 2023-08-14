@@ -22,13 +22,16 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
-import play.api.http.Status._
 import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
-import uk.gov.hmrc.nationalinsurancerecord.util.WireMockHelper
+import utils.WireMockHelper
 
-class StatePensionConnectorSpec extends NationalInsuranceRecordUnitSpec with GuiceOneAppPerSuite with WireMockHelper with ScalaFutures {
+class StatePensionConnectorSpec
+  extends NationalInsuranceRecordUnitSpec
+    with GuiceOneAppPerSuite
+    with WireMockHelper
+    with ScalaFutures {
 
   implicit val defaultPatience =
     PatienceConfig(timeout = Span(2, Seconds), interval = Span(5, Millis))

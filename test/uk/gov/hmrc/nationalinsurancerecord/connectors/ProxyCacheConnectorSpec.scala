@@ -18,23 +18,29 @@ package uk.gov.hmrc.nationalinsurancerecord.connectors
 
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
 import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.http.Fault
+import org.scalatest.RecoverMethods
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.{Authorization, HeaderCarrier, HeaderNames, RequestId, UpstreamErrorResponse}
+import uk.gov.hmrc.http.{Authorization, HeaderCarrier, HeaderNames, RequestId}
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.config.{AppContext, ApplicationConfig}
-import uk.gov.hmrc.nationalinsurancerecord.domain.des.ProxyCacheTestData._
-import uk.gov.hmrc.nationalinsurancerecord.util.WireMockHelper
+import uk.gov.hmrc.nationalinsurancerecord.domain.des.DesError
+import utils.ProxyCacheTestData._
+import utils.WireMockHelper
+
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class ProxyCacheConnectorSpec
   extends NationalInsuranceRecordUnitSpec
     with GuiceOneAppPerSuite
     with WireMockHelper
-    with ScalaFutures {
+    with ScalaFutures
+    with RecoverMethods {
 
   server.start()
 
@@ -67,7 +73,7 @@ class ProxyCacheConnectorSpec
 
   private val requests: Seq[(ResponseDefinitionBuilder, String)] = Seq(
     ok("""{"number": 456, "name": "def"}""") -> "invalidJson",
-    serverError().withStatus(500) -> "internalServerError",
+    serverError() -> "internalServerError",
     badRequest() -> "badRequest",
     aResponse().withStatus(502) -> "gatewayTimeout",
     serviceUnavailable() -> "serviceUnavailable"
@@ -91,12 +97,22 @@ class ProxyCacheConnectorSpec
     requests.foreach {
       case (errorResponse, description) =>
 
-      s"return Left(UpstreamErrorResponse) for $description" in {
+      s"return Left(DesError) for $description" in {
         server.stubFor(get(urlEqualTo(url))
           .willReturn(errorResponse))
 
-        await(connector.getProxyCacheData(nino)(headerCarrier).failed) shouldBe a[UpstreamErrorResponse]
+        await(connector.getProxyCacheData(nino)(headerCarrier).failed) shouldBe a[DesError]
       }
+    }
+
+    "return default Left(DesError)" in {
+      server.stubFor(get(urlEqualTo(url))
+        .willReturn(aResponse().withFault(Fault.CONNECTION_RESET_BY_PEER)))
+
+      val ex: DesError =
+        await(recoverToExceptionIf[DesError](connector.getProxyCacheData(nino)(headerCarrier)))
+
+      ex shouldBe a[DesError.OtherError]
     }
   }
 

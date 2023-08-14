@@ -56,9 +56,12 @@ class NationalInsuranceRecordControllerISpec extends IntegrationBaseSpec with Re
       "microservice.services.des-hod.port" -> server.port(),
       "microservice.services.ni-and-sp-proxy-cache.host" -> "127.0.0.1",
       "microservice.services.ni-and-sp-proxy-cache.port" -> server.port(),
+      "microservice.services.citizen-details.host" -> "127.0.0.1",
+      "microservice.services.citizen-details.port" -> server.port(),
       "auditing.enabled" -> false
     ).build()
 
+  private val nino: Nino = generateNino
   override def beforeEach(): Unit = {
     super.beforeEach()
 
@@ -71,19 +74,18 @@ class NationalInsuranceRecordControllerISpec extends IntegrationBaseSpec with Re
         |""".stripMargin
 
     stubPostServer(ok(authResponse), "/auth/authorise")
+    stubGetServer(ok(""), s"/citizen-details/${nino.nino}/designatory-details/")
     when(mockCopeExclusionAction.filterCopeExclusions(any()))
       .thenReturn(new FakeAction[AnyContent]())
   }
 
-  private val nino: Nino = generateNino
-
   private val requests = List(
-    notFound() -> "404" -> NOT_FOUND,
-    badRequest() -> "400" -> BAD_REQUEST,
-    gatewayTimeout() -> "504" -> GATEWAY_TIMEOUT,
-    badGateway() -> "502" -> BAD_GATEWAY,
-    serverError() -> "500" -> BAD_GATEWAY,
-    unauthorized() -> "401" -> BAD_GATEWAY
+    badRequest()     -> "400" -> BAD_REQUEST,
+    unauthorized()   -> "401" -> BAD_GATEWAY,
+    notFound()       -> "404" -> NOT_FOUND,
+    serverError()    -> "500" -> BAD_GATEWAY,
+    badGateway()     -> "502" -> BAD_GATEWAY,
+    gatewayTimeout() -> "504" -> GATEWAY_TIMEOUT
   )
 
   private val controllerUrl: String = s"/ni/$nino"
@@ -96,7 +98,7 @@ class NationalInsuranceRecordControllerISpec extends IntegrationBaseSpec with Re
 
     requests.foreach {
       case ((errorResponse, errorCode), statusCode) =>
-        s"return status code $statusCode for $errorCode" in {
+        s"return status code $statusCode for $errorCode when ProxyCacheToggle is disabled" in {
           when(mockFeatureFlagService.get(ArgumentMatchers.any[FeatureFlagName]()))
             .thenReturn(Future.successful(FeatureFlag(ProxyCacheToggle, isEnabled = false)))
 
@@ -113,11 +115,11 @@ class NationalInsuranceRecordControllerISpec extends IntegrationBaseSpec with Re
     }
   }
 
-  "NationalInsuranceRecordController when ProxyCacheToggle is enabled" must {
+  "NationalInsuranceRecordController" must {
 
     requests.foreach {
       case ((errorResponse, errorCode), statusCode) =>
-        s"return status code $statusCode for $errorCode" in {
+        s"return status code $statusCode for $errorCode when ProxyCacheToggle is enabled" in {
           when(mockFeatureFlagService.get(ArgumentMatchers.any[FeatureFlagName]()))
             .thenReturn(Future.successful(FeatureFlag(ProxyCacheToggle, isEnabled = true)))
 

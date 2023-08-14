@@ -24,6 +24,7 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.cache.AsyncCacheApi
 import uk.gov.hmrc.domain.{Generator, Nino}
+import utils.WireMockHelper
 
 import java.util.UUID
 import scala.concurrent.duration.Duration

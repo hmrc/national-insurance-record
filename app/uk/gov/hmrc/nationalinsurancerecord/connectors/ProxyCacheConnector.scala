@@ -20,20 +20,20 @@ import play.api.Logging
 import play.api.libs.json._
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{HeaderCarrier, HeaderNames, HttpClient, HttpResponse, UpstreamErrorResponse}
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, HeaderNames, HttpResponse, StringContextOps, UpstreamErrorResponse}
 import uk.gov.hmrc.nationalinsurancerecord.config.{AppContext, ApplicationConfig}
-import uk.gov.hmrc.nationalinsurancerecord.domain.des.ProxyCacheData
-import uk.gov.hmrc.nationalinsurancerecord.util.JsonDepersonaliser.{depersonalise, formatJsonErrors}
+import uk.gov.hmrc.nationalinsurancerecord.domain.des.{DesError, ProxyCacheData}
 
 import java.util.UUID
 import javax.inject.Inject
-import scala.collection.immutable
 import scala.concurrent.{ExecutionContext, Future}
 
 class ProxyCacheConnector @Inject () (
-  httpClient: HttpClient,
+  httpClient: HttpClientV2,
   appContext: AppContext,
-  appConfig: ApplicationConfig
+  appConfig: ApplicationConfig,
+  connectorUtil: ConnectorUtil
 )(
   implicit val executionContext: ExecutionContext
 ) extends Logging {
@@ -53,48 +53,19 @@ class ProxyCacheConnector @Inject () (
   private def connectToProxyCache(
     nino: Nino
   )(
-    implicit headerCarrier: HeaderCarrier
-  ): Future[Either[UpstreamErrorResponse, ProxyCacheData]] = {
-    httpClient
-      .GET[Either[UpstreamErrorResponse, HttpResponse]](
-        url     = s"${appConfig.proxyCacheUrl}/ni-and-sp-proxy-cache/$nino",
-        headers = Seq(
-          HeaderNames.authorisation -> appContext.internalAuthToken,
-          "Originator-Id"           -> "DA_PF",
-          "Environment"             -> appConfig.desEnvironment,
-          "CorrelationId"           -> UUID.randomUUID().toString,
-          HeaderNames.xRequestId    -> headerCarrier.requestId.fold("-")(_.value)
-        )
-      )(
-        rds = readEitherOf,
-        hc  = headerCarrier,
-        ec  = executionContext
-      ) map {
-        case Right(response) =>
-          response
-            .json
-            .validate[ProxyCacheData]
-            .fold(
-              errors => {
-                val formattedErrors: String =
-                  formatJsonErrors(errors.asInstanceOf[immutable.Seq[(JsPath, immutable.Seq[JsonValidationError])]])
-
-                val message: String =
-                  s"Unable to de-serialise proxy cache data: $formattedErrors\n${depersonalise(response.json)}"
-
-                logger.warn(s"$message")
-
-                Left(UpstreamErrorResponse.apply(
-                  message    = message,
-                  statusCode = 500
-                ))
-              },
-              success =>
-                Right(success)
-            )
-        case Left(errorResponse) =>
-          logger.warn(s"${errorResponse.message}")
-          Left(errorResponse)
-      }
+    implicit headerCarrier: HeaderCarrier,
+    reads: Reads[ProxyCacheData]
+  ): Future[Either[DesError, ProxyCacheData]] = {
+    connectorUtil.handleConnectorResponse(
+      futureResponse = httpClient
+        .get(url"${appConfig.proxyCacheUrl}/ni-and-sp-proxy-cache/$nino")
+        .setHeader(HeaderNames.authorisation -> appContext.internalAuthToken)
+        .setHeader("Originator-Id"           -> "DA_PF")
+        .setHeader("Environment"             -> appConfig.desEnvironment)
+        .setHeader("CorrelationId"           -> UUID.randomUUID().toString)
+        .setHeader(HeaderNames.xRequestId    -> headerCarrier.requestId.fold("-")(_.value))
+        .execute[Either[UpstreamErrorResponse, HttpResponse]],
+      jsonParseError = "proxy cache data"
+    )
   }
 }

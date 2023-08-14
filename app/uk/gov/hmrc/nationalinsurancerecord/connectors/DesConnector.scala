@@ -18,23 +18,21 @@ package uk.gov.hmrc.nationalinsurancerecord.connectors
 
 import com.google.inject.Inject
 import play.api.Logging
-import play.api.http.Status.BAD_GATEWAY
 import play.api.libs.json._
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.HttpReadsInstances.readEitherOf
 import uk.gov.hmrc.http._
+import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.nationalinsurancerecord.cache._
 import uk.gov.hmrc.nationalinsurancerecord.config.ApplicationConfig
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.des.{DesError, DesLiabilities, DesNIRecord, DesSummary}
 import uk.gov.hmrc.nationalinsurancerecord.services.{CachingService, MetricsService}
-import uk.gov.hmrc.nationalinsurancerecord.util.JsonDepersonaliser.{depersonalise, formatJsonErrors}
 import uk.gov.hmrc.nationalinsurancerecord.util.NIRecordConstants
 
 import java.util.UUID
-import scala.collection.immutable
 import scala.concurrent.{ExecutionContext, Future}
 
 class DesConnector @Inject()(
@@ -42,9 +40,10 @@ class DesConnector @Inject()(
   desNIRecordRepository: DesNIRecordRepository,
   desLiabilitiesRepository: DesLiabilitiesRepository,
   metrics: MetricsService,
-  http: HttpClient,
+  http: HttpClientV2,
   appConfig: ApplicationConfig,
-  implicit val executionContext: ExecutionContext
+  implicit val executionContext: ExecutionContext,
+  connectorUtil: ConnectorUtil
 ) extends Logging {
 
   private val authToken: String = appConfig.authorization
@@ -144,42 +143,22 @@ class DesConnector @Inject()(
     reads: Reads[A]
   ): Future[Either[DesError, A]] = {
     val timerContext = metrics.startTimer(api)
-    val headers = Seq(
-      HeaderNames.authorisation -> authToken,
-      "Originator-Id"           -> "DA_PF",
-      "Environment"             -> desEnvironment,
-      "CorrelationId"           -> UUID.randomUUID().toString,
-      HeaderNames.xRequestId    -> hc.requestId.fold("-")(_.value)
-    )
-
-    http
-      .GET[Either[UpstreamErrorResponse, HttpResponse]](url, headers = headers)(readEitherOf, hc, executionContext)
-      .transform {
-        result =>
-          timerContext.stop()
-          result
-      }.map {
-      case Right(response) =>
-        response.json.validate[A].fold(
-          errs => {
-            val formattedErrors: String =
-              formatJsonErrors(errs.asInstanceOf[immutable.Seq[(JsPath, immutable.Seq[JsonValidationError])]])
-
-            Left(DesError.JsonValidationError(
-              s"Unable to deserialise $api: $formattedErrors\n${depersonalise(response.json)}"
-            ))
-          },
-          valid =>
-            Right(valid)
-        )
-      case Left(error) =>
-        Left(DesError.HttpError(error))
-    } recover {
-      case error: HttpException =>
-        Left(DesError.HttpError(UpstreamErrorResponse(error.message, BAD_GATEWAY)))
-      case error =>
-        Left(DesError.OtherError(error))
-    } map {
+    connectorUtil.handleConnectorResponse(
+      futureResponse = http
+        .get(url"$url")
+        .setHeader(HeaderNames.authorisation -> authToken)
+        .setHeader("Originator-Id"           -> "DA_PF")
+        .setHeader("Environment"             -> desEnvironment)
+        .setHeader("CorrelationId"           -> UUID.randomUUID().toString)
+        .setHeader(HeaderNames.xRequestId    -> hc.requestId.fold("-")(_.value))
+        .execute[Either[UpstreamErrorResponse, HttpResponse]]
+        .transform {
+          result =>
+            timerContext.stop()
+            result
+        },
+      jsonParseError = api.toString
+    ) map {
       result =>
         result match {
           case Left(_) =>

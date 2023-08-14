@@ -34,7 +34,7 @@ import uk.gov.hmrc.nationalinsurancerecord.config.ApplicationConfig
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.des.{DesError, DesLiabilities, DesNIRecord, DesSummary}
 import uk.gov.hmrc.nationalinsurancerecord.services.MetricsService
-import uk.gov.hmrc.nationalinsurancerecord.util.WireMockHelper
+import utils.WireMockHelper
 
 import java.time.LocalDate
 import scala.concurrent.Future
@@ -532,35 +532,4 @@ class DesConnectorSpec
     }
 
   }
-
-//  "DesConnector when ProxyCacheToggle enabled" should {
-//    val nino = generateNino()
-//    val authValue = Random.alphanumeric.take(20).mkString
-//    val headerCarrier = HeaderCarrier(
-//      authorization = Some(Authorization(authValue)),
-//      requestId = Some(RequestId("requestId"))
-//    )
-//
-//    "make requests to proxy cache url with correct headers" in {
-//      when(mockFeatureFlagService.get(any())).thenReturn(
-//        Future.successful(FeatureFlag(ProxyCacheToggle, isEnabled = true, None))
-//      )
-//
-//      val proxyCacheNiRecordUrl: String =
-//        s"/ni-and-sp-proxy-cache/${nino.nino}/liabilities"
-//
-//      server.stubFor(get(urlEqualTo(proxyCacheNiRecordUrl))
-//        .willReturn(ok("{}")))
-//
-//      await(connector.getLiabilities(nino)(headerCarrier))
-//
-//      server.verify(getRequestedFor(urlEqualTo(proxyCacheNiRecordUrl))
-//        .withHeader(HeaderNames.authorisation, equalTo("a46d4d21-8adf-4190-820b-d730d8b0042f"))
-//        .withHeader("Originator-Id", equalTo("DA_PF"))
-//        .withHeader("Environment", equalTo(appConfig.desEnvironment))
-//        .withHeader("CorrelationId", matching("[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}"))
-//        .withHeader(HeaderNames.xRequestId, equalTo("requestId"))
-//      )
-//    }
-//  }
 }

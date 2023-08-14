@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nationalinsurancerecord.domain.des
+package utils
 
 import play.api.libs.json.Json
+import uk.gov.hmrc.nationalinsurancerecord.domain.des._
 
 import java.time.LocalDate
 import scala.io.Source

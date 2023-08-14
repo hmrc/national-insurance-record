@@ -18,7 +18,7 @@ package uk.gov.hmrc.nationalinsurancerecord.domain.des
 
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
-import uk.gov.hmrc.nationalinsurancerecord.domain.des.ProxyCacheTestData._
+import utils.ProxyCacheTestData._
 
 class ProxyCacheDataSpec
   extends AnyWordSpecLike
