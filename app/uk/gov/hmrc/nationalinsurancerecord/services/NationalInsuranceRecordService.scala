@@ -40,33 +40,21 @@ class NationalInsuranceRecordService @Inject()(
 ) {
 
   def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceRecord]] =
-    featureFlagService.get(ProxyCacheToggle).flatMap {
+    featureFlagService.get(ProxyCacheToggle) flatMap {
       proxyCache =>
-        citizenDetailsService.checkManualCorrespondenceIndicator(nino).flatMap {
+        citizenDetailsService.checkManualCorrespondenceIndicator(nino) flatMap {
           mci =>
             if (proxyCache.isEnabled) {
               proxyCacheConnector.getProxyCacheData(nino) map {
-                cacheData =>
-                  buildNationalInsuranceRecord(
-                    cacheData.nIRecord,
-                    cacheData.summary,
-                    cacheData.liabilities,
-                    mci
-                  )
+                pcd =>
+                  buildNationalInsuranceRecord(pcd.nIRecord, pcd.summary, pcd.liabilities, mci)
               }
             } else {
               for {
                 desNIRecord    <- des.getNationalInsuranceRecord(nino)
                 desLiabilities <- des.getLiabilities(nino)
                 desSummary     <- des.getSummary(nino)
-              } yield {
-                buildNationalInsuranceRecord(
-                  desNIRecord,
-                  desSummary,
-                  desLiabilities,
-                  mci
-                )
-              }
+              } yield buildNationalInsuranceRecord(desNIRecord, desSummary, desLiabilities, mci)
             }
         }
     }
