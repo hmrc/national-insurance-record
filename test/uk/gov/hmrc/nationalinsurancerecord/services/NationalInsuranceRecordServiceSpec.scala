@@ -157,7 +157,7 @@ class NationalInsuranceRecordServiceSpec
   private def proxyCacheData(summary: DesSummary = desSummary) =
     ProxyCacheData(
       summary     = summary,
-      nIRecord    = niRecordDES,
+      niRecord    = niRecordDES,
       liabilities = liabilities
     )
 

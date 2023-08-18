@@ -127,7 +127,7 @@ class DesConnector @Inject()(
       case None =>
         connectToDes(url, api)(hc, formatA).flatMap {
           case Right(response) =>
-            logger.debug(s"*~* - writing nino to cache: $nino")
+            logger.info(s"*~* - writing nino to cache: $nino")
             repository.insertByNino(nino, response)
             Future.successful(response)
           case Left(error) =>

@@ -16,32 +16,15 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.domain.des
 
-import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
 case class ProxyCacheData(
   summary: DesSummary,
-  nIRecord: DesNIRecord,
+  niRecord: DesNIRecord,
   liabilities: DesLiabilities
 )
 
 object ProxyCacheData {
-  implicit def reads: Reads[ProxyCacheData] =
-    (
-      (__ \ "summary" ).read[DesSummary] and
-      (__ \ "niRecord" ).read[DesNIRecord] and
-      (__ \ "liabilities" ).read[DesLiabilities]
-    )(
-      (summary, niRecord, liabilities) =>
-        ProxyCacheData(summary, niRecord, liabilities)
-    )
-
-  implicit def writes: Writes[ProxyCacheData] =
-    (
-      (__ \ "summary").write[DesSummary] and
-      (__ \ "niRecord").write[DesNIRecord] and
-      (__ \ "liabilities").write[DesLiabilities]
-    )(
-      unlift(ProxyCacheData.unapply)
-    )
+  implicit def format: Format[ProxyCacheData] =
+    Json.format[ProxyCacheData]
 }

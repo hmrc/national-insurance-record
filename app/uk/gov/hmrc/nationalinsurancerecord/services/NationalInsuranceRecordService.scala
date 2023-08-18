@@ -47,7 +47,7 @@ class NationalInsuranceRecordService @Inject()(
             if (proxyCache.isEnabled) {
               proxyCacheConnector.getProxyCacheData(nino) map {
                 pcd =>
-                  buildNationalInsuranceRecord(pcd.nIRecord, pcd.summary, pcd.liabilities, mci)
+                  buildNationalInsuranceRecord(pcd.niRecord, pcd.summary, pcd.liabilities, mci)
               }
             } else {
               for {
@@ -112,7 +112,7 @@ class NationalInsuranceRecordService @Inject()(
               proxyCacheConnector.getProxyCacheData(nino) map {
                 cacheData =>
                   buildTaxYear(
-                    cacheData.nIRecord,
+                    cacheData.niRecord,
                     cacheData.summary,
                     cacheData.liabilities,
                     mci,

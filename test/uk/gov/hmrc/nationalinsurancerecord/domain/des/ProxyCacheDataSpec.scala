@@ -27,7 +27,7 @@ class ProxyCacheDataSpec
   "ProxyCacheData" must {
     "read correctly" in {
       proxyCacheData.summary shouldBe desSummary
-      proxyCacheData.nIRecord shouldBe desNIRecord
+      proxyCacheData.niRecord shouldBe desNIRecord
       proxyCacheData.liabilities shouldBe desLiabilities
     }
   }

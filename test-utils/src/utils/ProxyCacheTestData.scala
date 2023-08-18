@@ -19,16 +19,15 @@ package utils
 import play.api.libs.json.Json
 import uk.gov.hmrc.nationalinsurancerecord.domain.des._
 
-import java.time.LocalDate
 import scala.io.Source
 
 object ProxyCacheTestData {
-  val niRecord: String =
+  val niRecordJson: String =
     Source
       .fromInputStream(getClass.getResourceAsStream("/json/niRecordDesProxyCacheTest.json"))
       .mkString
 
-  val summary: String =
+  val summaryJson: String =
     Source
       .fromInputStream(getClass.getResourceAsStream("/json/nisummaryDesTest.json"))
       .mkString
@@ -60,64 +59,19 @@ object ProxyCacheTestData {
       |}
   """.stripMargin
 
-  val desSummary: DesSummary = DesSummary(
-    rreToConsider = true,
-    dateOfDeath = Some(LocalDate.parse("2014-08-25")),
-    earningsIncludedUpTo = Some(LocalDate.parse("2014-01-01")),
-    dateOfBirth = Some(LocalDate.parse("2014-08-25")),
-    finalRelevantYear = Some(2014)
-  )
+  val desSummary: DesSummary =
+    Json.parse(summaryJson).as[DesSummary]
 
-  val desNIRecord: DesNIRecord = DesNIRecord(
-    numberOfQualifyingYears = 37,
-    nonQualifyingYears = 2,
-    nonQualifyingYearsPayable = 2,
-    dateOfEntry = Some(LocalDate.parse("1986-09-08")),
-    niTaxYears = List(
-      DesNITaxYear(
-        startTaxYear = 1986,
-        qualifying = true,
-        classThreePayableBy = None,
-        classThreePayableByPenalty = None,
-        classOneContribution = 416.99,
-        otherCredits = List(
-          DesOtherCredits(None, None, None)
-        )
-      ),
-      DesNITaxYear(
-        startTaxYear = 1987,
-        qualifying = true,
-        classThreePayableBy = None,
-        classThreePayableByPenalty = None,
-        classOneContribution = 466.85,
-        otherCredits = List(
-          DesOtherCredits(None, None, None)
-        )
-      ),
-      DesNITaxYear(
-        startTaxYear = 1988,
-        qualifying = true,
-        classThreePayableBy = None,
-        classThreePayableByPenalty = None,
-        classOneContribution = 530.07,
-        otherCredits = List(
-          DesOtherCredits(None, None, None)
-        )
-      )
-    )
-  )
+  val desNIRecord: DesNIRecord =
+    Json.parse(niRecordJson).as[DesNIRecord]
 
-  val desLiabilities: DesLiabilities = DesLiabilities(
-    liabilities = List(
-      DesLiability(Some(17)),
-      DesLiability(Some(45))
-    )
-  )
+  val desLiabilities: DesLiabilities =
+    Json.parse(desLiabilitiesJson).as[DesLiabilities]
 
   val proxyCacheData: ProxyCacheData =
     ProxyCacheData(
-      summary = Json.parse(summary).as[DesSummary],
-      nIRecord = Json.parse(niRecord).as[DesNIRecord],
-      liabilities = Json.parse(desLiabilitiesJson).as[DesLiabilities]
+      summary = desSummary,
+      niRecord = desNIRecord,
+      liabilities = desLiabilities
     )
 }

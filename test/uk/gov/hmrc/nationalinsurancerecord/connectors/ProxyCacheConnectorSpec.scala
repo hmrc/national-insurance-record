@@ -89,7 +89,7 @@ class ProxyCacheConnectorSpec
 
       result.liabilities shouldBe desLiabilities
       result.summary shouldBe desSummary
-      result.nIRecord shouldBe desNIRecord
+      result.niRecord shouldBe desNIRecord
     }
   }
 
