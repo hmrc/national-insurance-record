@@ -85,7 +85,7 @@ class ProxyCacheConnectorSpec
       server.stubFor(get(urlEqualTo(url))
         .willReturn(ok(Json.stringify(Json.toJson(proxyCacheData)))))
 
-      val result = await(connector.getProxyCacheData(nino)(headerCarrier))
+      val result = await(connector.get(nino)(headerCarrier))
 
       result.liabilities shouldBe desLiabilities
       result.summary shouldBe desSummary
@@ -101,7 +101,7 @@ class ProxyCacheConnectorSpec
         server.stubFor(get(urlEqualTo(url))
           .willReturn(errorResponse))
 
-        await(connector.getProxyCacheData(nino)(headerCarrier).failed) shouldBe a[DesError]
+        await(connector.get(nino)(headerCarrier).failed) shouldBe a[DesError]
       }
     }
 
@@ -110,7 +110,7 @@ class ProxyCacheConnectorSpec
         .willReturn(aResponse().withFault(Fault.CONNECTION_RESET_BY_PEER)))
 
       val ex: DesError =
-        await(recoverToExceptionIf[DesError](connector.getProxyCacheData(nino)(headerCarrier)))
+        await(recoverToExceptionIf[DesError](connector.get(nino)(headerCarrier)))
 
       ex shouldBe a[DesError.OtherError]
     }
@@ -122,7 +122,7 @@ class ProxyCacheConnectorSpec
       server.stubFor(get(urlEqualTo(url))
         .willReturn(ok(Json.stringify(Json.toJson(proxyCacheData)))))
 
-      await(connector.getProxyCacheData(nino)(headerCarrier))
+      await(connector.get(nino)(headerCarrier))
 
       server.verify(getRequestedFor(urlEqualTo(url))
         .withHeader(HeaderNames.authorisation, equalTo(appContext.internalAuthToken))

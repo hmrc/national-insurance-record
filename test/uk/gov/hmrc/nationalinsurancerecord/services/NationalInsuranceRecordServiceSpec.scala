@@ -209,7 +209,7 @@ class NationalInsuranceRecordServiceSpec
     when(mockFeatureFlagService.get(any()))
       .thenReturn(Future.successful(FeatureFlag(ProxyCacheToggle, isEnabled = true, None)))
 
-    when(mockProxyCacheConnector.getProxyCacheData(nino))
+    when(mockProxyCacheConnector.get(nino))
       .thenReturn(Future.successful(proxyCacheData()))
 
     val service: NationalInsuranceRecordService =
@@ -271,7 +271,7 @@ class NationalInsuranceRecordServiceSpec
         mockFeatureFlagService
       )
 
-    when(mockProxyCacheConnector.getProxyCacheData(nino))
+    when(mockProxyCacheConnector.get(nino))
       .thenReturn(Future.successful(proxyCacheData(exclusionsSummary)))
 
     exclusionsAssertions(service)
@@ -284,7 +284,7 @@ class NationalInsuranceRecordServiceSpec
 
     when(mockFeatureFlagService.get(any()))
       .thenReturn(Future.successful(FeatureFlag(ProxyCacheToggle, isEnabled = true, None)))
-    when(mockProxyCacheConnector.getProxyCacheData(nino))
+    when(mockProxyCacheConnector.get(nino))
       .thenReturn(Future.successful(proxyCacheData()))
 
     "proxy cache toggle is enabled" must {
@@ -359,7 +359,7 @@ class NationalInsuranceRecordServiceSpec
         result.map {
           ni =>
             ni shouldBe niRecord
-            verify(mockProxyCacheConnector, times(0)).getProxyCacheData(nino)
+            verify(mockProxyCacheConnector, times(0)).get(nino)
         }
       }
 
@@ -369,7 +369,7 @@ class NationalInsuranceRecordServiceSpec
         result.map {
           ty =>
             ty shouldBe niTaxYear
-            verify(mockProxyCacheConnector, times(0)).getProxyCacheData(nino)
+            verify(mockProxyCacheConnector, times(0)).get(nino)
         }
       }
     }

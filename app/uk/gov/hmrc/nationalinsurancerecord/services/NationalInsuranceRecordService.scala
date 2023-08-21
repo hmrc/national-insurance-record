@@ -45,16 +45,16 @@ class NationalInsuranceRecordService @Inject()(
         citizenDetailsService.checkManualCorrespondenceIndicator(nino) flatMap {
           mci =>
             if (proxyCache.isEnabled) {
-              proxyCacheConnector.getProxyCacheData(nino) map {
+              proxyCacheConnector.get(nino) map {
                 pcd =>
                   buildNationalInsuranceRecord(pcd.niRecord, pcd.summary, pcd.liabilities, mci)
               }
             } else {
               for {
-                desNIRecord    <- des.getNationalInsuranceRecord(nino)
-                desLiabilities <- des.getLiabilities(nino)
-                desSummary     <- des.getSummary(nino)
-              } yield buildNationalInsuranceRecord(desNIRecord, desSummary, desLiabilities, mci)
+                niRecord    <- des.getNationalInsuranceRecord(nino)
+                liabilities <- des.getLiabilities(nino)
+                summary     <- des.getSummary(nino)
+              } yield buildNationalInsuranceRecord(niRecord, summary, liabilities, mci)
             }
         }
     }
@@ -109,32 +109,16 @@ class NationalInsuranceRecordService @Inject()(
         citizenDetailsService.checkManualCorrespondenceIndicator(nino).flatMap {
           mci =>
             if (proxyCache.isEnabled) {
-              proxyCacheConnector.getProxyCacheData(nino) map {
-                cacheData =>
-                  buildTaxYear(
-                    cacheData.niRecord,
-                    cacheData.summary,
-                    cacheData.liabilities,
-                    mci,
-                    nino,
-                    taxYear
-                  )
+              proxyCacheConnector.get(nino) map {
+                pcd =>
+                  buildTaxYear(pcd.niRecord, pcd.summary, pcd.liabilities, mci, nino, taxYear)
               }
             } else {
               for {
-                desNIRecord    <- des.getNationalInsuranceRecord(nino)
-                desLiabilities <- des.getLiabilities(nino)
-                desSummary     <- des.getSummary(nino)
-              } yield {
-                buildTaxYear(
-                  desNIRecord,
-                  desSummary,
-                  desLiabilities,
-                  mci,
-                  nino,
-                  taxYear
-                )
-              }
+                niRecord    <- des.getNationalInsuranceRecord(nino)
+                liabilities <- des.getLiabilities(nino)
+                summary     <- des.getSummary(nino)
+              } yield buildTaxYear(niRecord, summary, liabilities, mci, nino, taxYear)
             }
         }
     }
