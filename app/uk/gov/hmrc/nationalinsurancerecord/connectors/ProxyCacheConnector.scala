@@ -23,7 +23,9 @@ import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HeaderNames, HttpResponse, StringContextOps, UpstreamErrorResponse}
 import uk.gov.hmrc.nationalinsurancerecord.config.{AppContext, ApplicationConfig}
+import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.des.{DesError, ProxyCacheData}
+import uk.gov.hmrc.nationalinsurancerecord.services.MetricsService
 
 import java.util.UUID
 import javax.inject.Inject
@@ -31,6 +33,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class ProxyCacheConnector @Inject () (
   httpClient: HttpClientV2,
+  metrics: MetricsService,
   appContext: AppContext,
   appConfig: ApplicationConfig,
   connectorUtil: ConnectorUtil
@@ -56,6 +59,8 @@ class ProxyCacheConnector @Inject () (
     implicit headerCarrier: HeaderCarrier,
     reads: Reads[ProxyCacheData]
   ): Future[Either[DesError, ProxyCacheData]] = {
+    val timerContext = metrics.startTimer(APITypes.ProxyCache)
+
     connectorUtil.handleConnectorResponse(
       futureResponse = httpClient
         .get(url"${appConfig.proxyCacheUrl}/ni-and-sp-proxy-cache/$nino")
@@ -64,8 +69,22 @@ class ProxyCacheConnector @Inject () (
         .setHeader("Environment"             -> appConfig.desEnvironment)
         .setHeader("CorrelationId"           -> UUID.randomUUID().toString)
         .setHeader(HeaderNames.xRequestId    -> headerCarrier.requestId.fold("-")(_.value))
-        .execute[Either[UpstreamErrorResponse, HttpResponse]],
+        .execute[Either[UpstreamErrorResponse, HttpResponse]]
+        .transform {
+          result =>
+            timerContext.stop()
+            result
+        },
       jsonParseError = "proxy cache data"
-    )
+    ) map {
+      result =>
+        result match {
+          case Left(_) =>
+            metrics.incrementFailedCounter(APITypes.ProxyCache)
+          case Right(_) =>
+            ()
+        }
+        result
+    }
   }
 }

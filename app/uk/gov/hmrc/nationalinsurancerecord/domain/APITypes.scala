@@ -22,4 +22,5 @@ object APITypes extends Enumeration {
   val Summary = Value
   val NIRecord = Value
   val Liabilities = Value
+  val ProxyCache = Value
 }
