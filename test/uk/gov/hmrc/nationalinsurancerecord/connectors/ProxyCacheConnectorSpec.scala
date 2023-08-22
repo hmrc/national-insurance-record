@@ -30,7 +30,7 @@ import uk.gov.hmrc.http.{Authorization, HeaderCarrier, HeaderNames, RequestId}
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.config.{AppContext, ApplicationConfig}
 import uk.gov.hmrc.nationalinsurancerecord.domain.des.DesError
-import utils.ProxyCacheTestData._
+import utils.TestData._
 import utils.WireMockHelper
 
 import scala.concurrent.ExecutionContext.Implicits.global

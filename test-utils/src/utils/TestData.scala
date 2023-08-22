@@ -21,7 +21,7 @@ import uk.gov.hmrc.nationalinsurancerecord.domain.des._
 
 import scala.io.Source
 
-object ProxyCacheTestData {
+object TestData {
   val niRecordJson: String =
     Source
       .fromInputStream(getClass.getResourceAsStream("/json/niRecordDesProxyCacheTest.json"))
