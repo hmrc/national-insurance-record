@@ -16,12 +16,13 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.services
 
+import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.domain.Exclusion
 import uk.gov.hmrc.nationalinsurancerecord.domain.des.DesLiability
 
 import java.time.LocalDate
 
-class ExclusionServiceSpec extends NationalInsuranceRecordServiceSpec {
+class ExclusionServiceSpec extends NationalInsuranceRecordUnitSpec {
   // scalastyle:off magic.number
 
   val exampleNow = LocalDate.of(2017, 2, 16)

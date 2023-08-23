@@ -64,7 +64,7 @@ class AuthActionImpl @Inject()(val authConnector: AuthConnector, val parser: Bod
         case _ => successful(Some(Unauthorized))
       } recover {
         case e: AuthorisationException =>
-          logger.debug("Debug info - " + e.getMessage, e)
+          logger.info("Debug info - " + e.getMessage, e)
           Some(Unauthorized)
         case e: Throwable =>
           logger.error("Unexpected Error", e)

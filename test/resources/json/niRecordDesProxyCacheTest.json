@@ -1,0 +1,53 @@
+{
+  "dateOfEntry": "1986-09-08",
+  "nino": "XX000002",
+  "nonQualifyingYears": 2,
+  "nonQualifyingYearsPayable": 2,
+  "numberOfQualifyingYears": 37,
+  "pre75CcCount": 0,
+  "yearsToFry": 18,
+  "employmentDetails": [
+    {}
+  ],
+  "taxYears": [
+    {
+      "coClassOnePaid": 239.15,
+      "coPrimaryPaidEarnings": 3491.24,
+      "niEarningsEmployed": 416.99,
+      "otherCredits": [
+        {}
+      ],
+      "payable": false,
+      "qualifying": true,
+      "rattdTaxYear": "1986",
+      "underInvestigationFlag": false,
+      "primaryPaidEarnings": 6221.58
+    },
+    {
+      "coClassOnePaid": 284.33,
+      "coPrimaryPaidEarnings": 4151,
+      "niEarningsEmployed": 466.85,
+      "otherCredits": [
+        {}
+      ],
+      "payable": false,
+      "qualifying": true,
+      "rattdTaxYear": "1987",
+      "underInvestigationFlag": false,
+      "primaryPaidEarnings": 6179
+    },
+    {
+      "coClassOnePaid": 337.83,
+      "coPrimaryPaidEarnings": 4826,
+      "niEarningsEmployed": 530.07,
+      "otherCredits": [
+        {}
+      ],
+      "payable": false,
+      "qualifying": true,
+      "rattdTaxYear": "1988",
+      "underInvestigationFlag": false,
+      "primaryPaidEarnings": 6962
+    }
+  ]
+}

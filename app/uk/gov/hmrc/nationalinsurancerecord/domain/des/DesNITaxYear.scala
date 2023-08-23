@@ -40,29 +40,28 @@ case class DesNITaxYear(
 }
 
 object DesNITaxYear {
+  val readIntFromString: JsPath => Reads[Int] =
+    jsPath =>
+      jsPath.readNullable[String].map(_.map(_.toInt).getOrElse(0))
 
-  val readBigDecimal: JsPath => Reads[BigDecimal] = jsPath => jsPath.readNullable[BigDecimal].map(_.getOrElse(0))
+  val writeStringFromInt: JsPath => OWrites[Int] =
+    jsPath =>
+      jsPath.write[String].contramap[Int](_.toString)
 
-  val readBigDecimalFromString: JsPath => Reads[BigDecimal] = jsPath => jsPath.readNullable[String].map(_.map(BigDecimal(_)).getOrElse(0))
-  val writeStringFromBigDecimal: JsPath => OWrites[BigDecimal] = jsPath => jsPath.write[String].contramap[BigDecimal](_.toString)
+  val readIntWithDefault: JsPath => Reads[Int] =
+    jsPath =>
+      jsPath.readNullable[Int].map(_.getOrElse(0))
+  val readBigDecimalWithDefault: JsPath => Reads[BigDecimal] =
+    jsPath =>
+      jsPath.readNullable[BigDecimal].map(_.getOrElse(0))
 
-  val readIntFromString: JsPath => Reads[Int] = jsPath => jsPath.readNullable[String].map(_.map(_.toInt).getOrElse(0))
-  val writeStringFromInt: JsPath => OWrites[Int] = jsPath => jsPath.write[String].contramap[Int](_.toString)
-
-  val readBooleanFromInt: JsPath => Reads[Boolean] = jsPath => jsPath.read[Int].map(_.equals(1))
-
-  val readIntWithDefault: JsPath => Reads[Int] = jsPath => jsPath.readNullable[Int].map(_.getOrElse(0))
-  val readBigDecimalWithDefault: JsPath => Reads[BigDecimal] = jsPath => jsPath.readNullable[BigDecimal].map(_.getOrElse(0))
-
-  val writeIntFromBoolean: JsPath => OWrites[Boolean] = jsPath => jsPath.write[Int].contramap[Boolean] {
-    case true => 1
-    case _ => 0
-  }
-
-  val readBooleanWithDefault: JsPath => Reads[Boolean] = jsPath => jsPath.readNullable[Boolean].map(_.getOrElse(false))
+  val readBooleanWithDefault: JsPath => Reads[Boolean] =
+    jsPath =>
+      jsPath.readNullable[Boolean].map(_.getOrElse(false))
 
   val readNullableList:JsPath => Reads[List[DesOtherCredits]] =
-    jsPath => jsPath.readNullable[List[DesOtherCredits]].map(_.getOrElse(List.empty))
+    jsPath =>
+      jsPath.readNullable[List[DesOtherCredits]].map(_.getOrElse(List.empty))
 
   val reads: Reads[DesNITaxYear] = (
         readIntFromString(__ \ "rattdTaxYear") and

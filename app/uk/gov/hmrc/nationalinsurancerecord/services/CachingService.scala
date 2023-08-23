@@ -93,7 +93,7 @@ class CachingMongoService[A <: CachingModel[A, B], B](
     tryResult match {
       case Success(success) =>
         success.map { results =>
-          logger.debug(s"[$apiType][findByNino] : { cacheKey : ${cacheKey(nino, apiType)}, result: $results }")
+          logger.info(s"[$apiType][findByNino] : { cacheKey : ${cacheKey(nino, apiType)}, result: $results }")
           val response = results.headOption.map(_.response)
           response match {
             case Some(data) =>
@@ -109,7 +109,7 @@ class CachingMongoService[A <: CachingModel[A, B], B](
             None
         }
       case Failure(f) =>
-        logger.debug(s"[$apiType][findByNino] : { cacheKey : ${cacheKey(nino, apiType)}, exception: ${f.getMessage} }")
+        logger.info(s"[$apiType][findByNino] : { cacheKey : ${cacheKey(nino, apiType)}, exception: ${f.getMessage} }")
         metrics.cacheReadNotFound()
         Future.successful(None)
     }

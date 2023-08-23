@@ -14,20 +14,17 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nationalinsurancerecord.util
+package uk.gov.hmrc.nationalinsurancerecord.domain.des
 
+import play.api.libs.json._
 
-import play.api.libs.json.{JsError, JsSuccess, Reads}
+case class ProxyCacheData(
+  summary: DesSummary,
+  niRecord: DesNIRecord,
+  liabilities: DesLiabilities
+)
 
-object EitherReads {
-  implicit def eitherReads[A, B](implicit A: Reads[A], B: Reads[B]): Reads[Either[A, B]] =
-    Reads[Either[A, B]] { json =>
-      A.reads(json) match {
-        case JsSuccess(value, path) => JsSuccess(Left(value), path)
-        case JsError(e1) => B.reads(json) match {
-          case JsSuccess(value, path) => JsSuccess(Right(value), path)
-          case JsError(e2) => JsError(JsError.merge(e1, e2))
-        }
-      }
-    }
+object ProxyCacheData {
+  implicit def format: Format[ProxyCacheData] =
+    Json.format[ProxyCacheData]
 }

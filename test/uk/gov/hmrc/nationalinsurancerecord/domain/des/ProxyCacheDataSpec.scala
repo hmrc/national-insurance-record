@@ -14,13 +14,21 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nationalinsurancerecord.domain
+package uk.gov.hmrc.nationalinsurancerecord.domain.des
 
-object APITypes extends Enumeration {
-  type APITypes = Value
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
+import utils.TestData._
 
-  val Summary = Value
-  val NIRecord = Value
-  val Liabilities = Value
-  val ProxyCache = Value
+class ProxyCacheDataSpec
+  extends AnyWordSpecLike
+    with Matchers {
+
+  "ProxyCacheData" must {
+    "read correctly" in {
+      proxyCacheData.summary shouldBe desSummary
+      proxyCacheData.niRecord shouldBe desNIRecord
+      proxyCacheData.liabilities shouldBe desLiabilities
+    }
+  }
 }

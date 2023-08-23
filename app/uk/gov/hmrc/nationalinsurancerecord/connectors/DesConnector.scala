@@ -19,35 +19,31 @@ package uk.gov.hmrc.nationalinsurancerecord.connectors
 import com.google.inject.Inject
 import play.api.Logging
 import play.api.libs.json._
-import play.api.http.Status.BAD_GATEWAY
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.HttpReadsInstances.readEitherOf
-import uk.gov.hmrc.mongoFeatureToggles.services.FeatureFlagService
+import uk.gov.hmrc.http._
+import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.nationalinsurancerecord.cache._
-import uk.gov.hmrc.nationalinsurancerecord.config.{AppContext, ApplicationConfig}
-import uk.gov.hmrc.nationalinsurancerecord.domain.{APITypes, ProxyCacheToggle}
+import uk.gov.hmrc.nationalinsurancerecord.config.ApplicationConfig
+import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.des.{DesError, DesLiabilities, DesNIRecord, DesSummary}
 import uk.gov.hmrc.nationalinsurancerecord.services.{CachingService, MetricsService}
-import uk.gov.hmrc.nationalinsurancerecord.util.{JsonDepersonaliser, NIRecordConstants}
+import uk.gov.hmrc.nationalinsurancerecord.util.NIRecordConstants
 
 import java.util.UUID
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
-import scala.collection.immutable
 
 class DesConnector @Inject()(
   desSummaryRepository: DesSummaryRepository,
   desNIRecordRepository: DesNIRecordRepository,
   desLiabilitiesRepository: DesLiabilitiesRepository,
   metrics: MetricsService,
-  http: HttpClient,
+  http: HttpClientV2,
   appConfig: ApplicationConfig,
-  appContext: AppContext,
   implicit val executionContext: ExecutionContext,
-  featureFlagService: FeatureFlagService
+  connectorUtil: ConnectorUtil
 ) extends Logging {
 
   private val authToken: String = appConfig.authorization
@@ -95,7 +91,6 @@ class DesConnector @Inject()(
       repository = summaryRepository
     )
 
-
   private def get[A, B](
     nino: Nino,
     apiTypes: APITypes.Value,
@@ -108,22 +103,12 @@ class DesConnector @Inject()(
   ): Future[A] = {
     metrics.incrementCounter(apiTypes)
 
-    featureFlagService.get(ProxyCacheToggle) flatMap {
-      proxyCache =>
-        val url: String =
-          if (proxyCache.isEnabled) {
-            s"${appConfig.proxyCacheUrl}/ni-and-sp-proxy-cache/$nino/$path"
-          } else {
-            s"${appConfig.desUrl}/individuals/${ninoWithoutSuffix(nino)}/pensions/$path"
-          }
-
-        connectToCache[A, B](
-          nino       = nino,
-          url        = url,
-          api        = apiTypes,
-          repository = repository
-        )
-    }
+    connectToCache[A, B](
+      nino       = nino,
+      url        = s"${appConfig.desUrl}/individuals/${ninoWithoutSuffix(nino)}/pensions/$path",
+      api        = apiTypes,
+      repository = repository
+    )
   }
 
   private def connectToCache[A, B](
@@ -142,7 +127,7 @@ class DesConnector @Inject()(
       case None =>
         connectToDes(url, api)(hc, formatA).flatMap {
           case Right(response) =>
-            logger.debug(s"*~* - writing nino to cache: $nino")
+            logger.info(s"*~* - writing nino to cache: $nino")
             repository.insertByNino(nino, response)
             Future.successful(response)
           case Left(error) =>
@@ -157,77 +142,31 @@ class DesConnector @Inject()(
     implicit hc: HeaderCarrier,
     reads: Reads[A]
   ): Future[Either[DesError, A]] = {
-
-    featureFlagService.get(ProxyCacheToggle) flatMap {
-      proxyCache =>
-        val token: String = if (proxyCache.isEnabled) appContext.internalAuthToken
-          else authToken
-
-        val headerCarrier: HeaderCarrier = hc.copy(authorization = Some(Authorization(token)))
-
-        val timerContext = metrics.startTimer(api)
-        val headers = Seq(
-          HeaderNames.authorisation -> token,
-          "Originator-Id"           -> "DA_PF",
-          "Environment"             -> desEnvironment,
-          "CorrelationId"           -> UUID.randomUUID().toString,
-          HeaderNames.xRequestId    -> hc.requestId.fold("-")(_.value)
-        )
-
-        http
-          .GET[Either[UpstreamErrorResponse, HttpResponse]](url, headers = headers)(readEitherOf, headerCarrier, executionContext)
-          .transform {
-            result =>
-              timerContext.stop()
-              result
-          }.map {
-          case Right(response) =>
-            response.json.validate[A].fold(
-              errs => {
-                val json = JsonDepersonaliser.depersonalise(response.json) match {
-                  case Success(s) =>
-                    s"Depersonalised JSON\n$s"
-                  case Failure(e) =>
-                    s"JSON could not be depersonalised\n${e.toString}"
-                }
-                Left(DesError.JsonValidationError(
-                  s"Unable to deserialise $api: ${formatJsonErrors(errs.asInstanceOf[immutable.Seq[(JsPath, immutable.Seq[JsonValidationError])]])}\n$json"
-                ))
-              },
-              valid =>
-                Right(valid)
-            )
-          case Left(error) =>
-            Left(DesError.HttpError(error))
-        } recover {
-          case error: HttpException =>
-            Left(DesError.HttpError(UpstreamErrorResponse(error.message, BAD_GATEWAY)))
-          case error =>
-            Left(DesError.OtherError(error))
-        } map {
+    val timerContext = metrics.startTimer(api)
+    connectorUtil.handleConnectorResponse(
+      futureResponse = http
+        .get(url"$url")
+        .setHeader(HeaderNames.authorisation -> authToken)
+        .setHeader("Originator-Id"           -> "DA_PF")
+        .setHeader("Environment"             -> desEnvironment)
+        .setHeader("CorrelationId"           -> UUID.randomUUID().toString)
+        .setHeader(HeaderNames.xRequestId    -> hc.requestId.fold("-")(_.value))
+        .execute[Either[UpstreamErrorResponse, HttpResponse]]
+        .transform {
           result =>
-            result match {
-              case Left(_) =>
-                metrics.incrementFailedCounter(api)
-              case Right(_) =>
-                ()
-            }
+            timerContext.stop()
             result
+        },
+      jsonParseError = api.toString
+    ) map {
+      result =>
+        result match {
+          case Left(_) =>
+            metrics.incrementFailedCounter(api)
+          case Right(_) =>
+            ()
         }
+        result
     }
   }
-
-  private def formatJsonErrors(errors: immutable.Seq[(JsPath, immutable.Seq[JsonValidationError])]): String = {
-    s"JSON Validation Error: ${
-      errors
-        .map(p => s"${p._1.toString()} - ${p._2.map(e => removeJson(e.message)).mkString(",")}")
-        .mkString(" | ")
-    }"
-  }
-
-  private def removeJson(message: String): String =
-    message.indexOf("{") match {
-      case i if i != -1  => message.substring(0, i - 1) + " [JSON removed]"
-      case _ => message
-    }
 }

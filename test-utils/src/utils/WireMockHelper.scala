@@ -14,12 +14,17 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.nationalinsurancerecord.util
-import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
-import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, Suite}
+package utils
 
-trait WireMockHelper extends BeforeAndAfterAll with BeforeAndAfterEach {
+import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
+import com.github.tomakehurst.wiremock.client.WireMock.{get, post, status, urlEqualTo}
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
+import com.github.tomakehurst.wiremock.stubbing.StubMapping
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, Suite}
+import play.api.http.Status
+
+trait WireMockHelper extends BeforeAndAfterAll with BeforeAndAfterEach with Status {
   this: Suite =>
 
   protected val server: WireMockServer = new WireMockServer(wireMockConfig().dynamicPort())
@@ -39,4 +44,22 @@ trait WireMockHelper extends BeforeAndAfterAll with BeforeAndAfterEach {
     server.stop()
   }
 
+  def gatewayTimeout(): ResponseDefinitionBuilder = status(GATEWAY_TIMEOUT)
+  def badGateway(): ResponseDefinitionBuilder = status(BAD_GATEWAY)
+
+  def stubPostServer(willReturn: ResponseDefinitionBuilder, url: String): StubMapping =
+    server.stubFor(
+      post(urlEqualTo(url))
+        .willReturn(
+          willReturn
+        )
+    )
+
+  def stubGetServer(willReturn: ResponseDefinitionBuilder, url: String): StubMapping =
+    server.stubFor(
+      get(urlEqualTo(url))
+        .willReturn(
+          willReturn
+        )
+    )
 }

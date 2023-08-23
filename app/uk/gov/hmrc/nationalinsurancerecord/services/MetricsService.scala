@@ -31,19 +31,22 @@ class MetricsService @Inject()(metrics: Metrics){
   val incrementCounters = Map(
     APITypes.Summary -> registry.counter("spsummary-counter"),
     APITypes.NIRecord -> registry.counter("nirecord-counter"),
-    APITypes.Liabilities -> registry.counter("liabilities-counter")
+    APITypes.Liabilities -> registry.counter("liabilities-counter"),
+    APITypes.ProxyCache -> registry.counter("proxy-cache-counter")
   )
 
   val timers = Map(
     APITypes.Summary -> registry.timer("summary-response-timer"),
     APITypes.NIRecord -> registry.timer("nirecord-response-timer"),
-    APITypes.Liabilities -> registry.timer("liabilities-response-timer")
+    APITypes.Liabilities -> registry.timer("liabilities-response-timer"),
+    APITypes.ProxyCache -> registry.timer("proxy-cache-response-timer")
   )
 
   val failedCounters = Map(
     APITypes.Summary -> registry.counter("summary-failed-counter"),
     APITypes.NIRecord -> registry.counter("nirecord-failed-counter"),
-    APITypes.Liabilities -> registry.counter("liabilities-failed-counter")
+    APITypes.Liabilities -> registry.counter("liabilities-failed-counter"),
+    APITypes.ProxyCache -> registry.counter("proxy-cache-failed-counter")
   )
 
   def startTimer(api: APITypes): Context = timers(api).time()
