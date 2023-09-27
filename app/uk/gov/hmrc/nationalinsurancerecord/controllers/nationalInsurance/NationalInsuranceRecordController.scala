@@ -64,70 +64,70 @@ class NationalInsuranceRecordController @Inject()(
   def getSummary(nino: Nino): Action[AnyContent] =
     (authAction andThen validateAccept(acceptHeaderValidationRules) andThen copeAction.filterCopeExclusions(nino)).async {
       implicit request =>
-        errorWrapper(nationalInsuranceRecordService.getNationalInsuranceRecord(nino).map {
-          case Right(Left(exclusion)) =>
-            if (exclusion.exclusionReasons.contains(Exclusion.Dead)) {
-              auditConnector.sendEvent(NationalInsuranceExclusion(nino, List(Exclusion.Dead)))
-              Forbidden(Json.toJson[ErrorResponse](ErrorResponses.ExclusionDead))
-            } else if (exclusion.exclusionReasons.contains(Exclusion.ManualCorrespondenceIndicator)) {
-              auditConnector.sendEvent(NationalInsuranceExclusion(nino, List(Exclusion.ManualCorrespondenceIndicator)))
-              Forbidden(Json.toJson[ErrorResponse](ErrorResponses.ExclusionManualCorrespondence))
-            } else if (exclusion.exclusionReasons.contains(Exclusion.IsleOfMan)) {
-              auditConnector.sendEvent(NationalInsuranceExclusion(nino, List(Exclusion.IsleOfMan)))
-              Forbidden(Json.toJson[ErrorResponse](ErrorResponses.ExclusionIsleOfMan))
-            } else {
-              auditConnector.sendEvent(NationalInsuranceExclusion(nino, exclusion.exclusionReasons))
-              Ok(halResourceSelfLink(Json.toJson(exclusion), nationalInsuranceRecordHref(nino)))
-            }
+        errorWrapper(nationalInsuranceRecordService.getNationalInsuranceRecord(nino) map {
+          _.fold(error => handleDesError(error), {
+            case Left(exclusion) =>
+              if (exclusion.exclusionReasons.contains(Exclusion.Dead)) {
+                auditConnector.sendEvent(NationalInsuranceExclusion(nino, List(Exclusion.Dead)))
+                Forbidden(Json.toJson[ErrorResponse](ErrorResponses.ExclusionDead))
+              } else if (exclusion.exclusionReasons.contains(Exclusion.ManualCorrespondenceIndicator)) {
+                auditConnector.sendEvent(NationalInsuranceExclusion(nino, List(Exclusion.ManualCorrespondenceIndicator)))
+                Forbidden(Json.toJson[ErrorResponse](ErrorResponses.ExclusionManualCorrespondence))
+              } else if (exclusion.exclusionReasons.contains(Exclusion.IsleOfMan)) {
+                auditConnector.sendEvent(NationalInsuranceExclusion(nino, List(Exclusion.IsleOfMan)))
+                Forbidden(Json.toJson[ErrorResponse](ErrorResponses.ExclusionIsleOfMan))
+              } else {
+                auditConnector.sendEvent(NationalInsuranceExclusion(nino, exclusion.exclusionReasons))
+                Ok(halResourceSelfLink(Json.toJson(exclusion), nationalInsuranceRecordHref(nino)))
+              }
 
-          case Right(Right(nationalInsuranceRecord)) =>
-            auditConnector.sendEvent(NationalInsuranceRecord(nino, nationalInsuranceRecord.qualifyingYears,
-              nationalInsuranceRecord.qualifyingYearsPriorTo1975, nationalInsuranceRecord.numberOfGaps,
-              nationalInsuranceRecord.numberOfGapsPayable, nationalInsuranceRecord.dateOfEntry,
-              nationalInsuranceRecord.homeResponsibilitiesProtection, nationalInsuranceRecord.earningsIncludedUpTo,
-              nationalInsuranceRecord.taxYears.length
-            ))
+            case Right(nationalInsuranceRecord) =>
+              auditConnector.sendEvent(NationalInsuranceRecord(nino, nationalInsuranceRecord.qualifyingYears,
+                nationalInsuranceRecord.qualifyingYearsPriorTo1975, nationalInsuranceRecord.numberOfGaps,
+                nationalInsuranceRecord.numberOfGapsPayable, nationalInsuranceRecord.dateOfEntry,
+                nationalInsuranceRecord.homeResponsibilitiesProtection, nationalInsuranceRecord.earningsIncludedUpTo,
+                nationalInsuranceRecord.taxYears.length
+              ))
 
-            Ok(halResourceWithTaxYears(nino, Json.toJson(nationalInsuranceRecord), nationalInsuranceRecordHref(nino),
-              years = nationalInsuranceRecord.taxYears))
-
-          case Left(desError) => handleDesError(desError)
+              Ok(halResourceWithTaxYears(nino, Json.toJson(nationalInsuranceRecord), nationalInsuranceRecordHref(nino),
+                years = nationalInsuranceRecord.taxYears))
+          })
         })
     }
+
 
   def getTaxYear(nino: Nino, taxYear: TaxYear): Action[AnyContent] =
     (authAction andThen validateAccept(acceptHeaderValidationRules)).async {
       implicit request =>
-        errorWrapper(nationalInsuranceRecordService.getTaxYear(nino, taxYear).map {
+        errorWrapper(nationalInsuranceRecordService.getTaxYear(nino, taxYear) map {
+          _.fold(error => handleDesError(error), {
+            case Left(exclusion) =>
+              if (exclusion.exclusionReasons.contains(Exclusion.Dead)) {
+                auditConnector.sendEvent(NationalInsuranceExclusion(nino, List(Exclusion.Dead)))
+                Forbidden(Json.toJson[ErrorResponse](ErrorResponses.ExclusionDead))
+              } else if (exclusion.exclusionReasons.contains(Exclusion.ManualCorrespondenceIndicator)) {
+                auditConnector.sendEvent(NationalInsuranceExclusion(nino, List(Exclusion.ManualCorrespondenceIndicator)))
+                Forbidden(Json.toJson[ErrorResponse](ErrorResponses.ExclusionManualCorrespondence))
+              } else if (exclusion.exclusionReasons.contains(Exclusion.IsleOfMan)) {
+                auditConnector.sendEvent(NationalInsuranceExclusion(nino, List(Exclusion.IsleOfMan)))
+                Forbidden(Json.toJson[ErrorResponse](ErrorResponses.ExclusionIsleOfMan))
+              } else {
+                auditConnector.sendEvent(NationalInsuranceExclusion(nino, exclusion.exclusionReasons))
+                Ok(halResourceSelfLink(Json.toJson(exclusion), nationalInsuranceTaxYearHref(nino, taxYear)))
+              }
 
-          case Right(Left(exclusion)) =>
-            if (exclusion.exclusionReasons.contains(Exclusion.Dead)) {
-              auditConnector.sendEvent(NationalInsuranceExclusion(nino, List(Exclusion.Dead)))
-              Forbidden(Json.toJson[ErrorResponse](ErrorResponses.ExclusionDead))
-            } else if (exclusion.exclusionReasons.contains(Exclusion.ManualCorrespondenceIndicator)) {
-              auditConnector.sendEvent(NationalInsuranceExclusion(nino, List(Exclusion.ManualCorrespondenceIndicator)))
-              Forbidden(Json.toJson[ErrorResponse](ErrorResponses.ExclusionManualCorrespondence))
-            } else if (exclusion.exclusionReasons.contains(Exclusion.IsleOfMan)) {
-              auditConnector.sendEvent(NationalInsuranceExclusion(nino, List(Exclusion.IsleOfMan)))
-              Forbidden(Json.toJson[ErrorResponse](ErrorResponses.ExclusionIsleOfMan))
-            } else {
-              auditConnector.sendEvent(NationalInsuranceExclusion(nino, exclusion.exclusionReasons))
-              Ok(halResourceSelfLink(Json.toJson(exclusion), nationalInsuranceTaxYearHref(nino, taxYear)))
-            }
+            case Right(nationalInsuranceTaxYear) =>
+              import uk.gov.hmrc.nationalinsurancerecord.events.NationalInsuranceTaxYear
+              auditConnector.sendEvent(NationalInsuranceTaxYear(nino, nationalInsuranceTaxYear.taxYear,
+                nationalInsuranceTaxYear.qualifying, nationalInsuranceTaxYear.classOneContributions,
+                nationalInsuranceTaxYear.classTwoCredits, nationalInsuranceTaxYear.classThreeCredits,
+                nationalInsuranceTaxYear.otherCredits, nationalInsuranceTaxYear.classThreePayable,
+                nationalInsuranceTaxYear.classThreePayableBy, nationalInsuranceTaxYear.classThreePayableByPenalty,
+                nationalInsuranceTaxYear.payable, nationalInsuranceTaxYear.underInvestigation))
 
-          case Right(Right(nationalInsuranceTaxYear)) =>
-            import uk.gov.hmrc.nationalinsurancerecord.events.NationalInsuranceTaxYear
-            auditConnector.sendEvent(NationalInsuranceTaxYear(nino, nationalInsuranceTaxYear.taxYear,
-              nationalInsuranceTaxYear.qualifying, nationalInsuranceTaxYear.classOneContributions,
-              nationalInsuranceTaxYear.classTwoCredits, nationalInsuranceTaxYear.classThreeCredits,
-              nationalInsuranceTaxYear.otherCredits, nationalInsuranceTaxYear.classThreePayable,
-              nationalInsuranceTaxYear.classThreePayableBy, nationalInsuranceTaxYear.classThreePayableByPenalty,
-              nationalInsuranceTaxYear.payable, nationalInsuranceTaxYear.underInvestigation))
+              Ok(halResourceSelfLink(Json.toJson(nationalInsuranceTaxYear), nationalInsuranceTaxYearHref(nino, taxYear)))
 
-            Ok(halResourceSelfLink(Json.toJson(nationalInsuranceTaxYear), nationalInsuranceTaxYearHref(nino, taxYear)))
-
-          case Left(desError) => handleDesError(desError)
+          })
         })
-
     }
 }
