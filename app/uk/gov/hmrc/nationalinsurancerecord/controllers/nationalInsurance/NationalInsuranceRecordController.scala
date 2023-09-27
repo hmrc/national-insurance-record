@@ -65,8 +65,7 @@ class NationalInsuranceRecordController @Inject()(
     (authAction andThen validateAccept(acceptHeaderValidationRules) andThen copeAction.filterCopeExclusions(nino)).async {
       implicit request =>
         errorWrapper(nationalInsuranceRecordService.getNationalInsuranceRecord(nino).map {
-
-          case Left(exclusion) =>
+          case Right(Left(exclusion)) =>
             if (exclusion.exclusionReasons.contains(Exclusion.Dead)) {
               auditConnector.sendEvent(NationalInsuranceExclusion(nino, List(Exclusion.Dead)))
               Forbidden(Json.toJson[ErrorResponse](ErrorResponses.ExclusionDead))
@@ -81,7 +80,7 @@ class NationalInsuranceRecordController @Inject()(
               Ok(halResourceSelfLink(Json.toJson(exclusion), nationalInsuranceRecordHref(nino)))
             }
 
-          case Right(nationalInsuranceRecord) =>
+          case Right(Right(nationalInsuranceRecord)) =>
             auditConnector.sendEvent(NationalInsuranceRecord(nino, nationalInsuranceRecord.qualifyingYears,
               nationalInsuranceRecord.qualifyingYearsPriorTo1975, nationalInsuranceRecord.numberOfGaps,
               nationalInsuranceRecord.numberOfGapsPayable, nationalInsuranceRecord.dateOfEntry,
@@ -91,6 +90,8 @@ class NationalInsuranceRecordController @Inject()(
 
             Ok(halResourceWithTaxYears(nino, Json.toJson(nationalInsuranceRecord), nationalInsuranceRecordHref(nino),
               years = nationalInsuranceRecord.taxYears))
+
+          case Left(desError) => handleDesError(desError)
         })
     }
 
@@ -99,7 +100,7 @@ class NationalInsuranceRecordController @Inject()(
       implicit request =>
         errorWrapper(nationalInsuranceRecordService.getTaxYear(nino, taxYear).map {
 
-          case Left(exclusion) =>
+          case Right(Left(exclusion)) =>
             if (exclusion.exclusionReasons.contains(Exclusion.Dead)) {
               auditConnector.sendEvent(NationalInsuranceExclusion(nino, List(Exclusion.Dead)))
               Forbidden(Json.toJson[ErrorResponse](ErrorResponses.ExclusionDead))
@@ -114,7 +115,7 @@ class NationalInsuranceRecordController @Inject()(
               Ok(halResourceSelfLink(Json.toJson(exclusion), nationalInsuranceTaxYearHref(nino, taxYear)))
             }
 
-          case Right(nationalInsuranceTaxYear) =>
+          case Right(Right(nationalInsuranceTaxYear)) =>
             import uk.gov.hmrc.nationalinsurancerecord.events.NationalInsuranceTaxYear
             auditConnector.sendEvent(NationalInsuranceTaxYear(nino, nationalInsuranceTaxYear.taxYear,
               nationalInsuranceTaxYear.qualifying, nationalInsuranceTaxYear.classOneContributions,
@@ -124,6 +125,8 @@ class NationalInsuranceRecordController @Inject()(
               nationalInsuranceTaxYear.payable, nationalInsuranceTaxYear.underInvestigation))
 
             Ok(halResourceSelfLink(Json.toJson(nationalInsuranceTaxYear), nationalInsuranceTaxYearHref(nino, taxYear)))
+
+          case Left(desError) => handleDesError(desError)
         })
 
     }

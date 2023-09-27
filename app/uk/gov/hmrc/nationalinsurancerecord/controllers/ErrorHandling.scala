@@ -31,13 +31,13 @@ trait ErrorHandling extends Logging {
   val app: String
   implicit val executionContext: ExecutionContext
 
+  //TODO is a case statement needed
   def errorWrapper(func: => Future[Result]): Future[Result] =
     func.recover {
-      case error: DesError => handleDesError(error)
       case error => handleLegacyError(error)
     }
 
-  private def handleDesError(error: DesError): Result =
+  protected def handleDesError(error: DesError): Result =
     error match {
       case DesError.HttpError(error) if error.statusCode == NOT_FOUND =>
         notFound
