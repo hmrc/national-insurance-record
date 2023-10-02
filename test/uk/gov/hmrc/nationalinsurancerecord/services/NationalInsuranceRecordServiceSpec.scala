@@ -182,11 +182,11 @@ class NationalInsuranceRecordServiceSpec
       .thenReturn(Future.successful(FeatureFlag(ProxyCacheToggle, isEnabled = false, None)))
 
     when(mockDesConnector.getLiabilities(nino))
-      .thenReturn(Future.successful(liabilities))
+      .thenReturn(Future.successful(Right(liabilities)))
     when(mockDesConnector.getNationalInsuranceRecord(nino))
-      .thenReturn(Future.successful(niRecordDES))
+      .thenReturn(Future.successful(Right(niRecordDES)))
     when(mockDesConnector.getSummary(nino))
-      .thenReturn(Future.successful(desSummary))
+      .thenReturn(Future.successful(Right(desSummary)))
 
     val service: NationalInsuranceRecordService =
       new NationalInsuranceRecordService(
@@ -235,11 +235,11 @@ class NationalInsuranceRecordServiceSpec
       .thenReturn(Future.successful(FeatureFlag(ProxyCacheToggle, isEnabled = false, None)))
 
     when(mockDesConnector.getLiabilities(nino))
-      .thenReturn(Future.successful(liabilities))
+      .thenReturn(Future.successful(Right(liabilities)))
     when(mockDesConnector.getNationalInsuranceRecord(nino))
-      .thenReturn(Future.successful(niRecordDES))
+      .thenReturn(Future.successful(Right(niRecordDES)))
     when(mockDesConnector.getSummary(nino))
-      .thenReturn(Future.successful(exclusionsSummary))
+      .thenReturn(Future.successful(Right(exclusionsSummary)))
 
     val service: NationalInsuranceRecordService =
       new NationalInsuranceRecordService(
@@ -301,11 +301,11 @@ class NationalInsuranceRecordServiceSpec
 
       "connect to ProxyCacheConnector for ni record" in {
 
-        val result = await(service.getNationalInsuranceRecord(nino))
+        val result: Either[DesError, Either[ExclusionResponse, NationalInsuranceRecord]] = await(service.getNationalInsuranceRecord(nino))
 
         result.map {
           ni =>
-            ni shouldBe niRecord
+            ni map (_ shouldBe niRecord)
             verify(mockDesConnector, times(0)).getSummary(nino)
             verify(mockDesConnector, times(0)).getLiabilities(nino)
             verify(mockDesConnector, times(0)).getNationalInsuranceRecord(nino)
@@ -317,7 +317,7 @@ class NationalInsuranceRecordServiceSpec
 
         result.map {
           ty =>
-            ty shouldBe niTaxYear
+            ty map(_ shouldBe niTaxYear)
             verify(mockDesConnector, times(0)).getNationalInsuranceRecord(nino)
             verify(mockDesConnector, times(0)).getSummary(nino)
             verify(mockDesConnector, times(0)).getLiabilities(nino)
@@ -334,11 +334,11 @@ class NationalInsuranceRecordServiceSpec
     when(mockFeatureFlagService.get(any()))
       .thenReturn(Future.successful(FeatureFlag(ProxyCacheToggle, isEnabled = false, None)))
     when(mockDesConnector.getLiabilities(nino))
-      .thenReturn(Future.successful(liabilities))
+      .thenReturn(Future.successful(Right(liabilities)))
     when(mockDesConnector.getNationalInsuranceRecord(nino))
-      .thenReturn(Future.successful(niRecordDES))
+      .thenReturn(Future.successful(Right(niRecordDES)))
     when(mockDesConnector.getSummary(nino))
-      .thenReturn(Future.successful(desSummary))
+      .thenReturn(Future.successful(Right(desSummary)))
 
     "proxy cache toggle is disabled" must {
 
@@ -358,7 +358,7 @@ class NationalInsuranceRecordServiceSpec
 
         result.map {
           ni =>
-            ni shouldBe niRecord
+            ni map (_ shouldBe niRecord)
             verify(mockProxyCacheConnector, times(0)).get(nino)
         }
       }
@@ -368,7 +368,7 @@ class NationalInsuranceRecordServiceSpec
 
         result.map {
           ty =>
-            ty shouldBe niTaxYear
+            ty map (_ shouldBe niTaxYear)
             verify(mockProxyCacheConnector, times(0)).get(nino)
         }
       }
@@ -377,104 +377,91 @@ class NationalInsuranceRecordServiceSpec
 
   private def niRecordAssertions(service: NationalInsuranceRecordService): Unit = "regular ni record" must {
 
-    lazy val niRecordResponse =
+    lazy val niRecordResponse:  Either[DesError, Either[ExclusionResponse, NationalInsuranceRecord]] =
       await(service.getNationalInsuranceRecord(nino))
-    lazy val niTaxYearResponse =
+    lazy val niTaxYearResponse:  Either[DesError, Either[ExclusionResponse, NationalInsuranceTaxYear]] =
       await(service.getTaxYear(nino, TaxYear("2014-15")))
 
     "return qualifying years to be 36" in {
-      niRecordResponse.map { ni =>
-        ni.qualifyingYears shouldBe 36
+      niRecordResponse.map { _ map (_.qualifyingYears shouldBe 36)
       }
     }
     "return qualifying years pre 1975 to be 5"  in {
-      niRecordResponse.map { ni =>
-        ni.qualifyingYearsPriorTo1975 shouldBe 5
+      niRecordResponse.map { _ map (_.qualifyingYearsPriorTo1975 shouldBe 5)
       }
     }
     "return number of gaps to be 1"  in {
-      niRecordResponse.map { ni =>
-        ni.numberOfGaps shouldBe 1
+      niRecordResponse.map { _ map (_.numberOfGaps shouldBe 1)
       }
     }
     "return number of gaps payable to be 1"  in {
-      niRecordResponse.map { ni =>
-        ni.numberOfGapsPayable shouldBe 1
+      niRecordResponse.map { _ map (_.numberOfGapsPayable shouldBe 1)
       }
     }
     "return date of entry to be 1969/8/1"  in {
-      niRecordResponse.map { ni =>
-        ni.dateOfEntry shouldBe Some(LocalDate.of(1969,8,1))
+      niRecordResponse.map { _ map (_.dateOfEntry shouldBe Some(LocalDate.of(1969,8,1)))
       }
     }
     "return homeResponsibilities to be true"  in {
-      niRecordResponse.map { ni =>
-        ni.homeResponsibilitiesProtection shouldBe true
+      niRecordResponse.map { _ map (_.homeResponsibilitiesProtection shouldBe true)
       }
     }
     "return earnings included upto to be 2016/8/1"  in {
-      niRecordResponse.map { ni =>
-        ni.earningsIncludedUpTo shouldBe LocalDate.of(2016,4,5)
+      niRecordResponse.map { _ map (_.earningsIncludedUpTo shouldBe LocalDate.of(2016,4,5))
       }
     }
     "return taxYear to be 2015-16"  in {
-      niRecordResponse.map { ni =>
-        ni.taxYears.head.taxYear shouldBe "2015-16"
+      niRecordResponse.map { _ map (_.taxYears.head.taxYear shouldBe "2015-16")
       }
     }
     "return qualifying status true for tax year 2015-16 to be"  in {
-      niRecordResponse.map { ni =>
-        ni.taxYears.head.qualifying shouldBe true
+      niRecordResponse.map { _ map (_.taxYears.head.qualifying shouldBe true)
       }
     }
     "return classOneContributions to be 2430.24 for tax year 2015-16"  in {
       niRecordResponse.map { ni =>
-        ni.taxYears.head.classOneContributions shouldBe 2430.24
+        ni map (_.taxYears.head.classOneContributions shouldBe 2430.24)
       }
     }
     "return classTwoCredits to be 0 for tax year 2015-16"  in {
-      niRecordResponse.map { ni =>
-        ni.taxYears.head.classTwoCredits shouldBe 0
+      niRecordResponse.map { _ map(_.taxYears.head.classTwoCredits shouldBe 0)
       }
     }
     "return classThreeCredits to be 0 for tax year 2015-16"  in {
       niRecordResponse.map { ni =>
-        ni.taxYears.head.classThreeCredits shouldBe 0
+        ni map (_.taxYears.head.classThreeCredits shouldBe 0)
       }
     }
     "return otherCredits to be 0 for tax year 2015-16"  in {
-      niRecordResponse.map { ni =>
-        ni.taxYears.head.otherCredits shouldBe 0
+      niRecordResponse.map { _ map (_.taxYears.head.otherCredits shouldBe 0)
       }
     }
     "return classThreePayable to be 0 for tax year 2015-16"  in {
-      niRecordResponse.map { ni =>
-        ni.taxYears.head.classThreePayable shouldBe 0
-        ni.taxYears(2).classThreePayable shouldBe 720
+      niRecordResponse.map { niEither =>
+        niEither map (_.taxYears.head.classThreePayable shouldBe 0)
+        niEither map (_.taxYears(2).classThreePayable shouldBe 720)
       }
     }
     "return classThreePayableBy to be None for tax year 2015-16"  in {
-      niRecordResponse.map { ni =>
-        ni.taxYears.head.classThreePayableBy shouldBe None
-        ni.taxYears(2).classThreePayableBy shouldBe Some(LocalDate.of(2019,4,5))
+      niRecordResponse.map { niEither =>
+        niEither map (_.taxYears.head.classThreePayableBy shouldBe None)
+        niEither map (_.taxYears(2).classThreePayableBy shouldBe Some(LocalDate.of(2019,4,5)))
       }
     }
     "return classThreePayableByPenalty to be None for tax year 2015-16"  in {
-      niRecordResponse.map { ni =>
-        ni.taxYears.head.classThreePayableByPenalty shouldBe None
-        ni.taxYears(2).classThreePayableByPenalty shouldBe Some(LocalDate.of(2023,4,5))
+      niRecordResponse.map { niEither =>
+        niEither map (_.taxYears.head.classThreePayableByPenalty shouldBe None)
+        niEither map (_.taxYears(2).classThreePayableByPenalty shouldBe Some(LocalDate.of(2023,4,5)))
       }
     }
     "return payable and under investigation flag to be false for tax year 2015-16"  in {
-      niRecordResponse.map { ni =>
-        ni.taxYears.head.payable shouldBe false
-        ni.taxYears.head.underInvestigation shouldBe false
+      niRecordResponse.map { niEither =>
+        niEither map (_.taxYears.head.payable shouldBe false)
+        niEither map (_.taxYears.head.underInvestigation shouldBe false)
       }
     }
     "return tax Year details correctly" in {
-      niTaxYearResponse.map { ty =>
-        ty shouldBe niTaxYear
-      }
+      niTaxYearResponse.map (_ map (_ shouldBe niTaxYear))
     }
   }
 
@@ -528,14 +515,17 @@ class NationalInsuranceRecordServiceSpec
 
   def exclusionsAssertions(service: NationalInsuranceRecordService): Unit = "return NI Summary with exclusions" in {
 
-    val result = await(service.getNationalInsuranceRecord(nino))
+    val result: Either[DesError, Either[ExclusionResponse, NationalInsuranceRecord]] = await(service.getNationalInsuranceRecord(nino))
 
-    result.left.map { niExclusion =>
+    result map { _.left.map { niExclusion =>
       niExclusion.exclusionReasons shouldBe List(Exclusion.IsleOfMan)
+      }
     }
 
-    result.left.map { _ =>
-      verify(mockMetrics, atLeastOnce()).exclusion(ArgumentMatchers.eq(Exclusion.IsleOfMan))
+    result map {
+      _.left.map { _ =>
+        verify(mockMetrics, atLeastOnce()).exclusion(ArgumentMatchers.eq(Exclusion.IsleOfMan))
+      }
     }
   }
 }

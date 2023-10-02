@@ -189,13 +189,13 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
     "there is a dead exclusion" must {
 
       "return status 403" in {
-        when(mockNationalInsuranceRecordService.getNationalInsuranceRecord(any())(any())).thenReturn(Left(ExclusionResponse(List(Exclusion.Dead))))
+        when(mockNationalInsuranceRecordService.getNationalInsuranceRecord(any())(any())).thenReturn(Right(Left(ExclusionResponse(List(Exclusion.Dead)))))
         val response = nationalInsuranceRecordController.getSummary(nino)(emptyRequestWithHeader)
         status(response) shouldBe 403
       }
 
       "return the dead message" in {
-        when(mockNationalInsuranceRecordService.getNationalInsuranceRecord(any())(any())).thenReturn(Left(ExclusionResponse(List(Exclusion.Dead))))
+        when(mockNationalInsuranceRecordService.getNationalInsuranceRecord(any())(any())).thenReturn(Right(Left(ExclusionResponse(List(Exclusion.Dead)))))
         val response = nationalInsuranceRecordController.getSummary(nino)(emptyRequestWithHeader)
         contentAsJson(response) shouldBe Json.parse(
           """{"code":"EXCLUSION_DEAD","message": "The customer needs to contact the National Insurance helpline"}"""
@@ -207,14 +207,16 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
     "there is a manual correspondence exclusion" must {
 
       "return status 403" in {
-        when(mockNationalInsuranceRecordService.getNationalInsuranceRecord(any())(any())).thenReturn(Left(ExclusionResponse(List(Exclusion.ManualCorrespondenceIndicator))))
+        when(mockNationalInsuranceRecordService.getNationalInsuranceRecord(any())(any())).
+          thenReturn(Right(Left(ExclusionResponse(List(Exclusion.ManualCorrespondenceIndicator)))))
         val response = nationalInsuranceRecordController.getSummary(nino)(emptyRequestWithHeader)
         status(response) shouldBe 403
 
       }
 
       "return the mci message" in {
-        when(mockNationalInsuranceRecordService.getNationalInsuranceRecord(any())(any())).thenReturn(Left(ExclusionResponse(List(Exclusion.ManualCorrespondenceIndicator))))
+        when(mockNationalInsuranceRecordService.getNationalInsuranceRecord(any())(any()))
+          .thenReturn(Right(Left(ExclusionResponse(List(Exclusion.ManualCorrespondenceIndicator)))))
         val response = nationalInsuranceRecordController.getSummary(nino)(emptyRequestWithHeader)
 
         contentAsJson(response) shouldBe Json.parse(
@@ -228,13 +230,15 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
 
 
       "return status 403" in {
-        when(mockNationalInsuranceRecordService.getNationalInsuranceRecord(any())(any())).thenReturn(Left(ExclusionResponse(List(Exclusion.IsleOfMan))))
+        when(mockNationalInsuranceRecordService.getNationalInsuranceRecord(any())(any())).
+          thenReturn(Right(Left(ExclusionResponse(List(Exclusion.IsleOfMan)))))
         val response = nationalInsuranceRecordController.getSummary(nino)(emptyRequestWithHeader)
         status(response) shouldBe 403
       }
 
       "return the IoM message" in {
-        when(mockNationalInsuranceRecordService.getNationalInsuranceRecord(any())(any())).thenReturn(Left(ExclusionResponse(List(Exclusion.IsleOfMan))))
+        when(mockNationalInsuranceRecordService.getNationalInsuranceRecord(any())(any())).
+          thenReturn(Right(Left(ExclusionResponse(List(Exclusion.IsleOfMan)))))
         val response = nationalInsuranceRecordController.getSummary(nino)(emptyRequestWithHeader)
 
         contentAsJson(response) shouldBe Json.parse(
@@ -268,21 +272,21 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
     "there is a list of dead, MCI, IoM exclusions" must {
 
       "return status 403" in {
-        when(mockNationalInsuranceRecordService.getNationalInsuranceRecord(any())(any())).thenReturn(Left(ExclusionResponse(List(
+        when(mockNationalInsuranceRecordService.getNationalInsuranceRecord(any())(any())).thenReturn(Right(Left(ExclusionResponse(List(
           Exclusion.IsleOfMan,
           Exclusion.ManualCorrespondenceIndicator,
           Exclusion.Dead
-        ))))
+        )))))
         val response = nationalInsuranceRecordController.getSummary(nino)(emptyRequestWithHeader)
         status(response) shouldBe 403
       }
 
       "return the dead message" in {
-        when(mockNationalInsuranceRecordService.getNationalInsuranceRecord(any())(any())).thenReturn(Left(ExclusionResponse(List(
+        when(mockNationalInsuranceRecordService.getNationalInsuranceRecord(any())(any())).thenReturn(Right(Left(ExclusionResponse(List(
           Exclusion.IsleOfMan,
           Exclusion.ManualCorrespondenceIndicator,
           Exclusion.Dead
-        ))))
+        )))))
         val response = nationalInsuranceRecordController.getSummary(nino)(emptyRequestWithHeader)
 
         contentAsJson(response) shouldBe Json.parse(
@@ -294,20 +298,20 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
     "there is a list of MCI, IoM exclusions" must {
 
       "return status 403" in {
-        when(mockNationalInsuranceRecordService.getNationalInsuranceRecord(any())(any())).thenReturn(Left(ExclusionResponse(List(
+        when(mockNationalInsuranceRecordService.getNationalInsuranceRecord(any())(any())).thenReturn(Right(Left(ExclusionResponse(List(
           Exclusion.IsleOfMan,
           Exclusion.ManualCorrespondenceIndicator
-        ))))
+        )))))
         val response = nationalInsuranceRecordController.getSummary(nino)(emptyRequestWithHeader)
         status(response) shouldBe 403
       }
 
       "return the mci message" in {
 
-        when(mockNationalInsuranceRecordService.getNationalInsuranceRecord(any())(any())).thenReturn(Left(ExclusionResponse(List(
+        when(mockNationalInsuranceRecordService.getNationalInsuranceRecord(any())(any())).thenReturn(Right(Left(ExclusionResponse(List(
           Exclusion.IsleOfMan,
           Exclusion.ManualCorrespondenceIndicator
-        ))))
+        )))))
         val response = nationalInsuranceRecordController.getSummary(nino)(emptyRequestWithHeader)
 
         contentAsJson(response) shouldBe Json.parse(
@@ -318,7 +322,7 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
 
     "there is a valid National Insurance Record with one item" must {
 
-      when(mockNationalInsuranceRecordService.getNationalInsuranceRecord(any())(any())).thenReturn(Right(dummyRecordSingle))
+      when(mockNationalInsuranceRecordService.getNationalInsuranceRecord(any())(any())).thenReturn(Right(Right(dummyRecordSingle)))
       val response = nationalInsuranceRecordController.getSummary(nino)(emptyRequestWithHeader)
       val json = contentAsJson(response)
 
@@ -330,7 +334,7 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
 
     "there is a valid National Insurance Record" must {
 
-      when(mockNationalInsuranceRecordService.getNationalInsuranceRecord(any())(any())).thenReturn(Right(dummyRecord))
+      when(mockNationalInsuranceRecordService.getNationalInsuranceRecord(any())(any())).thenReturn(Right(Right(dummyRecord)))
       val response = nationalInsuranceRecordController.getSummary(nino)(emptyRequestWithHeader)
       val json = contentAsJson(response)
 
@@ -529,7 +533,7 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
       "the date of entry is nullable" must {
         "not return the date of entry field" in {
 
-          when(mockNationalInsuranceRecordService.getNationalInsuranceRecord(any())(any())).thenReturn(Right(dummyRecord.copy(dateOfEntry = None)))
+          when(mockNationalInsuranceRecordService.getNationalInsuranceRecord(any())(any())).thenReturn(Right(Right(dummyRecord.copy(dateOfEntry = None))))
           val response = nationalInsuranceRecordController.getSummary(nino)(emptyRequestWithHeader)
           val json = contentAsJson(response)
 
@@ -554,14 +558,14 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
   "there is a dead exclusion" must {
 
     "return status 403" in {
-      when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).thenReturn(Left(ExclusionResponse(List(Exclusion.Dead))))
+      when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).thenReturn(Right(Left(ExclusionResponse(List(Exclusion.Dead)))))
       val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear("0000-01"))(emptyRequestWithHeader)
 
       status(response) shouldBe 403
     }
 
     "return the dead message" in {
-      when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).thenReturn(Left(ExclusionResponse(List(Exclusion.Dead))))
+      when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).thenReturn(Right(Left(ExclusionResponse(List(Exclusion.Dead)))))
       val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear("0000-01"))(emptyRequestWithHeader)
 
       contentAsJson(response) shouldBe Json.parse(
@@ -574,13 +578,15 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
 
 
     "return status 403" in {
-      when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).thenReturn(Left(ExclusionResponse(List(Exclusion.ManualCorrespondenceIndicator))))
+      when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).
+        thenReturn(Right(Left(ExclusionResponse(List(Exclusion.ManualCorrespondenceIndicator)))))
       val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear("0000-01"))(emptyRequestWithHeader)
       status(response) shouldBe 403
     }
 
     "return the mci message" in {
-      when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).thenReturn(Left(ExclusionResponse(List(Exclusion.ManualCorrespondenceIndicator))))
+      when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).
+        thenReturn(Right(Left(ExclusionResponse(List(Exclusion.ManualCorrespondenceIndicator)))))
       val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear("0000-01"))(emptyRequestWithHeader)
       contentAsJson(response) shouldBe Json.parse(
         """{"code":"EXCLUSION_MANUAL_CORRESPONDENCE","message": "The customer cannot access the service, they should contact HMRC"}"""
@@ -591,13 +597,13 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
 
   "there is an Isle of Man exclusion" must {
     "return status 403" in {
-      when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).thenReturn(Left(ExclusionResponse(List(Exclusion.IsleOfMan))))
+      when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).thenReturn(Right(Left(ExclusionResponse(List(Exclusion.IsleOfMan)))))
       val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear("0000-01"))(emptyRequestWithHeader)
       status(response) shouldBe 403
     }
 
     "return the IoM message" in {
-      when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).thenReturn(Left(ExclusionResponse(List(Exclusion.IsleOfMan))))
+      when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).thenReturn(Right(Left(ExclusionResponse(List(Exclusion.IsleOfMan)))))
       val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear("0000-01"))(emptyRequestWithHeader)
       contentAsJson(response) shouldBe Json.parse(
         """{"code":"EXCLUSION_ISLE_OF_MAN","message": "The customer needs to contact the National Insurance helpline"}"""
@@ -609,11 +615,11 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
 
     "return the dead message" in {
 
-      when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).thenReturn(Left(ExclusionResponse(List(
+      when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).thenReturn(Right(Left(ExclusionResponse(List(
         Exclusion.IsleOfMan,
         Exclusion.ManualCorrespondenceIndicator,
         Exclusion.Dead
-      ))))
+      )))))
       val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear("0000-01"))(emptyRequestWithHeader)
 
       status(response) shouldBe 403
@@ -626,19 +632,19 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
   "there is a list of MCI, IoM exclusions" must {
 
     "return status 403" in {
-      when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).thenReturn(Left(ExclusionResponse(List(
+      when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).thenReturn(Right(Left(ExclusionResponse(List(
         Exclusion.IsleOfMan,
         Exclusion.ManualCorrespondenceIndicator
-      ))))
+      )))))
       val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear("0000-01"))(emptyRequestWithHeader)
       status(response) shouldBe 403
     }
 
     "return the mci message" in {
-      when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).thenReturn(Left(ExclusionResponse(List(
+      when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).thenReturn(Right(Left(ExclusionResponse(List(
         Exclusion.IsleOfMan,
         Exclusion.ManualCorrespondenceIndicator
-      ))))
+      )))))
       val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear("0000-01"))(emptyRequestWithHeader)
       contentAsJson(response) shouldBe Json.parse(
         """{"code":"EXCLUSION_MANUAL_CORRESPONDENCE","message": "The customer cannot access the service, they should contact HMRC"}"""
@@ -648,7 +654,7 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
 
 
   "there is a valid Qualifying Tax Year" must {
-    when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).thenReturn(Right(dummyTaxYearQualifying))
+    when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).thenReturn(Right(Right(dummyTaxYearQualifying)))
     val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear(dummyTaxYearQualifying.taxYear))(emptyRequestWithHeader)
 
     lazy val json = contentAsJson(response)
@@ -707,7 +713,7 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
   }
 
   "there is a valid Non-Qualifying Tax Year" must {
-    when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).thenReturn(Right(dummyTaxYearNonQualifying))
+    when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).thenReturn(Right(Right(dummyTaxYearNonQualifying)))
     val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear(dummyTaxYearNonQualifying.taxYear))(emptyRequestWithHeader)
     lazy val json = contentAsJson(response)
 
