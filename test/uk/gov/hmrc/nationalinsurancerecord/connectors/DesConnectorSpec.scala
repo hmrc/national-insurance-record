@@ -343,15 +343,17 @@ class DesConnectorSpec
       verify(mockTimerContext, Mockito.atLeastOnce()).stop()
     }
 
-//    "return a failed NIRecord when there is an http error and pass on the exception" in {
-//      server.stubFor(get(urlEqualTo(s"/individuals/${nino.withoutSuffix}/pensions/ni"))
-//        .willReturn(badRequest()))
-//      when(mockNIRecordRepo().findByNino(any())(any(), any())).thenReturn(Future.successful(None))
-//
-//      ScalaFutures.whenReady(connector.getNationalInsuranceRecord(nino).failed) { ex =>
-//        ex shouldBe a[DesError.HttpError]
-//      }
-//    }
+    "return a DesError response when an NI record is not returned" in {
+      reset(mockMetrics)
+      when(mockMetrics.startTimer(APITypes.NIRecord)).thenReturn(mock[Timer.Context])
+
+      server.stubFor(get(urlEqualTo(s"/individuals/${nino.withoutSuffix}/pensions/ni"))
+        .willReturn(badRequest()))
+      when(mockNIRecordRepo().findByNino(any())(any(), any())).thenReturn(Future.successful(None))
+
+      val desNIRecordE: Either[DesError, DesNIRecord] = await(connector.getNationalInsuranceRecord(nino))
+      desNIRecordE.left.map (_ shouldBe a[DesError.HttpError])
+    }
 
     "return valid Liabilities response" in {
       reset(mockMetrics)
@@ -398,15 +400,18 @@ class DesConnectorSpec
       verify(mockTimerContext, Mockito.atLeastOnce()).stop()
     }
 
-//    "return a failed Liabilities when there is an http error and pass on the exception" in {
-//      when(mockLiabilitiesRepo().findByNino(any())(any(), any())).thenReturn(Future.successful(None))
-//
-//      server.stubFor(get(urlEqualTo(s"/individuals/${nino.withoutSuffix}/pensions/liabilities"))
-//        .willReturn(badRequest()))
-//      ScalaFutures.whenReady(connector.getLiabilities(nino).failed) { ex =>
-//        ex shouldBe a[DesError.HttpError]
-//      }
-//    }
+    "return a DesError response when a Liabilities record is not returned" in {
+      reset(mockMetrics)
+      when(mockMetrics.startTimer(APITypes.Liabilities)).thenReturn(mock[Timer.Context])
+      when(mockLiabilitiesRepo().findByNino(any())(any(), any())).thenReturn(Future.successful(None))
+
+      server.stubFor(get(urlEqualTo(s"/individuals/${nino.withoutSuffix}/pensions/liabilities"))
+        .willReturn(badRequest()))
+
+      val desNIRecordE: Either[DesError, DesLiabilities] = await(connector.getLiabilities(nino))
+      desNIRecordE.left.map (_ shouldBe a[DesError.HttpError])
+
+    }
 
     "return a depersonalised JSON structure following validation error" in {
       val invalidJson =
@@ -435,11 +440,13 @@ class DesConnectorSpec
       server.stubFor(get(urlEqualTo(s"/individuals/${nino.withoutSuffix}/pensions/ni"))
         .willReturn(ok(invalidJson)))
 
-//      ScalaFutures.whenReady(connector.getNationalInsuranceRecord(nino)(HeaderCarrier()).failed) { ex =>
-//        ex shouldBe a[DesError.JsonValidationError]
-//        ex.getMessage.contains("1973-10-01") shouldBe false
-//        ex.getMessage.contains("1111-11-11") shouldBe true
-//      }
+      val desNiRecordE:  Either[DesError, DesNIRecord] = await(connector.getNationalInsuranceRecord(nino)(HeaderCarrier()))
+
+      desNiRecordE.left.map{ desError =>
+        desError shouldBe a[DesError.JsonValidationError]
+        desError.getMessage.contains("1973-10-01") shouldBe false
+        desError.getMessage.contains("1111-11-11") shouldBe true
+      }
     }
   }
 

@@ -125,7 +125,7 @@ class DesConnector @Inject()(
       case Some(responseModel) =>
         Future.successful(Right(responseModel))
       case None =>
-         connectToDes(url, api)(hc, formatA) map { eitherR => //TODO better name or use EitherT
+         connectToDes(url, api)(hc, formatA) map { eitherR =>
             eitherR.map{ response =>
               logger.info(s"*~* - writing nino to cache: $nino")
               repository.insertByNino(nino, response)
