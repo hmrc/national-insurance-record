@@ -39,8 +39,8 @@ class NationalInsuranceRecordService @Inject()(
   featureFlagService: FeatureFlagService
 ) {
 
-  //TODO may need t hide the Eithers under a Type
-  def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[DesError, Either[ExclusionResponse, NationalInsuranceRecord]]] =
+  private type DesEither[A] = Either[DesError, Either[ExclusionResponse, A]]
+  def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[DesEither[NationalInsuranceRecord]] =
     featureFlagService.get(ProxyCacheToggle) flatMap {
       proxyCache =>
         citizenDetailsService.checkManualCorrespondenceIndicator(nino) flatMap {
@@ -67,7 +67,7 @@ class NationalInsuranceRecordService @Inject()(
                                            desSummaryEither: Either[DesError, DesSummary],
                                            desLiabilitiesEither: Either[DesError, DesLiabilities],
                                            manualCorrespondence: Boolean
-                                          ): Either[DesError, Either[ExclusionResponse, NationalInsuranceRecord]] = {
+                                          ): DesEither[NationalInsuranceRecord] = {
 
     (niRecordEither, desSummaryEither, desLiabilitiesEither) match {
       case (Right(niRecord), Right(desSummary), Right(desLiabilities)) =>
@@ -125,7 +125,7 @@ class NationalInsuranceRecordService @Inject()(
     }
   }
 
-  def getTaxYear(nino: Nino, taxYear: TaxYear)(implicit hc: HeaderCarrier): Future[Either[DesError, Either[ExclusionResponse, NationalInsuranceTaxYear]]] =
+  def getTaxYear(nino: Nino, taxYear: TaxYear)(implicit hc: HeaderCarrier): Future[DesEither[NationalInsuranceTaxYear]] =
     featureFlagService.get(ProxyCacheToggle).flatMap {
       proxyCache =>
         citizenDetailsService.checkManualCorrespondenceIndicator(nino).flatMap {
@@ -189,7 +189,7 @@ class NationalInsuranceRecordService @Inject()(
                            manualCorrespondence: Boolean,
                            nino: Nino,
                            taxYear: TaxYear
-                          ): Either[DesError, Either[ExclusionResponse, NationalInsuranceTaxYear]] = {
+                          ): DesEither[NationalInsuranceTaxYear] = {
     (niRecordEither, desSummaryEither, desLiabilitiesEither) match {
       case (Right(niRecord), Right(desSummary), Right(desLiabilities)) =>
         buildTaxYear(niRecord, desSummary, desLiabilities, manualCorrespondence, nino, taxYear) match {

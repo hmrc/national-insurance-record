@@ -70,15 +70,10 @@ class ProxyCacheConnector @Inject () (
             result
         },
       jsonParseError = "proxy cache data"
-    ) map {
-      result =>
-        result match {
-          case Left(_) =>
-            metrics.incrementFailedCounter(APITypes.ProxyCache)
-          case Right(_) =>
-            ()
-        }
-        result
+    ) map { _.left.map(desError => {
+        metrics.incrementFailedCounter(APITypes.ProxyCache)
+        desError
+      })
     }
   }
 }
