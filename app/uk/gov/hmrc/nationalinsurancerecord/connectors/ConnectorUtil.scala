@@ -51,14 +51,9 @@ class ConnectorUtil @Inject() (
           valid =>
             Right(valid)
         )
-      case Left(error) =>
-
-
-        // TODO which errors in here should cause an exception to be thrown?
-        Left(DesError.HttpError(error))
+      case Left(error) => Left(DesError.HttpError(error))
     } recover {
       case error: HttpException =>
-        // TODO should this be a BadGateway as it is generic?
         Left(DesError.HttpError(UpstreamErrorResponse(error.message, BAD_GATEWAY)))
       case error =>
         Left(DesError.OtherError(error))

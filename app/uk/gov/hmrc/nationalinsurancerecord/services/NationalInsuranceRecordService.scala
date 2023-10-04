@@ -58,28 +58,11 @@ class NationalInsuranceRecordService @Inject()(
                 niRecord    <- des.getNationalInsuranceRecord(nino)
                 liabilities <- des.getLiabilities(nino)
                 summary     <- des.getSummary(nino)
-              } yield buildNationalInsuranceRecord(niRecord, summary, liabilities, mci)
+              } yield handleDesEither[NationalInsuranceRecord](niRecord, summary, liabilities,
+                buildNationalInsuranceRecord(_: DesNIRecord, _: DesSummary, _: DesLiabilities, mci))
             }
         }
     }
-
-  private def buildNationalInsuranceRecord(niRecordEither: Either[DesError, DesNIRecord],
-                                           desSummaryEither: Either[DesError, DesSummary],
-                                           desLiabilitiesEither: Either[DesError, DesLiabilities],
-                                           manualCorrespondence: Boolean
-                                          ): DesEither[NationalInsuranceRecord] = {
-
-    (niRecordEither, desSummaryEither, desLiabilitiesEither) match {
-      case (Right(niRecord), Right(desSummary), Right(desLiabilities)) =>
-        buildNationalInsuranceRecord(niRecord, desSummary, desLiabilities, manualCorrespondence) match {
-          case Right(niRecord) => Right(Right(niRecord))
-          case Left(exclusion) => Right(Left(exclusion))
-        }
-      case (Left(niRecordError), _, _) => Left(niRecordError)
-      case (_, Left(desSummaryError), _) => Left(desSummaryError)
-      case (_, _, Left(desLiabilitiesError)) => Left(desLiabilitiesError)
-    }
-  }
 
   private def buildNationalInsuranceRecord(
     desNIRecord: DesNIRecord,
@@ -143,7 +126,8 @@ class NationalInsuranceRecordService @Inject()(
                 niRecord    <- des.getNationalInsuranceRecord(nino)
                 liabilities <- des.getLiabilities(nino)
                 summary     <- des.getSummary(nino)
-              } yield buildTaxYear(niRecord, summary, liabilities, mci, nino, taxYear)
+              } yield handleDesEither[NationalInsuranceTaxYear](niRecord, summary, liabilities,
+                  buildTaxYear(_: DesNIRecord, _: DesSummary, _: DesLiabilities, mci, nino, taxYear))
             }
         }
     }
@@ -182,18 +166,15 @@ class NationalInsuranceRecordService @Inject()(
         }
     }
   }
-
-  private def buildTaxYear(niRecordEither: Either[DesError, DesNIRecord],
+  private def handleDesEither[A](niRecordEither: Either[DesError, DesNIRecord],
                            desSummaryEither: Either[DesError, DesSummary],
                            desLiabilitiesEither: Either[DesError, DesLiabilities],
-                           manualCorrespondence: Boolean,
-                           nino: Nino,
-                           taxYear: TaxYear
-                          ): DesEither[NationalInsuranceTaxYear] = {
+                           func: (DesNIRecord, DesSummary, DesLiabilities) => Either[ExclusionResponse, A]
+                          ): DesEither[A] = {
     (niRecordEither, desSummaryEither, desLiabilitiesEither) match {
       case (Right(niRecord), Right(desSummary), Right(desLiabilities)) =>
-        buildTaxYear(niRecord, desSummary, desLiabilities, manualCorrespondence, nino, taxYear) match {
-          case Right(niTaxRecord) => Right(Right(niTaxRecord))
+        func(niRecord, desSummary, desLiabilities) match {
+          case Right(record) => Right(Right(record))
           case Left(exclusion) => Right(Left(exclusion))
         }
       case (Left(niRecordError), _, _) => Left(niRecordError)

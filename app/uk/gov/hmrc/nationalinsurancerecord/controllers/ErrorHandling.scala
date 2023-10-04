@@ -31,7 +31,6 @@ trait ErrorHandling extends Logging {
   val app: String
   implicit val executionContext: ExecutionContext
 
-  //TODO is a case statement needed
   def errorWrapper(func: => Future[Result]): Future[Result] =
     func.recover {
       case error => handleLegacyError(error)
