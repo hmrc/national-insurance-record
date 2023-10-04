@@ -125,11 +125,11 @@ class DesConnector @Inject()(
       case Some(responseModel) =>
         Future.successful(Right(responseModel))
       case None =>
-         connectToDes(url, api)(hc, formatA) map { eitherR =>
-            eitherR.map{ response =>
+         connectToDes(url, api)(hc, formatA) map { desEitherResponse =>
+           desEitherResponse map { validResponse =>
               logger.info(s"*~* - writing nino to cache: $nino")
-              repository.insertByNino(nino, response)
-              response
+              repository.insertByNino(nino, validResponse)
+              validResponse
             }
       }
     }
@@ -163,7 +163,7 @@ class DesConnector @Inject()(
           case Left(_) =>
             metrics.incrementFailedCounter(api)
           case Right(_) =>
-            ()
+            ()  //TODO left projection
         }
         result
     }

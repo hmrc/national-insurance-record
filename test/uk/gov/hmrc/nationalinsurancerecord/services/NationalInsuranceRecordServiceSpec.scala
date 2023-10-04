@@ -210,7 +210,7 @@ class NationalInsuranceRecordServiceSpec
       .thenReturn(Future.successful(FeatureFlag(ProxyCacheToggle, isEnabled = true, None)))
 
     when(mockProxyCacheConnector.get(nino))
-      .thenReturn(Future.successful(proxyCacheData()))
+      .thenReturn(Future.successful(Right(proxyCacheData())))
 
     val service: NationalInsuranceRecordService =
       new NationalInsuranceRecordService(
@@ -272,7 +272,7 @@ class NationalInsuranceRecordServiceSpec
       )
 
     when(mockProxyCacheConnector.get(nino))
-      .thenReturn(Future.successful(proxyCacheData(exclusionsSummary)))
+      .thenReturn(Future.successful(Right(proxyCacheData(exclusionsSummary))))
 
     exclusionsAssertions(service)
   }
@@ -285,7 +285,7 @@ class NationalInsuranceRecordServiceSpec
     when(mockFeatureFlagService.get(any()))
       .thenReturn(Future.successful(FeatureFlag(ProxyCacheToggle, isEnabled = true, None)))
     when(mockProxyCacheConnector.get(nino))
-      .thenReturn(Future.successful(proxyCacheData()))
+      .thenReturn(Future.successful(Right(proxyCacheData())))
 
     "proxy cache toggle is enabled" must {
 

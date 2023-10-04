@@ -47,11 +47,11 @@ class NationalInsuranceRecordService @Inject()(
           mci =>
             if (proxyCache.isEnabled) {
               proxyCacheConnector.get(nino) map {
-                pcd =>
-                  buildNationalInsuranceRecord(pcd.niRecord, pcd.summary, pcd.liabilities, mci) match {
-                    case Right(niRecord) => Right(Right(niRecord))
-                    case Left(exclusion) => Right(Left(exclusion))
-                  }
+                case Right(pcd) => buildNationalInsuranceRecord(pcd.niRecord, pcd.summary, pcd.liabilities, mci) match {
+                  case Right(niRecord) => Right(Right(niRecord))
+                  case Left(exclusion) => Right(Left(exclusion))
+                }
+                case Left(error) => Left(error)
               }
             } else {
               for {
@@ -132,11 +132,11 @@ class NationalInsuranceRecordService @Inject()(
           mci =>
             if (proxyCache.isEnabled) {
               proxyCacheConnector.get(nino) map {
-                pcd =>
-                  buildTaxYear(pcd.niRecord, pcd.summary, pcd.liabilities, mci, nino, taxYear) match {
+                case Right(pcd) => buildTaxYear(pcd.niRecord, pcd.summary, pcd.liabilities, mci, nino, taxYear) match {
                     case Right(niTaxYear) => Right(Right(niTaxYear))
                     case Left(exclusion) => Right(Left(exclusion))
                   }
+                case Left(error) => Left(error)
               }
             } else {
               for {

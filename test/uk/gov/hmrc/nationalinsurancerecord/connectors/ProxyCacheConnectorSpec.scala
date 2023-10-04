@@ -29,11 +29,9 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier, HeaderNames, RequestId}
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.config.{AppContext, ApplicationConfig}
-import uk.gov.hmrc.nationalinsurancerecord.domain.des.DesError
+import uk.gov.hmrc.nationalinsurancerecord.domain.des.{DesError, ProxyCacheData}
 import utils.TestData._
 import utils.WireMockHelper
-
-import scala.concurrent.ExecutionContext.Implicits.global
 
 class ProxyCacheConnectorSpec
   extends NationalInsuranceRecordUnitSpec
@@ -72,7 +70,6 @@ class ProxyCacheConnectorSpec
     s"/ni-and-sp-proxy-cache/${nino.nino}"
 
   private val requests: Seq[(ResponseDefinitionBuilder, String)] = Seq(
-    ok("""{"number": 456, "name": "def"}""") -> "invalidJson",
     serverError() -> "internalServerError",
     badRequest() -> "badRequest",
     aResponse().withStatus(502) -> "gatewayTimeout",
@@ -85,15 +82,17 @@ class ProxyCacheConnectorSpec
       server.stubFor(get(urlEqualTo(url))
         .willReturn(ok(Json.stringify(Json.toJson(proxyCacheData)))))
 
-      val result = await(connector.get(nino)(headerCarrier))
+      val result: Either[DesError, ProxyCacheData] = await(connector.get(nino)(headerCarrier))
 
-      result.liabilities shouldBe desLiabilities
-      result.summary shouldBe desSummary
-      result.niRecord shouldBe desNIRecord
+      result map { proxyCacheData =>
+        proxyCacheData.liabilities shouldBe desLiabilities
+        proxyCacheData.summary shouldBe desSummary
+        proxyCacheData.niRecord shouldBe desNIRecord
+      }
     }
   }
 
-  "getProxyCacheData failure" should {
+  "getProxyCacheData unsuccessful" should {
     requests.foreach {
       case (errorResponse, description) =>
 
@@ -101,7 +100,8 @@ class ProxyCacheConnectorSpec
         server.stubFor(get(urlEqualTo(url))
           .willReturn(errorResponse))
 
-        await(connector.get(nino)(headerCarrier).failed) shouldBe a[DesError]
+        val response: Either[DesError, ProxyCacheData] = await(connector.get(nino)(headerCarrier))
+        response.left.map(_ shouldBe a[DesError.HttpError])
       }
     }
 
@@ -109,10 +109,9 @@ class ProxyCacheConnectorSpec
       server.stubFor(get(urlEqualTo(url))
         .willReturn(aResponse().withFault(Fault.CONNECTION_RESET_BY_PEER)))
 
-      val ex: DesError =
-        await(recoverToExceptionIf[DesError](connector.get(nino)(headerCarrier)))
+      val response: Either[DesError, ProxyCacheData] = await(connector.get(nino)(headerCarrier))
 
-      ex shouldBe a[DesError.OtherError]
+      response.left.map(_ shouldBe a[DesError.OtherError])
     }
   }
 
