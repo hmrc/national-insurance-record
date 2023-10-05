@@ -25,7 +25,7 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nationalinsurancerecord.config.AppContext
 import uk.gov.hmrc.nationalinsurancerecord.controllers.actions.{AuthAction, CopeExclusionAction}
 import uk.gov.hmrc.nationalinsurancerecord.controllers.{ErrorHandling, ErrorResponses, HalSupport, Links}
-import uk.gov.hmrc.nationalinsurancerecord.domain.{Exclusion, ExclusionResponse, NationalInsuranceTaxYear, TaxYear}
+import uk.gov.hmrc.nationalinsurancerecord.domain.{Exclusion, ExclusionResponse, NationalInsuranceRecordResult, NationalInsuranceTaxYear, NationalInsuranceTaxYearResult, TaxYear}
 import uk.gov.hmrc.nationalinsurancerecord.events.{NationalInsuranceExclusion, NationalInsuranceRecord}
 import uk.gov.hmrc.nationalinsurancerecord.services.NationalInsuranceRecordService
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
@@ -64,11 +64,11 @@ class NationalInsuranceRecordController @Inject()(
   def getSummary(nino: Nino): Action[AnyContent] =
     (authAction andThen validateAccept(acceptHeaderValidationRules) andThen copeAction.filterCopeExclusions(nino)).async {
       implicit request =>
-        errorWrapper(nationalInsuranceRecordService.getNationalInsuranceRecord(nino) map {
+        nationalInsuranceRecordService.getNationalInsuranceRecord(nino) map {
           _.fold(handleDesError, {
-            case Left(exclusion) => handleExclusion(exclusion, nino,
+            case NationalInsuranceRecordResult(Left(exclusion)) => handleExclusion(exclusion, nino,
               Ok(halResourceSelfLink(Json.toJson(exclusion), nationalInsuranceRecordHref(nino))))
-            case Right(nationalInsuranceRecord) =>
+            case NationalInsuranceRecordResult(Right(nationalInsuranceRecord)) =>
               auditConnector.sendEvent(NationalInsuranceRecord(nino, nationalInsuranceRecord.qualifyingYears,
                 nationalInsuranceRecord.qualifyingYearsPriorTo1975, nationalInsuranceRecord.numberOfGaps,
                 nationalInsuranceRecord.numberOfGapsPayable, nationalInsuranceRecord.dateOfEntry,
@@ -79,18 +79,18 @@ class NationalInsuranceRecordController @Inject()(
               Ok(halResourceWithTaxYears(nino, Json.toJson(nationalInsuranceRecord), nationalInsuranceRecordHref(nino),
                 years = nationalInsuranceRecord.taxYears))
           })
-        })
+        }
     }
 
 
   def getTaxYear(nino: Nino, taxYear: TaxYear): Action[AnyContent] =
     (authAction andThen validateAccept(acceptHeaderValidationRules)).async {
       implicit request =>
-        errorWrapper(nationalInsuranceRecordService.getTaxYear(nino, taxYear) map {
+        nationalInsuranceRecordService.getTaxYear(nino, taxYear) map {
           _.fold(handleDesError, {
-            case Left(exclusion) => handleExclusion(exclusion, nino,
+            case NationalInsuranceTaxYearResult(Left(exclusion)) => handleExclusion(exclusion, nino,
               Ok(halResourceSelfLink(Json.toJson(exclusion), nationalInsuranceTaxYearHref(nino, taxYear))))
-            case Right(nationalInsuranceTaxYear) =>
+            case NationalInsuranceTaxYearResult(Right(nationalInsuranceTaxYear)) =>
               import uk.gov.hmrc.nationalinsurancerecord.events.NationalInsuranceTaxYear
               auditConnector.sendEvent(NationalInsuranceTaxYear(nino, nationalInsuranceTaxYear.taxYear,
                 nationalInsuranceTaxYear.qualifying, nationalInsuranceTaxYear.classOneContributions,
@@ -101,7 +101,7 @@ class NationalInsuranceRecordController @Inject()(
 
               Ok(halResourceSelfLink(Json.toJson(nationalInsuranceTaxYear), nationalInsuranceTaxYearHref(nino, taxYear)))
           })
-        })
+        }
     }
 
   private def handleExclusion(exclusion: ExclusionResponse, nino: Nino, okResult: => Result)(implicit request: Request[AnyContent]): Result = {
