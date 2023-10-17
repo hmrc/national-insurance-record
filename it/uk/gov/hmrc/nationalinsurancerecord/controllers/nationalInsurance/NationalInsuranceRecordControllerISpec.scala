@@ -90,7 +90,9 @@ class NationalInsuranceRecordControllerISpec extends IntegrationBaseSpec with Re
 
   private val controllerUrl: String = s"/ni/$nino"
 
-  private val desUrl: String = s"/individuals/${nino.withoutSuffix}/pensions/ni"
+  private val desNIUrl: String = s"/individuals/${nino.withoutSuffix}/pensions/ni"
+  private val desSummaryUrl: String = s"/individuals/${nino.withoutSuffix}/pensions/summary"
+  private val desLiabilitiesUrl: String = s"/individuals/${nino.withoutSuffix}/pensions/liabilities"
 
   private val proxyCacheUrl: String = s"/ni-and-sp-proxy-cache/${nino.nino}"
 
@@ -102,7 +104,9 @@ class NationalInsuranceRecordControllerISpec extends IntegrationBaseSpec with Re
           when(mockFeatureFlagService.get(ArgumentMatchers.any[FeatureFlagName]()))
             .thenReturn(Future.successful(FeatureFlag(ProxyCacheToggle, isEnabled = false)))
 
-          stubGetServer(errorResponse, desUrl)
+          stubGetServer(errorResponse, desNIUrl)
+          stubGetServer(errorResponse, desSummaryUrl)
+          stubGetServer(errorResponse, desLiabilitiesUrl)
 
           val request = FakeRequest(GET, controllerUrl)
             .withHeaders("Accept" -> "application/vnd.hmrc.1.0+json")

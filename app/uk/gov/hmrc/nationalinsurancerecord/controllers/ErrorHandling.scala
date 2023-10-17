@@ -20,24 +20,17 @@ import play.api.Logging
 import play.api.libs.json.Json
 import play.api.mvc.{BaseController, Result}
 import uk.gov.hmrc.api.controllers.{ErrorGenericBadRequest, ErrorInternalServerError, ErrorNotFound, ErrorResponse}
-import uk.gov.hmrc.http.UpstreamErrorResponse.WithStatusCode
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.nationalinsurancerecord.domain.des.DesError
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 trait ErrorHandling extends Logging {
   self: BaseController =>
   val app: String
   implicit val executionContext: ExecutionContext
 
-  def errorWrapper(func: => Future[Result]): Future[Result] =
-    func.recover {
-      case error: DesError => handleDesError(error)
-      case error => handleLegacyError(error)
-    }
-
-  private def handleDesError(error: DesError): Result =
+  protected def handleDesError(error: DesError): Result =
     error match {
       case DesError.HttpError(error) if error.statusCode == NOT_FOUND =>
         notFound
@@ -58,30 +51,11 @@ trait ErrorHandling extends Logging {
       case value =>
         throw new NotImplementedError(s"Match not implemented for: $value")
     }
-
-  private def handleLegacyError(error: Throwable): Result =
-    error match {
-      case _: NotFoundException =>
-        notFound
-      case _@WithStatusCode(GATEWAY_TIMEOUT) =>
-        gatewayTimeout(error)
-      case _: BadGatewayException =>
-        badGateway(error)
-      case _: BadRequestException =>
-        badRequest
-      case _@UpstreamErrorResponse.Upstream4xxResponse(_) =>
-        upstream4xx(error)
-      case _@UpstreamErrorResponse.Upstream5xxResponse(_) =>
-        upstream5xx(error)
-      case _: Throwable =>
-        internalServerError(error)
-    }
-
   private def notFound: Result =
     NotFound(Json.toJson[ErrorResponse](ErrorNotFound))
 
   private def gatewayTimeout(error: Throwable): Status = {
-    logger.error(s"$app Gateway Timeout: ${error.getMessage}", error)
+    logger.error(s"$app Gateway Timeout: ${error.getMessage}")
     GatewayTimeout
   }
 
@@ -93,7 +67,7 @@ trait ErrorHandling extends Logging {
     )
 
   private def badGateway(error: Throwable): Status = {
-    logger.error(s"$app Bad Gateway: ${error.getMessage}", error)
+    logger.error(s"$app Bad Gateway: ${error.getMessage}")
     BadGateway
   }
 
@@ -108,7 +82,7 @@ trait ErrorHandling extends Logging {
   }
 
   private def upstream5xx(error: Throwable): Status = {
-    logger.error(s"$app Upstream5XX: ${error.getMessage}", error)
+    logger.error(s"$app Upstream5XX: ${error.getMessage}")
     BadGateway
   }
 }

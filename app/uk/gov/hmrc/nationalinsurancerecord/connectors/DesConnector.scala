@@ -59,7 +59,7 @@ class DesConnector @Inject()(
     nino: Nino
   )(
     implicit hc: HeaderCarrier
-  ): Future[DesLiabilities] =
+  ): Future[Either[DesError, DesLiabilities]] =
     get[DesLiabilities, DesLiabilitiesCache](
       nino       = nino,
       apiTypes   = APITypes.Liabilities,
@@ -71,7 +71,7 @@ class DesConnector @Inject()(
     nino: Nino
   )(
     implicit hc: HeaderCarrier
-  ): Future[DesNIRecord] =
+  ): Future[Either[DesError, DesNIRecord]] =
     get[DesNIRecord, DesNIRecordCache](
       nino       = nino,
       apiTypes   = APITypes.NIRecord,
@@ -83,7 +83,7 @@ class DesConnector @Inject()(
     nino: Nino
   )(
     implicit hc: HeaderCarrier
-  ): Future[DesSummary] =
+  ): Future[Either[DesError, DesSummary]] =
     get[DesSummary, DesSummaryCache](
       nino       = nino,
       apiTypes   = APITypes.Summary,
@@ -100,7 +100,7 @@ class DesConnector @Inject()(
     implicit hc: HeaderCarrier,
     formatA: Format[A],
     formatB: OFormat[B]
-  ): Future[A] = {
+  ): Future[Either[DesError, A]] = {
     metrics.incrementCounter(apiTypes)
 
     connectToCache[A, B](
@@ -120,18 +120,16 @@ class DesConnector @Inject()(
     implicit hc: HeaderCarrier,
     formatA: Format[A],
     formatB: OFormat[B]
-  ): Future[A] =
+  ): Future[Either[DesError, A]] =
     repository.findByNino(nino).flatMap {
       case Some(responseModel) =>
-        Future.successful(responseModel)
+        Future.successful(Right(responseModel))
       case None =>
-        connectToDes(url, api)(hc, formatA).flatMap {
-          case Right(response) =>
-            logger.info(s"*~* - writing nino to cache: $nino")
-            repository.insertByNino(nino, response)
-            Future.successful(response)
-          case Left(error) =>
-            Future.failed(error)
+         connectToDes(url, api)(hc, formatA) map { _ map { validResponse =>
+              logger.info(s"*~* - writing nino to cache: $nino")
+              repository.insertByNino(nino, validResponse)
+              validResponse
+            }
       }
     }
 
@@ -158,15 +156,10 @@ class DesConnector @Inject()(
             result
         },
       jsonParseError = api.toString
-    ) map {
-      result =>
-        result match {
-          case Left(_) =>
-            metrics.incrementFailedCounter(api)
-          case Right(_) =>
-            ()
-        }
-        result
+    ) map { _.left.map(desError => {
+        metrics.incrementFailedCounter(api)
+        desError
+      })
     }
   }
 }

@@ -283,12 +283,14 @@ class DesConnectorSpec
       server.stubFor(get(urlEqualTo(s"/individuals/${nino.withoutSuffix}/pensions/summary"))
         .willReturn(ok(Json.stringify(testSummaryRecordJson))))
 
-      val desSummaryF = await(connector.getSummary(nino)(HeaderCarrier()))
-      desSummaryF.rreToConsider shouldBe false
-      desSummaryF.finalRelevantYear shouldBe Some(2016)
-      desSummaryF.dateOfBirth shouldBe Some(LocalDate.of(1952,11,21))
-      desSummaryF.dateOfDeath shouldBe None
-      desSummaryF.earningsIncludedUpTo shouldBe Some(LocalDate.of(2014,4,5))
+      val desSummaryF: Either[DesError, DesSummary] = await(connector.getSummary(nino)(HeaderCarrier()))
+      desSummaryF map { desSummary =>
+        desSummary.rreToConsider shouldBe false
+        desSummary.finalRelevantYear shouldBe Some(2016)
+        desSummary.dateOfBirth shouldBe Some(LocalDate.of(1952, 11, 21))
+        desSummary.dateOfDeath shouldBe None
+        desSummary.earningsIncludedUpTo shouldBe Some(LocalDate.of(2014, 4, 5))
+      }
     }
 
     "log correct Summary metrics" in {
@@ -305,32 +307,34 @@ class DesConnectorSpec
       server.stubFor(get(urlEqualTo(s"/individuals/${nino.withoutSuffix}/pensions/ni"))
         .willReturn(ok(Json.stringify(testNIRecordJson))))
 
-      val desNIRecordF = await(connector.getNationalInsuranceRecord(nino)(HeaderCarrier()))
-      desNIRecordF.nonQualifyingYearsPayable shouldBe 0
-      desNIRecordF.nonQualifyingYears shouldBe 13
-      desNIRecordF.numberOfQualifyingYears shouldBe 27
-      desNIRecordF.pre75ContributionCount shouldBe 51
-      desNIRecordF.dateOfEntry shouldBe Some(LocalDate.of(1973,10,1))
-      desNIRecordF.niTaxYears.head.qualifying shouldBe true
-      desNIRecordF.niTaxYears(1).qualifying shouldBe false
-      desNIRecordF.niTaxYears.head.underInvestigation shouldBe false
-      desNIRecordF.niTaxYears(1).underInvestigation shouldBe true
-      desNIRecordF.niTaxYears.head.payable shouldBe false
-      desNIRecordF.niTaxYears(1).payable shouldBe true
-      desNIRecordF.niTaxYears.head.classThreePayable shouldBe 0
-      desNIRecordF.niTaxYears(1).classThreePayable shouldBe 722.80
-      desNIRecordF.niTaxYears.head.classThreePayableBy shouldBe None
-      desNIRecordF.niTaxYears(1).classThreePayableBy shouldBe Some(LocalDate.of(2019, 4, 5))
-      desNIRecordF.niTaxYears.head.classThreePayableByPenalty shouldBe None
-      desNIRecordF.niTaxYears(1).classThreePayableByPenalty shouldBe Some(LocalDate.of(2023, 4, 5))
-      desNIRecordF.niTaxYears.head.classOneContribution shouldBe 1698.9600
-      desNIRecordF.niTaxYears(1).classOneContribution shouldBe 0
-      desNIRecordF.niTaxYears.head.classTwoCredits shouldBe 0
-      desNIRecordF.niTaxYears(1).classTwoCredits shouldBe 52
-      desNIRecordF.niTaxYears.head.otherCredits.head.creditSourceType.get shouldBe 2
-      desNIRecordF.niTaxYears.head.otherCredits.head.creditContributionType.get shouldBe 23
-      desNIRecordF.niTaxYears.head.otherCredits.head.numberOfCredits.get shouldBe 4
-      desNIRecordF.niTaxYears(1).otherCredits shouldBe List()
+      val desNIRecordF: Either[DesError, DesNIRecord] = await(connector.getNationalInsuranceRecord(nino)(HeaderCarrier()))
+      desNIRecordF map { desNIRecord =>
+        desNIRecord.nonQualifyingYearsPayable shouldBe 0
+        desNIRecord.nonQualifyingYears shouldBe 13
+        desNIRecord.numberOfQualifyingYears shouldBe 27
+        desNIRecord.pre75ContributionCount shouldBe 51
+        desNIRecord.dateOfEntry shouldBe Some(LocalDate.of(1973, 10, 1))
+        desNIRecord.niTaxYears.head.qualifying shouldBe true
+        desNIRecord.niTaxYears(1).qualifying shouldBe false
+        desNIRecord.niTaxYears.head.underInvestigation shouldBe false
+        desNIRecord.niTaxYears(1).underInvestigation shouldBe true
+        desNIRecord.niTaxYears.head.payable shouldBe false
+        desNIRecord.niTaxYears(1).payable shouldBe true
+        desNIRecord.niTaxYears.head.classThreePayable shouldBe 0
+        desNIRecord.niTaxYears(1).classThreePayable shouldBe 722.80
+        desNIRecord.niTaxYears.head.classThreePayableBy shouldBe None
+        desNIRecord.niTaxYears(1).classThreePayableBy shouldBe Some(LocalDate.of(2019, 4, 5))
+        desNIRecord.niTaxYears.head.classThreePayableByPenalty shouldBe None
+        desNIRecord.niTaxYears(1).classThreePayableByPenalty shouldBe Some(LocalDate.of(2023, 4, 5))
+        desNIRecord.niTaxYears.head.classOneContribution shouldBe 1698.9600
+        desNIRecord.niTaxYears(1).classOneContribution shouldBe 0
+        desNIRecord.niTaxYears.head.classTwoCredits shouldBe 0
+        desNIRecord.niTaxYears(1).classTwoCredits shouldBe 52
+        desNIRecord.niTaxYears.head.otherCredits.head.creditSourceType.get shouldBe 2
+        desNIRecord.niTaxYears.head.otherCredits.head.creditContributionType.get shouldBe 23
+        desNIRecord.niTaxYears.head.otherCredits.head.numberOfCredits.get shouldBe 4
+        desNIRecord.niTaxYears(1).otherCredits shouldBe List()
+      }
     }
 
     "log correct NIRecord metrics" in {
@@ -339,14 +343,16 @@ class DesConnectorSpec
       verify(mockTimerContext, Mockito.atLeastOnce()).stop()
     }
 
-    "return a failed NIRecord when there is an http error and pass on the exception" in {
+    "return a DesError response when an NI record is not returned" in {
+      reset(mockMetrics)
+      when(mockMetrics.startTimer(APITypes.NIRecord)).thenReturn(mock[Timer.Context])
+
       server.stubFor(get(urlEqualTo(s"/individuals/${nino.withoutSuffix}/pensions/ni"))
         .willReturn(badRequest()))
       when(mockNIRecordRepo().findByNino(any())(any(), any())).thenReturn(Future.successful(None))
 
-      ScalaFutures.whenReady(connector.getNationalInsuranceRecord(nino).failed) { ex =>
-        ex shouldBe a[DesError.HttpError]
-      }
+      val desNIRecordE: Either[DesError, DesNIRecord] = await(connector.getNationalInsuranceRecord(nino))
+      desNIRecordE.left.map (_ shouldBe a[DesError.HttpError])
     }
 
     "return valid Liabilities response" in {
@@ -357,9 +363,11 @@ class DesConnectorSpec
       server.stubFor(get(urlEqualTo(s"/individuals/${nino.withoutSuffix}/pensions/liabilities"))
         .willReturn(ok(Json.stringify(testLiabilitiesJson))))
 
-      val desLiabilitiesF = await(connector.getLiabilities(nino)(HeaderCarrier()))
-      desLiabilitiesF.liabilities.head.liabilityType shouldBe Some(13)
-      desLiabilitiesF.liabilities(4).liabilityType shouldBe Some(34)
+      val desLiabilitiesF: Either[DesError, DesLiabilities] = await(connector.getLiabilities(nino)(HeaderCarrier()))
+      desLiabilitiesF map { desLiabilities =>
+        desLiabilities.liabilities.head.liabilityType shouldBe Some(13)
+        desLiabilities.liabilities(4).liabilityType shouldBe Some(34)
+      }
     }
 
     "return valid NIRecord response when no tax years are present" in {
@@ -370,8 +378,8 @@ class DesConnectorSpec
       server.stubFor(get(urlEqualTo(s"/individuals/${nino.withoutSuffix}/pensions/ni"))
         .willReturn(ok(Json.stringify(testNIRecordNoTaxYearsJson))))
 
-      val desNIRecordF = await(connector.getNationalInsuranceRecord(nino)(HeaderCarrier()))
-      desNIRecordF.niTaxYears shouldBe List.empty
+      val desNIRecordF: Either[DesError, DesNIRecord] = await(connector.getNationalInsuranceRecord(nino)(HeaderCarrier()))
+      desNIRecordF map (_.niTaxYears shouldBe List.empty)
     }
 
     "return an empty Liabilities list" in {
@@ -382,8 +390,8 @@ class DesConnectorSpec
       server.stubFor(get(urlEqualTo(s"/individuals/${nino.withoutSuffix}/pensions/liabilities"))
         .willReturn(ok(Json.stringify(testEmptyLiabilitiesJson))))
 
-      val desLiabilitiesF = await(connector.getLiabilities(nino)(HeaderCarrier()))
-      desLiabilitiesF.liabilities.size shouldBe 0
+      val desLiabilitiesF: Either[DesError, DesLiabilities] = await(connector.getLiabilities(nino)(HeaderCarrier()))
+      desLiabilitiesF map (_.liabilities.size shouldBe 0)
     }
 
     "log correct Liabilities metrics" in {
@@ -392,14 +400,17 @@ class DesConnectorSpec
       verify(mockTimerContext, Mockito.atLeastOnce()).stop()
     }
 
-    "return a failed Liabilities when there is an http error and pass on the exception" in {
+    "return a DesError response when a Liabilities record is not returned" in {
+      reset(mockMetrics)
+      when(mockMetrics.startTimer(APITypes.Liabilities)).thenReturn(mock[Timer.Context])
       when(mockLiabilitiesRepo().findByNino(any())(any(), any())).thenReturn(Future.successful(None))
 
       server.stubFor(get(urlEqualTo(s"/individuals/${nino.withoutSuffix}/pensions/liabilities"))
         .willReturn(badRequest()))
-      ScalaFutures.whenReady(connector.getLiabilities(nino).failed) { ex =>
-        ex shouldBe a[DesError.HttpError]
-      }
+
+      val desNIRecordE: Either[DesError, DesLiabilities] = await(connector.getLiabilities(nino))
+      desNIRecordE.left.map (_ shouldBe a[DesError.HttpError])
+
     }
 
     "return a depersonalised JSON structure following validation error" in {
@@ -429,10 +440,12 @@ class DesConnectorSpec
       server.stubFor(get(urlEqualTo(s"/individuals/${nino.withoutSuffix}/pensions/ni"))
         .willReturn(ok(invalidJson)))
 
-      ScalaFutures.whenReady(connector.getNationalInsuranceRecord(nino)(HeaderCarrier()).failed) { ex =>
-        ex shouldBe a[DesError.JsonValidationError]
-        ex.getMessage.contains("1973-10-01") shouldBe false
-        ex.getMessage.contains("1111-11-11") shouldBe true
+      val desNiRecordE:  Either[DesError, DesNIRecord] = await(connector.getNationalInsuranceRecord(nino)(HeaderCarrier()))
+
+      desNiRecordE.left.map{ desError =>
+        desError shouldBe a[DesError.JsonValidationError]
+        desError.getMessage.contains("1973-10-01") shouldBe false
+        desError.getMessage.contains("1111-11-11") shouldBe true
       }
     }
   }
@@ -444,30 +457,32 @@ class DesConnectorSpec
 
     "return valid Summary response" in {
       when(mockSummaryRepo().findByNino(any())(any(), any())).thenReturn(Future.successful(Some(testSummaryModel)))
-      val desSummaryF = await(connector.getSummary(generateNino())(HeaderCarrier()))
-      desSummaryF.rreToConsider shouldBe false
-      desSummaryF.finalRelevantYear shouldBe Some(2016)
-      desSummaryF.dateOfBirth shouldBe Some(LocalDate.of(1952, 11, 21))
-      desSummaryF.dateOfDeath shouldBe None
-      desSummaryF.earningsIncludedUpTo shouldBe Some(LocalDate.of(2014, 4, 5))
+      val desSummaryF:  Either[DesError, DesSummary] = await(connector.getSummary(generateNino())(HeaderCarrier()))
+      desSummaryF map { desSummary =>
+        desSummary.rreToConsider shouldBe false
+        desSummary.finalRelevantYear shouldBe Some(2016)
+        desSummary.dateOfBirth shouldBe Some(LocalDate.of(1952, 11, 21))
+        desSummary.dateOfDeath shouldBe None
+        desSummary.earningsIncludedUpTo shouldBe Some(LocalDate.of(2014, 4, 5))
+      }
     }
 
     "return valid Summary from cache" in {
       when(mockSummaryRepo().findByNino(any())(any(), any())).thenReturn(Future.successful(Some(testSummaryModel)))
-      val desSummaryF = connector.getSummary(generateNino())(HeaderCarrier())
-      await(desSummaryF) shouldBe testSummaryModel
+      val desSummaryF: Either[DesError, DesSummary] = await(connector.getSummary(generateNino())(HeaderCarrier()))
+      desSummaryF map(_ shouldBe testSummaryModel)
     }
 
     "return valid NIRecord from cache" in {
       when(mockNIRecordRepo().findByNino(any())(any(), any())).thenReturn(Future.successful(Some(niRecord)))
-      val desNIRecordF = connector.getNationalInsuranceRecord(generateNino())(HeaderCarrier())
-      await(desNIRecordF) shouldBe niRecord
+      val desNIRecordF = await(connector.getNationalInsuranceRecord(generateNino())(HeaderCarrier()))
+      desNIRecordF map(_ shouldBe niRecord)
     }
 
     "return valid Liabilities from cache" in {
       when(mockLiabilitiesRepo().findByNino(any())(any(), any())).thenReturn(Future.successful(Some(liabilities)))
-      val desLiabilitiesF = connector.getLiabilities(generateNino())(HeaderCarrier())
-      await(desLiabilitiesF) shouldBe liabilities
+      val desLiabilitiesF = await(connector.getLiabilities(generateNino())(HeaderCarrier()))
+      desLiabilitiesF map(_ shouldBe liabilities)
     }
   }
 

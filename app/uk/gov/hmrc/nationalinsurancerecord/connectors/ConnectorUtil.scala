@@ -51,8 +51,7 @@ class ConnectorUtil @Inject() (
           valid =>
             Right(valid)
         )
-      case Left(error) =>
-        Left(DesError.HttpError(error))
+      case Left(error) => Left(DesError.HttpError(error))
     } recover {
       case error: HttpException =>
         Left(DesError.HttpError(UpstreamErrorResponse(error.message, BAD_GATEWAY)))

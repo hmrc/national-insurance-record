@@ -39,32 +39,43 @@ class NationalInsuranceRecordService @Inject()(
   featureFlagService: FeatureFlagService
 ) {
 
-  def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceRecord]] =
+  def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[DesError, NationalInsuranceRecordResult]] =
     featureFlagService.get(ProxyCacheToggle) flatMap {
       proxyCache =>
         citizenDetailsService.checkManualCorrespondenceIndicator(nino) flatMap {
           mci =>
             if (proxyCache.isEnabled) {
-              proxyCacheConnector.get(nino) map {
-                pcd =>
-                  buildNationalInsuranceRecord(pcd.niRecord, pcd.summary, pcd.liabilities, mci)
-              }
+              proxyCacheConnector.get(nino) map (_.map (pcd => buildNationalInsuranceRecord(pcd.niRecord, pcd.summary, pcd.liabilities, mci)))
             } else {
               for {
                 niRecord    <- des.getNationalInsuranceRecord(nino)
                 liabilities <- des.getLiabilities(nino)
                 summary     <- des.getSummary(nino)
-              } yield buildNationalInsuranceRecord(niRecord, summary, liabilities, mci)
+              } yield handleDesEither[NationalInsuranceRecordResult](niRecord, summary, liabilities,
+                buildNationalInsuranceRecord(_: DesNIRecord, _: DesSummary, _: DesLiabilities, mci))
             }
         }
     }
+
+  private def handleDesEither[A](niRecordEither: Either[DesError, DesNIRecord],
+                                 desSummaryEither: Either[DesError, DesSummary],
+                                 desLiabilitiesEither: Either[DesError, DesLiabilities],
+                                 func: (DesNIRecord, DesSummary, DesLiabilities) => A
+                                ): Either[DesError, A] = {
+    (niRecordEither, desSummaryEither, desLiabilitiesEither) match {
+      case (Right(niRecord), Right(desSummary), Right(desLiabilities)) => Right(func(niRecord, desSummary, desLiabilities))
+      case (Left(niRecordError), _, _) => Left(niRecordError)
+      case (_, Left(desSummaryError), _) => Left(desSummaryError)
+      case (_, _, Left(desLiabilitiesError)) => Left(desLiabilitiesError)
+    }
+  }
 
   private def buildNationalInsuranceRecord(
     desNIRecord: DesNIRecord,
     desSummary: DesSummary,
     desLiabilities: DesLiabilities,
     manualCorrespondence: Boolean
-  ): Either[ExclusionResponse, NationalInsuranceRecord] = {
+  ): NationalInsuranceRecordResult = {
     val purgedNIRecord: DesNIRecord =
       desNIRecord.purge(desSummary.finalRelevantYear.get)
 
@@ -77,7 +88,7 @@ class NationalInsuranceRecordService @Inject()(
 
     if (exclusions.nonEmpty) {
       metrics.exclusion(exclusions.head)
-      Left(ExclusionResponse(exclusions))
+      NationalInsuranceRecordResult(Left(ExclusionResponse(exclusions)))
     } else {
       val niRecord: NationalInsuranceRecord =
         NationalInsuranceRecord(
@@ -99,29 +110,28 @@ class NationalInsuranceRecordService @Inject()(
         qualifyingYears = niRecord.qualifyingYears
       )
 
-      Right(niRecord)
+      NationalInsuranceRecordResult(Right(niRecord))
     }
   }
 
-  def getTaxYear(nino: Nino, taxYear: TaxYear)(implicit hc: HeaderCarrier): Future[Either[ExclusionResponse, NationalInsuranceTaxYear]] =
+  def getTaxYear(nino: Nino, taxYear: TaxYear)(implicit hc: HeaderCarrier): Future[Either[DesError, NationalInsuranceTaxYearResult]] =
     featureFlagService.get(ProxyCacheToggle).flatMap {
       proxyCache =>
         citizenDetailsService.checkManualCorrespondenceIndicator(nino).flatMap {
           mci =>
             if (proxyCache.isEnabled) {
-              proxyCacheConnector.get(nino) map {
-                pcd =>
-                  buildTaxYear(pcd.niRecord, pcd.summary, pcd.liabilities, mci, nino, taxYear)
-              }
+              proxyCacheConnector.get(nino) map (_.map(pcd => buildTaxYear(pcd.niRecord, pcd.summary, pcd.liabilities, mci, nino, taxYear)))
             } else {
               for {
                 niRecord    <- des.getNationalInsuranceRecord(nino)
                 liabilities <- des.getLiabilities(nino)
                 summary     <- des.getSummary(nino)
-              } yield buildTaxYear(niRecord, summary, liabilities, mci, nino, taxYear)
+              } yield handleDesEither[NationalInsuranceTaxYearResult](niRecord, summary, liabilities,
+                  buildTaxYear(_: DesNIRecord, _: DesSummary, _: DesLiabilities, mci, nino, taxYear))
             }
         }
     }
+
 
   private def buildTaxYear(
     desNIRecord: DesNIRecord,
@@ -130,7 +140,7 @@ class NationalInsuranceRecordService @Inject()(
     manualCorrespondence: Boolean,
     nino: Nino,
     taxYear: TaxYear
-  ): Either[ExclusionResponse, NationalInsuranceTaxYear] = {
+  ): NationalInsuranceTaxYearResult = {
     val purgedNIRecord: DesNIRecord =
       desNIRecord.purge(desSummary.finalRelevantYear.get)
 
@@ -143,19 +153,20 @@ class NationalInsuranceRecordService @Inject()(
 
     if (exclusions.nonEmpty) {
       metrics.exclusion(exclusions.head)
-      Left(ExclusionResponse(exclusions))
+      NationalInsuranceTaxYearResult(Left(ExclusionResponse(exclusions)))
     } else {
       purgedNIRecord
         .niTaxYears
         .map(desTaxYearToNIRecordTaxYear)
         .find(_.taxYear == taxYear.taxYear) match {
           case Some(nationalInsuranceRecordTaxYear) =>
-            Right(nationalInsuranceRecordTaxYear)
+            NationalInsuranceTaxYearResult(Right(nationalInsuranceRecordTaxYear))
           case _ =>
             throw new NotFoundException(s"taxYear ${taxYear.taxYear} Not Found for $nino")
         }
     }
   }
+
 
   private def desHomeResponsibilitiesProtection(liabilities: List[DesLiability]): Boolean =
     liabilities.exists(
