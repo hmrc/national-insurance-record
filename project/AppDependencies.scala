@@ -29,7 +29,7 @@ object AppDependencies {
     "uk.gov.hmrc"       %%  "domain"                        % s"8.3.0-$playVersion",
     "uk.gov.hmrc"       %%  "play-hmrc-api"                 % s"7.2.0-$playVersion",
     "uk.gov.hmrc"       %%  "play-hal"                      % s"3.4.0-$playVersion",
-    "uk.gov.hmrc"       %%  "mongo-feature-toggles-client"  % "0.2.0",
+    "uk.gov.hmrc"       %%  "mongo-feature-toggles-client"  % "0.4.0",
     ehcache
   )
 
