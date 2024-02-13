@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,11 @@
 package uk.gov.hmrc.nationalinsurancerecord.controllers
 
 import play.api.Logging
-import play.api.libs.json.Json
 import play.api.mvc.{BaseController, Result}
-import uk.gov.hmrc.api.controllers.{ErrorGenericBadRequest, ErrorInternalServerError, ErrorNotFound, ErrorResponse}
 import uk.gov.hmrc.http._
+import uk.gov.hmrc.nationalinsurancerecord.controllers.ErrorResponses._
 import uk.gov.hmrc.nationalinsurancerecord.domain.des.DesError
+import uk.gov.hmrc.nationalinsurancerecord.util.ErrorResponseUtils
 
 import scala.concurrent.ExecutionContext
 
@@ -52,7 +52,7 @@ trait ErrorHandling extends Logging {
         throw new NotImplementedError(s"Match not implemented for: $value")
     }
   private def notFound: Result =
-    NotFound(Json.toJson[ErrorResponse](ErrorNotFound))
+    NotFound(ErrorResponseUtils.convertToJson(ErrorNotFound))
 
   private def gatewayTimeout(error: Throwable): Status = {
     logger.error(s"$app Gateway Timeout: ${error.getMessage}")
@@ -61,7 +61,7 @@ trait ErrorHandling extends Logging {
 
   private def badRequest: Result =
     BadRequest(
-      Json.toJson[ErrorResponse](
+      ErrorResponseUtils.convertToJson(
         ErrorGenericBadRequest("Upstream Bad Request. Is this customer below State Pension Age?")
       )
     )
@@ -73,7 +73,7 @@ trait ErrorHandling extends Logging {
 
   private def internalServerError(error: Throwable): Result = {
     logger.error(s"$app Internal server error: ${error.getMessage}", error)
-    InternalServerError(Json.toJson[ErrorResponse](ErrorInternalServerError))
+    InternalServerError(ErrorResponseUtils.convertToJson(ErrorInternalServerError))
   }
 
   private def upstream4xx(error: Throwable): Status = {
