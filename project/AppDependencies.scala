@@ -27,7 +27,7 @@ object AppDependencies {
     ws,
     "uk.gov.hmrc"       %%  s"bootstrap-backend-$playVersion"                   % bootstrapVersion,
     "uk.gov.hmrc"       %%  s"domain-$playVersion"                              % "9.0.0",
-    "uk.gov.hmrc"       %%  s"play-hal-$playVersion"                            % "4.0.0-SNAPSHOT",
+    "uk.gov.hmrc"       %%  s"play-hal-$playVersion"                            % "4.0.0",
     "uk.gov.hmrc"       %%  s"mongo-feature-toggles-client-$playVersion"        % "1.1.0",
   )
 
