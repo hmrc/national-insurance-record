@@ -41,8 +41,8 @@ object AppDependencies {
   ).map(_ % "test,it")
 
   private val silencerDependencies: Seq[ModuleID] = Seq(
-    compilerPlugin("com.github.ghik" % "silencer-plugin" % "1.7.9" cross CrossVersion.full),
-    "com.github.ghik" % "silencer-lib" % "1.7.9" % Provided cross CrossVersion.full
+    compilerPlugin("com.github.ghik" % "silencer-plugin" % "1.7.15" cross CrossVersion.full),
+    "com.github.ghik" % "silencer-lib" % "1.7.15" % Provided cross CrossVersion.full
   )
 
   val all: Seq[ModuleID] = compile ++ test ++ silencerDependencies

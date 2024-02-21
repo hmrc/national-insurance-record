@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.domain
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class TaxYearSummary(taxYear: String, qualifying: Boolean ){
 }
 
 object TaxYearSummary {
-  implicit val formats = Json.format[TaxYearSummary]
+  implicit val formats: OFormat[TaxYearSummary] = Json.format[TaxYearSummary]
 }

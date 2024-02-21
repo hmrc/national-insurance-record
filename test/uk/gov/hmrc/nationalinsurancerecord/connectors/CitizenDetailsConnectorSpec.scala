@@ -38,7 +38,7 @@ class CitizenDetailsConnectorSpec extends NationalInsuranceRecordUnitSpec with B
 
   val nino = generateNino()
   lazy val fakeRequest = FakeRequest()
-  implicit val hc = HeaderCarrier()
+  implicit val hc: HeaderCarrier = HeaderCarrier()
   val mockMetrics: MetricsService = mock[MetricsService]
   val mockTimerContext = mock[Timer.Context]
   val mockHttp: HttpClient = mock[HttpClient]
