@@ -33,7 +33,7 @@ lazy val microservice = Project(appName, file("."))
       "-Werror",
       "-Wconf:src=routes/.*:is,src=twirl/.*:is"
     ),
-    scalaVersion := "2.13.8",
+    scalaVersion := "2.13.12",
     libraryDependencies ++= AppDependencies.all,
     retrieveManaged := true,
     PlayKeys.playDefaultPort := 9312,

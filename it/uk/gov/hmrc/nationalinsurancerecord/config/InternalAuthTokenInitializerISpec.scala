@@ -1,6 +1,6 @@
 package uk.gov.hmrc.nationalinsurancerecord.config
 
-import akka.Done
+import org.apache.pekko.Done
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, get, getRequestedFor, post, postRequestedFor, urlMatching}
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import play.api.cache.AsyncCacheApi

@@ -16,10 +16,10 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.domain
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class APIAccess(`type`: String, whitelistedApplicationIds: Option[Seq[String]])
 
 object APIAccess {
-  implicit val formats = Json.format[APIAccess]
+  implicit val formats: OFormat[APIAccess] = Json.format[APIAccess]
 }

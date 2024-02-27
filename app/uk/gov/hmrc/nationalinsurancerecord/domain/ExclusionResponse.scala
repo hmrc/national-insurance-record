@@ -24,7 +24,7 @@ object Exclusion extends Enumeration {
   val Dead = Value
   val ManualCorrespondenceIndicator = Value
 
-  implicit val formats = new Format[Exclusion] {
+  implicit val formats: Format[Exclusion] = new Format[Exclusion] {
     def reads(json: JsValue): JsResult[Exclusion] = JsSuccess(Exclusion.withName(json.as[String]) )
     def writes(exclusion: Exclusion): JsValue = JsString(exclusion.toString)
   }

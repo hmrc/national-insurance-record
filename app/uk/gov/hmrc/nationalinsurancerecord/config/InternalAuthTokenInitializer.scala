@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.config
 
-import akka.Done
+import org.apache.pekko.Done
 import com.google.inject.Inject
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.client.HttpClientV2

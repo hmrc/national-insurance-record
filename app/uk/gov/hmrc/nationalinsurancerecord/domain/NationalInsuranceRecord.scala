@@ -35,7 +35,7 @@ case class NationalInsuranceRecord(
                                   )
 
 object NationalInsuranceRecord {
-  implicit val reads = Json.reads[NationalInsuranceRecord]
+  implicit val reads: Reads[NationalInsuranceRecord] = Json.reads[NationalInsuranceRecord]
   implicit val writes: Writes[NationalInsuranceRecord] = (
     (JsPath \ "qualifyingYears").write[Int] and
     (JsPath \ "qualifyingYearsPriorTo1975").write[Int] and

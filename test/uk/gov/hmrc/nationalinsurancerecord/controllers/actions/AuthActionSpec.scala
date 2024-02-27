@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.controllers.actions
 
-import akka.util.Timeout
+import org.apache.pekko.util.Timeout
 import org.mockito.ArgumentMatchers.{any, eq => MockitoEq}
 import org.mockito.Mockito.{verify, when}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite

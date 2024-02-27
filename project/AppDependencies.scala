@@ -19,34 +19,30 @@ import play.sbt.PlayImport._
 import sbt._
 
 object AppDependencies {
-  val bootstrapVersion = "7.21.0"
-  val mongoVersion = "1.3.0"
-  val playVersion = "play-28"
+  val bootstrapVersion = "8.4.0"
+  val mongoVersion = "1.7.0"
+  val playVersion = "play-30"
 
   val compile: Seq[ModuleID] = Seq(
     ws,
-    "uk.gov.hmrc"       %%  "bootstrap-backend-play-28"     % bootstrapVersion,
-    "uk.gov.hmrc"       %%  "domain"                        % s"8.3.0-$playVersion",
-    "uk.gov.hmrc"       %%  "play-hmrc-api"                 % s"7.2.0-$playVersion",
-    "uk.gov.hmrc"       %%  "play-hal"                      % s"3.4.0-$playVersion",
-    "uk.gov.hmrc"       %%  "mongo-feature-toggles-client"  % "0.4.0",
-    ehcache
+    "uk.gov.hmrc"       %%  s"bootstrap-backend-$playVersion"                   % bootstrapVersion,
+    "uk.gov.hmrc"       %%  s"domain-$playVersion"                              % "9.0.0",
+    "uk.gov.hmrc"       %%  s"play-hal-$playVersion"                            % "4.0.0",
+    "uk.gov.hmrc"       %%  s"mongo-feature-toggles-client-$playVersion"        % "1.1.0",
   )
 
   val test: Seq[ModuleID] = Seq(
     "uk.gov.hmrc"                   %%  s"bootstrap-test-$playVersion"    % bootstrapVersion,
     "org.pegdown"                    %  "pegdown"                         % "1.6.0",
-    "com.typesafe.play"             %%  "play-test"                       % PlayVersion.current,
-    "com.fasterxml.jackson.module"  %%  "jackson-module-scala"            % "2.14.1",
-    "com.github.tomakehurst"         %  "wiremock-jre8"                   % "2.35.0",
-    "org.mockito"                    %  "mockito-core"                    % "4.11.0",
+    "org.playframework"             %% "play-test"                        % "3.0.1",
+    "com.github.tomakehurst"        %  "wiremock"                         % "2.27.2",
+    "org.mockito"                    %  "mockito-core"                    % "5.10.0",
     "uk.gov.hmrc.mongo"             %%  s"hmrc-mongo-test-$playVersion"   % mongoVersion,
-    "uk.gov.hmrc"                   %%  "play-hal"                        % s"3.4.0-$playVersion",
   ).map(_ % "test,it")
 
   private val silencerDependencies: Seq[ModuleID] = Seq(
-    compilerPlugin("com.github.ghik" % "silencer-plugin" % "1.7.9" cross CrossVersion.full),
-    "com.github.ghik" % "silencer-lib" % "1.7.9" % Provided cross CrossVersion.full
+    compilerPlugin("com.github.ghik" % "silencer-plugin" % "1.7.15" cross CrossVersion.full),
+    "com.github.ghik" % "silencer-lib" % "1.7.15" % Provided cross CrossVersion.full
   )
 
   val all: Seq[ModuleID] = compile ++ test ++ silencerDependencies

@@ -16,17 +16,16 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.services
 
-import com.codahale.metrics.Counter
+import com.codahale.metrics.{Counter, MetricRegistry}
 import com.codahale.metrics.Timer.Context
 import com.google.inject.Inject
-import com.kenshoo.play.metrics.Metrics
 import uk.gov.hmrc.nationalinsurancerecord.domain.APITypes.APITypes
 import uk.gov.hmrc.nationalinsurancerecord.domain.Exclusion.Exclusion
 import uk.gov.hmrc.nationalinsurancerecord.domain.{APITypes, Exclusion}
 
-class MetricsService @Inject()(metrics: Metrics){
+class MetricsService @Inject()(metricRegistry: MetricRegistry){
 
-  val registry = metrics.defaultRegistry
+  val registry = metricRegistry
 
   val incrementCounters = Map(
     APITypes.Summary -> registry.counter("spsummary-counter"),
