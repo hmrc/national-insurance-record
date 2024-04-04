@@ -19,14 +19,13 @@ package uk.gov.hmrc.nationalinsurancerecord.services
 import com.google.inject.Inject
 import play.api.http.Status.LOCKED
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.nationalinsurancerecord.connectors.CitizenDetailsConnector
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class CitizenDetailsService @Inject()(citizenDetailsConnector: CitizenDetailsConnector, implicit val ec: ExecutionContext) {
 
-  def checkManualCorrespondenceIndicator(nino: Nino)(implicit hc: HeaderCarrier): Future[Boolean] =
+  def checkManualCorrespondenceIndicator(nino: Nino): Future[Boolean] =
     citizenDetailsConnector
       .retrieveMCIStatus(nino)
       .flatMap {
