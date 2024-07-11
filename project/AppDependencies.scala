@@ -35,7 +35,6 @@ object AppDependencies {
     "uk.gov.hmrc"                   %%  s"bootstrap-test-$playVersion"    % bootstrapVersion,
     "org.pegdown"                    %  "pegdown"                         % "1.6.0",
     "org.playframework"             %% "play-test"                        % "3.0.4",
-    "com.github.tomakehurst"        %  "wiremock"                         % "2.27.2",
     "org.mockito"                    %  "mockito-core"                    % "5.12.0",
     "uk.gov.hmrc.mongo"             %%  s"hmrc-mongo-test-$playVersion"   % mongoVersion,
   ).map(_ % "test")

@@ -34,6 +34,7 @@ class DesSummaryRepositorySpec
   override def fakeApplication(): Application =
     GuiceApplicationBuilder()
       .overrides(bind[AsyncCacheApi].toInstance(mockCacheApi))
+      .configure("internal-auth.isTestOnlyEndpoint" -> false)
       .build()
 
   val desSummary: DesSummary =
