@@ -73,7 +73,7 @@ class AuthActionSpec
         "the user is a trusted helper and requests with the nino of the helpee" in {
           val helperNino = ninoGenerator.nextNino.nino
           val (result, mockAuthConnector) =
-            testAuthActionWith(Future.successful(Some(helperNino) ~ Some(TrustedHelper("", "", "", testNino)) ~ None))
+            testAuthActionWith(Future.successful(Some(helperNino) ~ Some(TrustedHelper("", "", "", Some(testNino))) ~ None))
 
           status(result) shouldBe OK
 
@@ -118,7 +118,7 @@ class AuthActionSpec
         "the trusted helpee nino does not match the uri Nino" in {
           val notTestNino = testNino.take(testNino.length-1) + "X"
           val helperNino = ninoGenerator.nextNino.nino
-          val (result, _) = testAuthActionWith(Future.successful(Some(helperNino) ~ Some(TrustedHelper("", "", "", notTestNino)) ~ None))
+          val (result, _) = testAuthActionWith(Future.successful(Some(helperNino) ~ Some(TrustedHelper("", "", "", Some(notTestNino))) ~ None))
           status(result) shouldBe UNAUTHORIZED
         }
       }

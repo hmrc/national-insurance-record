@@ -19,16 +19,17 @@ package uk.gov.hmrc.nationalinsurancerecord.connectors
 import com.google.inject.Inject
 import play.api.http.Status.LOCKED
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse, UpstreamErrorResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps, UpstreamErrorResponse}
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.HttpReadsInstances.readEitherOf
+import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.nationalinsurancerecord.config.ApplicationConfig
 import uk.gov.hmrc.nationalinsurancerecord.services.MetricsService
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class CitizenDetailsConnector @Inject()(appConfig: ApplicationConfig,
-                                        http: HttpClient,
+                                        http: HttpClientV2,
                                         metrics: MetricsService,
                                         implicit val executionContext: ExecutionContext
                                        ) {
@@ -39,8 +40,8 @@ class CitizenDetailsConnector @Inject()(appConfig: ApplicationConfig,
   def retrieveMCIStatus(nino: Nino)(
     implicit hc: HeaderCarrier): Future[Either[UpstreamErrorResponse, Int]] = {
     val timerContext = metrics.startCitizenDetailsTimer()
-    http
-      .GET[Either[UpstreamErrorResponse, HttpResponse]](url(nino))
+    http.get(url"${url(nino)}")
+      .execute[Either[UpstreamErrorResponse, HttpResponse]]
       .transform {
         result =>
           timerContext.stop()

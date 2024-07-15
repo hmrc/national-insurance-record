@@ -58,7 +58,8 @@ class NationalInsuranceRecordControllerISpec extends IntegrationBaseSpec with Re
       "microservice.services.ni-and-sp-proxy-cache.port" -> server.port(),
       "microservice.services.citizen-details.host" -> "127.0.0.1",
       "microservice.services.citizen-details.port" -> server.port(),
-      "auditing.enabled" -> false
+      "auditing.enabled" -> false,
+      "internal-auth.isTestOnlyEndpoint" -> false
     ).build()
 
   private val nino: Nino = generateNino

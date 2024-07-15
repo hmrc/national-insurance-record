@@ -19,28 +19,29 @@ package uk.gov.hmrc.nationalinsurancerecord.connectors
 import com.google.inject.Inject
 import play.api.http.Status.{FORBIDDEN, NOT_FOUND}
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpReads, HttpResponse, UpstreamErrorResponse}
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, HttpResponse, StringContextOps, UpstreamErrorResponse}
 import uk.gov.hmrc.nationalinsurancerecord.config.ApplicationConfig
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class StatePensionConnector @Inject()(httpClient: HttpClient, applicationConfig: ApplicationConfig)(implicit ec: ExecutionContext) {
+class StatePensionConnector @Inject()(httpClient: HttpClientV2, applicationConfig: ApplicationConfig)(implicit ec: ExecutionContext) {
 
   val serviceUrl = applicationConfig.statePensionUrl
 
   class NotCopeException extends Exception
 
-  private val copeReads = new HttpReads[HttpResponse] {
-    override def read(method: String, url: String, response: HttpResponse): HttpResponse = {
+  def getCopeCase(nino: Nino)(implicit hc: HeaderCarrier): Future[Option[HttpResponse]] = {
+    implicit val copeReads: HttpReads[HttpResponse] = (_: String, _: String, response: HttpResponse) => {
       if (response.status == FORBIDDEN) response
       else if (response.status == NOT_FOUND) throw new NotCopeException
       else throw UpstreamErrorResponse(response.body, response.status)
     }
-  }
 
-  def getCopeCase(nino: Nino)(implicit hc: HeaderCarrier): Future[Option[HttpResponse]] = {
     val url = s"$serviceUrl/cope/$nino"
-    httpClient.GET(url, Seq(), Seq("accept" -> "application/vnd.hmrc.1.0+json"))(copeReads, implicitly, implicitly)
+    httpClient.get(url"$url")
+      .setHeader("accept" -> "application/vnd.hmrc.1.0+json")
+      .execute[HttpResponse]
       .map(Some(_)).recover { case _: NotCopeException => None }
   }
 }

@@ -1,8 +1,7 @@
 
-import play.sbt.routes.RoutesKeys._
-import uk.gov.hmrc.DefaultBuildSettings.{addTestReportOption, defaultSettings, scalaSettings}
-import uk.gov.hmrc.SbtAutoBuildPlugin
-import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
+import play.sbt.routes.RoutesKeys.*
+import uk.gov.hmrc.DefaultBuildSettings.{defaultSettings, scalaSettings}
+import uk.gov.hmrc.{DefaultBuildSettings, SbtAutoBuildPlugin}
 import scoverage.ScoverageKeys
 
 val appName = "national-insurance-record"
@@ -22,18 +21,19 @@ lazy val plugins: Seq[Plugins] = Seq(
   play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin
 )
 
+ThisBuild / majorVersion := 0
+ThisBuild / scalaVersion := "2.13.14"
+
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(plugins: _*)
   .settings(
     scoverageSettings,
     scalaSettings,
     defaultSettings(),
-    majorVersion := 0,
     scalacOptions ++= Seq(
       "-Werror",
       "-Wconf:src=routes/.*:is,src=twirl/.*:is"
     ),
-    scalaVersion := "2.13.12",
     libraryDependencies ++= AppDependencies.all,
     retrieveManaged := true,
     PlayKeys.playDefaultPort := 9312,
@@ -45,8 +45,6 @@ lazy val microservice = Project(appName, file("."))
     routesGenerator := InjectedRoutesGenerator
   )
   .settings(inConfig(Test)(testSettings): _*)
-  .configs(IntegrationTest)
-  .settings(inConfig(IntegrationTest)(itSettings): _*)
 
 lazy val testSettings: Seq[Def.Setting[_]] = Seq(
   fork := true,
@@ -54,13 +52,10 @@ lazy val testSettings: Seq[Def.Setting[_]] = Seq(
   Test / javaOptions += "-Dconfig.file=conf/test.application.conf"
 )
 
-lazy val itSettings = Defaults.itSettings ++ Seq(
-  fork := true,
-  unmanagedSourceDirectories := Seq(
-    baseDirectory.value / "it",
-    baseDirectory.value / "test-utils" / "src"
-  ),
-  addTestReportOption(IntegrationTest, "int-test-reports"),
-  parallelExecution := false,
-  javaOptions += "-Dconfig.file=conf/test.application.conf"
-)
+lazy val it = project
+  .enablePlugins(play.sbt.PlayScala)
+  .dependsOn(microservice % "test->test") // the "test->test" allows reusing test code and test dependencies
+  .settings(
+    libraryDependencies ++= AppDependencies.test,
+    DefaultBuildSettings.itSettings()
+  )

@@ -23,40 +23,46 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsDefined, JsObject, JsString, Json}
 import play.api.test.Helpers.running
-import uk.gov.hmrc.nationalinsurancerecord.domain.des.{DesLiabilities, DesLiability}
+import uk.gov.hmrc.nationalinsurancerecord.domain.des.DesSummary
 import uk.gov.hmrc.nationalinsurancerecord.test_utils.IntegrationBaseSpec
 
-import java.time.Instant
+import java.time.{Instant, LocalDate}
 
-class DesLiabilitiesRepositorySpec
+class DesSummaryRepositorySpec
   extends IntegrationBaseSpec {
   // scalastyle:off magic.number
   override def fakeApplication(): Application =
     GuiceApplicationBuilder()
       .overrides(bind[AsyncCacheApi].toInstance(mockCacheApi))
+      .configure("internal-auth.isTestOnlyEndpoint" -> false)
       .build()
 
-  val desLiabilities: DesLiabilities =
-    DesLiabilities(
-      liabilities = List(DesLiability(Some(100)))
+  val desSummary: DesSummary =
+    DesSummary(
+      dateOfDeath = Some(LocalDate.of(2022, 1, 1)),
+      earningsIncludedUpTo = Some(LocalDate.of(2022, 1, 1)),
+      dateOfBirth = Some(LocalDate.of(1998, 1, 1)),
+      finalRelevantYear = Some(0)
     )
 
-  val desLiabilitiesCache: DesLiabilitiesCache =
-    DesLiabilitiesCache(
+  val desSummaryCache: DesSummaryCache =
+    DesSummaryCache(
       key = "blah",
-      response = desLiabilities,
+      response = desSummary,
       expiresAt = Instant.ofEpochMilli(
         1640998860000L
       ).plusSeconds(60)
     )
 
-  val desLiabilitiesCacheJson: JsObject =
+  val desSummaryCacheJson: JsObject =
     Json.obj(
       "key" -> "blah",
       "response" -> Json.obj(
-        "liabilities" -> Json.arr(
-          Json.obj("liabilityType" -> 100)
-        )
+        "reducedRateElectionToConsider" -> false,
+        "earningsIncludedUpto" -> "2022-01-01",
+        "dateOfBirth" -> "1998-01-01",
+        "dateOfDeath" -> "2022-01-01",
+        "finalRelevantYear" -> 0
       ),
       "expiresAt" -> Json.obj(
         "$date" -> Json.obj(
@@ -65,14 +71,14 @@ class DesLiabilitiesRepositorySpec
       )
     )
 
-  "DesLiabilitiesRepository" must {
+  "DesSummaryRepository" must {
     "get/set liabilities" in {
 
       val app = fakeApplication()
 
       running(app) {
-        val repo: DesLiabilitiesRepository =
-          app.injector.instanceOf[DesLiabilitiesRepository]
+        val repo: DesSummaryRepository =
+          app.injector.instanceOf[DesSummaryRepository]
 
         repo().collection.drop()
 
@@ -80,27 +86,27 @@ class DesLiabilitiesRepositorySpec
 
         whenReady(
           repo()
-            .insertByNino(nino = nino, response = desLiabilities)
+            .insertByNino(nino = nino, response = desSummary)
             .flatMap(_ => repo().findByNino(nino))
         ) {
           result =>
-            result shouldBe Some(desLiabilities)
+            result shouldBe Some(desSummary)
         }
       }
     }
   }
 
-  "DesLiabilitiesCache" must {
+  "DesSummaryCache" must {
     "serialise and de-serialise correctly" in {
-      Json.toJson(desLiabilitiesCache) shouldBe
-        desLiabilitiesCacheJson
+      Json.toJson(desSummaryCache) shouldBe
+        desSummaryCacheJson
 
-      desLiabilitiesCacheJson.as[DesLiabilitiesCache] shouldBe
-        desLiabilitiesCache
+      desSummaryCacheJson.as[DesSummaryCache] shouldBe
+        desSummaryCache
     }
 
     "parse expiresAt as LocalDateTime correctly for Mongo" in {
-      (Json.toJson(desLiabilitiesCache) \ "expiresAt" \ "$date" \ "$numberLong") shouldBe
+      (Json.toJson(desSummaryCache) \ "expiresAt" \ "$date" \ "$numberLong") shouldBe
         JsDefined(JsString("1640998920000"))
     }
   }
