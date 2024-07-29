@@ -16,22 +16,18 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.domain
 
-import play.api.libs.json._
+import play.api.libs.json.{JsString, JsSuccess}
+import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 
-object Exclusion extends Enumeration {
-  type Exclusion = Value
-  val IsleOfMan = Value
-  val Dead = Value
-  val ManualCorrespondenceIndicator = Value
+class ExclusionResponseSpec extends NationalInsuranceRecordUnitSpec {
 
-  implicit val formats: Format[Exclusion] = new Format[Exclusion] {
-    def reads(json: JsValue): JsResult[Exclusion] = JsSuccess(Exclusion.withName(json.as[String]))
-    def writes(exclusion: Exclusion): JsValue = JsString(exclusion.toString)
+  "Exclusion" should {
+    "read correctly" in {
+        Exclusion.formats.reads(JsString("IsleOfMan")) shouldBe JsSuccess(Exclusion.IsleOfMan)
+    }
+
+    "write correctly" in {
+      Exclusion.formats.writes(Exclusion.IsleOfMan) shouldBe JsString("IsleOfMan")
+    }
   }
-}
-
-case class ExclusionResponse(exclusionReasons: List[Exclusion.Exclusion])
-
-object ExclusionResponse {
-  implicit val formats: OFormat[ExclusionResponse] = Json.format[ExclusionResponse]
 }

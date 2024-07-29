@@ -60,7 +60,7 @@ class DesLiabilitySpec extends UnitSpec {
       Json.parse(jsonPayload).as[DesLiabilities] shouldBe testData
     }
 
-    "give an emptyList for empty json object" in {
+    "give an emptyList for missing liabilityType" in {
       val jsonPayload =
         """
           |{
@@ -83,6 +83,20 @@ class DesLiabilitySpec extends UnitSpec {
 
       Json.parse(jsonPayload).as[DesLiabilities] shouldBe testData
     }
-  }
 
+    "give an emptyList for empty json object" in {
+      val jsonPayload =
+        """
+          |{
+          |
+          |}
+        """.stripMargin
+
+      val testData = DesLiabilities(
+        List()
+      )
+
+      Json.parse(jsonPayload).as[DesLiabilities] shouldBe testData
+    }
+  }
 }

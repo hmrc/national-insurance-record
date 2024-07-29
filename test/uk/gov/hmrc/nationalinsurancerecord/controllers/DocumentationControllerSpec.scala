@@ -19,6 +19,7 @@ package uk.gov.hmrc.nationalinsurancerecord.controllers
 import controllers.Assets
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Configuration
+import play.api.Play.materializer
 import play.api.libs.json.{JsArray, JsDefined, JsString, JsUndefined}
 import play.api.mvc.{ControllerComponents, Result}
 import play.api.test.Helpers._
@@ -26,7 +27,6 @@ import play.api.test.{FakeRequest, Injecting}
 import uk.gov.hmrc.nationalinsurancerecord.config.AppContext
 import uk.gov.hmrc.nationalinsurancerecord.controllers.documentation.DocumentationController
 import uk.gov.hmrc.nationalinsurancerecord.util.UnitSpec
-
 import scala.concurrent.duration.{DurationInt, FiniteDuration}
 import scala.language.postfixOps
 
@@ -106,7 +106,7 @@ class DocumentationControllerSpec extends UnitSpec with GuiceOneAppPerSuite with
     }
   }
 
-  "/definition status" must{
+  "/definition status" must {
 
 
     "return BETA if there is no application config" in {
@@ -131,5 +131,24 @@ class DocumentationControllerSpec extends UnitSpec with GuiceOneAppPerSuite with
 
     }
 
+  }
+
+  "/conf" should {
+    "return documentation" in {
+      val appContext = new AppContext(app.configuration) {
+        override lazy val appName: String = ""
+
+        override lazy val apiGatewayContext: String = ""
+
+        override lazy val access: Option[Configuration] = None
+
+        override lazy val status: Option[String] = None
+
+      }
+
+      val result = new DocumentationController(appContext, assets, controllerComponents).conf("1.0", "/docs/overview.md")(FakeRequest())
+
+      status(result) shouldBe OK
+    }
   }
 }
