@@ -33,7 +33,7 @@ trait ErrorHandling extends Logging {
   protected def handleDesError(error: DesError): Result =
     error match {
       case DesError.HttpError(error) if error.statusCode == NOT_FOUND =>
-        notFound
+        NotFound(ErrorResponseUtils.convertToJson(ErrorNotFound))
       case DesError.HttpError(error) if error.statusCode == GATEWAY_TIMEOUT =>
         gatewayTimeout(error)
       case DesError.HttpError(error) if error.statusCode == BAD_REQUEST =>
@@ -51,8 +51,6 @@ trait ErrorHandling extends Logging {
       case value =>
         throw new NotImplementedError(s"Match not implemented for: $value")
     }
-  private def notFound: Result =
-    NotFound(ErrorResponseUtils.convertToJson(ErrorNotFound))
 
   private def gatewayTimeout(error: Throwable): Status = {
     logger.error(s"$app Gateway Timeout: ${error.getMessage}")

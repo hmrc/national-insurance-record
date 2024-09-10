@@ -31,38 +31,38 @@ import java.util.UUID
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class ProxyCacheConnector @Inject () (
-  httpClient: HttpClientV2,
-  metrics: MetricsService,
-  appContext: AppContext,
-  appConfig: ApplicationConfig,
-  connectorUtil: ConnectorUtil
-)(
-  implicit val executionContext: ExecutionContext
-) extends Logging {
+class ProxyCacheConnector @Inject()(
+                                     httpClient: HttpClientV2,
+                                     metrics: MetricsService,
+                                     appContext: AppContext,
+                                     appConfig: ApplicationConfig,
+                                     connectorUtil: ConnectorUtil
+                                   )(
+                                     implicit val executionContext: ExecutionContext
+                                   ) extends Logging {
 
   def get(
-    nino: Nino
-  )(
-    implicit headerCarrier: HeaderCarrier
-  ): Future[Either[DesError, ProxyCacheData]] = connect(nino)
+           nino: Nino
+         )(
+           implicit headerCarrier: HeaderCarrier
+         ): Future[Either[DesError, ProxyCacheData]] = connect(nino)
 
   private def connect(
-    nino: Nino
-  )(
-    implicit headerCarrier: HeaderCarrier,
-    reads: Reads[ProxyCacheData]
-  ): Future[Either[DesError, ProxyCacheData]] = {
+                       nino: Nino
+                     )(
+                       implicit headerCarrier: HeaderCarrier,
+                       reads: Reads[ProxyCacheData]
+                     ): Future[Either[DesError, ProxyCacheData]] = {
     val timerContext = metrics.startTimer(APITypes.ProxyCache)
 
     connectorUtil.handleConnectorResponse(
       futureResponse = httpClient
         .get(url"${appConfig.proxyCacheUrl}/ni-and-sp-proxy-cache/$nino")
         .setHeader(HeaderNames.authorisation -> appContext.internalAuthToken)
-        .setHeader("Originator-Id"           -> "DA_PF")
-        .setHeader("Environment"             -> appConfig.desEnvironment)
-        .setHeader("CorrelationId"           -> UUID.randomUUID().toString)
-        .setHeader(HeaderNames.xRequestId    -> headerCarrier.requestId.fold("-")(_.value))
+        .setHeader("Originator-Id" -> "DA_PF")
+        .setHeader("Environment" -> appConfig.desEnvironment)
+        .setHeader("CorrelationId" -> UUID.randomUUID().toString)
+        .setHeader(HeaderNames.xRequestId -> headerCarrier.requestId.fold("-")(_.value))
         .execute[Either[UpstreamErrorResponse, HttpResponse]]
         .transform {
           result =>
@@ -70,7 +70,8 @@ class ProxyCacheConnector @Inject () (
             result
         },
       jsonParseError = "proxy cache data"
-    ) map { _.left.map(desError => {
+    ) map {
+      _.left.map(desError => {
         metrics.incrementFailedCounter(APITypes.ProxyCache)
         desError
       })

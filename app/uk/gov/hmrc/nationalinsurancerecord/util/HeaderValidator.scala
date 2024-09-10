@@ -45,7 +45,7 @@ trait HeaderValidator {
     def invokeBlock[A](
                         request: Request[A],
                         block:   (Request[A]) => Future[Result]
-                      ) =
+                      ): Future[Result] =
       if (rules(request.headers.get("Accept"))) block(request)
       else Future.successful(Status(ErrorAcceptHeaderInvalid.statusCode)(ErrorResponseUtils.convertToJson(ErrorAcceptHeaderInvalid)))
 
