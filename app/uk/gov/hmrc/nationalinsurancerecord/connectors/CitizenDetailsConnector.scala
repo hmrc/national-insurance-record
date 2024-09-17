@@ -19,10 +19,10 @@ package uk.gov.hmrc.nationalinsurancerecord.connectors
 import com.google.inject.Inject
 import play.api.http.Status.LOCKED
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps, UpstreamErrorResponse}
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.HttpReadsInstances.readEitherOf
 import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps, UpstreamErrorResponse}
 import uk.gov.hmrc.nationalinsurancerecord.config.ApplicationConfig
 import uk.gov.hmrc.nationalinsurancerecord.services.MetricsService
 
@@ -35,6 +35,7 @@ class CitizenDetailsConnector @Inject()(appConfig: ApplicationConfig,
                                        ) {
 
   val serviceUrl: String = appConfig.citizenDetailsUrl
+
   private def url(nino: Nino) = s"$serviceUrl/citizen-details/$nino/designatory-details/"
 
   def retrieveMCIStatus(nino: Nino)(

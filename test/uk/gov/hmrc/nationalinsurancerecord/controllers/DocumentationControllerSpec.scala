@@ -61,12 +61,12 @@ class DocumentationControllerSpec extends UnitSpec with GuiceOneAppPerSuite with
 
   "/definition access" must{
 
-    "return PRIVATE and no Whitelist IDs if there is no application config" in {
+    "return PRIVATE and no AllowList IDs if there is no application config" in {
 
       val result = getDefinitionResultFromConfig(apiConfig = None)
       status(result) shouldBe OK
       (contentAsJson(result) \ "api" \ "versions") (0) \ "access" \ "type" shouldBe JsDefined(JsString("PRIVATE"))
-      (contentAsJson(result) \ "api" \ "versions") (0) \ "access" \ "whitelistedApplicationIds" shouldBe JsDefined(JsArray())
+      (contentAsJson(result) \ "api" \ "versions") (0) \ "access" \ "allowlistedApplicationIds" shouldBe JsDefined(JsArray())
     }
 
     "return PRIVATE if the application config says PRIVATE" in {
@@ -83,26 +83,26 @@ class DocumentationControllerSpec extends UnitSpec with GuiceOneAppPerSuite with
       (contentAsJson(result) \ "api" \ "versions") (0) \ "access" \ "type" shouldBe JsDefined(JsString("PUBLIC"))
     }
 
-    "return No Whitelist IDs if the application config has an entry for whiteListIds but no Ids" in {
+    "return No Allowlist IDs if the application config has an entry for allowListId but no Ids" in {
 
-      val result = getDefinitionResultFromConfig(apiConfig = Some(Configuration.from(Map("type" -> "PRIVATE", "whitelist.applicationIds" -> Seq()))))
+      val result = getDefinitionResultFromConfig(apiConfig = Some(Configuration.from(Map("type" -> "PRIVATE", "allowlist.applicationIds" -> Seq()))))
       status(result) shouldBe OK
-      (contentAsJson(result) \ "api" \ "versions") (0) \ "access" \ "whitelistedApplicationIds" shouldBe JsDefined(JsArray())
+      (contentAsJson(result) \ "api" \ "versions") (0) \ "access" \ "allowlistedApplicationIds" shouldBe JsDefined(JsArray())
 
     }
 
-    "return Whitelist IDs 'A', 'B', 'C' if the application config has an entry with 'A', 'B', 'C' " in {
+    "return Allowlist IDs 'A', 'B', 'C' if the application config has an entry with 'A', 'B', 'C' " in {
 
-      val result = getDefinitionResultFromConfig(apiConfig = Some(Configuration.from(Map("type" -> "PRIVATE", "whitelist.applicationIds" -> Seq("A", "B", "C")))))
+      val result = getDefinitionResultFromConfig(apiConfig = Some(Configuration.from(Map("type" -> "PRIVATE", "allowlist.applicationIds" -> Seq("A", "B", "C")))))
       status(result) shouldBe OK
-      (contentAsJson(result) \ "api" \ "versions") (0) \ "access" \ "whitelistedApplicationIds" shouldBe JsDefined(JsArray(Seq(JsString("A"), JsString("B"), JsString("C"))))
+      (contentAsJson(result) \ "api" \ "versions") (0) \ "access" \ "allowlistedApplicationIds" shouldBe JsDefined(JsArray(Seq(JsString("A"), JsString("B"), JsString("C"))))
 
     }
 
-    "return no whitelistApplicationIds json entry if the entry is PUBLIC" in {
-      val result = getDefinitionResultFromConfig(apiConfig = Some(Configuration.from(Map("type" -> "PUBLIC", "whitelist.applicationIds" -> Seq()))))
+    "return no allowlistApplicationIds json entry if the entry is PUBLIC" in {
+      val result = getDefinitionResultFromConfig(apiConfig = Some(Configuration.from(Map("type" -> "PUBLIC", "allowlist.applicationIds" -> Seq()))))
       status(result) shouldBe OK
-      (contentAsJson(result) \ "api" \ "versions") (0) \ "access" \ "whitelistedApplicationIds" shouldBe a [JsUndefined]
+      (contentAsJson(result) \ "api" \ "versions") (0) \ "access" \ "allowlistedApplicationIds" shouldBe a [JsUndefined]
     }
   }
 

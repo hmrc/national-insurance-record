@@ -36,15 +36,15 @@ import java.util.UUID
 import scala.concurrent.{ExecutionContext, Future}
 
 class DesConnector @Inject()(
-  desSummaryRepository: DesSummaryRepository,
-  desNIRecordRepository: DesNIRecordRepository,
-  desLiabilitiesRepository: DesLiabilitiesRepository,
-  metrics: MetricsService,
-  http: HttpClientV2,
-  appConfig: ApplicationConfig,
-  implicit val executionContext: ExecutionContext,
-  connectorUtil: ConnectorUtil
-) extends Logging {
+                              desSummaryRepository: DesSummaryRepository,
+                              desNIRecordRepository: DesNIRecordRepository,
+                              desLiabilitiesRepository: DesLiabilitiesRepository,
+                              metrics: MetricsService,
+                              http: HttpClientV2,
+                              appConfig: ApplicationConfig,
+                              implicit val executionContext: ExecutionContext,
+                              connectorUtil: ConnectorUtil
+                            ) extends Logging {
 
   private val authToken: String = appConfig.authorization
   private val desEnvironment: String = appConfig.desEnvironment
@@ -56,99 +56,100 @@ class DesConnector @Inject()(
     nino.value.substring(0, NIRecordConstants.ninoLengthWithoutSuffix)
 
   def getLiabilities(
-    nino: Nino
-  )(
-    implicit hc: HeaderCarrier
-  ): Future[Either[DesError, DesLiabilities]] =
+                      nino: Nino
+                    )(
+                      implicit hc: HeaderCarrier
+                    ): Future[Either[DesError, DesLiabilities]] =
     get[DesLiabilities, DesLiabilitiesCache](
-      nino       = nino,
-      apiTypes   = APITypes.Liabilities,
-      path       = "liabilities",
+      nino = nino,
+      apiTypes = APITypes.Liabilities,
+      path = "liabilities",
       repository = liabilitiesRepository
     )
 
   def getNationalInsuranceRecord(
-    nino: Nino
-  )(
-    implicit hc: HeaderCarrier
-  ): Future[Either[DesError, DesNIRecord]] =
+                                  nino: Nino
+                                )(
+                                  implicit hc: HeaderCarrier
+                                ): Future[Either[DesError, DesNIRecord]] =
     get[DesNIRecord, DesNIRecordCache](
-      nino       = nino,
-      apiTypes   = APITypes.NIRecord,
-      path       = "ni",
+      nino = nino,
+      apiTypes = APITypes.NIRecord,
+      path = "ni",
       repository = niRecordRepository
     )
 
   def getSummary(
-    nino: Nino
-  )(
-    implicit hc: HeaderCarrier
-  ): Future[Either[DesError, DesSummary]] =
+                  nino: Nino
+                )(
+                  implicit hc: HeaderCarrier
+                ): Future[Either[DesError, DesSummary]] =
     get[DesSummary, DesSummaryCache](
-      nino       = nino,
-      apiTypes   = APITypes.Summary,
-      path       = "summary",
+      nino = nino,
+      apiTypes = APITypes.Summary,
+      path = "summary",
       repository = summaryRepository
     )
 
   private def get[A, B](
-    nino: Nino,
-    apiTypes: APITypes.Value,
-    path: String,
-    repository: CachingService[B, A]
-  )(
-    implicit hc: HeaderCarrier,
-    formatA: Format[A],
-    formatB: OFormat[B]
-  ): Future[Either[DesError, A]] = {
+                         nino: Nino,
+                         apiTypes: APITypes.Value,
+                         path: String,
+                         repository: CachingService[B, A]
+                       )(
+                         implicit hc: HeaderCarrier,
+                         formatA: Format[A],
+                         formatB: OFormat[B]
+                       ): Future[Either[DesError, A]] = {
     metrics.incrementCounter(apiTypes)
 
     connectToCache[A, B](
-      nino       = nino,
-      url        = s"${appConfig.desUrl}/individuals/${ninoWithoutSuffix(nino)}/pensions/$path",
-      api        = apiTypes,
+      nino = nino,
+      url = s"${appConfig.desUrl}/individuals/${ninoWithoutSuffix(nino)}/pensions/$path",
+      api = apiTypes,
       repository = repository
     )
   }
 
   private def connectToCache[A, B](
-    nino: Nino,
-    url: String,
-    api: APITypes,
-    repository: CachingService[B, A]
-  )(
-    implicit hc: HeaderCarrier,
-    formatA: Format[A],
-    formatB: OFormat[B]
-  ): Future[Either[DesError, A]] =
+                                    nino: Nino,
+                                    url: String,
+                                    api: APITypes,
+                                    repository: CachingService[B, A]
+                                  )(
+                                    implicit hc: HeaderCarrier,
+                                    formatA: Format[A],
+                                    formatB: OFormat[B]
+                                  ): Future[Either[DesError, A]] =
     repository.findByNino(nino).flatMap {
       case Some(responseModel) =>
         Future.successful(Right(responseModel))
       case None =>
-         connectToDes(url, api)(hc, formatA) map { _ map { validResponse =>
-              logger.info(s"*~* - writing nino to cache: $nino")
-              repository.insertByNino(nino, validResponse)
-              validResponse
-            }
-      }
+        connectToDes(url, api)(hc, formatA) map {
+          _ map { validResponse =>
+            logger.info(s"*~* - writing nino to cache: $nino")
+            repository.insertByNino(nino, validResponse)
+            validResponse
+          }
+        }
     }
 
   private def connectToDes[A](
-    url: String,
-    api: APITypes
-  )(
-    implicit hc: HeaderCarrier,
-    reads: Reads[A]
-  ): Future[Either[DesError, A]] = {
+                               url: String,
+                               api: APITypes
+                             )(
+                               implicit hc: HeaderCarrier,
+                               reads: Reads[A]
+                             ): Future[Either[DesError, A]] = {
     val timerContext = metrics.startTimer(api)
     connectorUtil.handleConnectorResponse(
       futureResponse = http
         .get(url"$url")
         .setHeader(HeaderNames.authorisation -> authToken)
-        .setHeader("Originator-Id"           -> "DA_PF")
-        .setHeader("Environment"             -> desEnvironment)
-        .setHeader("CorrelationId"           -> UUID.randomUUID().toString)
-        .setHeader(HeaderNames.xRequestId    -> hc.requestId.fold("-")(_.value))
+        .setHeader("Originator-Id" -> "DA_PF")
+        .setHeader("Environment" -> desEnvironment)
+        .setHeader("CorrelationId" -> UUID.randomUUID().toString)
+        .setHeader(HeaderNames.xRequestId -> hc.requestId.fold("-")(_.value))
         .execute[Either[UpstreamErrorResponse, HttpResponse]]
         .transform {
           result =>
@@ -156,7 +157,8 @@ class DesConnector @Inject()(
             result
         },
       jsonParseError = api.toString
-    ) map { _.left.map(desError => {
+    ) map {
+      _.left.map(desError => {
         metrics.incrementFailedCounter(api)
         desError
       })

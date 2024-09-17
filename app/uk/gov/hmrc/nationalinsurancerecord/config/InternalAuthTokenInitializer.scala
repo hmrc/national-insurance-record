@@ -45,8 +45,8 @@ class InternalAuthTokenInitializerImpl @Inject()(
   private val internalAuthServiceUrl = appConfig.internalAuthUrl
 
   override val initializeToken: Future[Done] =
-    validateToken(authToken).flatMap{ isValid =>
-      if(isValid) Future.successful(Done) else reinitializeToken(authToken)
+    validateToken(authToken).flatMap { isValid =>
+      if (isValid) Future.successful(Done) else reinitializeToken(authToken)
     }
 
   Await.result(initializeToken, 30.seconds)
@@ -71,12 +71,12 @@ class InternalAuthTokenInitializerImpl @Inject()(
         )
       ))
       .execute.flatMap { response =>
-      if (response.status == 201) {
-        Future.successful(Done)
+        if (response.status == 201) {
+          Future.successful(Done)
+        }
+        else {
+          Future.failed(new RuntimeException("Failed to initialize internal-auth token"))
+        }
       }
-      else {
-        Future.failed(new RuntimeException("Failed to initialize internal-auth token"))
-      }
-    }
 }
 
