@@ -40,7 +40,7 @@ class DocumentationController @Inject()(appContext: AppContext,
 
   private def buildAccess(): APIAccess = {
     val access = APIAccessConfig(appContext.access)
-    APIAccess(access.accessType, access.allowListedApplicationIds)
+    APIAccess(access.accessType, access.whiteListedApplicationIds)
   }
 
   private def buildStatus(): String = appContext.status.getOrElse("BETA")
