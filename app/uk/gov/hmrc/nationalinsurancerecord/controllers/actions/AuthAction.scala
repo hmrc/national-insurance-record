@@ -40,19 +40,22 @@ class AuthActionImpl @Inject()(val authConnector: AuthConnector, val parser: Bod
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
 
     val matchNinoInUriPattern = "/ni/([^/]+)/?.*".r
+    val matchNinoInMdtpUriPattern = "/ni/mdtp/([^/]+)/?.*".r
 
-    val matches = matchNinoInUriPattern.findAllIn(request.uri)
+    val apiMatches = matchNinoInUriPattern.findAllIn(request.uri)
+    val mdtpMatches = matchNinoInMdtpUriPattern.findAllIn(request.uri)
 
     def check(nino: String): Future[Option[Status]] = {
-      val uriNino = matches.group(1)
-      if (uriNino == nino) successful(None)
+      val uriNino1 = if (apiMatches.nonEmpty) apiMatches.group(1) else ""
+      val uriNino2 = if (mdtpMatches.nonEmpty) mdtpMatches.group(1) else ""
+      if (uriNino1 == nino || uriNino2 == nino) successful(None)
       else {
         logger.warn("nino does not match nino in uri")
         successful(Some(Unauthorized))
       }
     }
 
-    if (matches.isEmpty) {
+    if (apiMatches.isEmpty && mdtpMatches.isEmpty) {
       successful(Some(BadRequest))
     } else {
       authorised(

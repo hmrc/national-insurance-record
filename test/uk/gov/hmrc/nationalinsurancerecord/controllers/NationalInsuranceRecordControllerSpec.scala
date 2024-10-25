@@ -24,26 +24,28 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import uk.gov.hmrc.nationalinsurancerecord.util.DateFormats.localDateFormat
 import play.api.libs.json._
+import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsJson, _}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.connectors.StatePensionConnector
-import uk.gov.hmrc.nationalinsurancerecord.controllers.actions.{AuthAction, FakeAuthAction}
+import uk.gov.hmrc.nationalinsurancerecord.controllers.actions.{AuthAction, FakeAuthAction, FakePertaxAuthAction, PertaxAuthAction}
 import uk.gov.hmrc.nationalinsurancerecord.controllers.nationalInsurance.NationalInsuranceRecordController
+//import uk.gov.hmrc.nationalinsurancerecord.controllers.nationalInsurance.MdtpNationalInsuranceRecordController
 import uk.gov.hmrc.nationalinsurancerecord.domain._
 import uk.gov.hmrc.nationalinsurancerecord.services.NationalInsuranceRecordService
+import uk.gov.hmrc.nationalinsurancerecord.util.DateFormats.localDateFormat
 
 import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
 
-class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitSpec with GuiceOneAppPerSuite with BeforeAndAfterEach with ScalaFutures {
+trait NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitSpec with GuiceOneAppPerSuite with BeforeAndAfterEach with ScalaFutures {
 
-  val emptyRequest = FakeRequest()
-  val emptyRequestWithHeader = FakeRequest().withHeaders("Accept" -> "application/vnd.hmrc.1.0+json")
+  val emptyRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
+  val emptyRequestWithHeader: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withHeaders("Accept" -> "application/vnd.hmrc.1.0+json")
   val mockNationalInsuranceRecordService: NationalInsuranceRecordService = mock[NationalInsuranceRecordService]
   val mockStatePensionConnector: StatePensionConnector = mock[StatePensionConnector]
   val nino: Nino = generateNino()
@@ -53,11 +55,12 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
     .overrides(
       bind[NationalInsuranceRecordService].toInstance(mockNationalInsuranceRecordService),
       bind[StatePensionConnector].toInstance(mockStatePensionConnector),
-      bind[AuthAction].to[FakeAuthAction]
+      bind[AuthAction].to[FakeAuthAction],
+      bind[PertaxAuthAction].to[FakePertaxAuthAction]
     )
     .build()
 
-  override def beforeEach() = {
+  override def beforeEach(): Unit = {
     reset(mockNationalInsuranceRecordService)
     reset(mockStatePensionConnector)
     when(mockStatePensionConnector.getCopeCase(any())(any())).thenReturn(Future.successful(None))
@@ -65,7 +68,9 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
 
   when(mockStatePensionConnector.getCopeCase(any())(any())).thenReturn(Future.successful(None))
 
-  val nationalInsuranceRecordController: NationalInsuranceRecordController = app.injector.instanceOf[NationalInsuranceRecordController]
+  def nationalInsuranceRecordController: NationalInsuranceRecordController
+//  val nationalInsuranceRecordController = app.injector.instanceOf[MdtpNationalInsuranceRecordController]
+  val linkPath: String
 
   private val dummyTaxYearQualifying: NationalInsuranceTaxYear = NationalInsuranceTaxYear(
     taxYear = "2010-11",
@@ -327,7 +332,7 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
       val json = contentAsJson(response)
 
       "return an array of taxYears" in {
-        (json \ "_embedded").get shouldBe Json.parse(s"""{"taxYears":[{"_links":{"self":{"href":"/national-insurance-record/ni/$nino/taxyear/2021-22"}},"taxYear":"2021-22","qualifying":true,"classOneContributions":1149.98,"classTwoCredits":0,"classThreeCredits":0,"otherCredits":0,"classThreePayable":0,"classThreePayableBy":null,"classThreePayableByPenalty":null,"payable":false,"underInvestigation":false}]}""")
+        (json \ "_embedded").get shouldBe Json.parse(s"""{"taxYears":[{"_links":{"self":{"href":"/national-insurance-record/$linkPath/$nino/taxyear/2021-22"}},"taxYear":"2021-22","qualifying":true,"classOneContributions":1149.98,"classTwoCredits":0,"classThreeCredits":0,"otherCredits":0,"classThreePayable":0,"classThreePayableBy":null,"classThreePayableByPenalty":null,"payable":false,"underInvestigation":false}]}""")
       }
     }
 
@@ -424,7 +429,7 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
         }
 
         "have a link to it's resource" in {
-          ((json \ "_embedded" \ "taxYears") \ 0 \ "_links" \ "self" \ "href").as[String] shouldBe s"/national-insurance-record/ni/$nino/taxyear/2015-16"
+          ((json \ "_embedded" \ "taxYears") \ 0 \ "_links" \ "self" \ "href").as[String] shouldBe s"/national-insurance-record/$linkPath/$nino/taxyear/2015-16"
         }
       }
 
@@ -474,7 +479,7 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
         }
 
         "have a link to it's resource" in {
-          ((json \ "_embedded" \ "taxYears") \ 40 \ "_links" \ "self" \ "href").as[String] shouldBe s"/national-insurance-record/ni/$nino/taxyear/1975-76"
+          ((json \ "_embedded" \ "taxYears") \ 40 \ "_links" \ "self" \ "href").as[String] shouldBe s"/national-insurance-record/$linkPath/$nino/taxyear/1975-76"
         }
       }
       "a non qualifying year like 2012" must {
@@ -523,12 +528,12 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
         }
 
         "have a link to it's resource" in {
-          ((json \ "_embedded" \ "taxYears") \ 3 \ "_links" \ "self" \ "href").as[String] shouldBe s"/national-insurance-record/ni/$nino/taxyear/2012-13"
+          ((json \ "_embedded" \ "taxYears") \ 3 \ "_links" \ "self" \ "href").as[String] shouldBe s"/national-insurance-record/$linkPath/$nino/taxyear/2012-13"
         }
       }
 
       "have a link to itself" in {
-        ((json \ "_links" \ "self") \ "href").as[String] shouldBe s"/national-insurance-record/ni/$nino"
+        ((json \ "_links" \ "self") \ "href").as[String] shouldBe s"/national-insurance-record/$linkPath/$nino"
       }
 
       "the date of entry is nullable" must {
@@ -713,7 +718,7 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
     }
 
     "have a link to itself" in {
-      ((json \ "_links" \ "self") \ "href").as[String] shouldBe s"/national-insurance-record/ni/$nino/taxyear/2010-11"
+      ((json \ "_links" \ "self") \ "href").as[String] shouldBe s"/national-insurance-record/$linkPath/$nino/taxyear/2010-11"
     }
   }
 
@@ -772,7 +777,7 @@ class NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
     }
 
     "have a link to itself" in {
-      ((json \ "_links" \ "self") \ "href").as[String] shouldBe s"/national-insurance-record/ni/$nino/taxyear/2009-10"
+      ((json \ "_links" \ "self") \ "href").as[String] shouldBe s"/national-insurance-record/$linkPath/$nino/taxyear/2009-10"
     }
   }
 }

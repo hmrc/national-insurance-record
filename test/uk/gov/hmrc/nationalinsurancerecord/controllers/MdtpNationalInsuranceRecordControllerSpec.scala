@@ -16,20 +16,11 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.controllers
 
-import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.nationalinsurancerecord.domain.TaxYear
+import uk.gov.hmrc.nationalinsurancerecord.controllers.nationalInsurance.{MdtpNationalInsuranceRecordController, NationalInsuranceRecordController}
 
-trait Links {
+class MdtpNationalInsuranceRecordControllerSpec extends NationalInsuranceRecordControllerSpec {
 
-  val context: String
-  def endpointSummaryUrl(nino: Nino): String
-  def endpointTaxYearUrl(nino: Nino, taxYear: TaxYear): String
+  override def nationalInsuranceRecordController: NationalInsuranceRecordController = app.injector.instanceOf[MdtpNationalInsuranceRecordController]
 
-  private def createLink(endpointUrl: String) = if(context.isEmpty) endpointUrl else s"/$context$endpointUrl"
-
-  def nationalInsuranceRecordHref(nino: Nino): String =
-      createLink(endpointSummaryUrl(nino))
-
-  def nationalInsuranceTaxYearHref(nino: Nino, taxYear: TaxYear): String =
-    createLink(endpointTaxYearUrl(nino,taxYear))
+  override val linkPath: String = "ni/mdtp"
 }

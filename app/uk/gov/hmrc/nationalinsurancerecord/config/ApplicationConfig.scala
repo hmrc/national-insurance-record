@@ -21,18 +21,21 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 @Singleton
 class ApplicationConfig @Inject()(servicesConfig: ServicesConfig) {
+  import servicesConfig.{baseUrl, getConfString, getInt, getString}
 
-  val citizenDetailsUrl = servicesConfig.baseUrl("citizen-details")
-  val statePensionUrl = servicesConfig.baseUrl("state-pension")
-  val desUrl = servicesConfig.baseUrl("des-hod")
-  val proxyCacheUrl = servicesConfig.baseUrl("ni-and-sp-proxy-cache")
-  val internalAuthUrl = servicesConfig.baseUrl("internal-auth")
+  val citizenDetailsUrl: String = baseUrl("citizen-details")
+  val statePensionUrl: String = baseUrl("state-pension")
+  val desUrl: String = baseUrl("des-hod")
+  val proxyCacheUrl: String = baseUrl("ni-and-sp-proxy-cache")
+  val internalAuthUrl: String = baseUrl("internal-auth")
 
-  val responseCacheTTL = servicesConfig.getInt("mongodb.responseTTL")
-  val responseCacheCollectionName = servicesConfig.getString("mongodb.collectionName")
+  val responseCacheTTL: Int = getInt("mongodb.responseTTL")
+  val responseCacheCollectionName: String = getString("mongodb.collectionName")
 
-  val authorization: String = s"Bearer ${servicesConfig.getConfString("des-hod.authorizationToken", "local")}"
+  val authorization: String = s"Bearer ${getConfString("des-hod.authorizationToken", "local")}"
 
-  val desEnvironment: String = servicesConfig.getConfString("des-hod.environment", "local")
+  val desEnvironment: String = getConfString("des-hod.environment", "local")
+
+  def pertaxBaseUrl: String = baseUrl("pertax")
 
 }

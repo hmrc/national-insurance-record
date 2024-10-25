@@ -1,4 +1,7 @@
 # microservice specific routes
 
-GET  /:nino                      uk.gov.hmrc.nationalinsurancerecord.controllers.nationalInsurance.NationalInsuranceRecordController.getSummary(nino: uk.gov.hmrc.domain.Nino)
-GET  /:nino/taxyear/:taxYear     uk.gov.hmrc.nationalinsurancerecord.controllers.nationalInsurance.NationalInsuranceRecordController.getTaxYear(nino: uk.gov.hmrc.domain.Nino, taxYear: uk.gov.hmrc.nationalinsurancerecord.domain.TaxYear)
+GET  /:nino                           uk.gov.hmrc.nationalinsurancerecord.controllers.nationalInsurance.ApiNationalInsuranceRecordController.getSummary(nino: uk.gov.hmrc.domain.Nino)
+GET  /:nino/taxyear/:taxYear          uk.gov.hmrc.nationalinsurancerecord.controllers.nationalInsurance.ApiNationalInsuranceRecordController.getTaxYear(nino: uk.gov.hmrc.domain.Nino, taxYear: uk.gov.hmrc.nationalinsurancerecord.domain.TaxYear)
+
+GET  /mdtp/:nino                      uk.gov.hmrc.nationalinsurancerecord.controllers.nationalInsurance.MdtpNationalInsuranceRecordController.getSummary(nino: uk.gov.hmrc.domain.Nino)
+GET  /mdtp/:nino/taxyear/:taxYear     uk.gov.hmrc.nationalinsurancerecord.controllers.nationalInsurance.MdtpNationalInsuranceRecordController.getTaxYear(nino: uk.gov.hmrc.domain.Nino, taxYear: uk.gov.hmrc.nationalinsurancerecord.domain.TaxYear)
