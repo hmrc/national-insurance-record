@@ -20,7 +20,7 @@ import com.google.inject.Inject
 import play.api.mvc.{ActionBuilder, AnyContent, BodyParsers, ControllerComponents, Request}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nationalinsurancerecord.config.AppContext
-import uk.gov.hmrc.nationalinsurancerecord.controllers.actions.{AuthAction, CopeExclusionAction}
+import uk.gov.hmrc.nationalinsurancerecord.controllers.actions.{ApiAuthAction, CopeExclusionAction}
 import uk.gov.hmrc.nationalinsurancerecord.domain.TaxYear
 import uk.gov.hmrc.nationalinsurancerecord.services.NationalInsuranceRecordService
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
@@ -28,7 +28,7 @@ import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import scala.concurrent.ExecutionContext
 
 class ApiNationalInsuranceRecordController @Inject() (
-                                                       action: AuthAction,
+                                                       action: ApiAuthAction,
                                                        nationalInsuranceRecordService: NationalInsuranceRecordService,
                                                        auditConnector: AuditConnector,
                                                        appContext: AppContext,

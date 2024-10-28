@@ -15,11 +15,14 @@
  */
 
 package uk.gov.hmrc.nationalinsurancerecord.controllers.actions
+
 import com.google.inject.Inject
-import play.api.mvc.{BodyParsers, Request, Result}
+import play.api.mvc.{ActionBuilder, AnyContent, DefaultActionBuilder, Request}
 
-import scala.concurrent.{ExecutionContext, Future}
-
-class FakeAuthAction @Inject() (val parser: BodyParsers.Default) (implicit val executionContext: ExecutionContext)extends AuthAction {
-  override protected def filter[A](request: Request[A]): Future[Option[Result]] = Future.successful(None)
+class MdtpAuthorizeAction @Inject()(
+                                authAction: MdtpAuthAction,
+                                pertaxAuthAction: PertaxAuthAction,
+                                defaultActionBuilder: DefaultActionBuilder
+                              ) {
+  val mdtpAuthenticate: ActionBuilder[Request, AnyContent] = defaultActionBuilder andThen pertaxAuthAction andThen authAction
 }

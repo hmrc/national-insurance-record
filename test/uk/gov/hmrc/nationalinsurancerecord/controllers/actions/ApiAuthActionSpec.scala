@@ -32,13 +32,13 @@ import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.v2.TrustedHelper
 import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.domain.Generator
-import uk.gov.hmrc.nationalinsurancerecord.controllers.actions.AuthActionSpec.retrievalsTestingSyntax
+import uk.gov.hmrc.nationalinsurancerecord.controllers.actions.ApiAuthActionSpec.retrievalsTestingSyntax
 import uk.gov.hmrc.nationalinsurancerecord.util.UnitSpec
 import scala.language.postfixOps
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
-class AuthActionSpec
+class ApiAuthActionSpec
   extends UnitSpec
     with GuiceOneAppPerSuite {
   private val ninoGenerator = new Generator()
@@ -172,7 +172,7 @@ class AuthActionSpec
       .injector()
 
 
-    val authAction = injector.instanceOf[AuthAction]
+    val authAction = injector.instanceOf[ApiAuthAction]
 
     val testHarness = new AuthActionTestHarness(authAction)
 
@@ -181,7 +181,7 @@ class AuthActionSpec
   }
 }
 
-object AuthActionSpec {
+object ApiAuthActionSpec {
 
   implicit class retrievalsTestingSyntax[A](val a: A) extends AnyVal {
     def ~[B](b: B): A ~ B = new ~(a, b)

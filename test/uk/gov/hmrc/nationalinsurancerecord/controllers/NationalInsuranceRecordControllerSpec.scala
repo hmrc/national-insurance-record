@@ -21,20 +21,15 @@ import org.mockito.Mockito.{reset, when}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.Application
-import play.api.inject.bind
-import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json._
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{contentAsJson, _}
+import play.api.test.Helpers._
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.connectors.StatePensionConnector
-import uk.gov.hmrc.nationalinsurancerecord.controllers.actions.{AuthAction, FakeAuthAction, FakePertaxAuthAction, PertaxAuthAction}
 import uk.gov.hmrc.nationalinsurancerecord.controllers.nationalInsurance.NationalInsuranceRecordController
-//import uk.gov.hmrc.nationalinsurancerecord.controllers.nationalInsurance.MdtpNationalInsuranceRecordController
 import uk.gov.hmrc.nationalinsurancerecord.domain._
 import uk.gov.hmrc.nationalinsurancerecord.services.NationalInsuranceRecordService
 import uk.gov.hmrc.nationalinsurancerecord.util.DateFormats.localDateFormat
@@ -51,15 +46,6 @@ trait NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
   val nino: Nino = generateNino()
   implicit val executionContext: ExecutionContext = app.injector.instanceOf[ExecutionContext]
 
-  override def fakeApplication(): Application = GuiceApplicationBuilder()
-    .overrides(
-      bind[NationalInsuranceRecordService].toInstance(mockNationalInsuranceRecordService),
-      bind[StatePensionConnector].toInstance(mockStatePensionConnector),
-      bind[AuthAction].to[FakeAuthAction],
-      bind[PertaxAuthAction].to[FakePertaxAuthAction]
-    )
-    .build()
-
   override def beforeEach(): Unit = {
     reset(mockNationalInsuranceRecordService)
     reset(mockStatePensionConnector)
@@ -69,7 +55,6 @@ trait NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
   when(mockStatePensionConnector.getCopeCase(any())(any())).thenReturn(Future.successful(None))
 
   def nationalInsuranceRecordController: NationalInsuranceRecordController
-//  val nationalInsuranceRecordController = app.injector.instanceOf[MdtpNationalInsuranceRecordController]
   val linkPath: String
 
   private val dummyTaxYearQualifying: NationalInsuranceTaxYear = NationalInsuranceTaxYear(

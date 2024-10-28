@@ -20,7 +20,7 @@ import com.google.inject.Inject
 import play.api.mvc.{ActionBuilder, AnyContent, BodyParsers, ControllerComponents, Request}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nationalinsurancerecord.config.AppContext
-import uk.gov.hmrc.nationalinsurancerecord.controllers.actions.{CopeExclusionAction, MdtpAuthAction}
+import uk.gov.hmrc.nationalinsurancerecord.controllers.actions.{CopeExclusionAction, MdtpAuthorizeAction}
 import uk.gov.hmrc.nationalinsurancerecord.domain.TaxYear
 import uk.gov.hmrc.nationalinsurancerecord.services.NationalInsuranceRecordService
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
@@ -28,14 +28,14 @@ import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import scala.concurrent.ExecutionContext
 
 class MdtpNationalInsuranceRecordController @Inject()(
-                                                        mdtpAuthAction: MdtpAuthAction,
-                                                        nationalInsuranceRecordService: NationalInsuranceRecordService,
-                                                        auditConnector: AuditConnector,
-                                                        appContext: AppContext,
-                                                        copeAction: CopeExclusionAction,
-                                                        cc: ControllerComponents,
-                                                        val parser: BodyParsers.Default,
-                                                        val executionContext: ExecutionContext
+                                                       mdtpAuthAction: MdtpAuthorizeAction,
+                                                       nationalInsuranceRecordService: NationalInsuranceRecordService,
+                                                       auditConnector: AuditConnector,
+                                                       appContext: AppContext,
+                                                       copeAction: CopeExclusionAction,
+                                                       cc: ControllerComponents,
+                                                       val parser: BodyParsers.Default,
+                                                       val executionContext: ExecutionContext
                                                       )(override implicit val ec: ExecutionContext)
   extends NationalInsuranceRecordController(nationalInsuranceRecordService, auditConnector, appContext, copeAction, cc) {
   override val authAction: ActionBuilder[Request, AnyContent] = mdtpAuthAction.mdtpAuthenticate

@@ -16,11 +16,26 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.controllers
 
+import play.api.Application
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
+import uk.gov.hmrc.nationalinsurancerecord.connectors.StatePensionConnector
+import uk.gov.hmrc.nationalinsurancerecord.controllers.actions.{FakeMdtpAuthAction, FakePertaxAuthAction, MdtpAuthAction, PertaxAuthAction}
 import uk.gov.hmrc.nationalinsurancerecord.controllers.nationalInsurance.{MdtpNationalInsuranceRecordController, NationalInsuranceRecordController}
+import uk.gov.hmrc.nationalinsurancerecord.services.NationalInsuranceRecordService
 
 class MdtpNationalInsuranceRecordControllerSpec extends NationalInsuranceRecordControllerSpec {
 
   override def nationalInsuranceRecordController: NationalInsuranceRecordController = app.injector.instanceOf[MdtpNationalInsuranceRecordController]
 
   override val linkPath: String = "ni/mdtp"
+
+  override def fakeApplication(): Application = GuiceApplicationBuilder()
+    .overrides(
+      bind[NationalInsuranceRecordService].toInstance(mockNationalInsuranceRecordService),
+      bind[StatePensionConnector].toInstance(mockStatePensionConnector),
+      bind[MdtpAuthAction].to[FakeMdtpAuthAction],
+      bind[PertaxAuthAction].to[FakePertaxAuthAction]
+    )
+    .build()
 }

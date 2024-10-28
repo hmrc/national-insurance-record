@@ -17,24 +17,25 @@
 package uk.gov.hmrc.nationalinsurancerecord.controllers.actions
 
 import play.api.mvc.BodyParsers
-import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
-import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.auth.core.AuthProvider.PrivilegedApplication
+import uk.gov.hmrc.auth.core.{AuthConnector, AuthProviders, ConfidenceLevel}
+import uk.gov.hmrc.auth.core.authorise.Predicate
 import com.google.inject.{ImplementedBy, Inject}
 
 import scala.concurrent.ExecutionContext
 import scala.util.matching.Regex
 
-class MdtpAuthActionImpl @Inject() (
-                      val authConn: AuthConnector,
-                      val parse: BodyParsers.Default,
-                      val ec: ExecutionContext
-                    )
-  extends AuthActionImpl(authConn, parse)(ec) with MdtpAuthAction {
+class ApiAuthActionImpl  @Inject()(
+                                val authConn: AuthConnector,
+                                val parse: BodyParsers.Default,
+                                val ec: ExecutionContext
+                              )
+  extends AuthActionImpl(authConn, parse)(ec) with ApiAuthAction {
 
-  override val predicate: Predicate = EmptyPredicate
-  override val matchNinoInUriPattern: Regex = "/ni/mdtp/([^/]+)/?.*".r
+  override val predicate: Predicate = ConfidenceLevel.L200 or AuthProviders(PrivilegedApplication)
+  override val matchNinoInUriPattern: Regex = "/ni/([^/]+)/?.*".r
 }
 
 
-@ImplementedBy(classOf[MdtpAuthActionImpl])
-trait MdtpAuthAction extends AuthAction
+@ImplementedBy(classOf[ApiAuthActionImpl])
+trait ApiAuthAction extends AuthAction
