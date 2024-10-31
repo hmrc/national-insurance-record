@@ -27,11 +27,14 @@ import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import utils.WireMockHelper
 
-class StatePensionConnectorSpec
+abstract class StatePensionConnectorSpec
   extends NationalInsuranceRecordUnitSpec
     with GuiceOneAppPerSuite
     with WireMockHelper
     with ScalaFutures {
+
+  val connector: StatePensionConnector
+  val linkPath: String
 
   implicit val defaultPatience: PatienceConfig =
     PatienceConfig(timeout = Span(2, Seconds), interval = Span(5, Millis))
@@ -42,12 +45,10 @@ class StatePensionConnectorSpec
     )
     .build()
 
-  lazy val connector: StatePensionConnector = app.injector.instanceOf[StatePensionConnector]
-
   val nino = generateNino()
 
   def stubEndpoint(rtnStatus: Int, body: String): StubMapping = {
-    server.stubFor(get(urlEqualTo(s"/cope/$nino"))
+    server.stubFor(get(urlEqualTo(s"/$linkPath$nino"))
       .withHeader("accept", equalTo("application/vnd.hmrc.1.0+json"))
       .willReturn(
         aResponse()

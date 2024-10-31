@@ -25,12 +25,12 @@ import uk.gov.hmrc.play.bootstrap.backend.controller.BackendHeaderCarrierProvide
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class CopeExclusionAction @Inject()(
-  statePensionConnector: StatePensionConnector,
+abstract class CopeExclusionAction @Inject()(
   defaultBodyParser: BodyParsers.Default
 )(implicit ec: ExecutionContext)
   extends Results with BackendHeaderCarrierProvider {
 
+  val statePensionConnector: StatePensionConnector
 
   //Make a call to the Cope mongo repo. If data exists then we have a cope case. Means we always need to make the request to SP first in nispFE
 
