@@ -19,7 +19,6 @@ package uk.gov.hmrc.nationalinsurancerecord.controllers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import uk.gov.hmrc.nationalinsurancerecord.connectors.{ApiStatePensionConnector, MdtpStatePensionConnector}
-//import org.mockito.Mockito.{reset, when}
 import org.mockito.stubbing.OngoingStubbing
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.ScalaFutures
