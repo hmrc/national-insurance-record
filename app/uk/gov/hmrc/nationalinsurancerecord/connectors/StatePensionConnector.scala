@@ -40,7 +40,6 @@ abstract class StatePensionConnector @Inject()(httpClient: HttpClientV2, applica
     }
 
     val url = s"$serviceUrl/$routeUrl$nino"
-//    val url = s"$serviceUrl/cope/$nino"
     httpClient.get(url"$url")
       .setHeader("accept" -> "application/vnd.hmrc.1.0+json")
       .execute[HttpResponse]

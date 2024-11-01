@@ -41,8 +41,6 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitSpec with GuiceOneAppPerSuite with BeforeAndAfterEach with ScalaFutures {
 
-//  val mockStatePensionConnector: ApiStatePensionConnector
-
   val mockApiStatePensionConnector: ApiStatePensionConnector = mock[ApiStatePensionConnector]
   val mockMdtpStatePensionConnector: MdtpStatePensionConnector = mock[MdtpStatePensionConnector]
   val emptyRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
@@ -51,15 +49,7 @@ trait NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
   val nino: Nino = generateNino()
   implicit val executionContext: ExecutionContext = app.injector.instanceOf[ExecutionContext]
 
-//  override def beforeEach(): Unit = {
-//    reset(mockNationalInsuranceRecordService)
-//    reset(mockStatePensionConnector)
-//    when(mockStatePensionConnector.getCopeCase(any())(any())).thenReturn(Future.successful(None))
-//  }
-
   def mockStatePensionController(returnVal: Option[HttpResponse]): OngoingStubbing[Future[Option[HttpResponse]]]
-
-//  when(mockStatePensionConnector.getCopeCase(any())(any())).thenReturn(Future.successful(None))
 
   mockStatePensionController(None)
 
@@ -258,7 +248,6 @@ trait NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
       "return status 403" in {
 
         mockStatePensionController(Some(copeResponse))
-//        when(mockStatePensionConnector.getCopeCase(any())(any())).thenReturn(Future.successful(Some(copeResponse)))
         val response = nationalInsuranceRecordController.getSummary(nino)(emptyRequestWithHeader)
 
         status(response) shouldBe FORBIDDEN
@@ -267,7 +256,6 @@ trait NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
       "return message from state pension" in {
 
         mockStatePensionController(Some(copeResponse))
-//        when(mockStatePensionConnector.getCopeCase(any())(any())).thenReturn(Future.successful(Some(copeResponse)))
         val response = nationalInsuranceRecordController.getSummary(nino)(emptyRequestWithHeader)
 
         contentAsJson(response) shouldBe Json.parse(message)
