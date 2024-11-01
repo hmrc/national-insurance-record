@@ -38,7 +38,6 @@ abstract class NationalInsuranceRecordController @Inject()(
   nationalInsuranceRecordService: NationalInsuranceRecordService,
   auditConnector: AuditConnector,
   appContext: AppContext,
-  copeAction: CopeExclusionAction,
   cc: ControllerComponents
 ) extends BackendController(cc)
     with HeaderValidator
@@ -50,6 +49,7 @@ abstract class NationalInsuranceRecordController @Inject()(
   override val context: String = appContext.apiGatewayContext
 
   val authAction: ActionBuilder[Request, AnyContent]
+  val copeAction: CopeExclusionAction
   implicit val ec: ExecutionContext
 
   private def halResourceWithTaxYears(nino: Nino, content: JsValue, selfLink: String, years: List[NationalInsuranceTaxYear]): HalResource = {

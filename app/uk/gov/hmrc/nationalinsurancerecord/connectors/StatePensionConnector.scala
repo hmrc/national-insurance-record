@@ -25,9 +25,10 @@ import uk.gov.hmrc.nationalinsurancerecord.config.ApplicationConfig
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class StatePensionConnector @Inject()(httpClient: HttpClientV2, applicationConfig: ApplicationConfig)(implicit ec: ExecutionContext) {
+abstract class StatePensionConnector @Inject()(httpClient: HttpClientV2, applicationConfig: ApplicationConfig)(implicit ec: ExecutionContext) {
 
-  val serviceUrl = applicationConfig.statePensionUrl
+  val routeUrl: String
+  val serviceUrl: String = applicationConfig.statePensionUrl
 
   class NotCopeException extends Exception
 
@@ -38,7 +39,7 @@ class StatePensionConnector @Inject()(httpClient: HttpClientV2, applicationConfi
       else throw UpstreamErrorResponse(response.body, response.status)
     }
 
-    val url = s"$serviceUrl/cope/$nino"
+    val url = s"$serviceUrl/$routeUrl$nino"
     httpClient.get(url"$url")
       .setHeader("accept" -> "application/vnd.hmrc.1.0+json")
       .execute[HttpResponse]

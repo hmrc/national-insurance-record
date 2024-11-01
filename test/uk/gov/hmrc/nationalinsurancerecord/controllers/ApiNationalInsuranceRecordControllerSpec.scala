@@ -16,26 +16,41 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.controllers
 
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.{reset, when}
+import org.mockito.stubbing.OngoingStubbing
 import play.api.Application
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import uk.gov.hmrc.nationalinsurancerecord.connectors.StatePensionConnector
+import uk.gov.hmrc.http.HttpResponse
+import uk.gov.hmrc.nationalinsurancerecord.connectors.ApiStatePensionConnector
 import uk.gov.hmrc.nationalinsurancerecord.controllers.actions.{ApiAuthAction, FakeApiAuthAction, FakePertaxAuthAction, PertaxAuthAction}
 import uk.gov.hmrc.nationalinsurancerecord.controllers.nationalInsurance.{ApiNationalInsuranceRecordController, NationalInsuranceRecordController}
 import uk.gov.hmrc.nationalinsurancerecord.services.NationalInsuranceRecordService
 
-class ApiNationalInsuranceRecordControllerSpec extends NationalInsuranceRecordControllerSpec {
+import scala.concurrent.Future
 
-  override def nationalInsuranceRecordController: NationalInsuranceRecordController = app.injector.instanceOf[ApiNationalInsuranceRecordController]
+class ApiNationalInsuranceRecordControllerSpec extends NationalInsuranceRecordControllerSpec {
 
   override val linkPath: String = "ni"
 
   override def fakeApplication(): Application = GuiceApplicationBuilder()
     .overrides(
       bind[NationalInsuranceRecordService].toInstance(mockNationalInsuranceRecordService),
-      bind[StatePensionConnector].toInstance(mockStatePensionConnector),
+      bind[ApiStatePensionConnector].toInstance(mockApiStatePensionConnector),
       bind[ApiAuthAction].to[FakeApiAuthAction],
       bind[PertaxAuthAction].to[FakePertaxAuthAction]
     )
     .build()
+
+  override def beforeEach(): Unit = {
+    reset(mockNationalInsuranceRecordService)
+    reset(mockApiStatePensionConnector)
+    mockStatePensionController(None)
+  }
+
+  override def nationalInsuranceRecordController: NationalInsuranceRecordController = app.injector.instanceOf[ApiNationalInsuranceRecordController]
+
+  override def mockStatePensionController(returnVal: Option[HttpResponse]): OngoingStubbing[Future[Option[HttpResponse]]] =
+    when(mockApiStatePensionConnector.getCopeCase(any())(any())).thenReturn(Future.successful(returnVal))
 }

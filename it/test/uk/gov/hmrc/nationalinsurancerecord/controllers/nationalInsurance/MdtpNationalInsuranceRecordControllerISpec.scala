@@ -16,9 +16,35 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.controllers.nationalInsurance
 
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.when
+import play.api.Application
+import play.api.cache.AsyncCacheApi
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.mvc.AnyContent
 import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.mongoFeatureToggles.services.FeatureFlagService
+import uk.gov.hmrc.nationalinsurancerecord.controllers.actions.MdtpCopeExclusionAction
+import uk.gov.hmrc.nationalinsurancerecord.test_utils.FakeAction
 
 class MdtpNationalInsuranceRecordControllerISpec extends NationalInsuranceRecordControllerISpec {
   override def classPrefix: String = "Mdtp"
   override def controllerUrl(nino: Nino): String = s"/ni/mdtp/$nino"
+
+  private val mockCopeExclusionAction: MdtpCopeExclusionAction =
+    mock[MdtpCopeExclusionAction]
+
+  override def fakeApplication(): Application = GuiceApplicationBuilder()
+    .overrides(
+      bind[MdtpCopeExclusionAction].to(mockCopeExclusionAction),
+      bind[AsyncCacheApi].toInstance(mockCacheApi),
+      bind[FeatureFlagService].toInstance(mockFeatureFlagService)
+    )
+    .configure(
+      wiremockConfig
+    ).build()
+
+  when(mockCopeExclusionAction.filterCopeExclusions(any()))
+    .thenReturn(new FakeAction[AnyContent]())
 }
