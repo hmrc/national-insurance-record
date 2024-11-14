@@ -36,7 +36,9 @@ import uk.gov.hmrc.nationalinsurancerecord.test_utils.{FakeAction, IntegrationBa
 
 import scala.concurrent.Future
 
-class NationalInsuranceRecordControllerISpec extends IntegrationBaseSpec with Results {
+trait NationalInsuranceRecordControllerISpec extends IntegrationBaseSpec with Results {
+  def classPrefix: String
+  def controllerUrl(nino: Nino): String
 
   private val mockCopeExclusionAction: CopeExclusionAction =
     mock[CopeExclusionAction]
@@ -52,6 +54,7 @@ class NationalInsuranceRecordControllerISpec extends IntegrationBaseSpec with Re
     )
     .configure(
       "microservice.services.auth.port" -> server.port(),
+      "microservice.services.pertax.port" -> server.port(),
       "microservice.services.des-hod.host" -> "127.0.0.1",
       "microservice.services.des-hod.port" -> server.port(),
       "microservice.services.ni-and-sp-proxy-cache.host" -> "127.0.0.1",
@@ -68,13 +71,22 @@ class NationalInsuranceRecordControllerISpec extends IntegrationBaseSpec with Re
 
     val authResponse =
       s"""
-        |{
-        | "nino": "$nino",
-        | "authProviderId": { "ggCredId": "xyz" }
-        |}
-        |""".stripMargin
+         |{
+         | "nino": "$nino",
+         | "authProviderId": { "ggCredId": "xyz" }
+         |}
+         |""".stripMargin
+
+    val pertaxAuthResponse =
+      s"""
+         |{
+         | "code": "ACCESS_GRANTED",
+         | "message": ""
+         |}
+         |""".stripMargin
 
     stubPostServer(ok(authResponse), "/auth/authorise")
+    stubPostServer(ok(pertaxAuthResponse), "/pertax/authorise")
     stubGetServer(ok(""), s"/citizen-details/${nino.nino}/designatory-details/")
     when(mockCopeExclusionAction.filterCopeExclusions(any()))
       .thenReturn(new FakeAction[AnyContent]())
@@ -89,15 +101,13 @@ class NationalInsuranceRecordControllerISpec extends IntegrationBaseSpec with Re
     gatewayTimeout() -> "504" -> GATEWAY_TIMEOUT
   )
 
-  private val controllerUrl: String = s"/ni/$nino"
-
   private val desNIUrl: String = s"/individuals/${nino.withoutSuffix}/pensions/ni"
   private val desSummaryUrl: String = s"/individuals/${nino.withoutSuffix}/pensions/summary"
   private val desLiabilitiesUrl: String = s"/individuals/${nino.withoutSuffix}/pensions/liabilities"
 
   private val proxyCacheUrl: String = s"/ni-and-sp-proxy-cache/${nino.nino}"
 
-  "NationalInsuranceRecordController" must {
+  s"${classPrefix}NationalInsuranceRecordController" must {
 
     requests.foreach {
       case ((errorResponse, errorCode), statusCode) =>
@@ -109,7 +119,7 @@ class NationalInsuranceRecordControllerISpec extends IntegrationBaseSpec with Re
           stubGetServer(errorResponse, desSummaryUrl)
           stubGetServer(errorResponse, desLiabilitiesUrl)
 
-          val request = FakeRequest(GET, controllerUrl)
+          val request = FakeRequest(GET, controllerUrl(nino))
             .withHeaders("Accept" -> "application/vnd.hmrc.1.0+json")
             .withHeaders("Authorization" -> "Bearer 123")
 
@@ -120,7 +130,7 @@ class NationalInsuranceRecordControllerISpec extends IntegrationBaseSpec with Re
     }
   }
 
-  "NationalInsuranceRecordController" must {
+  s"${classPrefix}NationalInsuranceRecordController" must {
 
     requests.foreach {
       case ((errorResponse, errorCode), statusCode) =>
@@ -130,7 +140,7 @@ class NationalInsuranceRecordControllerISpec extends IntegrationBaseSpec with Re
 
           stubGetServer(errorResponse, proxyCacheUrl)
 
-          val request = FakeRequest(GET, controllerUrl)
+          val request = FakeRequest(GET, controllerUrl(nino))
             .withHeaders("Accept" -> "application/vnd.hmrc.1.0+json")
             .withHeaders("Authorization" -> "Bearer 123")
 

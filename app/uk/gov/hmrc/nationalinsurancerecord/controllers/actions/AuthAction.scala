@@ -16,30 +16,32 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.controllers.actions
 
-import com.google.inject.ImplementedBy
+import com.google.inject.Inject
 import play.api.Logger
 import play.api.mvc.Results._
 import play.api.mvc._
-import uk.gov.hmrc.auth.core.AuthProvider.PrivilegedApplication
+
+import scala.util.matching.Regex
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.{clientId, nino, trustedHelper}
 import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
-import javax.inject.Inject
 import scala.concurrent.Future.successful
 import scala.concurrent.{ExecutionContext, Future}
 
-class AuthActionImpl @Inject()(val authConnector: AuthConnector, val parser: BodyParsers.Default)(implicit val executionContext: ExecutionContext)
+abstract class AuthActionImpl @Inject()(val authConnector: AuthConnector, val parser: BodyParsers.Default)(implicit val executionContext: ExecutionContext)
   extends AuthAction with AuthorisedFunctions {
 
   private val logger = Logger(this.getClass)
 
+  val predicate: Predicate
+  val matchNinoInUriPattern: Regex
+
   override protected def filter[A](request: Request[A]): Future[Option[Result]] = {
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
-
-    val matchNinoInUriPattern = "/ni/([^/]+)/?.*".r
 
     val matches = matchNinoInUriPattern.findAllIn(request.uri)
 
@@ -56,7 +58,7 @@ class AuthActionImpl @Inject()(val authConnector: AuthConnector, val parser: Bod
       successful(Some(BadRequest))
     } else {
       authorised(
-        ConfidenceLevel.L200 or AuthProviders(PrivilegedApplication)
+        predicate
       ).retrieve(nino and trustedHelper and clientId) {
         case _ ~ _ ~ Some(_) => successful(None)
         case _ ~ Some(trusted) ~ _ => check(trusted.principalNino.getOrElse(""))
@@ -74,6 +76,5 @@ class AuthActionImpl @Inject()(val authConnector: AuthConnector, val parser: Bod
   }
 }
 
-@ImplementedBy(classOf[AuthActionImpl])
 trait AuthAction extends ActionBuilder[Request, AnyContent] with ActionFilter[Request]
 

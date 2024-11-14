@@ -40,7 +40,7 @@ trait HeaderValidator {
 
   def parser: BodyParser[AnyContent]
 
-  def validateAccept(rules: Option[String] => Boolean) = new ActionBuilder[Request, AnyContent] {
+  def validateAccept(rules: Option[String] => Boolean): ActionBuilder[Request, AnyContent] = new ActionBuilder[Request, AnyContent] {
 
     def invokeBlock[A](
                         request: Request[A],

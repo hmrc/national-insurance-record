@@ -18,7 +18,7 @@ import play.sbt.PlayImport.*
 import sbt.*
 
 object AppDependencies {
-  private val bootstrapVersion = "9.4.0"
+  private val bootstrapVersion = "9.5.0"
   private val playVersion = "play-30"
 
   val compile: Seq[ModuleID] = Seq(
@@ -26,14 +26,12 @@ object AppDependencies {
     "uk.gov.hmrc"       %%  s"bootstrap-backend-$playVersion"                   % bootstrapVersion,
     "uk.gov.hmrc"       %%  s"domain-$playVersion"                              % "10.0.0",
     "uk.gov.hmrc"       %%  s"play-hal-$playVersion"                            % "4.0.0",
-    "uk.gov.hmrc"       %%  s"mongo-feature-toggles-client-$playVersion"        % "1.6.0",
+    "uk.gov.hmrc"       %%  s"mongo-feature-toggles-client-$playVersion"        % "1.7.0",
   )
 
   val test: Seq[ModuleID] = Seq(
     "uk.gov.hmrc"                   %%  s"bootstrap-test-$playVersion"    % bootstrapVersion,
     "org.pegdown"                    %  "pegdown"                         % "1.6.0",
-    "org.playframework"             %% "play-test"                        % "3.0.4",
-    "org.mockito"                    %  "mockito-core"                    % "5.12.0",
     "uk.gov.hmrc.mongo"             %%  s"hmrc-mongo-test-$playVersion"   % "2.2.0",
   ).map(_ % "test")
 

@@ -22,12 +22,14 @@ import uk.gov.hmrc.nationalinsurancerecord.domain.TaxYear
 trait Links {
 
   val context: String
+  def endpointSummaryUrl(nino: Nino): String
+  def endpointTaxYearUrl(nino: Nino, taxYear: TaxYear): String
 
   private def createLink(endpointUrl: String) = if(context.isEmpty) endpointUrl else s"/$context$endpointUrl"
 
   def nationalInsuranceRecordHref(nino: Nino): String =
-      createLink(nationalInsurance.routes.NationalInsuranceRecordController.getSummary(nino).url)
+      createLink(endpointSummaryUrl(nino))
 
   def nationalInsuranceTaxYearHref(nino: Nino, taxYear: TaxYear): String =
-    createLink(nationalInsurance.routes.NationalInsuranceRecordController.getTaxYear(nino,taxYear).url)
+    createLink(endpointTaxYearUrl(nino,taxYear))
 }

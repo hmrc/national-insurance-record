@@ -19,10 +19,10 @@ package uk.gov.hmrc.nationalinsurancerecord.controllers.nationalInsurance
 import com.google.inject.{Inject, Singleton}
 import play.api.hal.HalResource
 import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.{Action, AnyContent, BodyParsers, ControllerComponents, Request, Result}
+import play.api.mvc.{Action, ActionBuilder, AnyContent, ControllerComponents, Request, Result}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nationalinsurancerecord.config.AppContext
-import uk.gov.hmrc.nationalinsurancerecord.controllers.actions.{AuthAction, CopeExclusionAction}
+import uk.gov.hmrc.nationalinsurancerecord.controllers.actions.CopeExclusionAction
 import uk.gov.hmrc.nationalinsurancerecord.controllers.{ErrorHandling, ErrorResponses, HalSupport, Links}
 import uk.gov.hmrc.nationalinsurancerecord.domain.{Exclusion, ExclusionResponse, NationalInsuranceRecordResult, NationalInsuranceTaxYear, NationalInsuranceTaxYearResult, TaxYear}
 import uk.gov.hmrc.nationalinsurancerecord.events.{NationalInsuranceExclusion, NationalInsuranceRecord}
@@ -34,15 +34,12 @@ import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class NationalInsuranceRecordController @Inject()(
+abstract class NationalInsuranceRecordController @Inject()(
   nationalInsuranceRecordService: NationalInsuranceRecordService,
   auditConnector: AuditConnector,
   appContext: AppContext,
-  authAction: AuthAction,
   copeAction: CopeExclusionAction,
-  cc: ControllerComponents,
-  val parser: BodyParsers.Default,
-  implicit val executionContext: ExecutionContext
+  cc: ControllerComponents
 ) extends BackendController(cc)
     with HeaderValidator
     with ErrorHandling
@@ -51,6 +48,9 @@ class NationalInsuranceRecordController @Inject()(
 
   override val app: String = appContext.appName
   override val context: String = appContext.apiGatewayContext
+
+  val authAction: ActionBuilder[Request, AnyContent]
+  implicit val ec: ExecutionContext
 
   private def halResourceWithTaxYears(nino: Nino, content: JsValue, selfLink: String, years: List[NationalInsuranceTaxYear]): HalResource = {
     halResourceSelfLink(
