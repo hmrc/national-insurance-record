@@ -652,7 +652,7 @@ trait NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
       .thenReturn(Right(NationalInsuranceTaxYearResult(Right(dummyTaxYearQualifying))))
     val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear(dummyTaxYearQualifying.taxYear))(emptyRequestWithHeader)
 
-    lazy val json = contentAsJson(response)
+    val json = contentAsJson(response)
 
     "return 200" in {
       status(response) shouldBe 200
@@ -711,7 +711,7 @@ trait NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
     when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any()))
       .thenReturn(Right(NationalInsuranceTaxYearResult(Right(dummyTaxYearNonQualifying))))
     val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear(dummyTaxYearNonQualifying.taxYear))(emptyRequestWithHeader)
-    lazy val json = contentAsJson(response)
+    val json = contentAsJson(response)
 
     "return 200" in {
       status(response) shouldBe 200
