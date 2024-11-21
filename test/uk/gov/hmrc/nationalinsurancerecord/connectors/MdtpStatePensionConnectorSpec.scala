@@ -18,5 +18,5 @@ package uk.gov.hmrc.nationalinsurancerecord.connectors
 
 class MdtpStatePensionConnectorSpec extends StatePensionConnectorSpec {
   override lazy val connector: StatePensionConnector = app.injector.instanceOf[MdtpStatePensionConnector]
-  override val linkPath: _root_.java.lang.String = "cope/mdtp/"
+  override val linkPath: String = "cope/mdtp/"
 }
