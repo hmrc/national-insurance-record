@@ -20,7 +20,7 @@ import com.google.inject.Inject
 import play.api.mvc.{ActionBuilder, AnyContent, BodyParsers, ControllerComponents, Request}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nationalinsurancerecord.config.AppContext
-import uk.gov.hmrc.nationalinsurancerecord.controllers.actions.{CopeExclusionAction, MdtpAuthorizeAction}
+import uk.gov.hmrc.nationalinsurancerecord.controllers.actions.{CopeExclusionAction, MdtpAuthorizeAction, MdtpCopeExclusionAction}
 import uk.gov.hmrc.nationalinsurancerecord.domain.TaxYear
 import uk.gov.hmrc.nationalinsurancerecord.services.NationalInsuranceRecordService
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
@@ -32,12 +32,12 @@ class MdtpNationalInsuranceRecordController @Inject()(
                                                        nationalInsuranceRecordService: NationalInsuranceRecordService,
                                                        auditConnector: AuditConnector,
                                                        appContext: AppContext,
-                                                       copeAction: CopeExclusionAction,
+                                                       mdtpCopeAction: MdtpCopeExclusionAction,
                                                        cc: ControllerComponents,
                                                        val parser: BodyParsers.Default,
                                                        val executionContext: ExecutionContext
                                                       )(override implicit val ec: ExecutionContext)
-  extends NationalInsuranceRecordController(nationalInsuranceRecordService, auditConnector, appContext, copeAction, cc) {
+  extends NationalInsuranceRecordController(nationalInsuranceRecordService, auditConnector, appContext, cc) {
   override val authAction: ActionBuilder[Request, AnyContent] = mdtpAuthAction.mdtpAuthenticate
 
   override def endpointSummaryUrl(nino: Nino): String =
@@ -45,4 +45,6 @@ class MdtpNationalInsuranceRecordController @Inject()(
 
   override def endpointTaxYearUrl(nino: Nino, taxYear: TaxYear): String =
     uk.gov.hmrc.nationalinsurancerecord.controllers.nationalInsurance.routes.MdtpNationalInsuranceRecordController.getTaxYear(nino, taxYear).url
+
+  override val copeAction: CopeExclusionAction = mdtpCopeAction
 }

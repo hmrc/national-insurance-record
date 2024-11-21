@@ -17,7 +17,9 @@
 package uk.gov.hmrc.nationalinsurancerecord.controllers
 
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{reset, when}
+import org.mockito.Mockito.when
+import uk.gov.hmrc.nationalinsurancerecord.connectors.{ApiStatePensionConnector, MdtpStatePensionConnector}
+import org.mockito.stubbing.OngoingStubbing
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
@@ -28,7 +30,6 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
-import uk.gov.hmrc.nationalinsurancerecord.connectors.StatePensionConnector
 import uk.gov.hmrc.nationalinsurancerecord.controllers.nationalInsurance.NationalInsuranceRecordController
 import uk.gov.hmrc.nationalinsurancerecord.domain._
 import uk.gov.hmrc.nationalinsurancerecord.services.NationalInsuranceRecordService
@@ -39,20 +40,17 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitSpec with GuiceOneAppPerSuite with BeforeAndAfterEach with ScalaFutures {
 
+  val mockApiStatePensionConnector: ApiStatePensionConnector = mock[ApiStatePensionConnector]
+  val mockMdtpStatePensionConnector: MdtpStatePensionConnector = mock[MdtpStatePensionConnector]
   val emptyRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
   val emptyRequestWithHeader: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withHeaders("Accept" -> "application/vnd.hmrc.1.0+json")
   val mockNationalInsuranceRecordService: NationalInsuranceRecordService = mock[NationalInsuranceRecordService]
-  val mockStatePensionConnector: StatePensionConnector = mock[StatePensionConnector]
   val nino: Nino = generateNino()
   implicit val executionContext: ExecutionContext = app.injector.instanceOf[ExecutionContext]
 
-  override def beforeEach(): Unit = {
-    reset(mockNationalInsuranceRecordService)
-    reset(mockStatePensionConnector)
-    when(mockStatePensionConnector.getCopeCase(any())(any())).thenReturn(Future.successful(None))
-  }
+  def mockStatePensionController(returnVal: Option[HttpResponse]): OngoingStubbing[Future[Option[HttpResponse]]]
 
-  when(mockStatePensionConnector.getCopeCase(any())(any())).thenReturn(Future.successful(None))
+  mockStatePensionController(None)
 
   def nationalInsuranceRecordController: NationalInsuranceRecordController
   val linkPath: String
@@ -248,7 +246,7 @@ trait NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
 
       "return status 403" in {
 
-        when(mockStatePensionConnector.getCopeCase(any())(any())).thenReturn(Future.successful(Some(copeResponse)))
+        mockStatePensionController(Some(copeResponse))
         val response = nationalInsuranceRecordController.getSummary(nino)(emptyRequestWithHeader)
 
         status(response) shouldBe FORBIDDEN
@@ -256,7 +254,7 @@ trait NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
 
       "return message from state pension" in {
 
-        when(mockStatePensionConnector.getCopeCase(any())(any())).thenReturn(Future.successful(Some(copeResponse)))
+        mockStatePensionController(Some(copeResponse))
         val response = nationalInsuranceRecordController.getSummary(nino)(emptyRequestWithHeader)
 
         contentAsJson(response) shouldBe Json.parse(message)

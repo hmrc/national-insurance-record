@@ -18,21 +18,15 @@ package uk.gov.hmrc.nationalinsurancerecord.controllers.nationalInsurance
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import org.mockito.ArgumentMatchers
-import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
-import play.api.Application
-import play.api.cache.AsyncCacheApi
-import play.api.inject.bind
-import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.mvc.{AnyContent, Results}
+import play.api.mvc.Results
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{route, status => statusResult, _}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.mongoFeatureToggles.model.{FeatureFlag, FeatureFlagName}
 import uk.gov.hmrc.mongoFeatureToggles.services.FeatureFlagService
-import uk.gov.hmrc.nationalinsurancerecord.controllers.actions.CopeExclusionAction
 import uk.gov.hmrc.nationalinsurancerecord.domain.ProxyCacheToggle
-import uk.gov.hmrc.nationalinsurancerecord.test_utils.{FakeAction, IntegrationBaseSpec}
+import uk.gov.hmrc.nationalinsurancerecord.test_utils.IntegrationBaseSpec
 
 import scala.concurrent.Future
 
@@ -40,32 +34,23 @@ trait NationalInsuranceRecordControllerISpec extends IntegrationBaseSpec with Re
   def classPrefix: String
   def controllerUrl(nino: Nino): String
 
-  private val mockCopeExclusionAction: CopeExclusionAction =
-    mock[CopeExclusionAction]
+  server.start()
 
-  private val mockFeatureFlagService: FeatureFlagService =
+  protected val mockFeatureFlagService: FeatureFlagService =
     mock[FeatureFlagService]
 
-  override def fakeApplication(): Application = GuiceApplicationBuilder()
-    .overrides(
-      bind[CopeExclusionAction].to(mockCopeExclusionAction),
-      bind[AsyncCacheApi].toInstance(mockCacheApi),
-      bind[FeatureFlagService].toInstance(mockFeatureFlagService)
-    )
-    .configure(
-      "microservice.services.auth.port" -> server.port(),
-      "microservice.services.pertax.port" -> server.port(),
-      "microservice.services.des-hod.host" -> "127.0.0.1",
-      "microservice.services.des-hod.port" -> server.port(),
-      "microservice.services.ni-and-sp-proxy-cache.host" -> "127.0.0.1",
-      "microservice.services.ni-and-sp-proxy-cache.port" -> server.port(),
-      "microservice.services.citizen-details.host" -> "127.0.0.1",
-      "microservice.services.citizen-details.port" -> server.port(),
-      "auditing.enabled" -> false,
-      "internal-auth.isTestOnlyEndpoint" -> false
-    ).build()
+  protected val wiremockConfig: Map[String, Any] = Map(
+    "microservice.services.auth.port" -> server.port(),
+    "microservice.services.pertax.port" -> server.port(),
+    "microservice.services.des-hod.port" -> server.port(),
+    "microservice.services.ni-and-sp-proxy-cache.port" -> server.port(),
+    "microservice.services.citizen-details.port" -> server.port(),
+    "auditing.enabled" -> false,
+    "internal-auth.isTestOnlyEndpoint" -> false
+  )
 
   private val nino: Nino = generateNino
+
   override def beforeEach(): Unit = {
     super.beforeEach()
 
@@ -88,8 +73,6 @@ trait NationalInsuranceRecordControllerISpec extends IntegrationBaseSpec with Re
     stubPostServer(ok(authResponse), "/auth/authorise")
     stubPostServer(ok(pertaxAuthResponse), "/pertax/authorise")
     stubGetServer(ok(""), s"/citizen-details/${nino.nino}/designatory-details/")
-    when(mockCopeExclusionAction.filterCopeExclusions(any()))
-      .thenReturn(new FakeAction[AnyContent]())
   }
 
   private val requests = List(
