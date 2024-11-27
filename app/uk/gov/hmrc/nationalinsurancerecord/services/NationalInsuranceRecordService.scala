@@ -20,8 +20,7 @@ import com.google.inject.Inject
 import services.TaxYearResolver
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
-import uk.gov.hmrc.mongoFeatureToggles.services.FeatureFlagService
-import uk.gov.hmrc.nationalinsurancerecord.connectors.{DesConnector, ProxyCacheConnector}
+import uk.gov.hmrc.nationalinsurancerecord.connectors.DesConnector
 import uk.gov.hmrc.nationalinsurancerecord.domain.Exclusion.Exclusion
 import uk.gov.hmrc.nationalinsurancerecord.domain._
 import uk.gov.hmrc.nationalinsurancerecord.domain.des._
@@ -31,31 +30,23 @@ import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
 
 class NationalInsuranceRecordService @Inject()(
-  des: DesConnector,
-  proxyCacheConnector: ProxyCacheConnector,
-  citizenDetailsService: CitizenDetailsService,
-  metrics: MetricsService,
-  implicit val executionContext: ExecutionContext,
-  featureFlagService: FeatureFlagService
-) {
+                                                des: DesConnector,
+                                                citizenDetailsService: CitizenDetailsService,
+                                                metrics: MetricsService,
+                                                implicit val executionContext: ExecutionContext
+                                              ) {
 
   def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[DesError, NationalInsuranceRecordResult]] =
-    featureFlagService.get(ProxyCacheToggle) flatMap {
-      proxyCache =>
-        citizenDetailsService.checkManualCorrespondenceIndicator(nino) flatMap {
-          mci =>
-            if (proxyCache.isEnabled) {
-              proxyCacheConnector.get(nino) map (_.map (pcd => buildNationalInsuranceRecord(pcd.niRecord, pcd.summary, pcd.liabilities, mci)))
-            } else {
-              for {
-                niRecord    <- des.getNationalInsuranceRecord(nino)
-                liabilities <- des.getLiabilities(nino)
-                summary     <- des.getSummary(nino)
-              } yield handleDesEither[NationalInsuranceRecordResult](niRecord, summary, liabilities,
-                buildNationalInsuranceRecord(_: DesNIRecord, _: DesSummary, _: DesLiabilities, mci))
-            }
-        }
+    citizenDetailsService.checkManualCorrespondenceIndicator(nino) flatMap {
+      mci =>
+        for {
+          niRecord <- des.getNationalInsuranceRecord(nino)
+          liabilities <- des.getLiabilities(nino)
+          summary <- des.getSummary(nino)
+        } yield handleDesEither[NationalInsuranceRecordResult](niRecord, summary, liabilities,
+          buildNationalInsuranceRecord(_: DesNIRecord, _: DesSummary, _: DesLiabilities, mci))
     }
+
 
   private def handleDesEither[A](niRecordEither: Either[DesError, DesNIRecord],
                                  desSummaryEither: Either[DesError, DesSummary],
@@ -71,11 +62,11 @@ class NationalInsuranceRecordService @Inject()(
   }
 
   private def buildNationalInsuranceRecord(
-    desNIRecord: DesNIRecord,
-    desSummary: DesSummary,
-    desLiabilities: DesLiabilities,
-    manualCorrespondence: Boolean
-  ): NationalInsuranceRecordResult = {
+                                            desNIRecord: DesNIRecord,
+                                            desSummary: DesSummary,
+                                            desLiabilities: DesLiabilities,
+                                            manualCorrespondence: Boolean
+                                          ): NationalInsuranceRecordResult = {
     val purgedNIRecord: DesNIRecord =
       desNIRecord.purge(desSummary.finalRelevantYear.get)
 
@@ -115,32 +106,25 @@ class NationalInsuranceRecordService @Inject()(
   }
 
   def getTaxYear(nino: Nino, taxYear: TaxYear)(implicit hc: HeaderCarrier): Future[Either[DesError, NationalInsuranceTaxYearResult]] =
-    featureFlagService.get(ProxyCacheToggle).flatMap {
-      proxyCache =>
-        citizenDetailsService.checkManualCorrespondenceIndicator(nino).flatMap {
-          mci =>
-            if (proxyCache.isEnabled) {
-              proxyCacheConnector.get(nino) map (_.map(pcd => buildTaxYear(pcd.niRecord, pcd.summary, pcd.liabilities, mci, nino, taxYear)))
-            } else {
-              for {
-                niRecord    <- des.getNationalInsuranceRecord(nino)
-                liabilities <- des.getLiabilities(nino)
-                summary     <- des.getSummary(nino)
-              } yield handleDesEither[NationalInsuranceTaxYearResult](niRecord, summary, liabilities,
-                  buildTaxYear(_: DesNIRecord, _: DesSummary, _: DesLiabilities, mci, nino, taxYear))
-            }
-        }
+    citizenDetailsService.checkManualCorrespondenceIndicator(nino).flatMap {
+      mci =>
+        for {
+          niRecord <- des.getNationalInsuranceRecord(nino)
+          liabilities <- des.getLiabilities(nino)
+          summary <- des.getSummary(nino)
+        } yield handleDesEither[NationalInsuranceTaxYearResult](niRecord, summary, liabilities,
+          buildTaxYear(_: DesNIRecord, _: DesSummary, _: DesLiabilities, mci, nino, taxYear))
     }
 
 
   private def buildTaxYear(
-    desNIRecord: DesNIRecord,
-    desSummary: DesSummary,
-    desLiabilities: DesLiabilities,
-    manualCorrespondence: Boolean,
-    nino: Nino,
-    taxYear: TaxYear
-  ): NationalInsuranceTaxYearResult = {
+                            desNIRecord: DesNIRecord,
+                            desSummary: DesSummary,
+                            desLiabilities: DesLiabilities,
+                            manualCorrespondence: Boolean,
+                            nino: Nino,
+                            taxYear: TaxYear
+                          ): NationalInsuranceTaxYearResult = {
     val purgedNIRecord: DesNIRecord =
       desNIRecord.purge(desSummary.finalRelevantYear.get)
 
@@ -175,7 +159,7 @@ class NationalInsuranceRecordService @Inject()(
     )
 
   def calcPre75QualifyingYears(pre75Contributions: Int, dateOfEntry: Option[LocalDate], dateOfBirth: LocalDate): Option[Int] = {
-    val yearCalc: BigDecimal = BigDecimal(pre75Contributions)/50
+    val yearCalc: BigDecimal = BigDecimal(pre75Contributions) / 50
     val sixteenthBirthday: LocalDate = dateOfBirth.plusYears(niRecordMinAge)
     val sixteenthBirthdayDiff: Int = niRecordStart - TaxYearResolver.taxYearFor(sixteenthBirthday)
 
