@@ -17,10 +17,9 @@
 package uk.gov.hmrc.nationalinsurancerecord.module
 
 import com.google.inject.Singleton
-import uk.gov.hmrc.mongoFeatureToggles.model.FeatureFlagNamesLibrary
 
 
 @Singleton
 class ApplicationStartUp {
-  FeatureFlagNamesLibrary.addFlags(List())
+
 }
