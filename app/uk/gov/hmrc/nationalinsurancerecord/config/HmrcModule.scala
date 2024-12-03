@@ -18,7 +18,6 @@ package uk.gov.hmrc.nationalinsurancerecord.config
 
 import play.api.inject.{Binding, Module}
 import play.api.{Configuration, Environment}
-import uk.gov.hmrc.nationalinsurancerecord.module.ApplicationStartUp
 
 class HmrcModule extends Module {
   override def bindings(environment: Environment, configuration: Configuration): collection.Seq[Binding[_]] = {
@@ -27,8 +26,6 @@ class HmrcModule extends Module {
         Seq(bind[InternalAuthTokenInitializer].to[InternalAuthTokenInitializerImpl].eagerly())
       else Seq(bind[InternalAuthTokenInitializer].to[InternalAuthTokenInitializerNonLocal].eagerly())
 
-    Seq(
-      bind[ApplicationStartUp].toSelf.eagerly()
-    ) ++ internalAuthBinding
+    internalAuthBinding
   }
 }

@@ -24,7 +24,6 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.AnyContent
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.mongoFeatureToggles.services.FeatureFlagService
 import uk.gov.hmrc.nationalinsurancerecord.controllers.actions.ApiCopeExclusionAction
 import uk.gov.hmrc.nationalinsurancerecord.test_utils.FakeAction
 
@@ -38,8 +37,7 @@ class ApiNationalInsuranceRecordControllerISpec extends NationalInsuranceRecordC
   override def fakeApplication(): Application = GuiceApplicationBuilder()
     .overrides(
       bind[ApiCopeExclusionAction].to(mockCopeExclusionAction),
-      bind[AsyncCacheApi].toInstance(mockCacheApi),
-      bind[FeatureFlagService].toInstance(mockFeatureFlagService)
+      bind[AsyncCacheApi].toInstance(mockCacheApi)
     )
     .configure(
       wiremockConfig
