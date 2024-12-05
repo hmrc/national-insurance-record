@@ -21,11 +21,8 @@ import play.api.{Configuration, Environment}
 
 class HmrcModule extends Module {
   override def bindings(environment: Environment, configuration: Configuration): collection.Seq[Binding[_]] = {
-    val internalAuthBinding =
-      if (configuration.get[Boolean]("internal-auth.isTestOnlyEndpoint"))
-        Seq(bind[InternalAuthTokenInitializer].to[InternalAuthTokenInitializerImpl].eagerly())
-      else Seq(bind[InternalAuthTokenInitializer].to[InternalAuthTokenInitializerNonLocal].eagerly())
-
-    internalAuthBinding
+    if (configuration.get[Boolean]("internal-auth.isTestOnlyEndpoint"))
+      Seq(bind[InternalAuthTokenInitializer].to[InternalAuthTokenInitializerImpl].eagerly())
+    else Seq(bind[InternalAuthTokenInitializer].to[InternalAuthTokenInitializerNonLocal].eagerly())
   }
 }
