@@ -43,14 +43,12 @@ class CitizenDetailsConnectorSpec extends NationalInsuranceRecordUnitSpec with B
   val mockMetrics: MetricsService = mock[MetricsService]
   val mockTimerContext = mock[Timer.Context]
   val mockHttp: HttpClientV2 = mock[HttpClientV2]
-  val mockDesConnector: DesConnector = mock[DesConnector]
   val mockRequestBuilder: RequestBuilder = mock[RequestBuilder]
 
   override def fakeApplication(): Application = GuiceApplicationBuilder()
     .overrides(
       bind[HttpClientV2].toInstance(mockHttp),
-      bind[MetricsService].toInstance(mockMetrics),
-      bind[DesConnector].toInstance(mockDesConnector)
+      bind[MetricsService].toInstance(mockMetrics)
     )
     .build()
 
@@ -61,7 +59,7 @@ class CitizenDetailsConnectorSpec extends NationalInsuranceRecordUnitSpec with B
     Mockito.reset(mockMetrics)
   }
 
-  "CitizenDetailsConnector" must{
+  "CitizenDetailsConnector" must {
 
     "return OK status when successful" in {
       when(mockMetrics.startCitizenDetailsTimer()).thenReturn(mockTimerContext)

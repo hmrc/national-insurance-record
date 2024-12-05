@@ -3,4 +3,3 @@
 ->         /ni                   app.Routes
 ->         /                     health.Routes
 ->         /api                  definition.Routes
-->         /admin                admin.Routes

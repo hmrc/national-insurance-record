@@ -17,15 +17,12 @@
 package uk.gov.hmrc.nationalinsurancerecord.services
 
 import org.mockito.ArgumentMatchers
-import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import uk.gov.hmrc.mongoFeatureToggles.model.FeatureFlag
-import uk.gov.hmrc.mongoFeatureToggles.services.FeatureFlagService
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
-import uk.gov.hmrc.nationalinsurancerecord.connectors.{DesConnector, ProxyCacheConnector}
+import uk.gov.hmrc.nationalinsurancerecord.connectors.ProxyCacheConnector
 import uk.gov.hmrc.nationalinsurancerecord.domain._
 import uk.gov.hmrc.nationalinsurancerecord.domain.des._
 
@@ -163,112 +160,42 @@ class NationalInsuranceRecordServiceSpec
 
   private val nino = generateNino()
 
-  private val mockFeatureFlagService = mock[FeatureFlagService]
   private val mockCitizenDetailsService = mock[CitizenDetailsService]
   private val mockMetrics = mock[MetricsService]
-  private val mockProxyCacheConnector = mock[ProxyCacheConnector]
-  private val mockDesConnector = mock[DesConnector]
 
   override def beforeEach(): Unit = {
     when(mockCitizenDetailsService.checkManualCorrespondenceIndicator(nino))
       .thenReturn(Future.successful(false))
   }
 
-  "NationalInsuranceRecordService when Proxy Cache toggle disabled" when {
-    val mockDesConnector = mock[DesConnector]
-    val mockFeatureFlagService = mock[FeatureFlagService]
-
-    when(mockFeatureFlagService.get(any()))
-      .thenReturn(Future.successful(FeatureFlag(ProxyCacheToggle, isEnabled = false, None)))
-
-    when(mockDesConnector.getLiabilities(nino))
-      .thenReturn(Future.successful(Right(liabilities)))
-    when(mockDesConnector.getNationalInsuranceRecord(nino))
-      .thenReturn(Future.successful(Right(niRecordDES)))
-    when(mockDesConnector.getSummary(nino))
-      .thenReturn(Future.successful(Right(desSummary)))
-
-    val service: NationalInsuranceRecordService =
-      new NationalInsuranceRecordService(
-        mockDesConnector,
-        mockProxyCacheConnector,
-        mockCitizenDetailsService,
-        mockMetrics,
-        executionContext,
-        mockFeatureFlagService
-      )
-
-    niRecordAssertions(service)
-    pre75Assertions(service)
-  }
-
-  "NationalInsuranceRecordService when Proxy Cache toggle enabled" when {
+  "NationalInsuranceRecordService" when {
     val mockProxyCacheConnector = mock[ProxyCacheConnector]
-    val mockFeatureFlagService = mock[FeatureFlagService]
-
-    when(mockFeatureFlagService.get(any()))
-      .thenReturn(Future.successful(FeatureFlag(ProxyCacheToggle, isEnabled = true, None)))
 
     when(mockProxyCacheConnector.get(nino))
       .thenReturn(Future.successful(Right(proxyCacheData())))
 
     val service: NationalInsuranceRecordService =
       new NationalInsuranceRecordService(
-        mockDesConnector,
         mockProxyCacheConnector,
         mockCitizenDetailsService,
         mockMetrics,
-        executionContext,
-        mockFeatureFlagService
+        executionContext
       )
 
     niRecordAssertions(service)
     pre75Assertions(service)
   }
 
-  "Exclusions when Proxy Cache toggle is disabled" should {
-    val mockDesConnector = mock[DesConnector]
-    val mockMetrics = mock[MetricsService]
-    val mockFeatureFlagService = mock[FeatureFlagService]
-
-    when(mockFeatureFlagService.get(any()))
-      .thenReturn(Future.successful(FeatureFlag(ProxyCacheToggle, isEnabled = false, None)))
-
-    when(mockDesConnector.getLiabilities(nino))
-      .thenReturn(Future.successful(Right(liabilities)))
-    when(mockDesConnector.getNationalInsuranceRecord(nino))
-      .thenReturn(Future.successful(Right(niRecordDES)))
-    when(mockDesConnector.getSummary(nino))
-      .thenReturn(Future.successful(Right(exclusionsSummary)))
-
-    val service: NationalInsuranceRecordService =
-      new NationalInsuranceRecordService(
-        mockDesConnector,
-        mockProxyCacheConnector,
-        mockCitizenDetailsService,
-        mockMetrics,
-        executionContext,
-        mockFeatureFlagService
-      )
-
-    exclusionsAssertions(service)
-  }
-
-  "Exclusions when Proxy Cache toggle is enabled" should {
+  "Exclusions" should {
     val mockProxyCacheConnector = mock[ProxyCacheConnector]
     val mockMetrics = mock[MetricsService]
 
-    when(mockFeatureFlagService.get(any()))
-      .thenReturn(Future.successful(FeatureFlag(ProxyCacheToggle, isEnabled = true, None)))
-
     val service: NationalInsuranceRecordService =
       new NationalInsuranceRecordService(
-        mockDesConnector,
         mockProxyCacheConnector,
         mockCitizenDetailsService,
         mockMetrics,
-        executionContext,
-        mockFeatureFlagService
+        executionContext
       )
 
     when(mockProxyCacheConnector.get(nino))
@@ -278,99 +205,40 @@ class NationalInsuranceRecordServiceSpec
   }
 
   "NationalInsuranceRecordService" when {
-    val mockDesConnector = mock[DesConnector]
     val mockProxyCacheConnector = mock[ProxyCacheConnector]
-    val mockFeatureFlagService = mock[FeatureFlagService]
 
-    when(mockFeatureFlagService.get(any()))
-      .thenReturn(Future.successful(FeatureFlag(ProxyCacheToggle, isEnabled = true, None)))
-    when(mockProxyCacheConnector.get(nino))
-      .thenReturn(Future.successful(Right(proxyCacheData())))
+    val service: NationalInsuranceRecordService =
+      new NationalInsuranceRecordService(
+        mockProxyCacheConnector,
+        mockCitizenDetailsService,
+        mockMetrics,
+        executionContext
+      )
 
-    "proxy cache toggle is enabled" must {
+    "connect to ProxyCacheConnector for ni record" in {
+      when(mockProxyCacheConnector.get(nino))
+        .thenReturn(Future.successful(Right(proxyCacheData())))
 
-      val service: NationalInsuranceRecordService =
-        new NationalInsuranceRecordService(
-          mockDesConnector,
-          mockProxyCacheConnector,
-          mockCitizenDetailsService,
-          mockMetrics,
-          executionContext,
-          mockFeatureFlagService
-        )
+      val result: Either[DesError, NationalInsuranceRecordResult] = await(service.getNationalInsuranceRecord(nino))
 
-      "connect to ProxyCacheConnector for ni record" in {
-
-        val result: Either[DesError, NationalInsuranceRecordResult] = await(service.getNationalInsuranceRecord(nino))
-
-        result.map {
-          ni =>
-            ni map (_ shouldBe niRecord)
-            verify(mockDesConnector, times(0)).getSummary(nino)
-            verify(mockDesConnector, times(0)).getLiabilities(nino)
-            verify(mockDesConnector, times(0)).getNationalInsuranceRecord(nino)
-        }
-      }
-
-      "connect to ProxyCacheConnector for tax year" in {
-        val result = await(service.getTaxYear(nino, TaxYear("2014-15")))
-
-        result.map {
-          ty =>
-            ty map(_ shouldBe niTaxYear)
-            verify(mockDesConnector, times(0)).getNationalInsuranceRecord(nino)
-            verify(mockDesConnector, times(0)).getSummary(nino)
-            verify(mockDesConnector, times(0)).getLiabilities(nino)
-        }
+      result.map {
+        ni =>
+          ni map (_ shouldBe niRecord)
+          verify(mockProxyCacheConnector, times(1)).get(nino)
       }
     }
-  }
 
-  "NationalInsuranceRecordService" when {
-    val mockDesConnector = mock[DesConnector]
-    val mockProxyCacheConnector = mock[ProxyCacheConnector]
-    val mockFeatureFlagService = mock[FeatureFlagService]
+    "connect to ProxyCacheConnector for tax year" in {
+      reset(mockProxyCacheConnector)
+      when(mockProxyCacheConnector.get(nino))
+        .thenReturn(Future.successful(Right(proxyCacheData())))
 
-    when(mockFeatureFlagService.get(any()))
-      .thenReturn(Future.successful(FeatureFlag(ProxyCacheToggle, isEnabled = false, None)))
-    when(mockDesConnector.getLiabilities(nino))
-      .thenReturn(Future.successful(Right(liabilities)))
-    when(mockDesConnector.getNationalInsuranceRecord(nino))
-      .thenReturn(Future.successful(Right(niRecordDES)))
-    when(mockDesConnector.getSummary(nino))
-      .thenReturn(Future.successful(Right(desSummary)))
+      val result: Either[DesError, NationalInsuranceTaxYearResult] = await(service.getTaxYear(nino, TaxYear("2014-15")))
 
-    "proxy cache toggle is disabled" must {
-
-      val service: NationalInsuranceRecordService =
-        new NationalInsuranceRecordService(
-          mockDesConnector,
-          mockProxyCacheConnector,
-          mockCitizenDetailsService,
-          mockMetrics,
-          executionContext,
-          mockFeatureFlagService
-        )
-
-      "connect to DesConnector for ni record" in {
-
-        val result = await(service.getNationalInsuranceRecord(nino))
-
-        result.map {
-          ni =>
-            ni map (_ shouldBe niRecord)
-            verify(mockProxyCacheConnector, times(0)).get(nino)
-        }
-      }
-
-      "connect to DesConnector for tax year" in {
-        val result = await(service.getTaxYear(nino, TaxYear("2014-15")))
-
-        result.map {
-          ty =>
-            ty map (_ shouldBe niTaxYear)
-            verify(mockProxyCacheConnector, times(0)).get(nino)
-        }
+      result.map {
+        ty =>
+          ty map (_ shouldBe niTaxYear)
+          verify(mockProxyCacheConnector, times(1)).get(nino)
       }
     }
   }

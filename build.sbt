@@ -39,8 +39,7 @@ lazy val microservice = Project(appName, file("."))
     PlayKeys.playDefaultPort := 9312,
     update / evictionWarningOptions := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
     routesImport ++= Seq(
-      "uk.gov.hmrc.nationalinsurancerecord.config.Binders._",
-      "uk.gov.hmrc.mongoFeatureToggles.model.FeatureFlagName"
+      "uk.gov.hmrc.nationalinsurancerecord.config.Binders._"
     ),
     routesGenerator := InjectedRoutesGenerator
   )

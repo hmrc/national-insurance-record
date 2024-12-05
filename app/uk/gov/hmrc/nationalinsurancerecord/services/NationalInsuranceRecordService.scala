@@ -20,8 +20,7 @@ import com.google.inject.Inject
 import services.TaxYearResolver
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
-import uk.gov.hmrc.mongoFeatureToggles.services.FeatureFlagService
-import uk.gov.hmrc.nationalinsurancerecord.connectors.{DesConnector, ProxyCacheConnector}
+import uk.gov.hmrc.nationalinsurancerecord.connectors.ProxyCacheConnector
 import uk.gov.hmrc.nationalinsurancerecord.domain.Exclusion.Exclusion
 import uk.gov.hmrc.nationalinsurancerecord.domain._
 import uk.gov.hmrc.nationalinsurancerecord.domain.des._
@@ -31,44 +30,17 @@ import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
 
 class NationalInsuranceRecordService @Inject()(
-  des: DesConnector,
   proxyCacheConnector: ProxyCacheConnector,
   citizenDetailsService: CitizenDetailsService,
   metrics: MetricsService,
-  implicit val executionContext: ExecutionContext,
-  featureFlagService: FeatureFlagService
+  implicit val executionContext: ExecutionContext
 ) {
 
   def getNationalInsuranceRecord(nino: Nino)(implicit hc: HeaderCarrier): Future[Either[DesError, NationalInsuranceRecordResult]] =
-    featureFlagService.get(ProxyCacheToggle) flatMap {
-      proxyCache =>
-        citizenDetailsService.checkManualCorrespondenceIndicator(nino) flatMap {
-          mci =>
-            if (proxyCache.isEnabled) {
-              proxyCacheConnector.get(nino) map (_.map (pcd => buildNationalInsuranceRecord(pcd.niRecord, pcd.summary, pcd.liabilities, mci)))
-            } else {
-              for {
-                niRecord    <- des.getNationalInsuranceRecord(nino)
-                liabilities <- des.getLiabilities(nino)
-                summary     <- des.getSummary(nino)
-              } yield handleDesEither[NationalInsuranceRecordResult](niRecord, summary, liabilities,
-                buildNationalInsuranceRecord(_: DesNIRecord, _: DesSummary, _: DesLiabilities, mci))
-            }
-        }
+    citizenDetailsService.checkManualCorrespondenceIndicator(nino) flatMap {
+      mci =>
+        proxyCacheConnector.get(nino) map (_.map(pcd => buildNationalInsuranceRecord(pcd.niRecord, pcd.summary, pcd.liabilities, mci)))
     }
-
-  private def handleDesEither[A](niRecordEither: Either[DesError, DesNIRecord],
-                                 desSummaryEither: Either[DesError, DesSummary],
-                                 desLiabilitiesEither: Either[DesError, DesLiabilities],
-                                 func: (DesNIRecord, DesSummary, DesLiabilities) => A
-                                ): Either[DesError, A] = {
-    (niRecordEither, desSummaryEither, desLiabilitiesEither) match {
-      case (Right(niRecord), Right(desSummary), Right(desLiabilities)) => Right(func(niRecord, desSummary, desLiabilities))
-      case (Left(niRecordError), _, _) => Left(niRecordError)
-      case (_, Left(desSummaryError), _) => Left(desSummaryError)
-      case (_, _, Left(desLiabilitiesError)) => Left(desLiabilitiesError)
-    }
-  }
 
   private def buildNationalInsuranceRecord(
     desNIRecord: DesNIRecord,
@@ -115,21 +87,9 @@ class NationalInsuranceRecordService @Inject()(
   }
 
   def getTaxYear(nino: Nino, taxYear: TaxYear)(implicit hc: HeaderCarrier): Future[Either[DesError, NationalInsuranceTaxYearResult]] =
-    featureFlagService.get(ProxyCacheToggle).flatMap {
-      proxyCache =>
-        citizenDetailsService.checkManualCorrespondenceIndicator(nino).flatMap {
-          mci =>
-            if (proxyCache.isEnabled) {
-              proxyCacheConnector.get(nino) map (_.map(pcd => buildTaxYear(pcd.niRecord, pcd.summary, pcd.liabilities, mci, nino, taxYear)))
-            } else {
-              for {
-                niRecord    <- des.getNationalInsuranceRecord(nino)
-                liabilities <- des.getLiabilities(nino)
-                summary     <- des.getSummary(nino)
-              } yield handleDesEither[NationalInsuranceTaxYearResult](niRecord, summary, liabilities,
-                  buildTaxYear(_: DesNIRecord, _: DesSummary, _: DesLiabilities, mci, nino, taxYear))
-            }
-        }
+    citizenDetailsService.checkManualCorrespondenceIndicator(nino).flatMap {
+      mci =>
+        proxyCacheConnector.get(nino) map (_.map(pcd => buildTaxYear(pcd.niRecord, pcd.summary, pcd.liabilities, mci, nino, taxYear)))
     }
 
 
