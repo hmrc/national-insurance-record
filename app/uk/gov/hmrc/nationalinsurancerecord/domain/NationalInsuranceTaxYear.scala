@@ -52,5 +52,5 @@ object NationalInsuranceTaxYear {
     ( JsPath \ Symbol("classThreePayableByPenalty")).write[Option[LocalDate]] and
     ( JsPath \ "payable").write[Boolean] and
     ( JsPath \ "underInvestigation").write[Boolean]
-    )(unlift(NationalInsuranceTaxYear.unapply))
+    )(o => Tuple.fromProductTyped(o))
 }

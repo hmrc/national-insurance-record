@@ -22,7 +22,7 @@ lazy val plugins: Seq[Plugins] = Seq(
 )
 
 ThisBuild / majorVersion := 0
-ThisBuild / scalaVersion := "2.13.15"
+ThisBuild / scalaVersion := "3.6.2"
 
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(plugins: _*)

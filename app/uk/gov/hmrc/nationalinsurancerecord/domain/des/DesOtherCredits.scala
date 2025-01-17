@@ -26,13 +26,13 @@ object DesOtherCredits {
       (__ \ "ccType").readNullable[Int] and
       (__ \ "creditSourceType").readNullable[Int] and
       (__ \ "numberOfCredits").readNullable[Int]
-    )(DesOtherCredits.apply _)
+    )(DesOtherCredits.apply)
 
   val writes: Writes[DesOtherCredits] = (
       (__ \ "ccType").writeNullable[Int] and
       (__ \ "creditSourceType").writeNullable[Int] and
       (__ \ "numberOfCredits").writeNullable[Int]
-    )(unlift(DesOtherCredits.unapply))
+    )(o => Tuple.fromProductTyped(o))
 
   implicit val format: Format[DesOtherCredits] = Format(reads, writes)
 

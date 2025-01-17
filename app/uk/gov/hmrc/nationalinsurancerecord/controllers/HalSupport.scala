@@ -22,7 +22,7 @@ import play.api.mvc.Result
 
 trait HalSupport {
 
-  def halResource(jsValue: JsValue, links: Set[HalLink], embedded: Option[Vector[(String, Vector[HalResource])]] = None): HalResource = {
+  private def halResource(jsValue: JsValue, links: Set[HalLink], embedded: Option[Vector[(String, Vector[HalResource])]] = None): HalResource = {
 
     val halState = Hal.state(jsValue)
 
