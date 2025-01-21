@@ -17,6 +17,6 @@
 package uk.gov.hmrc.nationalinsurancerecord.connectors
 
 class ApiStatePensionConnectorSpec extends StatePensionConnectorSpec {
-  val connector: StatePensionConnector = app.injector.instanceOf[ApiStatePensionConnector]
+  override def connector: StatePensionConnector = app.injector.instanceOf[ApiStatePensionConnector]
   override val linkPath: String = "cope/"
 }

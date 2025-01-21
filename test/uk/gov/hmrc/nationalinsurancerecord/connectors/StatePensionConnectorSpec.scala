@@ -33,7 +33,7 @@ abstract class StatePensionConnectorSpec
     with WireMockHelper
     with ScalaFutures {
 
-  val connector: StatePensionConnector
+  def connector: StatePensionConnector
   val linkPath: String
 
   implicit val defaultPatience: PatienceConfig =

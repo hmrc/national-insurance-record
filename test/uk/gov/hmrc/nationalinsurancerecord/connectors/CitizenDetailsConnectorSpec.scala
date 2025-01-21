@@ -64,7 +64,7 @@ class CitizenDetailsConnectorSpec extends NationalInsuranceRecordUnitSpec with B
 
     "return OK status when successful" in {
       when(mockMetrics.startCitizenDetailsTimer()).thenReturn(mockTimerContext)
-      when(mockHttp.get(any())(hc)).thenReturn(mockRequestBuilder)
+      when(mockHttp.get(any())(any())).thenReturn(mockRequestBuilder)
       when(mockRequestBuilder.execute[Either[UpstreamErrorResponse, HttpResponse]](using any(), any())).thenReturn(
         Future.successful(Right(HttpResponse(200, "")))
       )

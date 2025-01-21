@@ -31,7 +31,7 @@ class MdtpNationalInsuranceRecordControllerISpec extends NationalInsuranceRecord
   override def classPrefix: String = "Mdtp"
   override def controllerUrl(nino: Nino): String = s"/ni/mdtp/$nino"
 
-  private val mockCopeExclusionAction: MdtpCopeExclusionAction =
+  val mockCopeExclusionAction: MdtpCopeExclusionAction =
     mock[MdtpCopeExclusionAction]
 
   override def fakeApplication(): Application = GuiceApplicationBuilder()
