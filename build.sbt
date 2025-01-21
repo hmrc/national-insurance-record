@@ -31,8 +31,12 @@ lazy val microservice = Project(appName, file("."))
     scalaSettings,
     defaultSettings(),
     scalacOptions ++= Seq(
-      "-Werror",
-      "-Wconf:src=routes/.*:is,src=twirl/.*:is"
+      "-feature",
+      "-Xfatal-warnings",
+      "-Wconf:src=target/.*:s",
+      "-Wconf:src=routes/.*:s",
+      "-Wconf:msg=Flag.*repeatedly:s",
+      "-Wconf:msg=.*-Wunused.*:s"
     ),
     libraryDependencies ++= AppDependencies.all,
     retrieveManaged := true,

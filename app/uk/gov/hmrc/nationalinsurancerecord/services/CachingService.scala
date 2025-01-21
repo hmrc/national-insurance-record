@@ -34,7 +34,6 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.reflect.ClassTag
 import scala.util.{Failure, Success, Try}
 
-import org.mongodb.scala.ObservableFuture
 import org.mongodb.scala.gridfs.ObservableFuture
 
 trait CachingModel[A, B] {
@@ -124,7 +123,7 @@ class CachingMongoService[A <: CachingModel[A, B], B](
 
     val doc = apply(cacheKey(nino, apiType), response, Instant.now().plusSeconds(timeToLive))
 
-    collection.findOneAndReplace(query, doc, FindOneAndReplaceOptions().upsert(true)).toFuture().map { result =>
+    collection.findOneAndReplace(query, doc, FindOneAndReplaceOptions().upsert(true)).toFuture().map { _ =>
       metrics.cacheWritten()
       true
     } recover {

@@ -23,15 +23,15 @@ import org.mockito.stubbing.OngoingStubbing
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.libs.json._
+import play.api.libs.json.*
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.controllers.nationalInsurance.NationalInsuranceRecordController
-import uk.gov.hmrc.nationalinsurancerecord.domain._
+import uk.gov.hmrc.nationalinsurancerecord.domain.*
 import uk.gov.hmrc.nationalinsurancerecord.services.NationalInsuranceRecordService
 import uk.gov.hmrc.nationalinsurancerecord.util.DateFormats.localDateFormat
 
@@ -196,7 +196,7 @@ trait NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
     }
 
     "there is a manual correspondence exclusion" must {
-       val manualCorrespondenceExclusion = NationalInsuranceRecordResult(Left(ExclusionResponse(List(Exclusion.ManualCorrespondenceIndicator))))
+      val manualCorrespondenceExclusion = NationalInsuranceRecordResult(Left(ExclusionResponse(List(Exclusion.ManualCorrespondenceIndicator))))
 
       "return status 403" in {
         when(mockNationalInsuranceRecordService.getNationalInsuranceRecord(any())(any())).
@@ -219,7 +219,7 @@ trait NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
     }
 
     "there is an Isle of Man exclusion" must {
-       val isleOfManExclusion =  NationalInsuranceRecordResult(Left(ExclusionResponse(List(Exclusion.IsleOfMan))))
+      val isleOfManExclusion = NationalInsuranceRecordResult(Left(ExclusionResponse(List(Exclusion.IsleOfMan))))
 
       "return status 403" in {
         when(mockNationalInsuranceRecordService.getNationalInsuranceRecord(any())(any())).
@@ -285,7 +285,7 @@ trait NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
     }
 
     "there is a list of MCI, IoM exclusions" must {
-      val exclusions =  NationalInsuranceRecordResult(Left(ExclusionResponse(List(
+      val exclusions = NationalInsuranceRecordResult(Left(ExclusionResponse(List(
         Exclusion.IsleOfMan,
         Exclusion.ManualCorrespondenceIndicator
       ))))

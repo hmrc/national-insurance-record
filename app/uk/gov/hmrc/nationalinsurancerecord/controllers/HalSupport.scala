@@ -20,6 +20,8 @@ import play.api.hal.{Hal, HalLink, HalResource}
 import play.api.libs.json.{JsObject, JsValue, Json, Writes}
 import play.api.mvc.Result
 
+import play.api.hal.halLinkWrites
+
 trait HalSupport {
 
   private def halResource(jsValue: JsValue, links: Set[HalLink], embedded: Option[Vector[(String, Vector[HalResource])]] = None): HalResource = {

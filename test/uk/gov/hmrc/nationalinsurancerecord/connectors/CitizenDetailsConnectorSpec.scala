@@ -27,7 +27,7 @@ import play.api.Application
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
-import uk.gov.hmrc.http._
+import uk.gov.hmrc.http.*
 import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.services.MetricsService
@@ -57,14 +57,15 @@ class CitizenDetailsConnectorSpec extends NationalInsuranceRecordUnitSpec with B
   def beforeEach(): Unit = {
     Mockito.reset(mockHttp)
     Mockito.reset(mockMetrics)
+    Mockito.reset(mockRequestBuilder)
   }
 
   "CitizenDetailsConnector" must {
 
     "return OK status when successful" in {
       when(mockMetrics.startCitizenDetailsTimer()).thenReturn(mockTimerContext)
-      when(mockHttp.get(any())(any())).thenReturn(mockRequestBuilder)
-      when(mockRequestBuilder.execute[Either[UpstreamErrorResponse, HttpResponse]](any(), any())).thenReturn(
+      when(mockHttp.get(any())(hc)).thenReturn(mockRequestBuilder)
+      when(mockRequestBuilder.execute[Either[UpstreamErrorResponse, HttpResponse]](using any(), any())).thenReturn(
         Future.successful(Right(HttpResponse(200, "")))
       )
       val resultF = citizenDetailsConnector.retrieveMCIStatus(nino)(hc)
@@ -73,7 +74,7 @@ class CitizenDetailsConnectorSpec extends NationalInsuranceRecordUnitSpec with B
 
     "return 423 status when the Upstream is 423" in {
       when(mockHttp.get(any())(any())).thenReturn(mockRequestBuilder)
-      when(mockRequestBuilder.execute[Either[UpstreamErrorResponse, HttpResponse]](any(), any())).thenReturn(
+      when(mockRequestBuilder.execute[Either[UpstreamErrorResponse, HttpResponse]](using any(), any())).thenReturn(
         Future.successful(Left(UpstreamErrorResponse(":(", 423, 423, Map()))
       ))
       val resultF = citizenDetailsConnector.retrieveMCIStatus(nino)(hc)
@@ -82,7 +83,7 @@ class CitizenDetailsConnectorSpec extends NationalInsuranceRecordUnitSpec with B
 
     "return NotFoundException for invalid nino" in {
       when(mockHttp.get(any())(any())).thenReturn(mockRequestBuilder)
-      when(mockRequestBuilder.execute[Either[UpstreamErrorResponse, HttpResponse]](any(), any())).thenReturn(
+      when(mockRequestBuilder.execute[Either[UpstreamErrorResponse, HttpResponse]](using any(), any())).thenReturn(
         Future.successful(Left(UpstreamErrorResponse("NOT_FOUND", 404))
       ))
       val resultF = citizenDetailsConnector.retrieveMCIStatus(nino)(hc)
@@ -91,7 +92,7 @@ class CitizenDetailsConnectorSpec extends NationalInsuranceRecordUnitSpec with B
 
     "return 500 response code when there is Upstream is 4XX" in {
       when(mockHttp.get(any())(any())).thenReturn(mockRequestBuilder)
-      when(mockRequestBuilder.execute[Either[UpstreamErrorResponse, HttpResponse]](any(), any())).thenReturn(
+      when(mockRequestBuilder.execute[Either[UpstreamErrorResponse, HttpResponse]](using any(), any())).thenReturn(
         Future.failed(new InternalServerException("InternalServerError"))
       )
       val resultF = citizenDetailsConnector.retrieveMCIStatus(nino)(hc)
