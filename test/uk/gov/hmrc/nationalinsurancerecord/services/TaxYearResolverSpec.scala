@@ -16,9 +16,8 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.services
 
-import org.mockito.Mockito._
-import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 import services.TaxYearResolver
 
 import java.time.{LocalDate, LocalDateTime}
