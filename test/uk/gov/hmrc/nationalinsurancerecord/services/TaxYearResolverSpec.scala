@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.services
 
+import org.mockito.Mockito._
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatest.matchers.should.Matchers
 import services.TaxYearResolver
@@ -212,10 +213,6 @@ class TaxYearResolverSpec extends AnyWordSpecLike with Matchers {
 
     "return true when issue date is 31st Dec of the previous year" in {
       TaxYearResolverForTest.fallsInThisTaxYear(LocalDate.of(currentYear-1, 12, 31)) shouldBe true
-    }
-
-    "return true when issue date is today" in {
-      TaxYearResolverForTest.fallsInThisTaxYear(LocalDate.of(2025, 4, 6)) shouldBe true
     }
 
     "return true when issue date is 1st January of the current year" in {

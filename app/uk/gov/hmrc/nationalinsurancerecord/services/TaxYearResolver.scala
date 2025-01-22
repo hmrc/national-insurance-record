@@ -22,6 +22,8 @@ trait TaxYearResolver {
 
   lazy val now: () => LocalDateTime = ???
 
+  val earliestDateForCurrentTaxYear = LocalDate.of(taxYearFor(now().toLocalDate), 4, 6)
+
   def currentTaxYear: Int = taxYearFor(now().toLocalDate)
 
   def endOfCurrentTaxYear: LocalDate = endOfTaxYear(currentTaxYear)
@@ -31,7 +33,6 @@ trait TaxYearResolver {
   def endOfTaxYear(year: Int): LocalDate = LocalDate.of(year + 1, 4, 5)
 
   def fallsInThisTaxYear(currentDate: LocalDate): Boolean = {
-    val earliestDateForCurrentTaxYear = LocalDate.of(taxYearFor(now().toLocalDate), 4, 6)
     earliestDateForCurrentTaxYear.isBefore(currentDate) || earliestDateForCurrentTaxYear.isEqual(currentDate)
   }
 
