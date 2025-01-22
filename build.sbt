@@ -8,7 +8,7 @@ val appName = "national-insurance-record"
 
 lazy val scoverageSettings: Seq[Def.Setting[_]] = {
   Seq(
-    ScoverageKeys.coverageExcludedPackages := "<empty>;Reverse.*;models/.data/..*;views.*;config.*;models.*;" +
+    ScoverageKeys.coverageExcludedPackages := "<empty>;Reverse.*;models/.data/..*;views.*;config.*;models.*;.*domain.*;.*.views.txt.*;.*AppContext.*;" +
       ".*(AuthService|BuildInfo|Routes).*;" +
       "connectors.*",
     ScoverageKeys.coverageMinimumStmtTotal := 90.00,

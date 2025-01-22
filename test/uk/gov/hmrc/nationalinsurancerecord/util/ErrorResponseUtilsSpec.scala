@@ -30,12 +30,12 @@ class ErrorResponseUtilsSpec extends AnyWordSpec with Matchers {
 
   "convertToJson" should {
     "return a JSON object with correct structure" in {
-      val errorResponse = ErrorResponse(NOT_FOUND, "Error not found", Some("NOT_FOUND"))
+      val errorResponse = ErrorResponse(INTERNAL_SERVER_ERROR, "Internal Server Error", Some("INTERNAL_SERVER_ERROR"))
       val json: JsValue = convertToJson(errorResponse)
 
       json mustBe Json.obj(
- "code" -> "NOT_FOUND",
-        "message" -> "Error not found"
+        "code" -> "INTERNAL_SERVER_ERROR",
+        "message" -> "Internal Server Error"
       )
     }
 

@@ -214,6 +214,10 @@ class TaxYearResolverSpec extends AnyWordSpecLike with Matchers {
       TaxYearResolverForTest.fallsInThisTaxYear(LocalDate.of(currentYear-1, 12, 31)) shouldBe true
     }
 
+    "return true when issue date is today" in {
+      TaxYearResolverForTest.fallsInThisTaxYear(LocalDate.of(2025, 4, 6)) shouldBe true
+    }
+
     "return true when issue date is 1st January of the current year" in {
       TaxYearResolverForTest.fallsInThisTaxYear(LocalDate.of(currentYear, 1, 1)) shouldBe true
     }
