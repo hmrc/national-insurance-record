@@ -75,7 +75,7 @@ object DesNITaxYear {
         readIntWithDefault(__ \ "niEarningsSelfEmployed") and
         readIntWithDefault(__ \ "niEarningsVoluntary") and
         readNullableList(__ \ "otherCredits")
-    )(DesNITaxYear.apply _)
+    )(DesNITaxYear.apply)
 
   val writes: Writes[DesNITaxYear] = (
     writeStringFromInt(__ \ "rattdTaxYear") and
@@ -89,7 +89,7 @@ object DesNITaxYear {
       (__ \ "niEarningsSelfEmployed").write[Int] and
       (__ \ "niEarningsVoluntary").write[Int] and
       (__ \ "otherCredits").write[List[DesOtherCredits]]
-    )(unlift(DesNITaxYear.unapply))
+    )(o => Tuple.fromProductTyped(o))
 
   implicit val format: Format[DesNITaxYear] = Format(reads, writes)
 }

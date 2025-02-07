@@ -17,5 +17,5 @@
 package uk.gov.hmrc.nationalinsurancerecord.util
 
 object FunctionHelper {
-  def composeAll[A](functionList: Seq[A => A]): A => A = functionList.foldLeft(identity[A] _)(_ compose _)
+  def composeAll[A](functionList: Seq[A => A]): A => A = functionList.foldLeft(identity[A])(_ compose _)
 }

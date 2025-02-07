@@ -20,7 +20,7 @@ import play.api.inject.{Binding, Module}
 import play.api.{Configuration, Environment}
 
 class HmrcModule extends Module {
-  override def bindings(environment: Environment, configuration: Configuration): collection.Seq[Binding[_]] = {
+  override def bindings(environment: Environment, configuration: Configuration): collection.Seq[Binding[?]] = {
     if (configuration.get[Boolean]("internal-auth.isTestOnlyEndpoint"))
       Seq(bind[InternalAuthTokenInitializer].to[InternalAuthTokenInitializerImpl].eagerly())
     else Seq(bind[InternalAuthTokenInitializer].to[InternalAuthTokenInitializerNonLocal].eagerly())

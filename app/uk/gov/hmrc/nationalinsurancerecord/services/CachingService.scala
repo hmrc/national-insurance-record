@@ -34,6 +34,8 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.reflect.ClassTag
 import scala.util.{Failure, Success, Try}
 
+import org.mongodb.scala.gridfs.ObservableFuture
+
 trait CachingModel[A, B] {
   val key: String
   val response: B
@@ -49,16 +51,16 @@ trait CachingService[A, B] {
 }
 @Singleton
 class CachingMongoService[A <: CachingModel[A, B], B](
-  mongo: MongoComponent,
-  formats: Format[A],
-  apply: (String, B, Instant) => A,
-  apiType: APITypes,
-  appConfig: ApplicationConfig,
-  metricsX: MetricsService
-)(
-  implicit ec: ExecutionContext,
-  ct: ClassTag[A]
-) extends PlayMongoRepository[A](
+                                                       mongo: MongoComponent,
+                                                       formats: Format[A],
+                                                       apply: (String, B, Instant) => A,
+                                                       apiType: APITypes,
+                                                       appConfig: ApplicationConfig,
+                                                       metricsX: MetricsService
+                                                     )(
+                                                       implicit ec: ExecutionContext,
+                                                       ct: ClassTag[A]
+                                                     ) extends PlayMongoRepository[A](
   mongoComponent = mongo,
   collectionName = appConfig.responseCacheCollectionName,
   domainFormat = formats,
@@ -82,7 +84,7 @@ class CachingMongoService[A <: CachingModel[A, B], B](
 ) with CachingService[A, B] with Logging {
 
   private def cacheKey(nino: Nino, api: APITypes) = s"$nino-$api"
-  override val timeToLive = appConfig.responseCacheTTL
+  override val timeToLive: Int = appConfig.responseCacheTTL
 
   override def findByNino(nino: Nino)(implicit formats: Reads[A], ec: ExecutionContext): Future[Option[B]] = {
     val tryResult = Try {
@@ -121,7 +123,7 @@ class CachingMongoService[A <: CachingModel[A, B], B](
 
     val doc = apply(cacheKey(nino, apiType), response, Instant.now().plusSeconds(timeToLive))
 
-    collection.findOneAndReplace(query, doc, FindOneAndReplaceOptions().upsert(true)).toFuture().map { result =>
+    collection.findOneAndReplace(query, doc, FindOneAndReplaceOptions().upsert(true)).toFuture().map { _ =>
       metrics.cacheWritten()
       true
     } recover {

@@ -27,7 +27,7 @@ object AppDependencies {
     ws,
     "uk.gov.hmrc"       %%  s"bootstrap-backend-$playVersion"                   % bootstrapVersion,
     "uk.gov.hmrc"       %%  s"domain-$playVersion"                              % "10.0.0",
-    "uk.gov.hmrc"       %%  s"play-hal-$playVersion"                            % "4.0.0",
+    "uk.gov.hmrc"       %%  s"play-hal-$playVersion"                            % "4.1.0",
     "uk.gov.hmrc.mongo" %% s"hmrc-mongo-$playVersion"                           % hmrcMongoVersion,
     "org.typelevel"     %% "cats-core"                                          % "2.12.0",
     "uk.gov.hmrc"       %% s"internal-auth-client-$playVersion"                 % "3.0.0"
