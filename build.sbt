@@ -6,7 +6,7 @@ import scoverage.ScoverageKeys
 
 val appName = "national-insurance-record"
 
-lazy val scoverageSettings: Seq[Def.Setting[_]] = {
+lazy val scoverageSettings: Seq[Def.Setting[?]] = {
   Seq(
     ScoverageKeys.coverageExcludedPackages := "<empty>;Reverse.*;models/.data/..*;views.*;config.*;models.*;.*domain.*;.*AppContext.*;" +
       ".*(AuthService|BuildInfo|Routes).*;" +
@@ -25,7 +25,7 @@ ThisBuild / majorVersion := 0
 ThisBuild / scalaVersion := "3.6.2"
 
 lazy val microservice = Project(appName, file("."))
-  .enablePlugins(plugins: _*)
+  .enablePlugins(plugins *)
   .settings(
     scoverageSettings,
     scalaSettings,
@@ -47,9 +47,9 @@ lazy val microservice = Project(appName, file("."))
     ),
     routesGenerator := InjectedRoutesGenerator
   )
-  .settings(inConfig(Test)(testSettings): _*)
+  .settings(inConfig(Test)(testSettings) *)
 
-lazy val testSettings: Seq[Def.Setting[_]] = Seq(
+lazy val testSettings: Seq[Def.Setting[?]] = Seq(
   fork := true,
   unmanagedSourceDirectories += baseDirectory.value / "test-utils" / "src",
   Test / javaOptions += "-Dconfig.file=conf/test.application.conf"
