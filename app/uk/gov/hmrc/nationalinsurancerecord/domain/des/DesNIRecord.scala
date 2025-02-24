@@ -60,7 +60,7 @@ object DesNIRecord {
     readNullableInt(__ \ "pre75CcCount") and
     (__ \ "dateOfEntry").readNullable[LocalDate] and
     readNullableList(__ \ "taxYears")
-    )(DesNIRecord.apply _)
+    )(DesNIRecord.apply)
 
   val writes: Writes[DesNIRecord] = (
     (__ \ "numberOfQualifyingYears").write[Int] and
@@ -69,7 +69,7 @@ object DesNIRecord {
     (__ \ "pre75CcCount").write[Int] and
     (__ \ "dateOfEntry").writeNullable[LocalDate] and
     (__ \ "taxYears").write[List[DesNITaxYear]]
-    )(unlift(DesNIRecord.unapply))
+    )(o => Tuple.fromProductTyped(o))
 
   implicit val format: Format[DesNIRecord] = Format(reads, writes)
 }

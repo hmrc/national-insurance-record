@@ -39,7 +39,7 @@ object DesSummary {
       (__ \ "earningsIncludedUpto").write[Option[LocalDate]] and
       (__ \ "dateOfBirth").write[Option[LocalDate]] and
       (__ \ "finalRelevantYear").write[Option[Int]]
-    )(unlift(DesSummary.unapply))
+    )(o => Tuple.fromProductTyped(o))
 
   val reads: Reads[DesSummary] = (
     (__ \ "reducedRateElectionToConsider").readNullable[Boolean].map(_.getOrElse(false)) and
@@ -47,7 +47,7 @@ object DesSummary {
       (__ \ "earningsIncludedUpto").readNullable[LocalDate] and
       (__ \ "dateOfBirth").readNullable[LocalDate] and
       (__ \ "finalRelevantYear").readNullable[Int]
-    )(DesSummary.apply _)
+    )(DesSummary.apply)
 
   implicit val formats: Format[DesSummary] = Format(reads, writes)
 }

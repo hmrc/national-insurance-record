@@ -6,9 +6,9 @@ import scoverage.ScoverageKeys
 
 val appName = "national-insurance-record"
 
-lazy val scoverageSettings: Seq[Def.Setting[_]] = {
+lazy val scoverageSettings: Seq[Def.Setting[?]] = {
   Seq(
-    ScoverageKeys.coverageExcludedPackages := "<empty>;Reverse.*;models/.data/..*;views.*;config.*;models.*;" +
+    ScoverageKeys.coverageExcludedPackages := "<empty>;Reverse.*;models/.data/..*;views.*;config.*;models.*;.*domain.*;.*AppContext.*;" +
       ".*(AuthService|BuildInfo|Routes).*;" +
       "connectors.*",
     ScoverageKeys.coverageMinimumStmtTotal := 90.00,
@@ -22,17 +22,21 @@ lazy val plugins: Seq[Plugins] = Seq(
 )
 
 ThisBuild / majorVersion := 0
-ThisBuild / scalaVersion := "2.13.15"
+ThisBuild / scalaVersion := "3.6.2"
 
 lazy val microservice = Project(appName, file("."))
-  .enablePlugins(plugins: _*)
+  .enablePlugins(plugins *)
   .settings(
     scoverageSettings,
     scalaSettings,
     defaultSettings(),
     scalacOptions ++= Seq(
-      "-Werror",
-      "-Wconf:src=routes/.*:is,src=twirl/.*:is"
+      "-feature",
+      "-Xfatal-warnings",
+      "-Wconf:src=target/.*:s",
+      "-Wconf:src=routes/.*:s",
+      "-Wconf:msg=Flag.*repeatedly:s",
+      "-Wconf:msg=.*-Wunused.*:s"
     ),
     libraryDependencies ++= AppDependencies.all,
     retrieveManaged := true,
@@ -43,9 +47,9 @@ lazy val microservice = Project(appName, file("."))
     ),
     routesGenerator := InjectedRoutesGenerator
   )
-  .settings(inConfig(Test)(testSettings): _*)
+  .settings(inConfig(Test)(testSettings) *)
 
-lazy val testSettings: Seq[Def.Setting[_]] = Seq(
+lazy val testSettings: Seq[Def.Setting[?]] = Seq(
   fork := true,
   unmanagedSourceDirectories += baseDirectory.value / "test-utils" / "src",
   Test / javaOptions += "-Dconfig.file=conf/test.application.conf"

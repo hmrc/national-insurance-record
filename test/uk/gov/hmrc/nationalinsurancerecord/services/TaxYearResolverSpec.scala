@@ -16,9 +16,10 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.services
 
-import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 import services.TaxYearResolver
+import services.TaxYearResolver.fallsInThisTaxYear
 
 import java.time.{LocalDate, LocalDateTime}
 
@@ -35,7 +36,7 @@ class TaxYearResolverSpec extends AnyWordSpecLike with Matchers {
     }
   }
 
-  "Requesting the tax year for a date" must{
+  "Requesting the tax year for a date" must {
 
     "Return 2012 when the date is 2013/4/5" in {
       Resolver().taxYearFor(LocalDate.of(2013, 4, 5)) shouldBe 2012
@@ -62,7 +63,7 @@ class TaxYearResolverSpec extends AnyWordSpecLike with Matchers {
     }
   }
 
-  "Requesting the currentTaxYear" must{
+  "Requesting the currentTaxYear" must {
 
     "Return 2012 when the current UK time is 23:59:59.999 on 2013/4/5" in {
       val currentTime = LocalDateTime.of(2013, 4, 5, 23, 59, 59, 999)
@@ -95,7 +96,7 @@ class TaxYearResolverSpec extends AnyWordSpecLike with Matchers {
     }
   }
 
-  "Requesting the start of the current tax year" must{
+  "Requesting the start of the current tax year" must {
 
     "Return 2012/4/6 when the current UK time is 23:59:59.999 on 2013/4/5" in {
       val currentTime = LocalDateTime.of(2013, 4, 5, 23, 59, 59, 999)
@@ -128,7 +129,7 @@ class TaxYearResolverSpec extends AnyWordSpecLike with Matchers {
     }
   }
 
-  "Requesting the start of a given tax year" must{
+  "Requesting the start of a given tax year" must {
 
     "Return 2012/4/6 for 2012" in {
       Resolver().startOfTaxYear(2012) shouldBe LocalDate.of(2012, 4, 6)
@@ -136,7 +137,7 @@ class TaxYearResolverSpec extends AnyWordSpecLike with Matchers {
 
   }
 
-  "Requesting the end of the current tax year" must{
+  "Requesting the end of the current tax year" must {
 
     "Return 2013/4/5 when the current UK time is 23:59:59.999 on 2013/4/5" in {
       val currentTime = LocalDateTime.of(2013, 4, 5, 23, 59, 59, 999)
@@ -169,7 +170,7 @@ class TaxYearResolverSpec extends AnyWordSpecLike with Matchers {
     }
   }
 
-  "Requesting the start of the next tax year" must{
+  "Requesting the start of the next tax year" must {
 
     "Return 2013/4/6 when the current UK time is 23:59:59.999 on 2013/4/5" in {
       val currentTime = LocalDateTime.of(2013, 4, 5, 23, 59, 59, 999)
@@ -202,7 +203,7 @@ class TaxYearResolverSpec extends AnyWordSpecLike with Matchers {
     }
   }
 
-  "local date falling in this tax year" must{
+  "local date falling in this tax year" must {
 
     object TaxYearResolverForTest extends TaxYearResolver {
       override lazy val now: () => LocalDateTime = () => LocalDateTime.of(2015, 3, 31, 0, 0, 0, 0)
@@ -211,7 +212,7 @@ class TaxYearResolverSpec extends AnyWordSpecLike with Matchers {
     val currentYear = 2015
 
     "return true when issue date is 31st Dec of the previous year" in {
-      TaxYearResolverForTest.fallsInThisTaxYear(LocalDate.of(currentYear-1, 12, 31)) shouldBe true
+      TaxYearResolverForTest.fallsInThisTaxYear(LocalDate.of(currentYear - 1, 12, 31)) shouldBe true
     }
 
     "return true when issue date is 1st January of the current year" in {
@@ -227,11 +228,16 @@ class TaxYearResolverSpec extends AnyWordSpecLike with Matchers {
     }
 
     "return true when PXX8 issue date is 1st Jan of the next year" in {
-      TaxYearResolverForTest.fallsInThisTaxYear(LocalDate.of(currentYear+1, 1, 1)) shouldBe true
+      TaxYearResolverForTest.fallsInThisTaxYear(LocalDate.of(currentYear + 1, 1, 1)) shouldBe true
+    }
+
+    "return true when issue date is todays date" in {
+      val currentDate = LocalDate.of(2025, 4, 6)
+      fallsInThisTaxYear(currentDate) shouldBe true
     }
   }
 
-  "Requesting end of the last tax year" must{
+  "Requesting end of the last tax year" must {
     "Return 2012/4/5 when the current UK time is 23:59:59.999 on 2013/4/5" in {
       val currentTime = LocalDateTime.of(2013, 4, 5, 23, 59, 59, 999)
       Resolver(currentTime).endOfLastTaxYear shouldBe LocalDate.of(2012, 4, 5)
@@ -263,7 +269,7 @@ class TaxYearResolverSpec extends AnyWordSpecLike with Matchers {
     }
   }
 
-  "Requesting the end of a given tax year" must{
+  "Requesting the end of a given tax year" must {
     "return 2016/4/5 for the tax year 2015" in {
       Resolver().endOfTaxYear(2015) shouldBe LocalDate.of(2016, 4, 5)
     }
