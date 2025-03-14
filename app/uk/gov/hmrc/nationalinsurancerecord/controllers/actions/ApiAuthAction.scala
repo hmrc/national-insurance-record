@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.controllers.actions
 
+import com.google.inject.{ImplementedBy, Inject}
 import play.api.mvc.BodyParsers
 import uk.gov.hmrc.auth.core.AuthProvider.PrivilegedApplication
-import uk.gov.hmrc.auth.core.{AuthConnector, AuthProviders, ConfidenceLevel}
 import uk.gov.hmrc.auth.core.authorise.Predicate
-import com.google.inject.{ImplementedBy, Inject}
+import uk.gov.hmrc.auth.core.{AuthConnector, AuthProviders}
 
 import scala.concurrent.ExecutionContext
 import scala.util.matching.Regex
@@ -32,7 +32,7 @@ class ApiAuthActionImpl  @Inject()(
                               )
   extends AuthActionImpl(authConn, parse)(ec) with ApiAuthAction {
 
-  override val predicate: Predicate = ConfidenceLevel.L200 or AuthProviders(PrivilegedApplication)
+  override val predicate: Predicate = AuthProviders(PrivilegedApplication)
   override val matchNinoInUriPattern: Regex = "/ni/([^/]+)/?.*".r
 }
 
