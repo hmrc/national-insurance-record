@@ -17,7 +17,7 @@
 package uk.gov.hmrc.nationalinsurancerecord.controllers.actions
 
 import org.apache.pekko.util.Timeout
-import org.mockito.ArgumentMatchers.{any, eq as MockitoEq}
+import org.mockito.ArgumentMatchers.{any, eq => MockitoEq}
 import org.mockito.Mockito.{verify, when}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status.{BAD_REQUEST, INTERNAL_SERVER_ERROR, OK, UNAUTHORIZED}
@@ -27,17 +27,16 @@ import play.api.mvc.Results.Ok
 import play.api.mvc.{Action, AnyContent, Result}
 import play.api.test.FakeRequest
 import play.mvc.Controller
-import uk.gov.hmrc.auth.core.*
 import uk.gov.hmrc.auth.core.AuthProvider.PrivilegedApplication
+import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.v2.TrustedHelper
 import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.domain.Generator
 import uk.gov.hmrc.nationalinsurancerecord.controllers.actions.ApiAuthActionSpec.retrievalsTestingSyntax
 import uk.gov.hmrc.nationalinsurancerecord.util.UnitSpec
-
-import scala.concurrent.Future
-import scala.concurrent.duration.*
 import scala.language.postfixOps
+import scala.concurrent.Future
+import scala.concurrent.duration._
 
 class ApiAuthActionSpec
   extends UnitSpec
@@ -68,7 +67,7 @@ class ApiAuthActionSpec
 
           verify(mockAuthConnector)
             .authorise[Unit](MockitoEq(
-            AuthProviders(PrivilegedApplication)
+            ConfidenceLevel.L200 or AuthProviders(PrivilegedApplication)
           ), any())(any(), any())
         }
         "the user is a trusted helper and requests with the nino of the helpee" in {
@@ -80,7 +79,7 @@ class ApiAuthActionSpec
 
           verify(mockAuthConnector)
             .authorise[Unit](MockitoEq(
-            AuthProviders(PrivilegedApplication)
+            ConfidenceLevel.L200 or AuthProviders(PrivilegedApplication)
           ), any())(any(), any())
         }
 
@@ -92,12 +91,18 @@ class ApiAuthActionSpec
 
           verify(mockAuthConnector)
             .authorise[Unit](MockitoEq(
-            AuthProviders(PrivilegedApplication)
+            ConfidenceLevel.L200 or AuthProviders(PrivilegedApplication)
           ), any())(any(), any())
         }
       }
 
       "return UNAUTHORIZED" when {
+        "the Confidence Level is less than 200" in {
+          val (result, _) =
+            testAuthActionWith(Future.failed(new InsufficientConfidenceLevel))
+          status(result) shouldBe UNAUTHORIZED
+        }
+
         "the Nino is rejected by auth" in {
           val (result, _) =
             testAuthActionWith(Future.failed(InternalError("IncorrectNino")))
