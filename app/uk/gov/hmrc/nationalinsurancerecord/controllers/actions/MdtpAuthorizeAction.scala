@@ -20,9 +20,10 @@ import com.google.inject.Inject
 import play.api.mvc.{ActionBuilder, AnyContent, DefaultActionBuilder, Request}
 
 class MdtpAuthorizeAction @Inject()(
-                                authAction: MdtpAuthAction,
-                                pertaxAuthAction: PertaxAuthAction,
-                                defaultActionBuilder: DefaultActionBuilder
-                              ) {
-  val mdtpAuthenticate: ActionBuilder[Request, AnyContent] = defaultActionBuilder andThen pertaxAuthAction andThen authAction
+                                     mdtpAuthAction: MdtpAuthAction,
+                                     pertaxAuthAction: PertaxAuthAction,
+                                     defaultActionBuilder: DefaultActionBuilder
+                                   ) {
+  val mdtpAuthenticate: ActionBuilder[Request, AnyContent] =
+    defaultActionBuilder andThen pertaxAuthAction andThen mdtpAuthAction
 }

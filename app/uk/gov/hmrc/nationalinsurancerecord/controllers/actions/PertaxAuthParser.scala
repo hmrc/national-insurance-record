@@ -24,10 +24,10 @@ import uk.gov.hmrc.http.{HttpException, HttpResponse, UpstreamErrorResponse}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class PertaxAuthParser @Inject() ()(implicit ec: ExecutionContext) extends Logging {
+class PertaxAuthParser @Inject()()(implicit ec: ExecutionContext) extends Logging {
   def apply(
-      request: Future[Either[UpstreamErrorResponse, HttpResponse]]
-  ): EitherT[Future, UpstreamErrorResponse, PertaxAuthResponse] =
+             request: Future[Either[UpstreamErrorResponse, HttpResponse]]
+           ): EitherT[Future, UpstreamErrorResponse, PertaxAuthResponse] =
     EitherT(request.map {
       case Right(response) =>
         Right(response)

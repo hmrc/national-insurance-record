@@ -25,6 +25,7 @@ import uk.gov.hmrc.nationalinsurancerecord.test_utils.IntegrationBaseSpec
 
 trait NationalInsuranceRecordControllerISpec extends IntegrationBaseSpec with Results {
   def classPrefix: String
+
   def controllerUrl(nino: Nino): String
 
   server.start()
@@ -42,13 +43,22 @@ trait NationalInsuranceRecordControllerISpec extends IntegrationBaseSpec with Re
   override def beforeEach(): Unit = {
     super.beforeEach()
 
-    val authResponse =
+    def generateAuthHeaderResponse: String =
       s"""
          |{
-         | "nino": "$nino",
-         | "authProviderId": { "ggCredId": "xyz" }
-         |}
-         |""".stripMargin
+         |  "nino": "$nino",
+         |  "trustedHelper": {
+         |    "principalName": "Mr Test",
+         |    "attorneyName": "Mr Test",
+         |    "returnLinkUrl": "http://test.com/",
+         |    "principalNino": "$nino"
+         |  },
+         |  "authProviderId": {
+         |    "ggCredId": "xyz"
+         |  },
+         |  "clientId": "$nino"
+         |}"""
+        .stripMargin
 
     val pertaxAuthResponse =
       s"""
@@ -58,17 +68,17 @@ trait NationalInsuranceRecordControllerISpec extends IntegrationBaseSpec with Re
          |}
          |""".stripMargin
 
-    stubPostServer(ok(authResponse), "/auth/authorise")
+    stubPostServer(ok(generateAuthHeaderResponse), "/auth/authorise")
     stubPostServer(ok(pertaxAuthResponse), "/pertax/authorise")
     stubGetServer(ok(""), s"/citizen-details/${nino.nino}/designatory-details/")
   }
 
   private val requests = List(
-    badRequest()     -> "400" -> BAD_REQUEST,
-    unauthorized()   -> "401" -> BAD_GATEWAY,
-    notFound()       -> "404" -> NOT_FOUND,
-    serverError()    -> "500" -> BAD_GATEWAY,
-    badGateway()     -> "502" -> BAD_GATEWAY,
+    badRequest() -> "400" -> BAD_REQUEST,
+    unauthorized() -> "401" -> BAD_GATEWAY,
+    notFound() -> "404" -> NOT_FOUND,
+    serverError() -> "500" -> BAD_GATEWAY,
+    badGateway() -> "502" -> BAD_GATEWAY,
     gatewayTimeout() -> "504" -> GATEWAY_TIMEOUT
   )
 
