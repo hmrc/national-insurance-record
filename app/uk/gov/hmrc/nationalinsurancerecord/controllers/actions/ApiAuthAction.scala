@@ -53,7 +53,6 @@ class ApiAuthActionImpl @Inject()(
       case Some(_) =>
         Future.successful(None)
       case _ =>
-        println("HELLO, THIS IS API AUTH ACTION")
         Future.successful(Some(Unauthorized))
     } recover {
       case e: AuthorisationException =>

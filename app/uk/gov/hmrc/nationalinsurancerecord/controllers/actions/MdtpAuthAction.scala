@@ -64,7 +64,6 @@ class MdtpAuthActionImpl @Inject()(
     }
 
     if (matches.isEmpty) {
-      println("line 67")
       Future.successful(Some(BadRequest))
     } else {
       authorised(predicate).retrieve(nino and trustedHelper) {
