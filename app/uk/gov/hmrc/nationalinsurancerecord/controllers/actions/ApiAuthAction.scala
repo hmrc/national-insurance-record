@@ -27,16 +27,14 @@ import uk.gov.hmrc.auth.core.{AuthConnector, AuthProviders, AuthorisationExcepti
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.matching.Regex
 
 class ApiAuthActionImpl @Inject()(
                                    cc: ControllerComponents,
                                    val authConn: AuthConnector,
-                                   val parse: BodyParsers.Default,
-                                   val ec: ExecutionContext
-                                 )
+                                   val parse: BodyParsers.Default
+                                 )(implicit val ec: ExecutionContext)
   extends ApiAuthAction with AuthorisedFunctions with Logging {
 
   val predicate: Predicate = AuthProviders(PrivilegedApplication)

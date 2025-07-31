@@ -27,16 +27,14 @@ import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisationException, AuthorisedF
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.matching.Regex
 
 class MdtpAuthActionImpl @Inject()(
                                     cc: ControllerComponents,
                                     val connector: AuthConnector,
-                                    val parse: BodyParsers.Default,
-                                    val ec: ExecutionContext
-                                  )
+                                    val parse: BodyParsers.Default
+                                  )(implicit val ec: ExecutionContext)
   extends MdtpAuthAction with AuthorisedFunctions with Logging {
 
   val predicate: Predicate = EmptyPredicate
