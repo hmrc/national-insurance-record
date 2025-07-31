@@ -16,23 +16,34 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.controllers
 
-import play.api.http.Status._
+import play.api.http.Status.*
 import play.mvc.Http.Status.NOT_ACCEPTABLE
-import uk.gov.hmrc.play.bootstrap.backend.http.ErrorResponse
+import uk.gov.hmrc.api.controllers.ErrorResponse
 
 object ErrorResponses {
   val CODE_INVALID_NINO = "ERROR_NINO_INVALID"
   val CODE_INVALID_TAXYEAR = "CODE_TAXYEAR_INVALID"
-  val CODE_MANUAL_CORRESPONDENCE = "EXCLUSION_MANUAL_CORRESPONDENCE"
-  val CODE_DEAD = "EXCLUSION_DEAD"
-  val CODE_ISLE_OF_MAN = "EXCLUSION_ISLE_OF_MAN"
+  
+  private val CODE_MANUAL_CORRESPONDENCE = "EXCLUSION_MANUAL_CORRESPONDENCE"
+  private val CODE_DEAD = "EXCLUSION_DEAD"
+  private val CODE_ISLE_OF_MAN = "EXCLUSION_ISLE_OF_MAN"
+  private val CODE_NOT_FOUND = "NOT_FOUND"
+  private val CODE_INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR"
+  private val CODE_BAD_REQUEST = "BAD_REQUEST"
+  private val CODE_ACCEPT_HEADER_INVALID = "ACCEPT_HEADER_INVALID"
 
-  def ExclusionManualCorrespondence = ErrorResponse(FORBIDDEN, "The customer cannot access the service, they should contact HMRC", Some(CODE_MANUAL_CORRESPONDENCE))
-  def ExclusionDead  = ErrorResponse(FORBIDDEN, "The customer needs to contact the National Insurance helpline", Some(CODE_DEAD))
-  def ExclusionIsleOfMan = ErrorResponse(FORBIDDEN, "The customer needs to contact the National Insurance helpline", Some(CODE_ISLE_OF_MAN))
-  def ErrorNotFound = ErrorResponse(NOT_FOUND, "Resource was not found", Some("NOT_FOUND"))
-  def ErrorInternalServerError = ErrorResponse(INTERNAL_SERVER_ERROR, "Internal server error", Some("INTERNAL_SERVER_ERROR"))
-  def ErrorGenericBadRequest(msg: String = "Bad Request") = ErrorResponse(BAD_REQUEST, msg, Some("BAD_REQUEST"))
-  def ErrorAcceptHeaderInvalid = ErrorResponse(NOT_ACCEPTABLE, "The accept header is missing or invalid", Some("ACCEPT_HEADER_INVALID"))
+  case object ExclusionManualCorrespondence extends ErrorResponse(FORBIDDEN, CODE_MANUAL_CORRESPONDENCE, "The customer cannot access the service, they should contact HMRC")
+
+  case object ExclusionDead extends ErrorResponse(FORBIDDEN, CODE_DEAD, "The customer needs to contact the National Insurance helpline")
+
+  case object ExclusionIsleOfMan extends ErrorResponse(FORBIDDEN, CODE_ISLE_OF_MAN, "The customer needs to contact the National Insurance helpline")
+
+  case object ErrorNotFound extends ErrorResponse(NOT_FOUND, CODE_NOT_FOUND, "Resource was not found")
+
+  case object ErrorInternalServerError extends ErrorResponse(INTERNAL_SERVER_ERROR, CODE_INTERNAL_SERVER_ERROR, "Internal server error")
+
+  case object ErrorGenericBadRequest extends ErrorResponse(BAD_REQUEST, CODE_BAD_REQUEST, "Bad Request")
+
+  case object ErrorAcceptHeaderInvalid extends ErrorResponse(NOT_ACCEPTABLE, CODE_ACCEPT_HEADER_INVALID, "The accept header is missing or invalid")
 
 }

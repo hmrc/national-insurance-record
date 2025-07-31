@@ -16,8 +16,11 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.util
 
+import play.api.libs.json.Json
 import play.api.mvc.Results.Status
-import play.api.mvc._
+import play.api.mvc.*
+import play.mvc.Http.Status.NOT_ACCEPTABLE
+import uk.gov.hmrc.api.controllers.ErrorResponse
 import uk.gov.hmrc.nationalinsurancerecord.controllers.ErrorResponses.ErrorAcceptHeaderInvalid
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -47,7 +50,7 @@ trait HeaderValidator {
                         block:   (Request[A]) => Future[Result]
                       ): Future[Result] =
       if (rules(request.headers.get("Accept"))) block(request)
-      else Future.successful(Status(ErrorAcceptHeaderInvalid.statusCode)(ErrorResponseUtils.convertToJson(ErrorAcceptHeaderInvalid)))
+      else Future.successful(Status(NOT_ACCEPTABLE)(Json.toJson[ErrorResponse](ErrorAcceptHeaderInvalid)))
 
     override def parser: BodyParser[AnyContent] = outer.parser
 

@@ -40,6 +40,11 @@ trait NationalInsuranceRecordControllerISpec extends IntegrationBaseSpec with Re
 
   private val nino: Nino = generateNino
 
+  private val defaultHeaders: Seq[(String, String)] = Seq(
+    "Accept" -> "application/vnd.hmrc.1.0+json",
+    "Authorization" -> "Bearer 123"
+  )
+
   override def beforeEach(): Unit = {
     super.beforeEach()
 
@@ -92,8 +97,7 @@ trait NationalInsuranceRecordControllerISpec extends IntegrationBaseSpec with Re
           stubGetServer(errorResponse, proxyCacheUrl)
 
           val request = FakeRequest(GET, controllerUrl(nino))
-            .withHeaders("Accept" -> "application/vnd.hmrc.1.0+json")
-            .withHeaders("Authorization" -> "Bearer 123")
+            .withHeaders(defaultHeaders *)
 
           val result = route(app, request)
 

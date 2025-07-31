@@ -34,8 +34,6 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.reflect.ClassTag
 import scala.util.{Failure, Success, Try}
 
-import org.mongodb.scala.gridfs.ObservableFuture
-
 trait CachingModel[A, B] {
   val key: String
   val response: B
@@ -44,11 +42,14 @@ trait CachingModel[A, B] {
 
 trait CachingService[A, B] {
   def findByNino(nino: Nino)(implicit formats: Reads[A], e: ExecutionContext): Future[Option[B]]
+
   def insertByNino(nino: Nino, response: B)(implicit formatA: OFormat[A], e: ExecutionContext): Future[Boolean]
+
   val timeToLive: Int
 
   def metrics: MetricsService
 }
+
 @Singleton
 class CachingMongoService[A <: CachingModel[A, B], B](
                                                        mongo: MongoComponent,
@@ -84,6 +85,7 @@ class CachingMongoService[A <: CachingModel[A, B], B](
 ) with CachingService[A, B] with Logging {
 
   private def cacheKey(nino: Nino, api: APITypes) = s"$nino-$api"
+
   override val timeToLive: Int = appConfig.responseCacheTTL
 
   override def findByNino(nino: Nino)(implicit formats: Reads[A], ec: ExecutionContext): Future[Option[B]] = {

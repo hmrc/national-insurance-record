@@ -17,11 +17,12 @@
 package uk.gov.hmrc.nationalinsurancerecord.controllers
 
 import play.api.Logging
+import play.api.libs.json.Json
 import play.api.mvc.{BaseController, Result}
-import uk.gov.hmrc.http._
-import uk.gov.hmrc.nationalinsurancerecord.controllers.ErrorResponses._
+import uk.gov.hmrc.api.controllers.ErrorResponse
+import uk.gov.hmrc.http.*
+import uk.gov.hmrc.nationalinsurancerecord.controllers.ErrorResponses.*
 import uk.gov.hmrc.nationalinsurancerecord.domain.des.DesError
-import uk.gov.hmrc.nationalinsurancerecord.util.ErrorResponseUtils
 
 import scala.concurrent.ExecutionContext
 
@@ -33,7 +34,7 @@ trait ErrorHandling extends Logging {
   protected def handleDesError(error: DesError): Result =
     error match {
       case DesError.HttpError(error) if error.statusCode == NOT_FOUND =>
-        NotFound(ErrorResponseUtils.convertToJson(ErrorNotFound))
+        NotFound
       case DesError.HttpError(error) if error.statusCode == GATEWAY_TIMEOUT =>
         gatewayTimeout(error)
       case DesError.HttpError(error) if error.statusCode == BAD_REQUEST =>
@@ -57,12 +58,10 @@ trait ErrorHandling extends Logging {
     GatewayTimeout
   }
 
-  private def badRequest: Result =
-    BadRequest(
-      ErrorResponseUtils.convertToJson(
-        ErrorGenericBadRequest("Upstream Bad Request. Is this customer below State Pension Age?")
-      )
-    )
+  private def badRequest: Result = {
+    logger.error("Upstream Bad Request. Is this customer below State Pension Age?")
+    BadRequest
+  }
 
   private def badGateway(error: Throwable): Status = {
     logger.error(s"$app Bad Gateway: ${error.getMessage}")
@@ -71,7 +70,7 @@ trait ErrorHandling extends Logging {
 
   private def internalServerError(error: Throwable): Result = {
     logger.error(s"$app Internal server error: ${error.getMessage}", error)
-    InternalServerError(ErrorResponseUtils.convertToJson(ErrorInternalServerError))
+    InternalServerError(Json.toJson[ErrorResponse](ErrorInternalServerError))
   }
 
   private def upstream4xx(error: Throwable): Status = {

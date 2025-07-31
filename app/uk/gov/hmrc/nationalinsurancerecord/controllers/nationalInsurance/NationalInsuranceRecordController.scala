@@ -19,15 +19,16 @@ package uk.gov.hmrc.nationalinsurancerecord.controllers.nationalInsurance
 import com.google.inject.{Inject, Singleton}
 import play.api.hal.HalResource
 import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.{Action, ActionBuilder, AnyContent, ControllerComponents, Request, Result}
+import play.api.mvc.*
+import uk.gov.hmrc.api.controllers.ErrorResponse
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nationalinsurancerecord.config.AppContext
 import uk.gov.hmrc.nationalinsurancerecord.controllers.actions.CopeExclusionAction
 import uk.gov.hmrc.nationalinsurancerecord.controllers.{ErrorHandling, ErrorResponses, HalSupport, Links}
-import uk.gov.hmrc.nationalinsurancerecord.domain.{Exclusion, ExclusionResponse, NationalInsuranceRecordResult, NationalInsuranceTaxYear, NationalInsuranceTaxYearResult, TaxYear}
+import uk.gov.hmrc.nationalinsurancerecord.domain.*
 import uk.gov.hmrc.nationalinsurancerecord.events.{NationalInsuranceExclusion, NationalInsuranceRecord}
 import uk.gov.hmrc.nationalinsurancerecord.services.NationalInsuranceRecordService
-import uk.gov.hmrc.nationalinsurancerecord.util.{ErrorResponseUtils, HeaderValidator}
+import uk.gov.hmrc.nationalinsurancerecord.util.HeaderValidator
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
@@ -107,13 +108,13 @@ abstract class NationalInsuranceRecordController @Inject()(
   private def handleExclusion(exclusion: ExclusionResponse, nino: Nino, okResult: => Result)(implicit request: Request[AnyContent]): Result = {
     if (exclusion.exclusionReasons.contains(Exclusion.Dead)) {
       auditConnector.sendEvent(NationalInsuranceExclusion(nino, List(Exclusion.Dead)))
-      Forbidden(ErrorResponseUtils.convertToJson(ErrorResponses.ExclusionDead))
+      Forbidden(Json.toJson[ErrorResponse](ErrorResponses.ExclusionDead))
     } else if (exclusion.exclusionReasons.contains(Exclusion.ManualCorrespondenceIndicator)) {
       auditConnector.sendEvent(NationalInsuranceExclusion(nino, List(Exclusion.ManualCorrespondenceIndicator)))
-      Forbidden(ErrorResponseUtils.convertToJson(ErrorResponses.ExclusionManualCorrespondence))
+      Forbidden(Json.toJson[ErrorResponse](ErrorResponses.ExclusionManualCorrespondence))
     } else if (exclusion.exclusionReasons.contains(Exclusion.IsleOfMan)) {
       auditConnector.sendEvent(NationalInsuranceExclusion(nino, List(Exclusion.IsleOfMan)))
-      Forbidden(ErrorResponseUtils.convertToJson(ErrorResponses.ExclusionIsleOfMan))
+      Forbidden(Json.toJson[ErrorResponse](ErrorResponses.ExclusionIsleOfMan))
     } else {
       auditConnector.sendEvent(NationalInsuranceExclusion(nino, exclusion.exclusionReasons))
       okResult
