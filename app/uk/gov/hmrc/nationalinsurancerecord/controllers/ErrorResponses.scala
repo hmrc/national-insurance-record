@@ -18,7 +18,7 @@ package uk.gov.hmrc.nationalinsurancerecord.controllers
 
 import play.api.http.Status.*
 import play.mvc.Http.Status.NOT_ACCEPTABLE
-import uk.gov.hmrc.api.controllers.ErrorResponse
+import uk.gov.hmrc.play.bootstrap.http.ErrorResponse
 
 object ErrorResponses {
   val CODE_INVALID_NINO = "ERROR_NINO_INVALID"
@@ -27,23 +27,22 @@ object ErrorResponses {
   private val CODE_MANUAL_CORRESPONDENCE = "EXCLUSION_MANUAL_CORRESPONDENCE"
   private val CODE_DEAD = "EXCLUSION_DEAD"
   private val CODE_ISLE_OF_MAN = "EXCLUSION_ISLE_OF_MAN"
-  private val CODE_NOT_FOUND = "NOT_FOUND"
   private val CODE_INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR"
-  private val CODE_BAD_REQUEST = "BAD_REQUEST"
   private val CODE_ACCEPT_HEADER_INVALID = "ACCEPT_HEADER_INVALID"
 
-  case object ExclusionManualCorrespondence extends ErrorResponse(FORBIDDEN, CODE_MANUAL_CORRESPONDENCE, "The customer cannot access the service, they should contact HMRC")
+  def ExclusionManualCorrespondence: ErrorResponse =
+    ErrorResponse(FORBIDDEN, "The customer cannot access the service, they should contact HMRC",  Some(CODE_MANUAL_CORRESPONDENCE))
 
-  case object ExclusionDead extends ErrorResponse(FORBIDDEN, CODE_DEAD, "The customer needs to contact the National Insurance helpline")
+  def ExclusionDead: ErrorResponse =
+    ErrorResponse(FORBIDDEN, "The customer needs to contact the National Insurance helpline", Some(CODE_DEAD))
 
-  case object ExclusionIsleOfMan extends ErrorResponse(FORBIDDEN, CODE_ISLE_OF_MAN, "The customer needs to contact the National Insurance helpline")
+  def ExclusionIsleOfMan: ErrorResponse =
+    ErrorResponse(FORBIDDEN, "The customer needs to contact the National Insurance helpline", Some(CODE_ISLE_OF_MAN))
 
-  case object ErrorNotFound extends ErrorResponse(NOT_FOUND, CODE_NOT_FOUND, "Resource was not found")
+  def ErrorInternalServerError: ErrorResponse =
+    ErrorResponse(INTERNAL_SERVER_ERROR, "Internal server error", Some(CODE_INTERNAL_SERVER_ERROR))
 
-  case object ErrorInternalServerError extends ErrorResponse(INTERNAL_SERVER_ERROR, CODE_INTERNAL_SERVER_ERROR, "Internal server error")
-
-  case object ErrorGenericBadRequest extends ErrorResponse(BAD_REQUEST, CODE_BAD_REQUEST, "Bad Request")
-
-  case object ErrorAcceptHeaderInvalid extends ErrorResponse(NOT_ACCEPTABLE, CODE_ACCEPT_HEADER_INVALID, "The accept header is missing or invalid")
+  def ErrorAcceptHeaderInvalid: ErrorResponse =
+    ErrorResponse(NOT_ACCEPTABLE, "The accept header is missing or invalid", Some(CODE_ACCEPT_HEADER_INVALID))
 
 }

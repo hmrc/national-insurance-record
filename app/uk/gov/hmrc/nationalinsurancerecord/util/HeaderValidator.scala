@@ -20,7 +20,7 @@ import play.api.libs.json.Json
 import play.api.mvc.Results.Status
 import play.api.mvc.*
 import play.mvc.Http.Status.NOT_ACCEPTABLE
-import uk.gov.hmrc.api.controllers.ErrorResponse
+import uk.gov.hmrc.play.bootstrap.http.ErrorResponse
 import uk.gov.hmrc.nationalinsurancerecord.controllers.ErrorResponses.ErrorAcceptHeaderInvalid
 
 import scala.concurrent.{ExecutionContext, Future}
