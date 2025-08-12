@@ -57,10 +57,12 @@ trait ErrorHandling extends Logging {
     GatewayTimeout
   }
 
-  private def badRequest: Result = {
-    logger.error("Upstream Bad Request. Is this customer below State Pension Age?")
-    BadRequest
-  }
+  private def badRequest: Result =
+    BadRequest(
+      ErrorResponseHelper.convertToJson(
+        ErrorGenericBadRequest("Upstream Bad Request. Is this customer below State Pension Age?")
+      )
+    )
 
   private def badGateway(error: Throwable): Status = {
     logger.error(s"$app Bad Gateway: ${error.getMessage}")
