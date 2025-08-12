@@ -27,7 +27,7 @@ import uk.gov.hmrc.nationalinsurancerecord.controllers.{ErrorHandling, ErrorResp
 import uk.gov.hmrc.nationalinsurancerecord.domain.*
 import uk.gov.hmrc.nationalinsurancerecord.events.{NationalInsuranceExclusion, NationalInsuranceRecord}
 import uk.gov.hmrc.nationalinsurancerecord.services.NationalInsuranceRecordService
-import uk.gov.hmrc.nationalinsurancerecord.util.{ErrorResponseHelper, HeaderValidator}
+import uk.gov.hmrc.nationalinsurancerecord.util.{ErrorResponseUtils, HeaderValidator}
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
@@ -107,13 +107,13 @@ abstract class NationalInsuranceRecordController @Inject()(
   private def handleExclusion(exclusion: ExclusionResponse, nino: Nino, okResult: => Result)(implicit request: Request[AnyContent]): Result = {
     if (exclusion.exclusionReasons.contains(Exclusion.Dead)) {
       auditConnector.sendEvent(NationalInsuranceExclusion(nino, List(Exclusion.Dead)))
-      Forbidden(ErrorResponseHelper.convertToJson(ErrorResponses.ExclusionDead))
+      Forbidden(ErrorResponseUtils.convertToJson(ErrorResponses.ExclusionDead))
     } else if (exclusion.exclusionReasons.contains(Exclusion.ManualCorrespondenceIndicator)) {
       auditConnector.sendEvent(NationalInsuranceExclusion(nino, List(Exclusion.ManualCorrespondenceIndicator)))
-      Forbidden(ErrorResponseHelper.convertToJson(ErrorResponses.ExclusionManualCorrespondence))
+      Forbidden(ErrorResponseUtils.convertToJson(ErrorResponses.ExclusionManualCorrespondence))
     } else if (exclusion.exclusionReasons.contains(Exclusion.IsleOfMan)) {
       auditConnector.sendEvent(NationalInsuranceExclusion(nino, List(Exclusion.IsleOfMan)))
-      Forbidden(ErrorResponseHelper.convertToJson(ErrorResponses.ExclusionIsleOfMan))
+      Forbidden(ErrorResponseUtils.convertToJson(ErrorResponses.ExclusionIsleOfMan))
     } else {
       auditConnector.sendEvent(NationalInsuranceExclusion(nino, exclusion.exclusionReasons))
       okResult

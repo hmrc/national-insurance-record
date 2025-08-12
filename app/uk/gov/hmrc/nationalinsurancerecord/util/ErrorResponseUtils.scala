@@ -19,7 +19,7 @@ package uk.gov.hmrc.nationalinsurancerecord.util
 import play.api.libs.json.{JsString, JsValue, Json}
 import uk.gov.hmrc.play.bootstrap.http.ErrorResponse
 
-object ErrorResponseHelper {
+object ErrorResponseUtils {
 
   def convertToJson(errorResponse: ErrorResponse): JsValue = {
     val code = Json.obj("code" -> JsString(errorResponse.xStatusCode.getOrElse("No status code provided")))

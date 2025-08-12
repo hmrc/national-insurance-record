@@ -21,7 +21,7 @@ import play.api.mvc.{BaseController, Result}
 import uk.gov.hmrc.http.*
 import uk.gov.hmrc.nationalinsurancerecord.controllers.ErrorResponses.*
 import uk.gov.hmrc.nationalinsurancerecord.domain.des.DesError
-import uk.gov.hmrc.nationalinsurancerecord.util.ErrorResponseHelper
+import uk.gov.hmrc.nationalinsurancerecord.util.ErrorResponseUtils
 
 import scala.concurrent.ExecutionContext
 
@@ -33,7 +33,7 @@ trait ErrorHandling extends Logging {
   protected def handleDesError(error: DesError): Result =
     error match {
       case DesError.HttpError(error) if error.statusCode == NOT_FOUND =>
-        NotFound(ErrorResponseHelper.convertToJson(ErrorNotFound))
+        NotFound(ErrorResponseUtils.convertToJson(ErrorNotFound))
       case DesError.HttpError(error) if error.statusCode == GATEWAY_TIMEOUT =>
         gatewayTimeout(error)
       case DesError.HttpError(error) if error.statusCode == BAD_REQUEST =>
@@ -59,7 +59,7 @@ trait ErrorHandling extends Logging {
 
   private def badRequest: Result =
     BadRequest(
-      ErrorResponseHelper.convertToJson(
+      ErrorResponseUtils.convertToJson(
         ErrorGenericBadRequest("Upstream Bad Request. Is this customer below State Pension Age?")
       )
     )
@@ -71,7 +71,7 @@ trait ErrorHandling extends Logging {
 
   private def internalServerError(error: Throwable): Result = {
     logger.error(s"$app Internal server error: ${error.getMessage}", error)
-    InternalServerError(ErrorResponseHelper.convertToJson(ErrorInternalServerError))
+    InternalServerError(ErrorResponseUtils.convertToJson(ErrorInternalServerError))
   }
 
   private def upstream4xx(error: Throwable): Status = {
