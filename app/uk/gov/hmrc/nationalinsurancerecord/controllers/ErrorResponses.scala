@@ -29,9 +29,10 @@ object ErrorResponses {
   private val CODE_ISLE_OF_MAN = "EXCLUSION_ISLE_OF_MAN"
   private val CODE_INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR"
   private val CODE_ACCEPT_HEADER_INVALID = "ACCEPT_HEADER_INVALID"
+  private val CODE_BAD_REQUEST = "BAD_REQUEST"
 
   def ExclusionManualCorrespondence: ErrorResponse =
-    ErrorResponse(FORBIDDEN, "The customer cannot access the service, they should contact HMRC",  Some(CODE_MANUAL_CORRESPONDENCE))
+    ErrorResponse(FORBIDDEN, "The customer cannot access the service, they should contact HMRC", Some(CODE_MANUAL_CORRESPONDENCE))
 
   def ExclusionDead: ErrorResponse =
     ErrorResponse(FORBIDDEN, "The customer needs to contact the National Insurance helpline", Some(CODE_DEAD))
@@ -39,8 +40,14 @@ object ErrorResponses {
   def ExclusionIsleOfMan: ErrorResponse =
     ErrorResponse(FORBIDDEN, "The customer needs to contact the National Insurance helpline", Some(CODE_ISLE_OF_MAN))
 
+  def ErrorNotFound: ErrorResponse =
+    ErrorResponse(NOT_FOUND, "Resource was not found", Some("NOT_FOUND"))
+
   def ErrorInternalServerError: ErrorResponse =
     ErrorResponse(INTERNAL_SERVER_ERROR, "Internal server error", Some(CODE_INTERNAL_SERVER_ERROR))
+
+  def ErrorGenericBadRequest(msg: String = "Bad Request"): ErrorResponse =
+    ErrorResponse(BAD_REQUEST, msg, Some(CODE_BAD_REQUEST))
 
   def ErrorAcceptHeaderInvalid: ErrorResponse =
     ErrorResponse(NOT_ACCEPTABLE, "The accept header is missing or invalid", Some(CODE_ACCEPT_HEADER_INVALID))

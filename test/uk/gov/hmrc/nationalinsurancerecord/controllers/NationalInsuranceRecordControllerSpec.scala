@@ -171,9 +171,7 @@ trait NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
         val response = nationalInsuranceRecordController.getSummary(nino)(emptyRequest)
         status(response) shouldBe 406
 
-        contentAsJson(response) shouldBe Json.parse(
-        """{"statusCode":406,"message":"The accept header is missing or invalid","xStatusCode":"ACCEPT_HEADER_INVALID"}"""
-        )
+        contentAsJson(response) shouldBe Json.parse("""{"code":"ACCEPT_HEADER_INVALID","message":"The accept header is missing or invalid"}""")
       }
     }
 
@@ -192,7 +190,7 @@ trait NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
           thenReturn(Future.successful(Right(deadExclusion)))
         val response = nationalInsuranceRecordController.getSummary(nino)(emptyRequestWithHeader)
         contentAsJson(response) shouldBe Json.parse(
-          """{"statusCode":403,"message":"The customer needs to contact the National Insurance helpline","xStatusCode":"EXCLUSION_DEAD"}"""
+          """{"code":"EXCLUSION_DEAD","message": "The customer needs to contact the National Insurance helpline"}"""
         )
       }
 
@@ -215,7 +213,7 @@ trait NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
         val response = nationalInsuranceRecordController.getSummary(nino)(emptyRequestWithHeader)
 
         contentAsJson(response) shouldBe Json.parse(
-          """{"statusCode":403,"message":"The customer cannot access the service, they should contact HMRC","xStatusCode":"EXCLUSION_MANUAL_CORRESPONDENCE"}"""
+          """{"code":"EXCLUSION_MANUAL_CORRESPONDENCE","message": "The customer cannot access the service, they should contact HMRC"}"""
         )
       }
 
@@ -237,7 +235,7 @@ trait NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
         val response = nationalInsuranceRecordController.getSummary(nino)(emptyRequestWithHeader)
 
         contentAsJson(response) shouldBe Json.parse(
-          """{"statusCode":403,"message":"The customer needs to contact the National Insurance helpline","xStatusCode":"EXCLUSION_ISLE_OF_MAN"}"""
+          """{"code":"EXCLUSION_ISLE_OF_MAN","message": "The customer needs to contact the National Insurance helpline"}"""
         )
       }
     }
@@ -282,7 +280,7 @@ trait NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
         val response = nationalInsuranceRecordController.getSummary(nino)(emptyRequestWithHeader)
 
         contentAsJson(response) shouldBe Json.parse(
-          """{"statusCode":403,"message":"The customer needs to contact the National Insurance helpline","xStatusCode":"EXCLUSION_DEAD"}"""
+          """{"code":"EXCLUSION_DEAD","message": "The customer needs to contact the National Insurance helpline"}"""
         )
       }
     }
@@ -305,7 +303,7 @@ trait NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
         val response = nationalInsuranceRecordController.getSummary(nino)(emptyRequestWithHeader)
 
         contentAsJson(response) shouldBe Json.parse(
-          """{"statusCode":403,"message":"The customer cannot access the service, they should contact HMRC","xStatusCode":"EXCLUSION_MANUAL_CORRESPONDENCE"}"""
+          """{"code":"EXCLUSION_MANUAL_CORRESPONDENCE","message": "The customer cannot access the service, they should contact HMRC"}"""
         )
       }
     }
@@ -543,9 +541,7 @@ trait NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
       "return status code 406" in {
         val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear("0000-01"))(emptyRequest)
         status(response) shouldBe 406
-        contentAsJson(response) shouldBe Json.parse(
-        """{"statusCode":406,"message":"The accept header is missing or invalid","xStatusCode":"ACCEPT_HEADER_INVALID"}"""
-        )
+        contentAsJson(response) shouldBe Json.parse("""{"code":"ACCEPT_HEADER_INVALID","message":"The accept header is missing or invalid"}""")
       }
     }
   }
@@ -565,7 +561,7 @@ trait NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
       val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear("0000-01"))(emptyRequestWithHeader)
 
       contentAsJson(response) shouldBe Json.parse(
-        """{"statusCode":403,"message":"The customer needs to contact the National Insurance helpline","xStatusCode":"EXCLUSION_DEAD"}"""
+        """{"code":"EXCLUSION_DEAD","message": "The customer needs to contact the National Insurance helpline"}"""
       )
     }
   }
@@ -585,7 +581,7 @@ trait NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
         thenReturn(Future.successful(Right(manualCorrespondenceExclusion)))
       val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear("0000-01"))(emptyRequestWithHeader)
       contentAsJson(response) shouldBe Json.parse(
-        """{"statusCode":403,"message":"The customer cannot access the service, they should contact HMRC","xStatusCode":"EXCLUSION_MANUAL_CORRESPONDENCE"}"""
+        """{"code":"EXCLUSION_MANUAL_CORRESPONDENCE","message": "The customer cannot access the service, they should contact HMRC"}"""
       )
     }
 
@@ -604,7 +600,7 @@ trait NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
       when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).thenReturn(Future.successful(Right(isleOfManExclusion)))
       val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear("0000-01"))(emptyRequestWithHeader)
       contentAsJson(response) shouldBe Json.parse(
-        """{"statusCode":403,"message":"The customer needs to contact the National Insurance helpline","xStatusCode":"EXCLUSION_ISLE_OF_MAN"}"""
+        """{"code":"EXCLUSION_ISLE_OF_MAN","message": "The customer needs to contact the National Insurance helpline"}"""
       )
     }
   }
@@ -623,7 +619,7 @@ trait NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
 
       status(response) shouldBe 403
       contentAsJson(response) shouldBe Json.parse(
-        """{"statusCode":403,"message":"The customer needs to contact the National Insurance helpline","xStatusCode":"EXCLUSION_DEAD"}"""
+        """{"code":"EXCLUSION_DEAD","message": "The customer needs to contact the National Insurance helpline"}"""
       )
     }
   }
@@ -644,7 +640,7 @@ trait NationalInsuranceRecordControllerSpec extends NationalInsuranceRecordUnitS
       when(mockNationalInsuranceRecordService.getTaxYear(any(), any())(any())).thenReturn(Future.successful(Right(exclusions)))
       val response = nationalInsuranceRecordController.getTaxYear(nino, TaxYear("0000-01"))(emptyRequestWithHeader)
       contentAsJson(response) shouldBe Json.parse(
-        """{"statusCode":403,"message":"The customer cannot access the service, they should contact HMRC","xStatusCode":"EXCLUSION_MANUAL_CORRESPONDENCE"}"""
+        """{"code":"EXCLUSION_MANUAL_CORRESPONDENCE","message": "The customer cannot access the service, they should contact HMRC"}"""
       )
     }
   }
