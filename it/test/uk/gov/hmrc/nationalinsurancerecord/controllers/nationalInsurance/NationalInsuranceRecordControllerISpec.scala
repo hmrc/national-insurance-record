@@ -91,7 +91,8 @@ trait NationalInsuranceRecordControllerISpec extends IntegrationBaseSpec with Re
           stubGetServer(errorResponse, proxyCacheUrl)
 
           val request = FakeRequest(GET, controllerUrl(nino))
-            .withHeaders(defaultHeaders *)
+            .withHeaders("Accept" -> "application/vnd.hmrc.1.0+json")
+            .withHeaders("Authorization" -> "Bearer 123")
 
           val result = route(app, request)
 

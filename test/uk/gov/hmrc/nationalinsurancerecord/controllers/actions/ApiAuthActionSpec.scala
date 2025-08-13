@@ -17,8 +17,8 @@
 package uk.gov.hmrc.nationalinsurancerecord.controllers.actions
 
 import org.apache.pekko.util.Timeout
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
+import org.mockito.ArgumentMatchers.{any, eq => MockitoEq}
+import org.mockito.Mockito.{verify, when}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status.{INTERNAL_SERVER_ERROR, OK, UNAUTHORIZED}
 import play.api.inject.bind
@@ -27,6 +27,7 @@ import play.api.mvc.Results.Ok
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.*
+import uk.gov.hmrc.auth.core.AuthProvider.PrivilegedApplication
 import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.domain.Generator
 import uk.gov.hmrc.nationalinsurancerecord.util.UnitSpec
@@ -88,6 +89,16 @@ class ApiAuthActionSpec extends UnitSpec with GuiceOneAppPerSuite {
           val (result, mockAuthConnector) = testApiAuthActionWith(Some(""))
 
           status(result) shouldBe OK
+        }
+
+        "the request comes from a privileged application" in {
+          val (result, mockAuthConnector) =
+            testApiAuthActionWith(Future.successful(Some("clientId")))
+
+          status(result) shouldBe OK
+
+          verify(mockAuthConnector)
+            .authorise[Unit](MockitoEq(AuthProviders(PrivilegedApplication)), any())(any(), any())
         }
       }
 
