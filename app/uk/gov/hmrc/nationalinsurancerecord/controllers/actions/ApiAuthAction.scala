@@ -28,7 +28,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.matching.Regex
 
 class ApiAuthActionImpl @Inject()(
                                    cc: ControllerComponents,
@@ -38,7 +37,6 @@ class ApiAuthActionImpl @Inject()(
   extends ApiAuthAction with AuthorisedFunctions with Logging {
 
   val predicate: Predicate = AuthProviders(PrivilegedApplication)
-  val matchNinoInUriPattern: Regex = "/ni/([^/]+)/?.*".r
 
   override def authConnector: AuthConnector = authConn
 

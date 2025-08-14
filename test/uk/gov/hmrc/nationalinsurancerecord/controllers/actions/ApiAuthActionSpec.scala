@@ -29,7 +29,6 @@ import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.*
 import uk.gov.hmrc.auth.core.AuthProvider.PrivilegedApplication
 import uk.gov.hmrc.auth.core.retrieve.~
-import uk.gov.hmrc.domain.Generator
 import uk.gov.hmrc.nationalinsurancerecord.util.UnitSpec
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
@@ -40,9 +39,6 @@ import scala.language.postfixOps
 class ApiAuthActionSpec extends UnitSpec with GuiceOneAppPerSuite {
 
   val controllerComponents: ControllerComponents = Helpers.stubControllerComponents()
-  private val ninoGenerator = new Generator()
-  private val testNino = ninoGenerator.nextNino.nino
-  private val goodUriWithNino = s"/ni/$testNino/"
 
   implicit val timeout: Timeout = 5 seconds
 
@@ -60,7 +56,7 @@ class ApiAuthActionSpec extends UnitSpec with GuiceOneAppPerSuite {
     }
   }
 
-  private def testApiAuthActionWith[T](authResult: Future[T], uri: String = goodUriWithNino): (Future[Result], AuthConnector) = {
+  private def testApiAuthActionWith[T](authResult: Future[T]): (Future[Result], AuthConnector) = {
 
     val mockAuthConnector = newMockConnectorWithAuthResult(authResult)
 
@@ -70,7 +66,7 @@ class ApiAuthActionSpec extends UnitSpec with GuiceOneAppPerSuite {
     val authAction = injector.instanceOf[ApiAuthAction]
     val testHarness = new AuthActionTestHarness(authAction)
 
-    (testHarness.onPageLoad()(FakeRequest(method = "", path = uri)), mockAuthConnector)
+    (testHarness.onPageLoad()(FakeRequest()), mockAuthConnector)
   }
 
 
