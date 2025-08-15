@@ -52,7 +52,6 @@ class ApiNationalInsuranceRecordControllerISpec extends IntegrationBaseSpec with
 
   protected val wiremockConfig: Map[String, Any] = Map(
     "microservice.services.auth.port" -> server.port(),
-    "microservice.services.pertax.port" -> server.port(),
     "microservice.services.ni-and-sp-proxy-cache.port" -> server.port(),
     "microservice.services.citizen-details.port" -> server.port(),
     "internal-auth.isTestOnlyEndpoint" -> false
