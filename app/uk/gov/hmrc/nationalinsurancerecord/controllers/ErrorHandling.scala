@@ -18,8 +18,8 @@ package uk.gov.hmrc.nationalinsurancerecord.controllers
 
 import play.api.Logging
 import play.api.mvc.{BaseController, Result}
-import uk.gov.hmrc.http._
-import uk.gov.hmrc.nationalinsurancerecord.controllers.ErrorResponses._
+import uk.gov.hmrc.http.*
+import uk.gov.hmrc.nationalinsurancerecord.controllers.ErrorResponses.*
 import uk.gov.hmrc.nationalinsurancerecord.domain.des.DesError
 import uk.gov.hmrc.nationalinsurancerecord.util.ErrorResponseUtils
 

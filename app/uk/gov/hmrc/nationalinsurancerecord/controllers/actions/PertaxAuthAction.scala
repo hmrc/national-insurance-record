@@ -27,7 +27,8 @@ import uk.gov.hmrc.nationalinsurancerecord.connectors.PertaxConnector
 import scala.concurrent.{ExecutionContext, Future}
 
 class PertaxAuthActionImpl @Inject()(
-                                      val pertaxConnector: PertaxConnector, val parser: BodyParsers.Default
+                                      val pertaxConnector: PertaxConnector,
+                                      val parser: BodyParsers.Default
                                     )(implicit val executionContext: ExecutionContext) extends PertaxAuthAction {
 
   private val CLIENT_CLOSED_REQUEST = 499

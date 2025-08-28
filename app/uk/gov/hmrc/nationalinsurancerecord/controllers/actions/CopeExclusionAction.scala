@@ -26,8 +26,8 @@ import uk.gov.hmrc.play.bootstrap.backend.controller.BackendHeaderCarrierProvide
 import scala.concurrent.{ExecutionContext, Future}
 
 abstract class CopeExclusionAction @Inject()(
-  defaultBodyParser: BodyParsers.Default
-)(implicit ec: ExecutionContext)
+                                              defaultBodyParser: BodyParsers.Default
+                                            )(implicit ec: ExecutionContext)
   extends Results with BackendHeaderCarrierProvider {
 
   val statePensionConnector: StatePensionConnector
@@ -37,6 +37,7 @@ abstract class CopeExclusionAction @Inject()(
   def filterCopeExclusions(nino: Nino): ActionBuilder[Request, AnyContent] & ActionFilter[Request] =
     new ActionBuilder[Request, AnyContent] with ActionFilter[Request] {
       override def parser: BodyParser[AnyContent] = defaultBodyParser
+
       override protected def executionContext: ExecutionContext = ec
 
       override protected def filter[A](request: Request[A]): Future[Option[Result]] = {

@@ -16,23 +16,46 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.controllers.nationalInsurance
 
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import play.api.Application
 import play.api.cache.AsyncCacheApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.mvc.AnyContent
+import play.api.mvc.{AnyContent, Results}
+import play.api.test.FakeRequest
+import play.api.test.Helpers.{GET, route, status as statusResult, *}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nationalinsurancerecord.controllers.actions.ApiCopeExclusionAction
-import uk.gov.hmrc.nationalinsurancerecord.test_utils.FakeAction
+import uk.gov.hmrc.nationalinsurancerecord.test_utils.{FakeAction, IntegrationBaseSpec}
 
-class ApiNationalInsuranceRecordControllerISpec extends NationalInsuranceRecordControllerISpec {
-  override def classPrefix: String = "Api"
-  override def controllerUrl(nino: Nino): String = s"/ni/$nino"
+class ApiNationalInsuranceRecordControllerISpec extends IntegrationBaseSpec with Results {
 
-  private val mockCopeExclusionAction: ApiCopeExclusionAction =
-    mock[ApiCopeExclusionAction]
+  server.start()
+
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+
+    val authResponse =
+      s"""
+         |{
+         |  "clientId": "$nino"
+         |}"""
+        .stripMargin
+
+    stubPostServer(ok(authResponse), "/auth/authorise")
+    stubGetServer(ok(""), s"/citizen-details/${nino.nino}/designatory-details/")
+  }
+
+  private val mockCopeExclusionAction: ApiCopeExclusionAction = mock[ApiCopeExclusionAction]
+
+  protected val wiremockConfig: Map[String, Any] = Map(
+    "microservice.services.auth.port" -> server.port(),
+    "microservice.services.ni-and-sp-proxy-cache.port" -> server.port(),
+    "microservice.services.citizen-details.port" -> server.port(),
+    "internal-auth.isTestOnlyEndpoint" -> false
+  )
 
   override def fakeApplication(): Application = GuiceApplicationBuilder()
     .overrides(
@@ -45,5 +68,35 @@ class ApiNationalInsuranceRecordControllerISpec extends NationalInsuranceRecordC
 
   when(mockCopeExclusionAction.filterCopeExclusions(any()))
     .thenReturn(new FakeAction[AnyContent]())
+
+  private val nino: Nino = generateNino
+  private val proxyCacheUrl: String = s"/ni-and-sp-proxy-cache/${nino.nino}"
+
+  private val requests = List(
+    badRequest()     -> "400" -> BAD_REQUEST,
+    unauthorized()   -> "401" -> BAD_GATEWAY,
+    notFound()       -> "404" -> NOT_FOUND,
+    serverError()    -> "500" -> BAD_GATEWAY,
+    badGateway()     -> "502" -> BAD_GATEWAY,
+    gatewayTimeout() -> "504" -> GATEWAY_TIMEOUT
+  )
+
+  "ApiNationalInsuranceRecordController" must {
+
+    requests.foreach {
+      case ((errorResponse, errorCode), statusCode) =>
+        s"return status code $statusCode for $errorCode" in {
+          stubGetServer(errorResponse, proxyCacheUrl)
+
+          val request = FakeRequest(GET, s"/ni/$nino")
+            .withHeaders("Accept" -> "application/vnd.hmrc.1.0+json")
+            .withHeaders("Authorization" -> "Bearer 123")
+
+          val result = route(app, request)
+
+          result.map(statusResult) shouldBe Some(statusCode)
+        }
+    }
+  }
 
 }

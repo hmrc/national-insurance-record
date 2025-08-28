@@ -16,25 +16,72 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.controllers.actions
 
-import play.api.mvc.BodyParsers
-import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
-import uk.gov.hmrc.auth.core.AuthConnector
 import com.google.inject.{ImplementedBy, Inject}
+import play.api.Logging
+import play.api.mvc.Results.{BadRequest, InternalServerError, Status, Unauthorized}
+import play.api.mvc.*
+import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.{nino, trustedHelper}
+import uk.gov.hmrc.auth.core.retrieve.~
+import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisationException, AuthorisedFunctions}
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.matching.Regex
 
-class MdtpAuthActionImpl @Inject() (
-                      val authConn: AuthConnector,
-                      val parse: BodyParsers.Default,
-                      val ec: ExecutionContext
-                    )
-  extends AuthActionImpl(authConn, parse)(ec) with MdtpAuthAction {
+class MdtpAuthActionImpl @Inject()(
+                                    cc: ControllerComponents,
+                                    val connector: AuthConnector,
+                                    val parse: BodyParsers.Default
+                                  )(implicit val ec: ExecutionContext)
+  extends MdtpAuthAction with AuthorisedFunctions with Logging {
 
-  override val predicate: Predicate = EmptyPredicate
-  override val matchNinoInUriPattern: Regex = "/ni/mdtp/([^/]+)/?.*".r
+  val predicate: Predicate = EmptyPredicate
+  private val matchNinoInUriPattern: Regex = "[ni|cope]/(?:mdtp/)?([^/]+)/?.*".r
+
+
+  override def authConnector: AuthConnector = connector
+
+  override def parser: BodyParser[AnyContent] = cc.parsers.defaultBodyParser
+
+  override protected def filter[A](request: Request[A]): Future[Option[Result]] = {
+    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
+
+    val matches = matchNinoInUriPattern.findAllIn(request.uri)
+
+    def check(nino: String): Future[Option[Status]] = {
+      val uriNino = matches.group(1)
+      if (uriNino == nino) {
+        Future.successful(None)
+      }
+      else {
+        logger.warn("nino does not match nino in uri")
+        Future.successful(Some(Unauthorized))
+      }
+    }
+
+    if (matches.isEmpty) {
+      Future.successful(Some(BadRequest))
+    } else {
+      authorised(predicate).retrieve(nino and trustedHelper) {
+        case Some(nino) ~ _ => check(nino)
+        case _ ~ Some(trusted) => check(trusted.principalNino.getOrElse(""))
+        case _ => Future.successful(Some(Unauthorized))
+      } recover {
+        case e: AuthorisationException =>
+          logger.info("Debug info - " + e.getMessage, e)
+          Some(Unauthorized)
+        case e: Throwable =>
+          logger.error(s"Unexpected Error $e", e)
+          Some(InternalServerError)
+      }
+    }
+  }
+
+  override protected def executionContext: ExecutionContext = cc.executionContext
 }
 
 
 @ImplementedBy(classOf[MdtpAuthActionImpl])
-trait MdtpAuthAction extends AuthAction
+trait MdtpAuthAction extends ActionBuilder[Request, AnyContent] with ActionFilter[Request]

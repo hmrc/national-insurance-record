@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,9 @@ package uk.gov.hmrc.nationalinsurancerecord.util
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.Result
-import play.api.test.Helpers._
-import uk.gov.hmrc.nationalinsurancerecord.util.ErrorResponseUtils._
-import uk.gov.hmrc.play.bootstrap.backend.http.ErrorResponse
-
-import scala.concurrent.Future
+import play.api.test.Helpers.*
+import uk.gov.hmrc.nationalinsurancerecord.util.ErrorResponseUtils.*
+import uk.gov.hmrc.play.bootstrap.http.ErrorResponse
 
 class ErrorResponseUtilsSpec extends AnyWordSpec with Matchers {
 
@@ -34,7 +31,7 @@ class ErrorResponseUtilsSpec extends AnyWordSpec with Matchers {
       val json: JsValue = convertToJson(errorResponse)
 
       json mustBe Json.obj(
- "code" -> "NOT_FOUND",
+        "code" -> "NOT_FOUND",
         "message" -> "Error not found"
       )
     }
@@ -45,22 +42,6 @@ class ErrorResponseUtilsSpec extends AnyWordSpec with Matchers {
 
       json mustBe Json.obj(
         "code" -> "No status code provided",
-        "message" -> "Error not found"
-      )
-    }
-  }
-
-  "errorResponseToResult" should {
-    "return a Result with the correct status code and json body" in {
-      val errorResponse = ErrorResponse(NOT_FOUND, "Error not found", Some("NOT_FOUND"))
-      val result: Future[Result] = Future.successful(errorResponseToResult(errorResponse))
-
-      status(result) mustBe NOT_FOUND
-
-      val jsonBody = contentAsJson(result)
-
-      jsonBody mustBe Json.obj(
-        "code" -> "NOT_FOUND",
         "message" -> "Error not found"
       )
     }

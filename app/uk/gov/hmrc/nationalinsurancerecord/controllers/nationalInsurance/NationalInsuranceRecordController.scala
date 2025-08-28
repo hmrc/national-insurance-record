@@ -19,12 +19,12 @@ package uk.gov.hmrc.nationalinsurancerecord.controllers.nationalInsurance
 import com.google.inject.{Inject, Singleton}
 import play.api.hal.HalResource
 import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.{Action, ActionBuilder, AnyContent, ControllerComponents, Request, Result}
+import play.api.mvc.*
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.nationalinsurancerecord.config.AppContext
 import uk.gov.hmrc.nationalinsurancerecord.controllers.actions.CopeExclusionAction
 import uk.gov.hmrc.nationalinsurancerecord.controllers.{ErrorHandling, ErrorResponses, HalSupport, Links}
-import uk.gov.hmrc.nationalinsurancerecord.domain.{Exclusion, ExclusionResponse, NationalInsuranceRecordResult, NationalInsuranceTaxYear, NationalInsuranceTaxYearResult, TaxYear}
+import uk.gov.hmrc.nationalinsurancerecord.domain.*
 import uk.gov.hmrc.nationalinsurancerecord.events.{NationalInsuranceExclusion, NationalInsuranceRecord}
 import uk.gov.hmrc.nationalinsurancerecord.services.NationalInsuranceRecordService
 import uk.gov.hmrc.nationalinsurancerecord.util.{ErrorResponseUtils, HeaderValidator}

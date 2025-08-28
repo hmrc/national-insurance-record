@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,7 @@
 package uk.gov.hmrc.nationalinsurancerecord.util
 
 import play.api.libs.json.{JsString, JsValue, Json}
-import play.api.mvc.{Result, Results}
-import uk.gov.hmrc.play.bootstrap.backend.http.ErrorResponse
+import uk.gov.hmrc.play.bootstrap.http.ErrorResponse
 
 object ErrorResponseUtils {
 
@@ -28,9 +27,4 @@ object ErrorResponseUtils {
     code ++ message
   }
 
-  def errorResponseToResult(errorResponse: ErrorResponse): Result = {
-    val jsonResult = convertToJson(errorResponse)
-    val statusCode = errorResponse.statusCode
-    Results.Status(statusCode)(jsonResult)
-  }
 }
