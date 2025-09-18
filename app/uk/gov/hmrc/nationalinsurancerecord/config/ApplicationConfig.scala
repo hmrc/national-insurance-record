@@ -38,4 +38,5 @@ class ApplicationConfig @Inject()(servicesConfig: ServicesConfig) {
 
   def pertaxBaseUrl: String = baseUrl("pertax")
 
+  lazy val fandfHost: String = baseUrl("fandf")
 }
