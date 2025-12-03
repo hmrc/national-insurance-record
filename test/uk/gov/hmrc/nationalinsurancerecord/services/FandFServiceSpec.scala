@@ -18,7 +18,7 @@ package uk.gov.hmrc.nationalinsurancerecord.services
 
 import org.mockito.Mockito.when
 import uk.gov.hmrc.auth.core.retrieve.v2.TrustedHelper
-import uk.gov.hmrc.domain.{Generator, Nino}
+import uk.gov.hmrc.domain.{NinoGenerator, Nino}
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.connectors.FandFConnector
 
@@ -29,7 +29,7 @@ class FandFServiceSpec extends NationalInsuranceRecordUnitSpec {
 
   val mockFandFConnector: FandFConnector = mock[FandFConnector]
   implicit val ec: ExecutionContext = ExecutionContext.global
-  val nino: String = Nino(new Generator(new Random()).nextNino.nino).toString
+  val nino: String = Nino(new NinoGenerator(new Random()).nextNino.nino).toString
 
   val fandfService = new FandFService(mockFandFConnector)
 
