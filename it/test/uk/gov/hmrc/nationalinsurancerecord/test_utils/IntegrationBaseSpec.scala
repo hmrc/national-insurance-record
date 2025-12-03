@@ -23,14 +23,13 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.cache.AsyncCacheApi
-import uk.gov.hmrc.domain.{Generator, Nino}
+import uk.gov.hmrc.domain.{Nino, NinoGenerator}
 import utils.WireMockHelper
 
 import java.util.UUID
 import scala.concurrent.duration.Duration
 import scala.concurrent.{ExecutionContext, Future}
 import scala.reflect.ClassTag
-import scala.util.Random
 
 trait IntegrationBaseSpec extends AnyWordSpec
   with Matchers
@@ -39,7 +38,7 @@ trait IntegrationBaseSpec extends AnyWordSpec
 
   implicit lazy val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
 
-  def generateNino: Nino = new Generator(new Random).nextNino
+  def generateNino: Nino = new NinoGenerator().nextNino
 
   def generateUUId: UUID = UUID.randomUUID()
 
