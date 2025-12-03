@@ -23,13 +23,12 @@ import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.connectors.FandFConnector
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Random
 
 class FandFServiceSpec extends NationalInsuranceRecordUnitSpec {
 
   val mockFandFConnector: FandFConnector = mock[FandFConnector]
   implicit val ec: ExecutionContext = ExecutionContext.global
-  val nino: String = Nino(new NinoGenerator(new Random()).nextNino.nino).toString
+  val nino: String = Nino(new NinoGenerator().nextNino.nino).toString
 
   val fandfService = new FandFService(mockFandFConnector)
 
