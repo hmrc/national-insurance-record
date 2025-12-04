@@ -24,7 +24,7 @@ import play.api.inject.Injector
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.Injecting
 import uk.gov.hmrc.auth.core.retrieve.v2.TrustedHelper
-import uk.gov.hmrc.domain.Generator
+import uk.gov.hmrc.domain.NinoGenerator
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.test.{HttpClientV2Support, WireMockSupport}
@@ -44,7 +44,7 @@ class FandFConnectorSpec extends NationalInsuranceRecordUnitSpec
   implicit val ec: ExecutionContext = ExecutionContext.global
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  private val trustedHelperNino = new Generator().nextNino
+  private val trustedHelperNino = new NinoGenerator().nextNino
 
   val trustedHelper: TrustedHelper =
     TrustedHelper("principal Name", "attorneyName", "returnLink", Some(trustedHelperNino.nino))

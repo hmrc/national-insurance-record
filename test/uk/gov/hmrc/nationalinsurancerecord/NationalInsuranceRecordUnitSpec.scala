@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,12 @@
 
 package uk.gov.hmrc.nationalinsurancerecord
 
-import uk.gov.hmrc.domain.{Generator, Nino}
+import uk.gov.hmrc.domain.{Nino, NinoGenerator}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.nationalinsurancerecord.util.UnitSpec
 
-import scala.util.Random
-
 trait NationalInsuranceRecordUnitSpec extends UnitSpec {
-  private val ninoGenerator = new Generator(new Random())
+  private val ninoGenerator = new NinoGenerator()
   def generateNino(): Nino = ninoGenerator.nextNino
   def generateNinoWithPrefix(prefix: String): Nino = {
     require(prefix.length == 2)
