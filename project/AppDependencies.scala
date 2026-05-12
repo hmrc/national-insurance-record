@@ -18,7 +18,7 @@ import play.sbt.PlayImport.*
 import sbt.*
 
 object AppDependencies {
-  private val bootstrapVersion = "10.5.0"
+  private val bootstrapVersion = "10.7.0"
   private val playVersion = "play-30"
   private val hmrcMongoVersion = "2.12.0"
   private val domainVersion = "13.0.0"
