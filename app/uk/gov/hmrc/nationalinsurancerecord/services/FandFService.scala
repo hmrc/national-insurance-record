@@ -17,7 +17,6 @@
 package uk.gov.hmrc.nationalinsurancerecord.services
 
 import com.google.inject.Inject
-import uk.gov.hmrc.auth.core.retrieve.v2.TrustedHelper
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.nationalinsurancerecord.connectors.FandFConnector
 

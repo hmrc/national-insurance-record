@@ -17,7 +17,6 @@
 package uk.gov.hmrc.nationalinsurancerecord.services
 
 import com.google.inject.Inject
-import services.TaxYearResolver
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
 import uk.gov.hmrc.nationalinsurancerecord.connectors.ProxyCacheConnector
