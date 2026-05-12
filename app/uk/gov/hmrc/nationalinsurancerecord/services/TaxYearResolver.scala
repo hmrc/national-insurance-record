@@ -14,32 +14,15 @@
  * limitations under the License.
  */
 
-package services
+package uk.gov.hmrc.nationalinsurancerecord.services
 
 import java.time.{LocalDate, LocalDateTime, ZoneId}
 
 trait TaxYearResolver {
 
-  lazy val now: () => LocalDateTime = ???
+  lazy val now: () => LocalDateTime
 
   def currentTaxYear: Int = taxYearFor(now().toLocalDate)
-
-  def endOfCurrentTaxYear: LocalDate = endOfTaxYear(currentTaxYear)
-
-  def endOfLastTaxYear: LocalDate = endOfTaxYear(currentTaxYear - 1)
-
-  def endOfTaxYear(year: Int): LocalDate = LocalDate.of(year + 1, 4, 5)
-
-  def fallsInThisTaxYear(currentDate: LocalDate): Boolean = {
-    val earliestDateForCurrentTaxYear = LocalDate.of(taxYearFor(now().toLocalDate), 4, 6)
-    earliestDateForCurrentTaxYear.isBefore(currentDate) || earliestDateForCurrentTaxYear.isEqual(currentDate)
-  }
-
-  def startOfCurrentTaxYear: LocalDate = startOfTaxYear(currentTaxYear)
-
-  def startOfNextTaxYear: LocalDate = startOfTaxYear(currentTaxYear + 1)
-
-  def startOfTaxYear(year: Int): LocalDate = LocalDate.of(year, 4, 6)
 
   def taxYearFor(dateToResolve: LocalDate): Int = {
     val year = dateToResolve.getYear
