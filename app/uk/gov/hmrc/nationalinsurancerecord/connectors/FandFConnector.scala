@@ -19,11 +19,11 @@ package uk.gov.hmrc.nationalinsurancerecord.connectors
 import com.google.inject.Inject
 import play.api.Logging
 import play.api.http.Status.{NOT_FOUND, OK}
-import uk.gov.hmrc.auth.core.retrieve.v2.TrustedHelper
 import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps, UpstreamErrorResponse}
 import uk.gov.hmrc.nationalinsurancerecord.config.ApplicationConfig
+import uk.gov.hmrc.nationalinsurancerecord.domain.TrustedHelper
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
@@ -35,16 +35,18 @@ class FandFConnector @Inject()(
                               )(implicit val ec: ExecutionContext)
   extends Logging {
 
-  def getTrustedHelper(implicit hc: HeaderCarrier): Future[Option[TrustedHelper]] = {
+  def getTrustedHelper(implicit hc: HeaderCarrier): Future[Option[TrustedHelper]] =
     httpClient
       .get(url"${appConfig.fandfHost}/delegation/get")
       .execute[HttpResponse]
       .map { httpResponse =>
         httpResponse.status match {
-          case NOT_FOUND => None
+          case NOT_FOUND =>
+            None
           case OK =>
-            Try(httpResponse.json.as[TrustedHelper](uk.gov.hmrc.auth.core.retrieve.v2.TrustedHelper.reads)) match {
-              case Success(trustedHelper) => Some(trustedHelper)
+            Try(httpResponse.json.as[TrustedHelper]) match {
+              case Success(trustedHelper) =>
+                Some(trustedHelper)
               case Failure(ex) =>
                 logger.error(s"Failed to parse TrustedHelper", ex)
                 None
@@ -59,6 +61,4 @@ class FandFConnector @Inject()(
         logger.error(s"Exception: ${ex.getMessage}", ex)
         None
       }
-  }
-
 }

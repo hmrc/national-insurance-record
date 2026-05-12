@@ -17,10 +17,10 @@
 package uk.gov.hmrc.nationalinsurancerecord.services
 
 import org.mockito.Mockito.when
-import uk.gov.hmrc.auth.core.retrieve.v2.TrustedHelper
-import uk.gov.hmrc.domain.{NinoGenerator, Nino}
+import uk.gov.hmrc.domain.{Nino, NinoGenerator}
 import uk.gov.hmrc.nationalinsurancerecord.NationalInsuranceRecordUnitSpec
 import uk.gov.hmrc.nationalinsurancerecord.connectors.FandFConnector
+import uk.gov.hmrc.nationalinsurancerecord.domain.TrustedHelper
 
 import scala.concurrent.{ExecutionContext, Future}
 
