@@ -26,18 +26,18 @@ object AppDependencies {
   val compile: Seq[ModuleID] = Seq(
     caffeine,
     ws,
-    "uk.gov.hmrc"       %%  s"bootstrap-backend-$playVersion"                   % bootstrapVersion,
-    "uk.gov.hmrc"       %%  s"domain-$playVersion"                              % domainVersion,
-    "uk.gov.hmrc"       %%  s"play-hal-$playVersion"                            % "4.1.0",
-    "uk.gov.hmrc.mongo" %% s"hmrc-mongo-$playVersion"                           % hmrcMongoVersion,
-    "org.typelevel"     %% "cats-core"                                          % "2.13.0",
-    "uk.gov.hmrc"       %% s"internal-auth-client-$playVersion"                 % "4.3.0"
+    "uk.gov.hmrc"       %%  s"bootstrap-backend-$playVersion"    % bootstrapVersion,
+    "uk.gov.hmrc"       %%  s"domain-$playVersion"               % domainVersion,
+    "uk.gov.hmrc"       %%  s"play-hal-$playVersion"             % "4.1.0",
+    "uk.gov.hmrc.mongo" %%  s"hmrc-mongo-$playVersion"           % hmrcMongoVersion,
+    "org.typelevel"     %%  "cats-core"                          % "2.13.0",
+    "uk.gov.hmrc"       %%  s"internal-auth-client-$playVersion" % "4.3.0"
   )
 
   val test: Seq[ModuleID] = Seq(
-    "uk.gov.hmrc"                   %%  s"bootstrap-test-$playVersion"    % bootstrapVersion,
-    "uk.gov.hmrc.mongo"             %%  s"hmrc-mongo-test-$playVersion"   % hmrcMongoVersion,
-    "uk.gov.hmrc"                   %%  s"domain-test-$playVersion"       % domainVersion
+    "uk.gov.hmrc"       %%  s"bootstrap-test-$playVersion"    % bootstrapVersion,
+    "uk.gov.hmrc.mongo" %%  s"hmrc-mongo-test-$playVersion"   % hmrcMongoVersion,
+    "uk.gov.hmrc"       %%  s"domain-test-$playVersion"       % domainVersion
   ).map(_ % "test")
 
   val all: Seq[ModuleID] = compile ++ test
