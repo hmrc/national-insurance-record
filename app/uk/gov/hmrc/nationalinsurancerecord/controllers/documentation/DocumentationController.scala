@@ -30,14 +30,14 @@ class DocumentationController @Inject()(appContext: AppContext,
   extends BackendController(cc) {
 
   def definition(): Action[AnyContent] = Action {
-    Ok(txt.definition(apiAccess(), buildStatus())).as("application/json")
+    Ok(txt.definition(buildAccess(), buildStatus())).as("application/json")
   }
 
   def conf(version: String, file: String): Action[AnyContent] = {
     assets.at(s"/public/api/conf/$version", file)
   }
 
-  private def apiAccess(): String = APIAccessConfig(appContext.access).accessType
+  private def buildAccess(): String = APIAccessConfig(appContext.access).accessType
 
   private def buildStatus(): String = appContext.status.getOrElse("BETA")
 }
