@@ -16,16 +16,9 @@
 
 package uk.gov.hmrc.nationalinsurancerecord.config
 
-import play.api.Configuration
+case class APIAccessConfig(value: Option[String]) {
 
-case class APIAccessConfig(value: Option[Configuration]) {
+  private val INTERNAL = "INTERNAL"
 
-  private val PRIVATE = "PRIVATE"
-
-  def accessType: String = {
-    value match {
-      case Some(config) => config.getOptional[String]("type").getOrElse(PRIVATE)
-      case None => PRIVATE
-    }
-  }
+  def accessType: String = value.getOrElse(INTERNAL)
 }

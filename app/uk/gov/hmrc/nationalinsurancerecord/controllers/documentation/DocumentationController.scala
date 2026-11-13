@@ -20,7 +20,6 @@ import com.google.inject.{Inject, Singleton}
 import controllers.Assets
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.nationalinsurancerecord.config.{APIAccessConfig, AppContext}
-import uk.gov.hmrc.nationalinsurancerecord.domain.APIAccess
 import uk.gov.hmrc.nationalinsurancerecord.views._
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
@@ -31,17 +30,14 @@ class DocumentationController @Inject()(appContext: AppContext,
   extends BackendController(cc) {
 
   def definition(): Action[AnyContent] = Action {
-    Ok(txt.definition(buildAccess(), buildStatus())).as("application/json")
+    Ok(txt.definition(apiAccess(), buildStatus())).as("application/json")
   }
 
   def conf(version: String, file: String): Action[AnyContent] = {
     assets.at(s"/public/api/conf/$version", file)
   }
 
-  private def buildAccess(): APIAccess = {
-    val access = APIAccessConfig(appContext.access)
-    APIAccess(access.accessType)
-  }
+  private def apiAccess(): String = APIAccessConfig(appContext.access).accessType
 
   private def buildStatus(): String = appContext.status.getOrElse("BETA")
 }

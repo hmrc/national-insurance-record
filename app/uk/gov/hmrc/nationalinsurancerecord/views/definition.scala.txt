@@ -1,8 +1,6 @@
 @import play.api.libs.json.Json
-@import uk.gov.hmrc.nationalinsurancerecord.domain.APIAccess
 
-
-@(access: APIAccess, status: String)
+@(access: String, status: String)
 {
   "api": {
     "name": "National Insurance Record",
@@ -13,7 +11,7 @@
         "version": "1.0",
         "status": "@status",
         "endpointsEnabled": true,
-        "access" : @Json.toJson(access)
+        "access" : "@access"
       }
     ]
   }

@@ -18,11 +18,10 @@ package uk.gov.hmrc.nationalinsurancerecord.controllers
 
 import controllers.Assets
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.Configuration
 import play.api.Play.materializer
 import play.api.libs.json.{JsDefined, JsString}
 import play.api.mvc.{ControllerComponents, Result}
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import play.api.test.{FakeRequest, Injecting}
 import uk.gov.hmrc.nationalinsurancerecord.config.AppContext
 import uk.gov.hmrc.nationalinsurancerecord.controllers.documentation.DocumentationController
@@ -43,14 +42,14 @@ class DocumentationControllerSpec extends UnitSpec with GuiceOneAppPerSuite with
   val controllerComponents: ControllerComponents = stubControllerComponents()
   val assets: Assets = inject[Assets]
 
-  def getDefinitionResultFromConfig(apiConfig: Option[Configuration] = None, apiStatus: Option[String] = None): Result = {
+  def getDefinitionResultFromConfig(apiConfig: Option[String] = None, apiStatus: Option[String] = None): Result = {
 
     val appContext = new AppContext(app.configuration) {
       override lazy val appName: String = ""
 
       override lazy val apiGatewayContext: String = ""
 
-      override lazy val access: Option[Configuration] = apiConfig
+      override lazy val access: Option[String] = apiConfig
 
       override lazy val status: Option[String] = apiStatus
 
@@ -62,25 +61,32 @@ class DocumentationControllerSpec extends UnitSpec with GuiceOneAppPerSuite with
 
   "/definition access" must{
 
-    "return PRIVATE if there is no application config" in {
+    "return INTERNAL if there is no application config" in {
 
       val result = getDefinitionResultFromConfig(apiConfig = None)
       status(result) shouldBe OK
-      (contentAsJson(result) \ "api" \ "versions") (0) \ "access" \ "type" shouldBe JsDefined(JsString("PRIVATE"))
+      (contentAsJson(result) \ "api" \ "versions") (0) \ "access"  shouldBe JsDefined(JsString("INTERNAL"))
     }
 
-    "return PRIVATE if the application config says PRIVATE" in {
+    "return INTERNAL if the application config says INTERNAL" in {
 
-      val result = getDefinitionResultFromConfig(apiConfig = Some(Configuration.from(Map("type" -> "PRIVATE"))))
+      val result = getDefinitionResultFromConfig(apiConfig = Some("INTERNAL"))
       status(result) shouldBe OK
-      (contentAsJson(result) \ "api" \ "versions") (0) \ "access" \ "type" shouldBe JsDefined(JsString("PRIVATE"))
+      (contentAsJson(result) \ "api" \ "versions") (0) \ "access" shouldBe JsDefined(JsString("INTERNAL"))
+    }
+
+    "return CONTROLLED if the application config says CONTROLLED" in {
+
+      val result = getDefinitionResultFromConfig(apiConfig = Some("CONTROLLED"))
+      status(result) shouldBe OK
+      (contentAsJson(result) \ "api" \ "versions") (0) \ "access" shouldBe JsDefined(JsString("CONTROLLED"))
     }
 
     "return PUBLIC if the application config says PUBLIC" in {
 
-      val result = getDefinitionResultFromConfig(apiConfig = Some(Configuration.from(Map("type" -> "PUBLIC"))))
+      val result = getDefinitionResultFromConfig(apiConfig = Some("PUBLIC"))
       status(result) shouldBe OK
-      (contentAsJson(result) \ "api" \ "versions") (0) \ "access" \ "type" shouldBe JsDefined(JsString("PUBLIC"))
+      (contentAsJson(result) \ "api" \ "versions") (0) \ "access" shouldBe JsDefined(JsString("PUBLIC"))
     }
   }
 
@@ -118,7 +124,7 @@ class DocumentationControllerSpec extends UnitSpec with GuiceOneAppPerSuite with
 
         override lazy val apiGatewayContext: String = ""
 
-        override lazy val access: Option[Configuration] = None
+        override lazy val access: Option[String] = None
 
         override lazy val status: Option[String] = None
 
